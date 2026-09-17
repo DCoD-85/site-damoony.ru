@@ -615,3 +615,155 @@ Meta: полный набор + разные CSS для guest/logged (`guest/dt.
 
 Если `$vt_start` выглядит «пустым» по объявлению — это **не баг**.
 Он наполняется через `tag()` на этапе build, а не через прямое присваивание.
+
+---
+
+## Пустые CSS — заготовки под аллиасы
+
+Обновлено: 2026-09-18 (Sprint 12).
+
+В проекте есть пустые CSS-файлы (0 байт). Это НЕ мусор, а заготовки.
+
+    www\media\release\default\css\left.css                   (0 b)
+    www\media\release\default\visuo\visuo-elements.css       (0 b)
+    www\media\release\default\visuo\visuo-elements-form.css  (0 b)
+    sources\visuo\css\visuoelements\form.css                 (0 b)
+    sources\visuo\css\visuoelements\input.css                (0 b)
+
+**Причина:** это стили под конкретные аллиасы, которые пока не реализованы.
+Заготовки сделаны на будущее.
+
+**Не удалять.** При появлении аллиаса — файл уже на месте, его наполнят.
+
+**Не создавать пустыми новые.** Если создаётся файл под новый аллиас — сразу с содержимым.
+
+### Правило
+
+CSS-файл в `media\release\<skin>\css\<allias>\dt.css` — часть схемы аллиаса.
+Он подключается из `alliasscheme_<name>::meta()`.
+Пустой файл = стили ещё не написаны, но структура готова.
+
+---
+
+## VISUOSTRUCT — параллельные структуры
+
+Обновлено: 2026-09-18 (Sprint 12).
+
+### Что это
+
+`visuostruct` — параллельная система для не-HTML режимов ответа сервера.
+Живёт рядом с `visuotag`/`visuoelement`, но работает с JSON-ответами.
+
+**Три режима ответа сервера:**
+
+| Режим | Класс | Что отдаёт |
+|---|---|---|
+| Полная страница | `visuotag` + `visuorelease` | HTML |
+| AJAX-догрузка | `visuostruct_ajax` | JSON со слоями |
+| Мини-ответ (форма) | `visuostruct_min` | JSON с формой/сообщениями |
+
+### Структура
+
+    sources\visuo\sources\
+    ├── visuostruct.php              фасад: ->min() / ->ajax()
+    └── visuostruct\
+        ├── visuostruct_min.php      JSON для форм
+        └── visuostruct_ajax.php     JSON со слоями
+
+### visuostruct_ajax — контракт со слоями
+
+    as_json() → {
+      error: bool,
+      address: string|null,
+      layers: {
+        header: html,
+        top:    { layer:'dt_top',    html:'...' } | null,
+        left:   { layer:'dt_left',   html:'...' } | null,
+        center: { layer:'dt_center', html:'...' } | null,
+        right:  { layer:'dt_right',  html:'...' } | null,
+        bottom: { layer:'dt_bottom', html:'...' } | null
+      }
+    }
+
+**`layer` — id DOM-элемента на клиенте.** Клиент находит `#dt_center`, `#dt_top`
+и заменяет содержимое. Перерисовки всей страницы нет.
+
+**Каждый слой содержит visuotag.** Рендер: `$visuotag->root()->release()`.
+
+### visuostruct_min — контракт с формой
+
+    release() → {
+      error: bool,
+      messages: html,
+      release: {
+        html: string,
+        layer: string,
+        popup: bool,
+        popup_back: bool,
+        popup_navigate: bool
+      },
+      form: {
+        reset: bool,
+        redirect: string|null,
+        redirect_time: int|null
+      },
+      referer: string
+    }
+
+**Что клиент делает с этим:**
+- `error` — была ли ошибка.
+- `messages` — HTML для вставки в область сообщений.
+- `release.html` — HTML контента.
+- `release.layer` — куда вставить (`dt_center` и т.д.).
+- `release.popup` / `popup_back` / `popup_navigate` — флаги для клиента.
+- `form.reset` — сбросить форму после ответа.
+- `form.redirect` + `redirect_time` — куда и через сколько перекинуть.
+- `referer` — откуда пришёл запрос (для возврата).
+
+### Точки входа
+
+Из алгоритмов логики:
+
+    $struct = $main->visuostruct->min( );
+    $struct_error    = $struct->error( );
+    $struct_messages = $struct->messages( );
+    $struct_release  = $struct->release( );
+    $struct_form     = $struct->form( );
+    $struct_referer  = $struct->referer( );
+    # ... наполнение ...
+    $visuorelease->release_min( $struct );
+
+Для AJAX:
+
+    $struct = $main->visuostruct->ajax( );
+    $struct_address = $struct->address( );
+    $struct_top     = $struct->top( );
+    $struct_center  = $struct->center( );
+    $struct_bottom  = $struct->bottom( );
+    # ... наполнение ...
+    $visuorelease->release_struct( $struct );
+
+### Как работает трёхфазная модель
+
+`visuorelease::final()` проверяет `$main->render->getdata('min')`:
+
+- `false` → обычный рендер HTML (`visuotag->prepare()` + `release()`).
+- `true` → выводится `release_alternative` (это `json_encode` от `release_min`).
+
+**Значит:** две ветки полностью независимы:
+- HTML-ветка — `visuotag` + `visuoelement` + схема из logic.
+- JSON-ветка — `visuostruct_min` / `visuostruct_ajax` + `visuorelease->release_min/struct`.
+
+### Что важно помнить
+
+1. `visuostruct` — не для HTML. Для JSON.
+2. Каждая часть структуры (`error`, `messages`, `release`, `form`, `referer`) — отдельный класс с `set()` / `release()`.
+3. `release()` в подклассах возвращает разные типы:
+   - `error` → `bool`
+   - `messages` → HTML-строка
+   - `release` → `array` с `html`/`layer`/`popup`
+   - `form` → `array` с `reset`/`redirect`/`redirect_time`
+   - `referer` → `string`
+4. `visuostruct_min_release::release()` сам вызывает `prepare()` на visuotag:
+   `$html->prepare(); $html->release();`. Это потому что ветка `min` идёт в обход основного prepare.
+5. `layer` — id DOM-элемента (`dt_center`, `dt_top`, `dt_bottom`). Клиент сам решает, куда вставлять.
