@@ -169,7 +169,7 @@ class algoritm_lang_form
 		$tablelogin__data = $tablelogin->get_table_table__data( );
 		$tablelogin__data->clear( )
 			// ->add_thead( [ 'Логин' , [ $inputlogin_login ] ] )
-			->add_tbody( [ 'Данные для авторизации:' , [ $inputlogin_login , $inputlogin_password ] ] , colelsinline : [ false , true ] , colwidth : [ '30%' , '70%' ] )
+			->add_tbody( [ 'Данные для авторизации:' , [ $inputlogin_login , $inputlogin_password ] ] , colelsinline : [ false , false ] , colwidth : [ '30%' , '70%' ] )
 			->add_tbody( [ 'Контроль:' , [ 'Загрузка капчи' , 'Second' ] ] , colelsinline : [ false , true ] )
 			->add_tbody( [ 'Дополнительно:' , [ $inputlogin_remember ] ] )
 			->add_tfoot( [ 'Действия' , [ $inputlogin_submit , $inputlogin_reset ] ] , colelsinline : [ false , true ] );

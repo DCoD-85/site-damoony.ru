@@ -32,10 +32,11 @@ class algoritm_lang
 			$this->algoritmdata->set( );
 		}
 
-		$this->algoritmdata->set( [ '' , 'index' , 'form' , 'login' , 'logout' , 'redirect' , 'profile' , 'agreement' , 'test' ] , false , true , $main->library->url->static_base[ 1 ] == '' ? true : false );
+		$this->algoritmdata->set( [ '' , 'index' , 'form' , 'login' , 'logout' , 'redirect' , 'profile' , 'agreement' , 'registration' ] , false , true , $main->library->url->static_base[ 1 ] == '' ? true : false );
 		
 		# release
 		$this->release_( $this );
+
 	}
 	
 	public function default ( ) {
