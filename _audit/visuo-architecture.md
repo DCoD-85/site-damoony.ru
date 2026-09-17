@@ -213,3 +213,206 @@ Namespace: `damoony` (весь домен = один пул).
 4. **Схема собирает документ.** Она знает про слои, CSS, JS, meta.
 5. **Управление — через `$main->alliasscheme->load( '<имя>' )`** из алгоритма.
 6. **`visuorelease_scheme` в движке — не использовать.** Мёртвый рудимент другой архитектуры.
+
+---
+
+## СХЕМЫ АЛЛИАСОВ — полный обзор
+
+Обновлено: 2026-09-18.
+
+Все схемы лежат в `www\logic\alpha.0.0\domain\<домен>\alliasscheme\`.
+Namespace всех — `damoony` (весь домен = один пул).
+
+### Общий контракт схемы
+
+Каждая схема — класс с одинаковым набором методов:
+
+    __construct( alliasscheme )
+        получает $main, $visuorelease
+
+    meta( )
+        очищает visuorelease->meta() и наполняет CSS/JS
+
+    body_preload( )
+        возвращает visuotag с preload/load-слоями
+
+    body( )
+        очищает visuorelease->visuotag, строит HTML-скелет, вызывает visuotag_set()
+
+    clear( )
+        сбрасывает 7 ссылок на слои (dt_*)
+
+    init( )
+        находит слои в свежем дереве через find(class)
+
+    refresh( bool $reload )
+        заполняет слои содержимым из alliasglobal
+
+    load( )
+        meta → body → init → refresh
+
+    reload( )
+        meta->clear → clear → meta → body → init → refresh(true)
+
+### Общие поля
+
+    public null|\main         $main
+    public null|alliasscheme  $alliasscheme
+    public null|\visuorelease $visuorelease
+
+    public null|\visuotag $dt_root
+    public null|\visuotag $dt_top
+    public null|\visuotag $dt_middle
+    public null|\visuotag $dt_left
+    public null|\visuotag $dt_center
+    public null|\visuotag $dt_right
+    public null|\visuotag $dt_bottom
+
+### 4 схемы
+
+#### alliasscheme_login — полная, для аллиаса login
+
+Скелет:
+
+    !doctype → html.scheme_login → head → body
+        body_preload( )
+        div#popup_result
+        div.dt
+            div.dt_top
+            div.dt_middle
+                div.dt_center
+                div.dt_right
+            div.dt_bottom
+        div.dt_debug
+
+Слои: dt_top, dt_center, dt_right, dt_bottom (без left).
+Meta: полный набор CSS/JS + plyr (CDN).
+
+#### alliasscheme_error — сокращённая, для ошибок
+
+Скелет:
+
+    !doctype → html.scheme_error.<class>.<guest|logged> → head → body
+        body_preload( )
+        div#popup_result
+        div.dt
+            div.dt_top
+            div.dt_middle
+                div.dt_center
+            div.dt_bottom
+        div.dt_debug
+
+Слои: dt_top, dt_center, dt_bottom (без left/right).
+Класс html = `scheme_error` + get_class($this) + guest/logged.
+Meta: CSS с `error.css` вместо `center.css`, без plyr.
+
+#### alliasscheme_min — минимальная, для AJAX
+
+Скелет:
+
+    div.dt_center
+
+Слои: только dt_center.
+Meta: пустая (`$meta->clear()`).
+Используется в `algoritm_lang_login::default_guest()` при `$_POST`,
+перед `visuorelease->release_min( $struct )`.
+
+**Это не HTML-схема.** Это заглушка под JSON-ответ:
+`release_min` собирает JSON, а не HTML.
+
+#### alliasscheme_www — полная, для главной
+
+Скелет:
+
+    !doctype → html.cl_html.<class>.<guest|logged> → head → body
+        body_preload( )
+        div#popup_result
+        div.dt
+            div.dt_top
+            div.dt_middle
+                div.dt_left
+                div.dt_center
+                div.dt_right
+            div.dt_bottom
+        div.dt_debug
+
+Слои: dt_top, dt_left, dt_center, dt_right, dt_bottom — полная сетка.
+Класс html = `cl_html` + get_class($this) + guest/logged.
+Meta: полный набор + разные CSS для guest/logged (`guest/dt.css`, `logged/dt.css`).
+
+### Сравнительная таблица
+
+| Схема | dt_top | dt_left | dt_center | dt_right | dt_bottom | meta | Использование |
+|---|---|---|---|---|---|---|---|
+| login | ✓ | — | ✓ | ✓ | ✓ | полный + plyr | форма логина |
+| error | ✓ | — | ✓ | — | ✓ | с error.css | ошибки |
+| min | — | — | ✓ | — | — | пусто | JSON-ответ |
+| www | ✓ | ✓ | ✓ | ✓ | ✓ | полный + guest/logged | главная |
+
+### Что общего и что разное
+
+**Общее (одинаково во всех):**
+
+- namespace `damoony`
+- поля main/alliascheme/visuorelease
+- поля dt_root/dt_top/dt_middle/dt_left/dt_center/dt_right/dt_bottom
+- методы meta / body_preload / body / clear / init / refresh / load / reload
+- `body_preload()` — базовая разметка preload + load
+- `body()` всегда вызывает `visuorelease->visuotag_clear()` в начале
+- `body()` всегда заканчивается `visuorelease->visuotag_set( $vt )`
+- `init()` всегда находит слои через `$vt->root()->find( class : 'dt_...' )`
+- `refresh()` всегда наполняет слои через `alliasglobal->{top,left,center,right,bottom}->as_tag()`
+- `reload()` — перерисовка без перезагрузки страницы
+
+**Разное:**
+
+- скелет HTML в `body()` (какие слои и в каком порядке)
+- класс на `<html>` (scheme_login / scheme_error / cl_html + guest/logged)
+- наполнение meta (какие CSS/JS подключаются)
+- `body_preload()` может быть с popupload (login, www) или без (error, min)
+- `body()` в min — не строит `!doctype / html / head / body`, только div.dt_center
+
+### Точка входа
+
+Из алгоритма логики:
+
+    $scheme = $main->alliasscheme;
+    $scheme->load( 'login' );    // или 'error', 'min', 'www'
+
+`alliasscheme::load( $name )`:
+
+    $this->schemename = $schemename;
+    $this->{$schemename}->load( );
+
+`alliasscheme` держит 4 публичных свойства-схемы:
+
+    public null|alliasscheme_login  $login  = null;
+    public null|alliasscheme_error  $error  = null;
+    public null|alliasscheme_min    $min    = null;
+    public null|alliasscheme_www    $www    = null;
+
+Создаются в `alliasscheme::init()`, который вызывается из `autoload()`.
+
+### Расширение — как добавить новую схему
+
+1. Создать файл `logic\alpha.0.0\domain\<домен>\alliasscheme\alliasscheme_<имя>.php`.
+2. namespace `damoony`.
+3. Класс `alliasscheme_<имя>`, повторяет контракт (см. выше).
+4. В `alliasscheme.php`:
+   - добавить `include_once` в `autoload()`
+   - добавить публичное свойство `$<имя>`
+   - добавить `new alliasscheme_<имя>($this)` в `init()`
+5. Вызывать `$main->alliasscheme->load( '<имя>' )` из алгоритма.
+
+### Замечание
+
+Схемы внутри одного домена имеют **дубликаты кода**:
+
+- `meta()` почти одинаков у login/www/error (отличия только в 1–3 строках)
+- `body_preload()` одинаков у login/www/error
+- `init()`, `refresh()`, `clear()`, `reload()`, `load()` — идентичны во всех четырёх
+- `body()` различается только скелетом
+
+**Это осознанное решение.** Каждая схема — самодостаточный файл, независимо правится под нужды своего аллиаса. Общая база не вводится, потому что цена ошибки в базе — падение всех схем сразу.
+
+Возможный рефакторинг (не сейчас) — вынести общий скелет в базовый класс `alliasscheme_base`, оставить наследникам только `body()`. Но это **отдельный спринт**.
