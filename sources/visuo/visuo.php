@@ -10,7 +10,6 @@ $visuosources = __DIR__ . DS . 'sources' . DS;
 ( include_once $file = $visuosources . 'visuolog.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuolist.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuolink.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoscript.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 ( include_once $file = $visuosources . 'visuotag.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
