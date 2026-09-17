@@ -22,3 +22,4 @@ BACKUP: _backup_2026-09-17\ (полный слепок до уборки)
 2026-09-17 23:48 SPRINT-8: visuo — перенесено 15 файлов в _archive\visuo-obsolete\, удалено 4 пустых папки
 2026-09-18 01:02 SPRINT-9: visuorelease_scheme.php перенесён в _archive\visuo-obsolete\
 2026-09-18 01:19 ACCESS-CHANGE: algoritm_lang_form — доступ к форме логина открыт всем пользователям (было: только авторизованным)
+2026-09-18 01:21 SPRINT-12: sources\library\other.php (39 KB, 19 методов) → _archive\library-other.php (от старого движка)
