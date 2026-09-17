@@ -142,7 +142,7 @@ class main {
 		$this->init( );
 		$this->logic( );
 		$this->savedata( );
-		$this->release( );
+		$this->release( GL_LOG , GL_DEBUG);
 	}
 
 	public function redirect ( null|string $address = null  ) {

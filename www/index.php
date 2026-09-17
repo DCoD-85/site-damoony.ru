@@ -68,10 +68,6 @@ if( ! defined( 'DSA' ) ) define( 'DSA' , '/' );													// Разделит�
 if( ! defined( 'BR' ) ) define( 'BR' , PHP_EOL );											// 
 if( ! defined( 'SIMPLECMS' ) ) define( 'SIMPLECMS' , true );									// Альтернативная CMS
 
-if( ! defined( 'GL_LOG' ) ) define( 'GL_LOG' , false );
-if( ! defined( 'GL_DEBUG' ) ) define( 'GL_DEBUG' , false );
-if( ! defined( 'GL_DEBUGHARD' ) ) define( 'GL_DEBUGHARD' , false );
-
 function error ( string $title , string $message , string $file = '' , string $line = '' ) {
 	$title = $title ?: 'Проверьте целостность сайта.';
 	$message = $message ?: 'Проверьте целостность сайта.';
