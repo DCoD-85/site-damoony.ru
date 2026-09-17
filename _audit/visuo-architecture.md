@@ -416,3 +416,202 @@ Meta: полный набор + разные CSS для guest/logged (`guest/dt.
 **Это осознанное решение.** Каждая схема — самодостаточный файл, независимо правится под нужды своего аллиаса. Общая база не вводится, потому что цена ошибки в базе — падение всех схем сразу.
 
 Возможный рефакторинг (не сейчас) — вынести общий скелет в базовый класс `alliasscheme_base`, оставить наследникам только `body()`. Но это **отдельный спринт**.
+
+---
+
+## META — что живое, что вынесено
+
+Обновлено: 2026-09-18 (Sprint 10).
+
+### Что живёт
+
+**`sources\visuo\sources\visuometa.php`** — 2 класса, ~2.5 KB:
+
+- `visuometa` — контейнер meta-элементов.
+- `visuometa_title` — единственный подтип.
+
+Методы `visuometa`:
+
+    __construct( visuorelease )
+    visuorelease( )            возвращает родителя
+    visuotag( )                возвращает накопительный visuotag
+    visuotag_set( visuotag )   
+    clear( )                   сбросить элементы
+    append( visuometa )        слить элементы другого visuometa
+    title( )                   создать visuometa_title
+    link( )                    создать visuolink (см. ниже)
+    as_tag( )                  visuometa → visuotag
+    tohtml( )                  элементы → строка
+    test_elements( )           дебаг
+
+**`sources\visuo\sources\visuolink.php`** — 4 класса, живой:
+
+- `visuolink` — фасад для link/script.
+- `visuolink_favicon` — `<link rel="icon">`.
+- `visuolink_css` — `<link rel="stylesheet">`.
+- `visuolink_js` — `<script src>`.
+
+Методы `visuolink`:
+
+    favicon( href )     → визуалинк_фавикон
+    css( href )         → визуалинк_css
+    js( href )          → визуалинк_js
+    as_tag( )           → visuotag
+
+Все подтипы добавляют `?rand=XXXXX` к href (cache busting), кроме favicon.
+
+### Как используются
+
+В схемах аллиасов (logic\domain\<домен>\alliasscheme\):
+
+    $meta = $this->visuorelease->meta( );
+    $meta->clear( );
+    $meta->link( )->favicon( '/media/favicon.ico#' . $allias );
+    $meta->link( )->css( DSA . 'media' . ... . 'main.css' );
+    $meta->link( )->css( DSA . 'media' . ... . 'messages.css' );
+    $meta->link( )->js( DSA . 'media' . ... . 'jquery-1.8.3.min.js' );
+    ...
+
+**Использование:** 133 вызова `$meta->link()` в 5 файлах:
+
+    alliasscheme_www.php       36
+    alliasscheme_login.php     31
+    alliasscheme_error.php     29
+    alliasglobal/scheme.php    26
+    domainglobal/scheme.php    11
+
+### Что вынесено в архив (Sprint 10)
+
+**`visuoscript.php`** → `_archive\visuo-obsolete\visuoscript.php`
+
+Причина: полностью мёртвый + сломанный.
+- Класс `visuoscript` с методами `link()` / `content()` — никем не вызывался.
+- `visuoscript_link` не существовал (был `cisuoscript_link` — опечатка).
+- `$this->css` / `$this->js` не были объявлены.
+- `$this->type` никогда не задавался.
+- При первом вызове — Fatal Error.
+
+**Из `visuometa.php` удалено (Sprint 10):**
+
+Методы:
+- `favicon( )` — 0 вызовов.
+- `style( )` — 0 вызовов.
+- `script( )` — 0 вызовов.
+- `as_tag_ARHIV( )` — старый вариант, 0 вызовов.
+
+Классы:
+- `visuometa_favicon` — только через `$meta->link()->favicon()`.
+- `visuometa_style` — не использовался.
+- `visuometa_script` — не использовался.
+
+### Итоговая структура meta
+
+    visuorelease
+        └── visuometa (живая)
+            ├── visuometa_title
+            └── visuolink
+                ├── visuolink_favicon
+                ├── visuolink_css
+                └── visuolink_js
+
+**Единый путь для добавления CSS/JS** — через `$meta->link()->css(...)` и `$meta->link()->js(...)`.
+
+**Title** — через `$meta->title()->data('Заголовок')`.
+
+### Cache busting
+
+Все CSS/JS/favicon получают `?rand=XXXXX` в момент `as_tag()`.
+Это обходит браузерный кэш при каждом рендере.
+
+**Место:** `visuolink_css::as_tag()`, `visuolink_js::as_tag()`, `visuolink_favicon::as_tag()`.
+
+### Замечание
+
+`$meta->title()->data()` возвращает **родителя** (`visuometa`), а не себя.
+Аналогично `favicon()->data()`.
+Но `favicon()->attr()` возвращает **себя** — можно навесить атрибуты.
+
+Пример подразумеваемого использования:
+
+    $meta->title()->data( 'Заголовок страницы' );
+    $meta->link()->favicon( '/favicon.ico' );
+    $meta->link()->css( '/css/main.css' );
+    $meta->link()->js( '/js/app.js' );
+
+---
+
+## ПАТТЕРН $vt_start / $vt_end в подтипах
+
+Обновлено: 2026-09-18 (Sprint 11).
+
+### Проблема, которую решает
+
+Подтип (`text`, `checkbox`, `form_form`) строит **своё поддерево**.
+Нужно передать его наружу — группе и внешнему visuoelement.
+
+### Решение — «контейнер без тега»
+
+    $vt_element = new visuotag( );        # пустой контейнер
+    $vt_start = $vt_element;               # ссылка на контейнер
+    $vt_end = $vt_start;
+
+    $vt_element = $vt_element->tag('div'); # создан новый visuotag, добавлен в контейнер
+    ...
+
+    $this->visuoelement_group->visuotag_start = $vt_start;
+    $this->visuoelement_group->visuotag_end   = $vt_end;
+
+Внутри `visuotag::tag()` новый узел делается так:
+
+    $newtag = new visuotag( ... );
+    $parent->elements[ ] = $newtag;        # ← добавлен в родительский контейнер
+    return $newtag;                        # ← возвращён наружу
+
+**Значит $vt_start не пустой.** Он содержит в `->elements[]` всё поддерево подтипа.
+Просто у него самого нет tagname — он не отрендерится как тег.
+
+### Что происходит при release
+
+`visuoelement::release( $vt_parent )`:
+
+    $vt_final = (new visuotag())
+        ->content('<!-- start : ClassName -->')
+        ->append( $this->visuotag_start )   # забирает детей контейнера
+        ->content('<!-- end : ClassName -->');
+
+    $vt_parent->insert( $vt_final , $this->visuotag_end );
+
+`append()` через `root()->elements` собирает детей `$vt_start` — это всё поддерево.
+
+### Реальный пример HTML
+
+    <!-- start : visuoelement_input_text -->
+    <div class="col_block">
+      <div class="el el-input-text">
+        <div class="box">
+          <span class="span-input">
+            <span class="border-box">
+              <input class="el-text" type="text" name="form[login]" ... >
+            </span>
+          </span>
+          <span class="span-label-comment">Логин</span>
+        </div>
+      </div>
+    </div>
+    <!-- end : visuoelement_input_text -->
+
+Комментарии `<!-- start/end -->` — из `visuoelement::release()`.
+Они попадают в итоговый HTML и помогают в отладке (F12).
+
+### Что важно помнить
+
+1. **`$vt_start` — контейнер без тега.** Не удаляй его и не пытайся обернуть в `<div>`.
+2. **`$vt_end` — маркер конца.** Используется в `insert()` для пересадки старых детей.
+3. **`clear()` перед каждым `init()`** — сбрасывает прошлые маркеры. Позволяет вызывать `init()` повторно.
+4. **Комментарии start/end — не мусор.** Они реально в HTML и помогают понимать, где какой элемент.
+5. **input рендерится с `</input>`** — артефакт `tag_closed = true`. Браузеры игнорируют. Можно исправить в `tag('input', false)` — но это отдельная правка.
+
+### Что НЕ является багом
+
+Если `$vt_start` выглядит «пустым» по объявлению — это **не баг**.
+Он наполняется через `tag()` на этапе build, а не через прямое присваивание.

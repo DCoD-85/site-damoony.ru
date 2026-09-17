@@ -34,7 +34,7 @@ class algoritm_lang_form
 		}
 
 		$available = [ '' ];
-		$auth = true;
+		$auth = false;
 		$search = true;
 		$default = $this->main->library->url->static_base[ 2 ] == '' ? true : false;
 
