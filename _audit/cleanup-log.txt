@@ -20,3 +20,4 @@ BACKUP: _backup_2026-09-17\ (полный слепок до уборки)
 2026-09-17 23:38 BLOCK-7.1: удалено 14 пустых папок
 2026-09-17 23:39 BLOCK-7.2: site-map.txt → _audit\_site-map-old.txt
 2026-09-17 23:48 SPRINT-8: visuo — перенесено 15 файлов в _archive\visuo-obsolete\, удалено 4 пустых папки
+2026-09-18 01:02 SPRINT-9: visuorelease_scheme.php перенесён в _archive\visuo-obsolete\

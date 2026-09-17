@@ -1,4 +1,4 @@
-<?PHP
+﻿<?PHP
 # --- script information --- #
 # script name: /main.php
 # created : 10.09.2025
@@ -66,7 +66,7 @@ class main {
 		( include_once $path = __DIR__ . DS . '..' . DS . 'sources' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
 		# 
-		$this->visuorelease = $this->visuorelease ?: new visuorelease( $this , scheme_use : false );
+		$this->visuorelease = $this->visuorelease ?: new visuorelease( $this );
 		$this->visuostruct = $this->visuostruct ?: new visuostruct( $this );
 		
 		$this->render = $this->render ?: new render( $this );
@@ -189,8 +189,8 @@ class main_path {
 class main_settings {
 	# vars
 	public null|main $main = null;
-	public string $domain_real_name;	# текущее реальное название домена
-	public string $allias_real_name;		# текущее реальное название аллиаса
+	public string $domain_real_name;	# С‚РµРєСѓС‰РµРµ СЂРµР°Р»СЊРЅРѕРµ РЅР°Р·РІР°РЅРёРµ РґРѕРјРµРЅР°
+	public string $allias_real_name;		# С‚РµРєСѓС‰РµРµ СЂРµР°Р»СЊРЅРѕРµ РЅР°Р·РІР°РЅРёРµ Р°Р»Р»РёР°СЃР°
 	private string $language;
 	private string $render;
 	public bool $visuoelement_render_classic = true;
@@ -228,20 +228,20 @@ class main_settings {
 
 		$v = new visuotag( );
 		
-		# Кросс-доменное разрешение
+		# РљСЂРѕСЃСЃ-РґРѕРјРµРЅРЅРѕРµ СЂР°Р·СЂРµС€РµРЅРёРµ
 		# header( 'Access-Control-Allow-Origin:*' , false , 200 );
 		# header( 'Access-Control-Allow-Credentials:true' , false , 200 );
 
 	}
 	/**
- * Загружает внешнюю конфигурацию из JSON файла и динамически обновляет свойства класса.
+ * Р—Р°РіСЂСѓР¶Р°РµС‚ РІРЅРµС€РЅСЋСЋ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РёР· JSON С„Р°Р№Р»Р° Рё РґРёРЅР°РјРёС‡РµСЃРєРё РѕР±РЅРѕРІР»СЏРµС‚ СЃРІРѕР№СЃС‚РІР° РєР»Р°СЃСЃР°.
  * 
- * @param string $configPath Абсолютный путь к файлу конфигурации.
+ * @param string $configPath РђР±СЃРѕР»СЋС‚РЅС‹Р№ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РєРѕРЅС„РёРіСѓСЂР°С†РёРё.
  * @return void
  */
 	public function loadExternalConfig( string $configPath ) {
 		if( ! file_exists( $configPath ) ){
-			// Если файл не найден, можно залогировать ошибку или просто выйти
+			// Р•СЃР»Рё С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ, РјРѕР¶РЅРѕ Р·Р°Р»РѕРіРёСЂРѕРІР°С‚СЊ РѕС€РёР±РєСѓ РёР»Рё РїСЂРѕСЃС‚Рѕ РІС‹Р№С‚Рё
 			return;
 		}
 
@@ -249,12 +249,12 @@ class main_settings {
 		$configData = json_decode( $jsonContent , true );
 
 		if( json_last_error( ) !== JSON_ERROR_NONE || ! is_array( $configData ) ) {
-			// Если JSON невалиден, выходим, чтобы не повредить текущие настройки
+			// Р•СЃР»Рё JSON РЅРµРІР°Р»РёРґРµРЅ, РІС‹С…РѕРґРёРј, С‡С‚РѕР±С‹ РЅРµ РїРѕРІСЂРµРґРёС‚СЊ С‚РµРєСѓС‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё
 			return;
 		}
 
 		foreach( $configData as $property=>$value ){
-			// Проверяем, существует ли такое свойство в текущем классе
+			// РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚Р°РєРѕРµ СЃРІРѕР№СЃС‚РІРѕ РІ С‚РµРєСѓС‰РµРј РєР»Р°СЃСЃРµ
 			if ( property_exists( $this , $property ) ){
 				$this->$property = $value;
 			}

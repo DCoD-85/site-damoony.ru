@@ -1,4 +1,4 @@
-<?PHP
+﻿<?PHP
 
 if( ! defined( 'DS' ) ) define( 'DS' , DIRECTORY_SEPARATOR );
 if( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
@@ -26,35 +26,5 @@ $visuosources = __DIR__ . DS . 'sources' . DS;
 ( include_once $file = $visuosources . 'visuostruct.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 ( include_once $file = $visuosources . 'visuorelease.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuorelease_scheme.php' ) or error_file( $file , __FILE__ , __LINE__ );
-
-/*
-include_array( [ __FILE__ , __LINE__ ] , [
-	$visuosources . 'visuolog.php' ,
-	
-	$visuosources . 'visuolist.php' ,
-	$visuosources . 'visuolink.php' ,
-	$visuosources . 'visuoscript.php' ,
-	# visuotag []
-	$visuosources . 'visuotag.php' ,
-	# visuattrs
-	$visuosources . 'visuoattrs.php' ,
-	$visuosources . 'visuoattrs' . DS . 'visuoattrsclass.php' ,
-	$visuosources . 'visuoattrs' . DS . 'visuoattrsstyle.php' ,
-	$visuosources . 'visuoattrs' . DS . 'visuoattrsactions.php' ,
-	$visuosources . 'visuometa.php' ,
-	
-	$visuosources . 'visuodata.php' ,
-	$visuosources . 'visuoelement.php' ,
-	$visuosources . 'visuoelements.php' ,
-	$visuosources . 'visuostruct.php' ,
-	$visuosources . 'visuostruct_data.php' ,
-	$visuosources . 'visuorelease.php' ,
-	$visuosources . 'visuorelease_scheme.php' ,
-# 	# 'visuo' . DS . 'visuopage' . DS . 'visuopage.php' ,
-# 	# 'visuo' . DS . 'visuopage' . DS . 'visuopage_data.php' ,
-# 	# 'visuo' . DS . 'visuodata' . DS . 'visuodata_addclass.php' ,
-] , [ ] );
-*/
 
 ?>
