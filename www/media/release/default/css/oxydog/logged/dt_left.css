@@ -1,0 +1,33 @@
+
+
+html.logged .dt_left .author { }
+html.logged .dt_left .author .name { border-bottom : none ; }
+html.logged .dt_left .author .avatar { }
+html.logged .dt_left .author .avatar img { min-width : 290px ; max-width : -webkit-fill-available ; }
+html.logged .dt_left .author .slogan { padding : 10px ; }
+html.logged .dt_left .author .about { padding : 10px ; border-top : dashed #CCC 1px ; }
+html.logged .dt_left .author .actions { padding : 10px ; }
+html.logged .dt_left .author .actions a { padding : 0px ; color : #369 ; }
+html.logged .dt_left .author .actions a:hover { }
+
+html.logged .dt_left .popechitelstvo { }
+html.logged .dt_left .popechitelstvo .title { padding : 10px ; font-weight : 600 ; }
+
+html.logged .dt_center .blog { }
+html.logged .dt_center .blog .title { font-weight : 600 ; padding : 10px ; }
+html.logged .dt_center .blog .body { }
+html.logged .dt_center .blog .body .row { padding : 10px 10px ; border-top : solid #DDD 1px ; }
+html.logged .dt_center .blog .body .empty { background : #CCC ; text-align : center ; }
+
+
+html.logged .dt_right .chat { }
+html.logged .dt_right .chat .title { font-weight : 600 ; padding : 10px ; border-bottom : solid #DDD 1px ; }
+html.logged .dt_right .chat .body { padding : 0px ; }
+html.logged .dt_right .chat .body .text { }
+html.logged .dt_right .chat .body .text .row { position : relative ; margin : 0px 10px ; padding : 5px ; border-bottom : dashed #CCC 1px ; }
+html.logged .dt_right .chat .body .text .row .date { display : inline-flex ; width : 30% ; color : #369 ; }
+html.logged .dt_right .chat .body .text .row .author { display : inline-flex ; justify-content : flex-end ; width : 70% ; color : #999 ; }
+html.logged .dt_right .chat .body .text .row .message { text-align : left ; color : #666 ; }
+html.logged .dt_right .chat .body .text .row .actions { display : none ; }
+html.logged .dt_right .chat .body .text .row:hover .actions { display : block ; position : absolute ; z-index : 10 ; top : 100% ; left : 0 ; right : 0 ; padding : 10px ; background : #FFF ; }
+html.logged .dt_right .chat .body .elements { padding : 10px ; }

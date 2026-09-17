@@ -1,0 +1,52 @@
+
+.dt_left .menuleft { margin : 10px 0px ; padding : 10px ; background : ; border-radius : 5px ; }
+.dt_left .menuleft .menulink_between { display : none ; }
+.dt_left .menuleft .menulink { position : relative ; }
+.dt_left .menuleft .menulink.link_text { }
+.dt_left .menuleft .menulink.link_link { }
+.dt_left .menuleft .menulink.link_popup { }
+
+.dt_left .menuleft .menulink .span_text { display : block ; color : #666 ; }
+.dt_left .menuleft .menulink .span_text a { display : block ; padding : 5px ; color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_left .menuleft .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_left .menuleft .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_left .menuleft .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_left .menuleft .menulink:last-child .span_text a { border-bottom : none ; }
+.dt_left .menuleft .menulink:last-child .span_text a:hover { border-bottom : none ; }
+
+.dt_left .menuleft .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_left .menuleft .menulink:hover .span_comment { display : block ; }
+.dt_left .menuleft .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_left .menuleft .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+
+.dt_right .menuright { margin : 10px 0px ; padding : 10px ; background : #EEE ; border-radius : 5px ; }
+.dt_right .menuright .menulink_between { display : none ; }
+.dt_right .menuright .menulink { position : relative ; }
+.dt_right .menuright .menulink.link_text { }
+.dt_right .menuright .menulink.link_link { }
+.dt_right .menuright .menulink.link_popup { }
+
+.dt_right .menuright .menulink .span_text { display : block ; color : #666 ; }
+.dt_right .menuright .menulink .span_text a { display : block ; padding : 5px ; color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_right .menuright .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_right .menuright .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menuright .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menuright .menulink:last-child .span_text a { border-bottom : none ; }
+.dt_right .menuright .menulink:last-child .span_text a:hover { border-bottom : none ; }
+
+.dt_right .menuright .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_right .menuright .menulink:hover .span_comment { display : block ; }
+.dt_right .menuright .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_right .menuright .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+.block { padding : 0px ; }
+.block .block_head { font-weight : 600 ; padding : 15px 15px 5px 15px ; color : #666 ; border-bottom : dashed #CCC 1px ; }
+.block .block_body { padding : 10px ; }
+.block .body .row { padding : 10px 10px ; border-top : solid #DDD 1px ; }
+.block .body .empty { background : #CCC ; text-align : center ; }
+
+.block .block_body .visuotable .tfoot .row .col.colelsinline .col-inside { display : flex ; padding : 20px 10px 10px 10px ; border-top : solid #CCC 1px ; }
+.block .block_body .visuotable .tfoot .row .col.colelsinline .col-inside .el { padding : 0px ; }

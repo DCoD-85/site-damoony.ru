@@ -1,0 +1,183 @@
+
+.dt_top .menulink_between { font-weight : 100 ; padding : 0 5px ; color : #CCC ; }
+.dt_top .menulink { display : grid ; justify-items : center ; position : relative ; }
+.dt_top .menulink.link_text { }
+.dt_top .menulink.link_link { }
+.dt_top .menulink.link_popup { }
+
+.dt_top .menulink .span_text { color : #666 ; }
+.dt_top .menulink .span_text a { color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_top .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_top .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_top .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_top .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_top .menulink:hover .span_comment { display : block ; }
+.dt_top .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_top .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+
+.toplogo { font-size : 24px ; display : grid ; align-items : end ; grid-template-columns : 0px 300px auto ; }
+
+.toplogo .toplogo_title { display: flex ; height: 100% ; padding-right : 10px ; text-align : right ; flex-direction : column ; justify-content : space-between ; }
+.toplogo .toplogo_title .siteprojects { font-size : 16px ; font-weight : 300 ; padding : 10px 10px 20px 10px ; text-align : right ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon { display : flex ; justify-content : flex-end ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink:nth-child( 1 ) .span_text a { font-weight : 600 ;  border : none ; color : #369 ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink .span_comment { display : none ; position : absolute ; z-index : 100 ; padding-top : 10px ; top : 100% ; min-width : 200px ; text-align : center ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink:hover .span_comment { display : block ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink .span_comment .span_comment_text { font-size : 20px ; padding : 15px ; min-width : 100px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink .span_comment .span_comment_text a span { display : block ; font-size : 14px ; padding-top : 5px ; line-height : 1.0 ; color : #CCC ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink .span_comment .span_comment_text a { display : block ; padding : 5px ; color : #FFF ; border-bottom : dashed #999 1px ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink .span_comment .span_comment_text a:hover { color : #CCC ; }
+.toplogo .toplogo_title .siteprojects .projects_unfon .menulink .span_comment .span_comment_text a:last-child { border-bottom : none ; }
+
+.toplogo .toplogo_title .sitename { display : grid ; align-items : center ; justify-content : center ; text-align : center ; height : 100% ; font-size : 54px ; font-weight : 600 ; padding : 10px ; background : #CCC ; color : #369 ; border-radius : 10px ; }
+.toplogo .toplogo_title .sitename span { display : block ; font-size : 16px ; font-weight : 300 ; padding-left : 50px ; text-align : center ; }
+.toplogo .toplogo_title .sitename a { color : #369 ; text-decoration : none ; }
+.toplogo .toplogo_title .sitename a:hover { font-weight : 900 ; border-bottom : none ; }
+.toplogo .toplogo_title .sitename a:hover span { font-weight : 300 ; padding-left : 50px ; }
+.toplogo .toplogo_title .siteabout { padding : 10px 10px 10px 10px ; font-weight : 500 ; color : #999 ; text-align : left ; }
+
+.toplogo .toplogo_logo { }
+
+.toplogo .projects ,
+.toplogo .login ,
+.toplogo .skins ,
+.toplogo .languages ,
+.toplogo .pagelogo ,
+.toplogo .navigate { position : relative ; }
+
+/*
+.toplogo .menulink_fon { position : absolute ; z-index : -1 ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; background : #963 ; opacity : 0.5 ; }
+*/
+
+.toplogo_links .projects_unfon { display : flex ; padding : 10px ; }
+.toplogo_links .login_unfon { display : flex ; padding : 10px ; }
+.toplogo_links .skins_unfon { display : flex ; padding : 10px ; }
+.toplogo_links .languages_unfon { display : flex ; padding : 10px ; }
+.toplogo_links .pagelogo { margin : 10px 0px 0px 0px ; height : 200px ; border-radius : 10px ; background : url( 'https://www.damoony2.ru/pagelogo' ) center right no-repeat ; }
+.toplogo_links .navigate_unfon { display : flex ; justify-content : flex-end ; padding : 10px ; }
+
+
+.toplogo .toplogo_links_links .menulink .link_comment { display : none ; font-size : 16px ; position : absolute ; z-index : 100 ; top : 100% ; width : max-content ; min-width : 150px ; max-width : 300px ; text-align : left ; }
+.toplogo .toplogo_links_links .menulink .link_comment div { }
+.toplogo .toplogo_links_links .menulink .link_comment .span_title { display : block ; margin : 0 0px 20px 0px ; padding : 0 0px 10px 0px ; color : #CCC ; border-bottom : solid #999 1px ;  }
+.toplogo .toplogo_links_links .menulink .link_comment a { display : block ; margin-top : 10px ; font-weight : 200 ; color : #9CF ; border : none ; }
+.toplogo .toplogo_links_links .menulink .link_comment a:hover { color : #BDF ; }
+
+.toplogo .toplogo_links .menulink:hover .link_comment { display : grid ; align-items : stretch ; }
+
+.toplogo .toplogo_links .between { margin : 0 5px ; font-weight : 100 ; color : #CCC ; }
+.toplogo .toplogo_links .toplogo_links_top { display : flex ;  }
+.toplogo .toplogo_links .toplogo_links_top_login { width : 100% ; text-align : left ; }
+.toplogo .toplogo_links .toplogo_links_top_skins { }
+.toplogo .toplogo_links .toplogo_links_top_skins .box { white-space : nowrap ; margin : -20px 0 -10px 0 ; }
+.toplogo .toplogo_links .toplogo_links_top_skins .box .title { display : none ; margin-top : 10px ; padding-top : 10px ; text-align : center ; border-top : dashed #DDD 1px ; }
+.toplogo .toplogo_links .toplogo_links_top_skins .box .data { padding : 20px 10px 10px 10px ; background : #EEE ;}
+.toplogo .toplogo_links .toplogo_links_top_skins .box:hover .data { margin-bottom : -15px ; border-top : solid #CCC 5px ; }
+.toplogo .toplogo_links .toplogo_links_top_skins .box:hover .title { display : block ; }
+.toplogo .toplogo_links .toplogo_links_top_languages .box { white-space : nowrap ; padding-left : 10px ; }
+.toplogo .toplogo_links .toplogo_links_top_login ,
+.toplogo .toplogo_links .toplogo_links_top_skins ,
+.toplogo .toplogo_links .toplogo_links_top_languages { font-size : 16px ; }
+
+.link_popup { }
+.link_popup .link_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; }
+.link_popup .link_comment .link_comment_narrow { margin-top : 5px ; height : 10px ; width : 100% ; background : url( '/media/release/default/images/narrow_top.png' ) bottom no-repeat ; }
+.link_popup .link_comment .link_comment_text { padding : 10px ; background : #666 ; color : #CCC ; border-radius : 3px ; }
+.link_popup .link_comment .link_comment_text a { color : #FFF ; }
+.link_popup:hover .link_comment { display : grid ! important ; justify-items : center ! important ; }
+
+
+.toplogo .toplogo_links .toplogo_links_links { font-weight : 400 ; }
+
+.topsubmenu { display : flex ; justify-content : space-between ; font-size : 16px ; font-weight : 300 ; text-align : right ; border-top : dashed #CCC 1px ; }
+.topsubmenu .subnavigate_unfon { display : flex ; padding : 10px ; }
+/*
+.topsubmenu .subnavigate .link { }
+.topsubmenu .subnavigate .link a { color : #999 ; }
+.topsubmenu .subnavigate .link a:hover { color : #369 ; border-bottom : solid #369 1px ; }
+.topsubmenu .subnavigate .link.selected a { color : #369 ; border-bottom : dashed #369 1px ; }
+.topsubmenu .subnavigate .between { font-weight : 100 ; padding : 0 5px ; color : #CCC ; }
+.topsubmenu .subnavigate .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; }
+.topsubmenu .subnavigate .link:hover .span_comment { display : block ; }
+*/
+
+
+
+.topsubmenu .topsubmenu_title { padding : 25px 10px 10px 10px ; color : #CCC ; }
+.topsubmenu .topsubmenu_title a { padding : 0 0px ; color : #999 ; background : #DDD ; }
+.topsubmenu .topsubmenu_title a:first-child { font-weight : 800 ; }
+
+.topmenu { margin : 0px 0px 0px 0px ; padding : 0px 0px 0px 0px ; border-top : dashed #999 1px ; }
+
+.topmenu div.title { display : none ; font-size : 30px ; font-weight : 900 ; padding : 10px ; color : #000 ; }
+
+
+.topmenu div.menu { display : flex ; justify-content : flex-end ; font-size : 24px ; margin : 0px ; padding : 10px ; border-bottom : solid #333 0px ; }
+.topmenu div.menu .menua span.span_title {  font-weight : 400 ; display : grid ; align-items : end ; margin : 0px ; padding : 0px ; color : #666 ; background : #DDD ; border-bottom : solid #DDD 1px ; }
+.topmenu div.menu .menua:hover span.span_title { cursor : pointer ; color : #9c2ca4 ; border-bottom : solid #CCC 1px ; }
+.topmenu div.menu .menua_between { display : flex ; margin : 0px 5px ; padding : 0px 0px ; color : #CCC ; }
+.topmenu div.menu .menua { position : relative ; display : flex ; }
+.topmenu div.menu .menua span.span_popup { display : none ; position : absolute ; z-index : 1000 ; font-size : 15px ; top : 100% ; right : 0px ; padding : 0px 0px ; } 
+.topmenu div.menu .menua:hover span.span_popup { display : block ; } 
+.topmenu div.menu .menua span.span_popup .border { margin : 0px 0px 0px 0px ; padding : 10px ; width : max-content ;  min-width : 100% ; max-width : 300px ; } 
+.topmenu div.menu .menua span.span_popup .border .div { padding : 0px ; background : #222 ; color : #FFF ; } 
+.topmenu div.menu .menua span.span_popup .border .head_comment { padding : 10px ; } 
+.topmenu div.menu .menua span.span_popup .border .head_links_title { padding : 15px 10px 5px 10px ; color : #000 ; background : #666 ; } 
+.topmenu div.menu .menua span.span_popup .border .head_links a { display : block ; padding : 5px 10px 10px 10px ; color : #CCC ; text-decoration : none ; } 
+.topmenu div.menu .menua span.span_popup .border .head_links a:hover { text-decoration : underline ; }
+
+
+
+/* LEFT */
+
+.dt_left .left_menu { padding : 10px ; }
+
+.dt_left .left_menu .left_menu_box { display : grid ; align-items : end ; grid-template-columns : 30px auto ; }
+.dt_left .left_menu .left_menu_box .back { height : 100% ; background : #333 ; }
+.dt_left .left_menu .left_menu_box .back a { padding : 5px ; writing-mode : tb-rl ; transform : rotate(180deg) ; text-align : left 	; color : #FFF ; text-decoration : none ;}
+.dt_left .left_menu .left_menu_box .links { padding-left : 10px ; }
+
+.dt_left .left_menu .link { position : relative ; vertical-align : middle ; display : flex ; align-items : center ; }
+.dt_left .left_menu .link_between { margin : 3px 0px ; border-top : dashed #999 1px ; }
+.dt_left .left_menu .link a { display : block ; padding : 0px ; width : 100% ; color : #666 ; text-decoration : none ; }
+.dt_left .left_menu .link a:hover { color : #000 ; background : #CCC ; }
+.dt_left .left_menu .link.selected a { font-weight : bold ; color : #000 ; }
+.dt_left .left_menu .link .a_unactive { color : #CCC ; }
+.dt_left .left_menu .link .link_comment { display : none ; position : absolute ; z-index : 100 ; left : 100% ; width : 100% ; }
+.dt_left .left_menu .link .link_comment .link_comment_narrow { background : url( '/media/release/default/images/narrow.png' ) center no-repeat ; }
+.dt_left .left_menu .link .link_comment .link_comment_text { padding : 15px ; background : #666 ; color : #FFF ; line-height : 1em ; border-radius : 0 5px 5px 0 ; }
+.dt_left .left_menu .link:hover .link_comment { display : grid ; align-items : stretch ; grid-template-columns : 10px auto ; }
+
+
+/*
+.topmenu div.menu { display : flex ; margin : 5px 0px 0px 0px ; padding : 0px ; border-bottom : solid #333 1px ; }
+.topmenu div.menu .menua span.span_title { display : grid ; align-items : end ; font-size : 24px ; margin : 0px ; padding : 10px ; max-width : 200px ; color : #333 ; background : #DDD ; }
+.topmenu div.menu .menua:hover span.span_title { cursor : pointer ; background : #333 ; color : #FFF ; }
+.topmenu div.menu .menua { position : relative ; display : flex ; }
+.topmenu div.menu .menua span.span_popup { display : none ; position : absolute ; z-index : 1000 ; font-size : 15px ; top : 100% ; left : 0px ; right : 0px ; padding : 0px 0px ; } 
+.topmenu div.menu .menua:hover span.span_popup { display : block ; } 
+.topmenu div.menu .menua span.span_popup .border { margin : 0px 0px 0px 0px ; padding : 0px ; width : max-content ;  min-width : 100% ; max-width : 300px ; } 
+.topmenu div.menu .menua span.span_popup .border .div { padding : 0px ; background : #222 ; color : #FFF ; } 
+.topmenu div.menu .menua span.span_popup .border .head_comment { padding : 10px ; } 
+.topmenu div.menu .menua span.span_popup .border .head_links_title { padding : 15px 10px 5px 10px ; color : #000 ; background : #666 ; } 
+.topmenu div.menu .menua span.span_popup .border .head_links a { display : block ; padding : 5px 10px 10px 10px ; color : #CCC ; text-decoration : none ; } 
+.topmenu div.menu .menua span.span_popup .border .head_links a:hover { text-decoration : underline ; }
+*/
+
+
+/*
+.topmenu div.menu { display : flex ; padding : 5px 0px 0px 0px ; border-bottom : solid #333 1px ; }
+.topmenu span.menua { position : relative ; }
+.topmenu div.menu .menua span.span_title { display : grid ; align-items : end ; font-size : 24px ; margin : 0px ; padding : 10px ; max-width : 150px ; color : #333 ; }
+.topmenu div.menu .menua:hover span.span_title { cursor : pointer ; background : #333 ; color : #FFF ; }
+.topmenu div.menu .menua { display : flex ; }
+.topmenu div.menu span.span_popup { display : none ; position : absolute ; z-index : 1000 ; font-size : 15px ; top : 100% ; left : 0px ; right : 0px ; padding : 0px 0px ; } 
+.topmenu div.menu span.span_popup .border { margin : 0px 0px 0px 0px ; padding : 0px ; width : max-content ;  min-width : 100% ; max-width : 150px ; } 
+.topmenu div.menu span.span_popup .border .div { padding : 0px ; background : #222 ; color : #FFF ; } 
+.topmenu div.menu span.span_popup .border .head_comment { padding : 10px ; } 
+.topmenu div.menu span.span_popup .border .head_links_title { padding : 10px ; color : #000 ; background : #666 ; } 
+.topmenu div.menu span.span_popup .border .head_links a { display : block ; padding : 10px ; color : #CCC ; text-decoration : none ; } 
+.topmenu div.menu span.span_popup .border .head_links a:hover { text-decoration : underline ; }
+*/

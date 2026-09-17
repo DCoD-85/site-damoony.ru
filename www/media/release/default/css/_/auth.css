@@ -1,0 +1,6 @@
+html , body { margin : 0px ; padding : 0px ; }
+
+.title { font-weight : bolder ; padding : 15px ; }
+.body { display : flex ; padding : 0px ; }
+.left { padding : 15px ; background : #EEE ; }
+.right { padding : 15px ; width : 30% ; }

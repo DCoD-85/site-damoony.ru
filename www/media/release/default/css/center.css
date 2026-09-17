@@ -1,0 +1,9 @@
+.center { }
+
+.center_title { font-size : 22px ; padding : 10px ; background : #D3D3D3 ; color : #999 ; border-bottom : solid #BBB 3px ; }
+.center_title .title_link { }
+.center_title .title_link a { color : #666 ; }
+.center_title .title_text { }
+.center_title .title_between { padding : 0 5px ; color : #666 ; }
+
+.center_body { padding : 10px ; }

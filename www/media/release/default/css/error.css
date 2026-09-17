@@ -1,0 +1,40 @@
+.error {
+	display : flex ;
+	align-items : center ;
+	padding : 0px 0px ;
+	width : -webkit-fill-available ;
+}
+
+.error_head {
+	font-size : 104px ;
+	font-weight : 900 ;
+	margin : 45px 0 ;
+	padding : 100px 200px 100px 100px ;
+	text-align : center ;
+	background : #C33 ;
+	color : #EEE;
+	border-radius : 0 500px 500px 0 ;
+}
+
+.error_title {
+	margin : 50px ;
+	font-size : 52px ;
+	width : inherit ;
+	text-align : center ;
+	color : #C33 ;
+	font-weight : 300 ;
+}
+
+.scheme_error hr {
+	margin : 20px 0 ;
+	border-color : #C33 ;
+	/* border-style : solid ; */
+}
+
+.scheme_error .dt_middle {
+	display : block ;
+}
+
+.scheme_error .dt_center {
+	border : none ;
+}

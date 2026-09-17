@@ -1,0 +1,9 @@
+.log { background : #FFF ; }
+
+.log_row { display : grid ; grid-template-columns : 50px auto 400px 100px 200px ; border-bottom : solid #CCC 1px ; }
+.log_row div { padding : 5px ; }
+.log_row_num { font-weight : bold ; padding : 3px ; text-align : right ; }
+.log_row_message { }
+.log_row_method { }
+.log_row_microtime { font-weight : 800 ; color : rgb(82, 211, 127) ; }
+.log_row_datetime { }

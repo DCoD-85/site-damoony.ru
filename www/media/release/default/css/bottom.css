@@ -1,0 +1,66 @@
+/*
+
+*/
+
+/*
+.bottom_ { position : relative ; max-height : 200px ; }
+
+.bottom_fon { position : absolute ; top : 100% ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 100 ; background : #333 ; color : #FFF ; opacity : 0.8 ; max-height : 200px ; }
+.bottom_click { font-size : 36px ; font-weight : 900 ; position : absolute ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 101 ; padding : 30px 150px ; display : flex ; justify-content : center ; align-items : center ; text-align : center ; color : #FFF ; max-height : 200px ; }
+
+.bottom_confidence { max-height : 300px ; overflow : auto ; }
+.bottom_confidence h1 { font-size : 40px ; }
+.bottom_confidence h2 { font-size : 26px ; margin : 20px 0px ; }
+.bottom_confidence p { font-size : 20px ; margin : 10px 0px ; text-indent : 20px ; }
+*/
+
+.bottom_nav { display : flex ; justify-content : space-between ; font-size : 16px ; color : #000 ; line-height : 1.5em ; }
+.bottom_nav a { margin-top : 5px ; line-height : 1.0em ; }
+.bottom_nav a::before { content : '' }
+.bottom_nav a::after { content : '' }
+.bottom_nav .title { display : inline-block ; font-weight : 600 ; padding-bottom : 5px ; }
+.bottom_nav .bottom_nav_panel { width : 20% ; padding : 10px ; }
+
+.bottom_nav_project { }
+.bottom_nav_project .title { }
+.bottom_nav_project .links { }
+.bottom_nav_project a { display : block ; color : #369 ; }
+.bottom_nav_project a:hover { display : block ; color : #666 ; }
+
+.bottom_nav_info { }
+.bottom_nav_info .title { }
+.bottom_nav_info .links { }
+.bottom_nav_info a { display : block ; color : #369 ; }
+.bottom_nav_info a:hover { display : block ; color : #666 ; }
+
+.bottom_nav_policy { }
+.bottom_nav_policy .title { }
+.bottom_nav_policy .links { }
+.bottom_nav_policy a { display : block ; color : #369 ; }
+.bottom_nav_policy a:hover { display : block ; color : #666 ; }
+
+.bottom_box { display : flex ; justify-content : space-between ; padding-bottom : 50px ; border-top : dashed #EEE 1px ; }
+.bottom_box div { padding : 10px ; color : #999 ; }
+.bottom_box a { color : #999 ; }
+.bottom_box a:hover { color : #333 ; }
+
+.bottom_agreement { }
+.bottom_agreement.hide { display : none ; }
+.bottom_body { position : fixed ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 2 ; overflow : auto ; }
+
+.bottom_body.hidden { }
+.bottom_fon { position : fixed ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 1 ; background : #333 ; color : #FFF ; opacity : 0.9 ; }
+
+.bottom_click { font-size : 36px ; font-weight : 900 ; padding : 0px 150px ; height : 100% ; display : flex ; justify-content : center ; align-items : center ; text-align : center ; color : #FFF ; }
+.bottom_body.show .bottom_click { display : none ; }
+
+.bottom_confidence_close { display : none ; }
+.bottom_body.show .bottom_confidence_close { font-size : 36px ; font-weight : 900 ; margin : 50px 150px ; display : flex ; justify-content : center ; align-items : center ; text-align : center ; color : #FFF ; }
+.bottom_body.show .bottom_confidence_close:hover { color : #CF0 ; }
+
+.bottom_confidence { display : none ; }
+.bottom_confidence.onpage  { display : block ; }
+.bottom_body.show .bottom_confidence { display : block ; margin : 50px 100px ; padding : 20px ; background : #FFF ; border-radius : 5px ; }
+.bottom_confidence h1 { font-size : 52px ; }
+.bottom_confidence h2 { font-size : 26px ; margin : 20px 0px ; }
+.bottom_confidence p { font-size : 20px ; margin : 10px 0px ; text-indent : 20px ; }

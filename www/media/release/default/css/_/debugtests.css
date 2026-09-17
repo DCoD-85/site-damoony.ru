@@ -1,0 +1,8 @@
+body.debugtests { margin : 0px ; padding : 20px ; }
+
+.dt_top { position : relative ; border-bottom : solid #F90 1px ; }
+.dt_left { position : relative ; }
+.dt_center { position : relative ; }
+.dt_right { position : relative ; }
+.dt_bottom { position : relative ; }
+

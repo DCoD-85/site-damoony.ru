@@ -1,0 +1,16 @@
+
+/* class_functions */
+.my_vardump { font-family : "Exo 2.0 Light" ; font-weight : 300 ; margin : 5px ; padding : 0px ; line-height : 1.1em ; color : #DDD ; border-bottom : solid #CCC 1px ; }
+.my_vardump .div_title { position : relative ; margin : 0 ; padding : 0px ; background : #333 ; }
+.my_vardump .div_title .div_title_actions { display : none ; }
+.my_vardump .div_title:hover .div_title_actions { display : block ; position : absolute ; left : 0 ; bottom: 100% ; width : 100% ; display : block ; padding : 0px ; text-align : right ; }
+.my_vardump .div_title_actions span { display: inline-block ; padding: 5px ; background : #666 ; }
+.my_vardump .div_title_actions a { color : #F90 ! important ; text-decoration : none ! important ; border : none ! important ; }
+.my_vardump .div_title_actions a:hover { color : #F90 ! important ; text-decoration : underline ! important ; border : none ! important ; }
+.my_vardump .div_title_varname { display : block ; padding : 10px ; }
+.my_vardump .div_title_type { padding-left : 5px ; color : #CCC ; }
+.my_vardump .messagetext { padding : 5px ; background : #DDD ; }
+.my_vardump .my_vardump_row { padding : 5px ; color : #000 ; }
+.my_vardump .my_vardump_row .my_vardump_row_body { cursor : pointer ; display : inline-block ; padding : 0px ; color : #369 ; width : 100px ; }
+.my_vardump .my_vardump_row .my_vardump_row_box {  margin-left : 2px ; padding-left : 8px ; border-left : dashed #CCC 1px ; }
+.my_vardump b { font-weight : 400 ; }

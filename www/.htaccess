@@ -1,0 +1,36 @@
+php_value max_execution_time 5000
+php_value upload_max_filesize 2000M
+php_value post_max_size 2000M
+php_value max_input_vars 100001
+php_value memory_limit 512M
+
+php_flag magic_quotes_gpc off
+php_flag magic_quotes_runtime off
+php_flag register_globals off
+
+RewriteEngine On
+RewriteBase /
+
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .php .html
+
+Options +FollowSymlinks
+DirectoryIndex index.php index.htm index.html
+
+Options -Indexes
+
+# RewriteCond %{SERVER_PORT} !^443$
+# RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
+
+
+# RewriteCond %{REQUEST_FILENAME} ^(.*)admin.panel(.*)$
+# RewriteRule ^(.*)$ admin.install.php?%{QUERY_STRING} [NC]
+
+RewriteCond %{REQUEST_FILENAME} !-f [OR]
+RewriteCond %{REQUEST_FILENAME} !-d [OR]
+RewriteCond %{REQUEST_FILENAME} !-l [OR]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} !^.*(ico|xml|txt)$
+RewriteRule ^(.*)$ index.php?%{QUERY_STRING} [L]

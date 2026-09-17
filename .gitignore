@@ -1,0 +1,22 @@
+﻿# Слепки — локальные, в репозиторий не идут
+_backup_*/
+
+# Старые версии файлов — локальные (но _archive\README.md — да, см. ниже)
+_archive/*
+!_archive/README.md
+
+# Аудит — оставляем документацию, но не мусор
+_audit/*
+!_audit/sitemap.md
+!_audit/conventions.md
+!_audit/cleanup-log.txt
+
+# Системное
+Thumbs.db
+.DS_Store
+*.log
+*.bak
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,17 @@
+.menuright { }
+.menuright .link a { display : block ; }
+.menuright a { display : block ; padding : 10px ; }
+
+.dt_right .right_menu { padding : 20px 5px 5px 5px ; }
+.dt_right .right_menu .menu_title { display : none ; font-size : 22px ; padding : 10px ; border-bottom : solid #CCC 3px ; }
+.dt_right .right_menu .link { display : block ; margin : 10px ; padding : 0px ; }
+.dt_right .right_menu .link a { color : #369 ; text-decoration : none ; border-bottom : dotted #999 1px ; }
+.dt_right .right_menu .link a:hover { color : #000 ; border-bottom : solid #666 1px ; }
+
+/*
+.dt_right .right_menu { padding : 0px ; }
+.dt_right .right_menu .menu_title { display : none ; }
+.dt_right .right_menu .link { display : block ; margin : 0px ; padding : 0px ; }
+.dt_right .right_menu .link a { display : block ; margin : 10px 0 0 10px ; padding : 10px ; background : #CCC ; color : #369 ; text-decoration : none ; }
+.dt_right .right_menu .link a:hover { background : #CCC ; color : #000 ; }
+*/

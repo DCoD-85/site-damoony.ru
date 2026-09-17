@@ -1,0 +1,74 @@
+# language : ru-ru
+# date create : 05.04.2026
+LOGIN_GUEST_WELCOME
+	Show user profile: %s
+HELLO_TEXT
+	Hello %s, this is start frase!
+LOGOUT_TEXT_TIME
+	Time logout is: %s.
+LOGOUT_TEXT
+	Diar %s, You is exit from project. Have a nice day!
+LOGIN_GUEST_WELCOME
+	This is welcome message
+LOGIN_GUEST_NEED_AUTH
+	 You need auth.
+LOGIN_GUEST_ALSO_AUTH
+	 You also auth.
+
+
+TOP_PROJECTS_DAMOONY
+	Damoony
+TOP_PROJECTS_ASPTOUR
+	Asptour
+TOP_SKINS_LIGHT
+	Light
+TOP_SKINS_DARK
+	Dark
+TOP_SKINS_LIGHT_COMMENT
+	
+TOP_SKINS_DARK_COMMENT
+	
+TOP_LOGIN_PROFILE
+	%s
+TOP_LOGIN_SETTINGS
+	Настройки
+TOP_LOGIN_LOGOUT
+	Выход
+TOP_PROJECTS_DAMOONY_COMMENT
+	<a href="%s">login</a>
+		<a href="%s">football<span>Футбольный менеджер, возьми команду и приведи её к успеху!</span></a>
+		<a href="%s">visuo</a>
+TOP_LOGIN_PROFILE_COMMENT
+	
+TOP_LOGIN_SETTINGS_COMMENT
+	
+TOP_LOGIN_LOGOUT_COMMENT
+	
+TOP_LOGIN_LOGIN
+	Login
+TOP_LOGIN_REGISTRATION
+	Registration
+TOP_LOGIN_LOGIN_COMMENT
+	Авторизация
+TOP_LOGIN_REGISTRATION_COMMENT
+	Регистрация
+TOP_LANGUAGES_RUS
+	Russian
+TOP_LANGUAGES_ENG
+	English
+TOP_LANGUAGES_CHINA
+	Chinese
+TOP_LANGUAGES_RUS_COMMENT
+	
+TOP_LANGUAGES_ENG_COMMENT
+	
+TOP_LANGUAGES_CHINA_COMMENT
+
+TOP_NAVIGATE_LOGIN
+	Login
+TOP_NAVIGATE_REGISTRATION
+	Registration
+TOP_NAVIGATE_LOGIN_COMMENT
+	
+TOP_NAVIGATE_REGISTRATION_COMMENT
+	

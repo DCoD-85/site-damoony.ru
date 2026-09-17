@@ -1,0 +1,21 @@
+﻿
+=== SPRINT-5 CLEANUP 2026-09-17 23:27 ===
+BLOCK-A (удалено):
+  - www\mediaall\images\image1.png
+  - www\mediaall\images\image2.png
+  - www\mediaall\images\image3.png
+  - www\mediaall\images\image4.png
+  - www\media\release\default\images\Bitmap image.bmp
+
+BLOCK-B (в _archive\):
+  - sources\other\                              → _archive\sources-other
+  - sources\modules\                            → _archive\sources-modules
+  - sources\db\dbcheck.php                      → _archive\dbcheck-old-db-version.php
+  - sources\db\db_mysqli copy.php               → _archive\db_mysqli-class1.php
+  - sources\visuo\...\visuopage copy.php        → _archive\visuopage-class22.php
+  - www\media\js\scripts\fb — копия.js          → _archive\fb-2023.js
+  - www\media\js\scripts\old\                   → _archive\js-old
+
+BACKUP: _backup_2026-09-17\ (полный слепок до уборки)
+2026-09-17 23:38 BLOCK-7.1: удалено 14 пустых папок
+2026-09-17 23:39 BLOCK-7.2: site-map.txt → _audit\_site-map-old.txt

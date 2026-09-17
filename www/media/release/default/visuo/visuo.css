@@ -1,0 +1,51 @@
+
+/* FORM */
+/* INPUT :: SELECT :: reset :: button */
+input[ type=text ] ,
+input[ type=password ] ,
+input[ type=file ] ,
+input[ type=button ] , 
+input[ type=submit ] , 
+input[ type=reset ] , 
+input[ type=number ] , 
+input[ type=date ] , 
+input[ type=time ] , 
+input[ type=datetime ] , 
+input[ type=datetime-local ] , 
+input[ type=range ] , 
+select ,
+textarea {
+	box-sizing : border-box ;
+	font-family : 'Exo 2.0' , 'Exo 2' , 'Roboto' , 'Caviar Dreams' , 'Fira Sans' , 'Philosopher' , 'Source Sans Pro' , 'Microsoft YaHei UI Light' , 'Helvetica' , 'Arial' , 'sans-serif' , 'Tahoma' , 'segoe UI' ;
+	font-size : 16px ;
+	font-weight : 300 ;
+	padding : 4px 5px ;
+	color : #666 ;
+	border : solid #DDD 0px ;
+	border-radius : 0px ; 
+	width : 100%;
+}
+input[ type=button ] , 
+input[ type=submit ] , 
+input[ type=reset ] { cursor : pointer ; }
+
+input[ type=checkbox ] ,
+input[ type=radio ] { box-sizing : border-box ; margin : 0px 0px 0px 0px ; padding : 0px ; border : none ; height : 30px ; width : 30px ; }
+input[ type=checkbox ]:checked ,
+input[ type=radio ]:checked { box-sizing : border-box ; margin : 0px 0px 0px 15px ; padding : 0px ; border : none ; }
+
+
+input:focus ,
+textarea:focus { color : #000 ; } 
+
+textarea { line-height : 1.2em ; height : 6.0em ; }
+select { padding : 4px 1px ; }
+textarea:focus ,
+select:focus ,
+input:focus {
+	outline : solid #9CF 5px ;
+	outline-radius : 5px ;
+	outline : none ;
+}
+input[type=button]:disabled { background : #EEE ! important ; color : #CCC ! important ; }
+input[type=button]:disabled:hover { background : #EEE ! important ; }

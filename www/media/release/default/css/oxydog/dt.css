@@ -1,0 +1,86 @@
+
+.dt_left .menuleft { margin : 10px 0px ; padding : 10px ; background : ; border-radius : 5px ; }
+.dt_left .menuleft .menulink_between { display : none ; }
+.dt_left .menuleft .menulink { position : relative ; }
+.dt_left .menuleft .menulink.link_text { }
+.dt_left .menuleft .menulink.link_link { }
+.dt_left .menuleft .menulink.link_popup { }
+
+.dt_left .menuleft .menulink .span_text { display : block ; color : #666 ; }
+.dt_left .menuleft .menulink .span_text a { display : block ; padding : 5px ; color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_left .menuleft .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_left .menuleft .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_left .menuleft .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_left .menuleft .menulink:last-child .span_text a { border-bottom : none ; }
+.dt_left .menuleft .menulink:last-child .span_text a:hover { border-bottom : none ; }
+
+.dt_left .menuleft .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_left .menuleft .menulink:hover .span_comment { display : block ; }
+.dt_left .menuleft .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_left .menuleft .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+
+.dt_right .menuright { margin : 10px 0px ; padding : 10px ; background : #EEE ; border-radius : 5px ; }
+.dt_right .menuright .menulink_between { display : none ; }
+.dt_right .menuright .menulink { position : relative ; }
+.dt_right .menuright .menulink.link_text { }
+.dt_right .menuright .menulink.link_link { }
+.dt_right .menuright .menulink.link_popup { }
+
+.dt_right .menuright .menulink .span_text { display : block ; color : #666 ; }
+.dt_right .menuright .menulink .span_text a { display : block ; padding : 5px ; color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_right .menuright .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_right .menuright .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menuright .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menuright .menulink:last-child .span_text a { border-bottom : none ; }
+.dt_right .menuright .menulink:last-child .span_text a:hover { border-bottom : none ; }
+
+.dt_right .menuright .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_right .menuright .menulink:hover .span_comment { display : block ; }
+.dt_right .menuright .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_right .menuright .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+html.guest { }
+
+html.guest .block { margin : 10px 0px ; padding : 0px ; background : #EEE ; border-radius : 5px ; }
+html.guest .block .header { font-weight : 600 ; padding : 15px 15px 5px 15px ; color : #666 ; }
+html.guest .block .block_head { font-weight : 600 ; padding : 15px 15px 5px 15px ; color : #666 ; border-bottom : dashed #CCC 1px ; }
+html.guest .block .block_body { padding : 10px ; }
+html.guest .block .body { padding : 10px 10px ; }
+html.guest .block .body .row { padding : 10px 10px ; border-top : solid #DDD 1px ; }
+html.guest .block .body .row:hover { background : #BBB ; color : #FFF ; }
+html.guest .block .body .row:first-child:hover { background : #BBB ; border : none ; border-radius : 5px 5px 0px 0px ; }
+html.guest .block .body .row:last-child:hover { background : #BBB ; border-radius : 0px 0px 5px 5px ; }
+html.guest .block .body .empty { background : #CCC ; text-align : center ; }
+
+
+html.logged { }
+
+html.logged .block { margin : 10px 0px ; padding : 0px ; background : #EEE ; border-radius : 5px ; }
+html.logged .block .header { font-weight : 600 ; padding : 15px 15px 5px 15px ; color : #666 ; }
+html.logged .block .block_head { font-weight : 600 ; padding : 15px 15px 5px 15px ; color : #666 ; border-bottom : dashed #CCC 1px ; }
+html.logged .block .block_body { padding : 10px ; }
+html.logged .block .body { padding : 10px 10px ; }
+html.logged .block .body .row { padding : 10px 10px ; border-top : solid #DDD 1px ; }
+html.logged .block .body .row:hover { background : #BBB ; color : #FFF ; }
+html.logged .block .body .row:first-child:hover { background : #BBB ; border : none ; border-radius : 5px 5px 0px 0px ; }
+html.logged .block .body .row:last-child:hover { background : #BBB ; border-radius : 0px 0px 5px 5px ; }
+html.logged .block .body .empty { background : #CCC ; text-align : center ; }
+
+html.logged .block .block_body .visuotable .tfoot .row .col.colelsinline .col-inside { display : flex ; padding : 20px 10px 10px 10px ; border-top : solid #CCC 1px ; }
+html.logged .block .block_body .visuotable .tfoot .row .col.colelsinline .col-inside .el { padding : 0px ; }
+
+html.logged .block.avatar { background : #FFF ; }
+html.logged .block.avatar .block_head { }
+html.logged .block.avatar .block_body { padding : 20px ; }
+html.logged .block.avatar .block_body img { border : solid #FFF 5px ; border-radius : 3px ; }
+
+html.logged .block.settings_notice_block_notice { background : #FFF ; }
+html.logged .block.settings_notice_block_notice .block_head { }
+html.logged .block.settings_notice_block_notice .block_body form .ttype .row { }
+html.logged .block.settings_notice_block_notice .block_body form .ttype .row .col { }
+html.logged .block.settings_notice_block_notice .block_body form .tfoot .row .col .col-inside { border : none ! important ; }
+
+

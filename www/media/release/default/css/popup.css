@@ -1,0 +1,62 @@
+/*
+
+*/
+/* load */
+.tb_preload { display : none ; }
+.tb_preload .div { position : fixed ; z-index : 10000 ; top : 0px ; right : 0px ; bottom : 0px ; left : 0px ; background : url( '/media/img/loading/loading0.png' ) center no-repeat ; opacity : 0.7 ; }
+
+.popupload { display : none ; }
+/* active */
+.popupload.active { display : grid ; justify-content : center ; align-items : center ; position : fixed ; z-index : 2000 ; left : 0px ; top : 0px ; right : 0px ; height : 100% ; overflow : auto ; }
+.popupload.active .bg-nav { display : flex ; align-items : center ; position : fixed ; z-index : 2001 ; left : 0px ; top : 0px ; right : 0px ; bottom : 0px ; background : #333 ; opacity : 0.5 ; }
+/* back */
+
+.popupload.active .bg-nav.back .pos { display : grid ; height : 100% ; width : 100% ; }
+.popupload.active .bg-nav.back .pos:hover { background : #369 ; }
+.popupload.active .bg-nav.back .left { display : none ; }
+.popupload.active .bg-nav.back .close { width : 100% ; }
+.popupload.active .bg-nav.back .right { display : none ; }
+/* navigate */
+.popupload.active .bg-nav.navigate .pos { display : grid ; height : 100% ; width : 50% ; }
+.popupload.active .bg-nav.navigate .pos:hover { background : #369 ; }
+.popupload.active .bg-nav.navigate .left { width : 50% ; }
+.popupload.active .bg-nav.navigate .close { display : none ; }
+.popupload.active .bg-nav.navigate .right { width : 50% ; }
+/* backnavigate */
+.popupload.active .bg-nav.backnavigate .pos { display : grid ; height : 100% ; width : 50% ; }
+.popupload.active .bg-nav.backnavigate .pos:hover { background : #369 ; }
+.popupload.active .bg-nav.backnavigate .left { width : 25% ; }
+.popupload.active .bg-nav.backnavigate .close { width : 50% ; }
+.popupload.active .bg-nav.backnavigate .right { width : 25% ; }
+
+/*
+.popupload.active .bg-nav .pos { display : grid ; height : 100% ; width : 50% ; }
+.popupload.active .bg-nav .pos:hover { background : #369 ; }
+.popupload.active .bg-nav .left { display : none ; }
+.popupload.active .bg-nav .close { width : 100% ; }
+.popupload.active .bg-nav .right { display : none ; }
+*/
+
+.popupload.active .result {  margin : 50px 0px ; z-index : 2002 ; }
+
+.popupload.active .loadcontent {  margin : 0px 0px ; background : #FFF ; border-radius : 5px ; }
+.popupload.active .loadcontent .loadbox { width : 600px ; }
+
+.popupload.active .loadcontent .boxm { padding : 0px ; }
+
+.popupload.active .loadcontent .boxm .loadbox { display : grid ; grid-template-columns: 200px auto ; width : 800px ; }
+.popupload.active .loadcontent .boxm .loadbox .boxmdisplay { margin : 10px 0px 10px 10px; background : #DDD ; border-radius : 5px; }
+.popupload.active .loadcontent .boxm .loadbox .boxmdisplay span { display : block ; margin : 10px ; }
+.popupload.active .loadcontent .boxm .loadbox .boxmdisplay span a { color : #666 ; }
+.popupload.active .loadcontent .boxm .loadbox .boxmdisplay span a:hover { color : #333 ; }
+.popupload.active .loadcontent .boxm .loadbox .boxmrow { margin : 10px ; display : grid ; justify-content : center ; align-items : center ; height : 100px ; background : #CCC ; border-radius : 5px ; }
+
+/* navigate */
+
+.popupload.active.close .bg-nav .left { display : none ; }
+.popupload.active.close .bg-nav .close { display : initial ; }
+.popupload.active.close .bg-nav .right { display : none ; }
+
+.popupload.active.navigate .bg-nav .left { display : initial ; }
+.popupload.active.navigate .bg-nav .close { display : initial ; }
+.popupload.active.navigate .bg-nav .right { display : initial ; }
