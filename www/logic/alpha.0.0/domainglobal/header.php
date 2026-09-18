@@ -15,8 +15,8 @@ class domainglobal_header {
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
 		
-		$lang = in_array( $url_base[ 0 ] , [ 'ru-ru' , 'en-en' ] );
-		$lang_cookie = in_array( $_COOKIE[ 'lang' ] , [ 'ru-ru' , 'en-en' ] );
+		$lang = in_array( $url_base[ 0 ] , [ 'ru-ru' , 'en-en' , 'tests' ] );
+		$lang_cookie = in_array( $_COOKIE[ 'lang' ] , [ 'ru-ru' , 'en-en' , 'tests' ] );
 		
 		if( $lang ){
 			$lang = $url_base[ 0 ];

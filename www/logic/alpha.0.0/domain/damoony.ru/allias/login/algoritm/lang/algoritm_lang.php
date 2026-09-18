@@ -4,41 +4,20 @@ namespace damoony\login;
 
 class algoritm_lang
 	extends \algoritm_ {
-	# vars
-	public null|\algoritmdata_ $algoritmdata = null;
-	public \visuotag $vt;
-	public array $args = [ ];
 	
-	# methods
-	public function __construct( \main $main , array $args = [ ] ) {
-		$this->main = $main;
-		$this->args = $args;
-		$this->algoritm = $main->algoritm;
-		$this->algoritmdata = new \algoritmdata_( );
-	}
+	# --- page settings ---
+	public array $available = [ '' , 'index' , 'form' , 'login' , 'logout' , 'redirect' , 'profile' , 'agreement' , 'registration' ];
+	public bool  $auth      = false;
+	public bool  $search    = true;
 	
-	public function args ( array $args ) {
-		$this->args = $args;
-	}
-	
-	public function algoritm ( ) {
-	}
-
-	public function release ( ) {		
-		$main = $this->algoritm->main;
-		if( $main->user->is_guest( ) ){
-			$this->algoritmdata->set( );
-		} else {
-			$this->algoritmdata->set( );
-		}
-
-		$this->algoritmdata->set( [ '' , 'index' , 'form' , 'login' , 'logout' , 'redirect' , 'profile' , 'agreement' , 'registration' ] , false , true , $main->library->url->static_base[ 1 ] == '' ? true : false );
-		
-		# release
+	# --- release: dynamic default, so custom set ---
+	public function release ( ) {
+		$default = $this->main->library->url->static_base[ 1 ] == '' ? true : false;
+		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
 		$this->release_( $this );
-
 	}
 	
+	# --- default: redirect to form ---
 	public function default ( ) {
 		$main = $this->algoritm->main;
 		$visuorelease = $main->visuorelease;
@@ -59,7 +38,6 @@ class algoritm_lang
 		http_response_code( 307 );
 		header( 'Location: ' . $href );
 	}
-	
 }
 
 ?>

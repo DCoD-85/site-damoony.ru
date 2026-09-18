@@ -9,7 +9,7 @@ class algoritm
 	public \algoritmlogic $logic;
 	
 	# path and classes
-	public array $available = [ 'index' , '([a-z]{2}-[a-z]{2})|lang' ];
+	public array $available = [ 'index' , '([a-z]{2}-[a-z]{2})|lang' , 'tests' ];
 	public bool $search = true;
 	public bool $default = false;
 	public bool $auth = false;
@@ -71,7 +71,7 @@ class algoritm
 	}
 	
 	public function release ( ) {
-		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' ] , false , true , true );
+		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' , 'tests' ] , false , true , true );
 		
 		# 
 		$this->release_( $this );

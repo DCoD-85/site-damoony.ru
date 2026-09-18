@@ -1,14 +1,15 @@
 <?PHP
 
 class algoritm_ {
-	# vars
+	# --- core references ---
 	public main $main;
-	
+
 	public \damoony\www\algoritm|\damoony\login\algoritm|\damoony\oxydog\algoritm $algoritm;
 	public array $args = [ ];
 	public null|algoritmdata_ $algoritmdata = null;
 	public string $path = '';
 
+	# --- routing paths and classes ---
 	public string $path_class = 'algoritm';
 	public string $class = 'algoritm';
 	public array $algoritm_classes = [ ];
@@ -20,24 +21,83 @@ class algoritm_ {
 	public string $authclass = '';
 	public int $count_pages = 0;
 
-	protected function construct ( main $main , array $args = [ ] ) {
+	# --- page settings (override in child) ---
+	public array $available = [ '' ];
+	public bool  $auth      = false;
+	public bool  $search    = true;
+	public bool  $default   = false;
+
+	# ===============================================================
+	#   CONSTRUCTOR - unified for all children
+	# ===============================================================
+	public function __construct ( main $main , array $args = [ ] ) {
 		$this->main = $main;
 		$this->args = $args;
-		/*
-		if( ! empty( $args ) ){
-			if( isset( $args[ 'base' ] ) ){
-				$this->basepath = $args[ 'base' ][ 'basepath' ];
-				$this->baseclass = $args[ 'base' ][ 'baseclass' ];
-				$this->errorpath = $args[ 'base' ][ 'errorpath' ];
-				$this->errorclass = $args[ 'base' ][ 'errorclass' ];
-				$this->authpath = $args[ 'base' ][ 'authpath' ];
-				$this->authclass = $args[ 'base' ][ 'authclass' ];
-			}
-		}
-		*/
+		$this->algoritm = $main->algoritm;
 		$this->algoritmdata = new algoritmdata_( );
 	}
 
+	public function args ( array $args ) {
+		$this->args = $args;
+	}
+
+	# ===============================================================
+	#   RELEASE FRAMEWORK
+	# ===============================================================
+	public function release () {
+		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
+		$this->release_( $this );
+	}
+
+	# ===============================================================
+	#   HELPERS
+	# ===============================================================
+	public function is_ajax ()    : bool { return (bool) $this->main->render->getdata( 'render_ajax' ); }
+	public function is_guest ()   : bool { return $this->main->user->is_guest( ); }
+	public function is_post ()    : bool { return ! empty( $_POST ); }
+	public function is_default () : bool { return $this->main->library->url->static_base[ 2 ] == ''; }
+
+	# ===============================================================
+	#   ROUTING FRAMEWORK - default -> ajax -> role
+	# ===============================================================
+	public function default () {
+		if ( $this->is_ajax() ) return $this->ajax();
+		return $this->role();
+	}
+	public function ajax () {
+		if ( $this->is_guest() ) return $this->ajax_guest();
+		return $this->ajax_logged();
+	}
+	public function role () {
+		if ( $this->is_guest() ) return $this->guest();
+		return $this->logged();
+	}
+
+	# ===============================================================
+	#   STUBS - override in children
+	# ===============================================================
+	public function algoritm ()    { }
+	public function guest ()       { return false; }
+	public function logged ()      { return false; }
+	public function ajax_guest ()  { return false; }
+	public function ajax_logged () { return false; }
+
+	# ===============================================================
+	#   ERROR ALIAS
+	# ===============================================================
+	public function error () {
+		return $this->error_( $this );
+	}
+
+	# ===============================================================
+	#   ROUTING HOOK - empty, override in child for debug
+	# ===============================================================
+	public function on_route ( string $class , string $path ) {
+	}
+
+	# ===============================================================
+	#   SERVICE METHODS
+	# ===============================================================
 	public function clear ( ) {
 		$url = $this->main->library->url( );
 		$url->init( );
@@ -46,9 +106,12 @@ class algoritm_ {
 	public function debug ( ) {
 	}
 
+	# ===============================================================
+	#   ROUTING - DO NOT TOUCH
+	# ===============================================================
 	public function include_ext ( object $object , array $available , bool $search = false , bool $default = false ){
 		$main = $this->main;
-		
+
 		$library = $main->library;
 		$link = $library->link( );
 		$url = $library->url( );
@@ -56,30 +119,25 @@ class algoritm_ {
 		$url_allias = $url->static_allias;
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
-		
+
 		$static_domain = $main->main_settings->domain_accepted( false );
 		$static_allias = $url->static_allias[ 1 ];
 
 		$in_array = false;
 		$args = [ ];
-		
+
 		$url_base_pos = count( explode( '_' , get_class( $object ) ) ) - 1;
 		$url_base_real = $url_base;
 
-		
 		if( $search === true ){
-			# print 'count $available: ' . count( $available ) . '<br />';
 			if( ! empty( $available ) ){
 				foreach( $available as $key=>$value ){
-					# print '<div># ' . $value . '</div>';
-					# print 'available value: ' . $value . '<br />';
 					$mbstr = mb_strpos( $value , '|' );
 					if( $mbstr ){
 						$base = explode( '|' , $value );
 						mb_ereg( '^' . $base[ 0 ] . '$' , $url_base_real[ $url_base_pos ] , $matches );
 
 						if( ! empty( $matches ) ){
-							# print $value . '<br />';
 							$args[ $matches[ 1 ] ] = $matches[ 2 ];
 							$url_base_real[ $url_base_pos ] = $base[ 1 ];
 							$available[ $key ] = $base[ 1 ];
@@ -88,34 +146,21 @@ class algoritm_ {
 					} else if( $value === $url_base_real[ $url_base_pos ] ) break;
 				}
 			}
-		} else {
-			// 
 		}
 
 		$in_array = in_array( $url_base_real[ $url_base_pos ] , $available ) ? $url_base_real[ $url_base_pos ] : false ;
-		
+
 		$this->main->algoritm->basepath .= $url_base_real[ $url_base_pos ] . DS;
 		$this->main->algoritm->baseclass .= '_' . $url_base_real[ $url_base_pos ];
-		
+
 		$class = $this->main->algoritm->baseclass;
 		$path = $this->main->algoritm->basepath . $class . '.php';
 		$class = '\\' . $static_domain . '\\' . $static_allias . '\\' . $class;
 
-		# print 'this: ' . get_class( $this ) . '<br />';
-		# print (int)$search . '<br />';
-		# print 'in_array: ' . $in_array . '<br />';
-		# print 'base real: ' . $url_base_real[ $url_base_pos ] . '<br />';
-		# print '<div>[ debug ] available: ' . implode( ' | ' , $available ) . '</div>';
-		# print '<div>[ debug ] base path: ' . $path . '</div>';
-		# print 'object: ' . get_class( $object ) . '<br />';
-		# print '<div>base class: ' . $class . '</div>';
+		$this->on_route( $class , $path );
 
 		if( $in_array && include_once $path ){
-			
-			# print '<div>[ debug ] class exists: ' . (int)class_exists( $class ) . '</div>';
-
 			if( class_exists( $class ) ){
-				
 				$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
 				if( $this->algoritm_classes[ $url_base_pos ]->logged == false
 					|| ( $this->algoritm_classes[ $url_base_pos ]->logged == true && $main->user->is_guest( ) == false )
@@ -130,51 +175,34 @@ class algoritm_ {
 				print '<div>' . gettype( $this->algoritm_classes[ $url_base_pos - 1 ] ) . '</div>';
 				$this->algoritm_classes[ $url_base_pos - 1 ]->release( );
 			}
-			
 		} else {
-			# print 'gettype: ' . (int)$in_array . ' - ' . gettype( $in_array ) . ' - ' . gettype( $object->algoritmdata->default ) . ' - ' . (int)$object->algoritmdata->default . '<br />';
-
-			if( ( is_string( $in_array ) ) && $object->algoritmdata->default === true ){
-				$object->default( ) ? true : $this->error_( $object );
-			} else if( ( is_null( $in_array ) ) && $object->algoritmdata->default === true ){
+			if( ( $in_array === '' || is_null( $in_array ) ) && $object->algoritmdata->default === true ){
 				$object->default( ) ? true : $this->error_( $object );
 			} else {
 				$class = $this->main->algoritm->errorclass;
-				
+
 				$path = $this->main->algoritm->errorpath . $class . '.php';
+				$class = '\\' . $static_domain . '\\' . $static_allias . '\\' . $class;
 
 				( include_once $path ) or error_file( $path , __FILE__ , __LINE__ );
-				
+
 				$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
 				$this->algoritm_classes[ $url_base_pos ]->algoritm( );
 				$this->algoritm_classes[ $url_base_pos ]->release( );
 			}
 		}
 	}
-	
-	public function release_ ( object $object ){
-		if( $object->algoritmdata == null ){
-			# $object->algoritmdata = new algoritmdata_( );
-		} else {
-		}
 
+	public function release_ ( object $object ){
 		$available = $object->algoritmdata->available;
 		$auth = $object->algoritmdata->auth;
 		$search = $object->algoritmdata->search;
 		$default = $object->algoritmdata->default;
 
-		# print '<div>
-		# 	<div>class: ' . get_class( $object ) . '</div>
-		# 	<div>available: ' . implode( ' , ' , $available ) . '</div>
-		# 	<div>auth: ' . (int)$auth . '</div>
-		# 	<div>search: ' . (int)$search . '</div>
-		# 	<div>default: ' . (int)$default . '</div>
-		# </div>';
-		
 		if( $auth ){
 			$auth = $this->auth( );
 		} else $auth = true;
-		
+
 		if( $auth ){
 			if( ! $search && $default ){
 				$object->default( ) ? true : $this->error_( $object );
@@ -191,20 +219,17 @@ class algoritm_ {
 
 		$domain = $main->main_settings->domain_accepted( false );
 		$allias = $main->main_settings->allias_accepted( );
-		
+
 		if( $main->user->is_guest( ) == false ){
 			return true;
 		}
-		
+
 		$class = $this->algoritm->authclass;
 		$path = $this->algoritm->authpath . $class . '.php';
-		$class = '\\' . $domain . '\\' . $allias . '\\' . $class;		
-		
-		# print 'error path: ' . $path . '<br />';
-		# print 'error class: ' . $class . '<br />';
+		$class = '\\' . $domain . '\\' . $allias . '\\' . $class;
 
 		( include_once $path ) or error_file( $path , __FILE__ , __LINE__ );
-		
+
 		$url_base_pos = 0;
 
 		$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
@@ -224,15 +249,13 @@ class algoritm_ {
 		$center = $main->alliasglobal->center;
 		$right = $main->alliasglobal->right;
 		$bottom = $main->alliasglobal->bottom;
-		
+
 		$class = $this->main->algoritm->errorclass;
 		$path = $this->main->algoritm->errorpath . $class . '.php';
-		$class = '\\' . $domain . '\\' . $allias . '\\' . $class;		
-		# print 'error path: ' . $path . '<br />';
-		# print 'error class: ' . $class . '<br />';
+		$class = '\\' . $domain . '\\' . $allias . '\\' . $class;
 
 		( include_once $path ) or error_file( $path , __FILE__ , __LINE__ );
-		
+
 		$center->visuotag( )->clear( );
 
 		$url_base_pos = 0;
