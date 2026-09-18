@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 class visuometa {
 ### vars
 public null|visuorelease $visuorelease = null;

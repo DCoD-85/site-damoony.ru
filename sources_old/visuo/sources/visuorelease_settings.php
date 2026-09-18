@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 
 class visuorelease_settings {
 # vars

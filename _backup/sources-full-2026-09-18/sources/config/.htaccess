@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /~adminhelp3/
+
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)$ index.php2?error=404 [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.*)$ index.php?error=404 [L]

@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 # --- script information --- #
 # script name: /main.php
 # created : 10.09.2025

@@ -1,4 +1,4 @@
-﻿<?PHP
+<?PHP
 
 class visuorelease {
 public null|main $main = null;
