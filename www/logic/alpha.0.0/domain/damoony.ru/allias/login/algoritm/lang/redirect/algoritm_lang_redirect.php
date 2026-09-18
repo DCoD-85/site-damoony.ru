@@ -49,7 +49,7 @@ class algoritm_lang_login
 		$main = $this->algoritm->main;
 		$visuorelease = $main->visuorelease;
 		
-		$var = $main->core->var;
+		$var = $main->library->vars;
 		$library = $main->library;
 		$vars = $library->vars;
 		$link = $library->link( );
