@@ -36,13 +36,16 @@ class log {
 	# --- render for debug panel ---
 	public function as_tag ( ) : \visuotag {
 		$vt = new \visuotag( );
-		
+	
+        if ( empty( $this->rows ) ) return $vt;   // ← явно: нечего рендерить
+
 		foreach ( $this->rows as $row ) {
 			$vt->append( $row->as_tag( ) );
 		}
 		
 		return $vt;
 	}
+
 	# --- alias (old code) ---
 	public function astag ( ) : \visuotag {
 		return $this->as_tag( );
