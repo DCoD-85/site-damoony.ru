@@ -21,3 +21,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Configs with secrets
+secure/*.config
+secure/*.xml
+secure/*.inc

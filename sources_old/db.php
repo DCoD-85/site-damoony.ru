@@ -18,7 +18,7 @@ class db {
 		$this->db_config = new db_config( $this );
 		$dbData = [ ];
 		// Путь к настройкам Базы Данных
-		$path = __DIR__ . DS . 'config' . DS . 'db-test.xml.inc';
+		$path = dirname( __DIR__ ) . DS . 'secure' . DS . 'db.config';
 		if( ! is_file( $path ) ) error_file( $path , __FILE__ , __LINE__ 	);
 		else {
 			$dom = simplexml_load_file( $path );
