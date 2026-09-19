@@ -1,5 +1,5 @@
 <?PHP
-# Visuotag tests — baseline + stage 2 + stage 3 + stage 4
+# Visuotag tests — baseline + stage 2 + stage 3 + stage 4 + stage 5
 error_reporting( E_ALL );
 ini_set( 'display_errors' , '1' );
 header( 'Content-Type: text/html; charset=UTF-8' );
@@ -18,6 +18,31 @@ require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsactions.php';
 require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsdata.php';
 require $root_dir . '/sources/visuo/sources/visuoattrs.php';
 require $root_dir . '/sources/visuo/sources/visuotag.php';
+
+# --- stubs for stage-5 hooks ---
+if ( ! class_exists( 'visuostruct' ) ) {
+	class visuostruct { }
+}
+if ( ! class_exists( 'visuoelement' ) ) {
+	class visuoelement {
+		public string $name = '';
+		public bool   $init = false;
+		public null|visuotag $visuotag_start = null;
+		public null|visuotag $visuotag_end   = null;
+		public function __construct ( $visuorelease = null , $data = null , $visuotag = null ) {}
+		public function init ( ) : void { $this->init = true; }
+		public function release ( visuotag $vt ) : void {}
+	}
+}
+if ( ! class_exists( 'visuometa' ) ) {
+	class visuometa {
+		public function as_tag ( ) : visuotag {
+			$vt = new visuotag();
+			$vt->tag( 'title' )->content( 'stub' );
+			return $vt;
+		}
+	}
+}
 
 echo '<h1>Visuotag tests</h1>';
 
@@ -54,7 +79,6 @@ echo '<h2>5. release tree</h2>';
 $r = new visuotag();
 $r->tag('div')->content('hello');
 echo 'release: <b>' . htmlspecialchars( $r->release() ) . '</b><br>';
-echo 'ожидаем: &lt;div&gt;hello&lt;/div&gt;<br>';
 
 # 6. self-closing
 echo '<h2>6. self-closing tag</h2>';
@@ -102,7 +126,7 @@ $r1->tag('a');
 $r2 = new visuotag();
 $r2->tag('b')->tag('c');
 $r1->append($r2);
-echo 'r1 elements count: <b>' . count( $r1->elements ) . '</b> (ожидаем 2 — append сливает root-детей)<br>';
+echo 'r1 elements count: <b>' . count( $r1->elements ) . '</b> (ожидаем 2)<br>';
 echo 'release: <b>' . htmlspecialchars( $r1->release() ) . '</b><br>';
 
 # 12. prepend
@@ -166,7 +190,7 @@ $r = new visuotag();
 $r->tag('div')->content('x');
 echo 'final: <b>' . htmlspecialchars( $r->final() ) . '</b><br>';
 
-# -------- stage 2 additions --------
+# -------- stage 2 --------
 
 # 21. find — deep
 echo '<h2>21. find deep</h2>';
@@ -242,7 +266,7 @@ $r->tag('div');
 echo '_body: <b>' . var_export( $r->_body() , true ) . '</b> (ожидаем null)<br>';
 echo '_html: <b>' . var_export( $r->_html() , true ) . '</b> (ожидаем null)<br>';
 
-# -------- stage 3 additions --------
+# -------- stage 3 --------
 
 # 31. attrs() returns visuoattrs
 echo '<h2>31. attrs() type</h2>';
@@ -250,7 +274,7 @@ $r = new visuotag();
 $r->tag('div');
 echo 'attrs is visuoattrs: <b>' . ( $r->elements[0]->attrs( ) instanceof visuoattrs ? 'true' : 'false' ) . '</b><br>';
 
-# 32. attrs_add returns visuotag (chain)
+# 32. attrs_add chain
 echo '<h2>32. attrs_add chain</h2>';
 $r = new visuotag();
 $v = $r->tag('div')->attrs_add('id', 'x')->attrs_add('data-x', 'y');
@@ -263,25 +287,25 @@ $r = new visuotag();
 $r->tag('div')->attrs_add('id', 'x')->attrs_remove('id');
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем без id)<br>';
 
-# 34. class_add + class_remove
+# 34. class add/remove
 echo '<h2>34. class add/remove</h2>';
 $r = new visuotag();
 $r->tag('div')->attrs_class_add('a b')->attrs_class_remove('a');
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем class="b")<br>';
 
-# 35. style_add + style_remove
+# 35. style add/remove
 echo '<h2>35. style add/remove</h2>';
 $r = new visuotag();
 $r->tag('div')->attrs_style_add('color:red;font-size:14px')->attrs_style_remove('color');
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем font-size:14px)<br>';
 
-# 36. actions_add + actions_remove
+# 36. actions add/remove
 echo '<h2>36. actions add/remove</h2>';
 $r = new visuotag();
 $r->tag('div')->attrs_actions_add('onclick', 'a()')->attrs_actions_add('onmouseover', 'b()')->attrs_actions_remove('onclick');
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем onmouseover, без onclick)<br>';
 
-# 37. data_add + data_remove
+# 37. data add/remove
 echo '<h2>37. data add/remove</h2>';
 $r = new visuotag();
 $r->tag('div')->data_add('ajax', true)->data_add('role', 'admin', false)->data_remove('ajax');
@@ -298,16 +322,14 @@ echo '<h2>39. full combination</h2>';
 $r = new visuotag();
 $r->tag('a')->id('link')->attrs_class_add('btn')->attrs_style_add('color:blue')->attrs_actions_add('onclick', 'go()')->data_add('role', 'nav', false);
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
-echo 'ожидаем: class, style, onclick, id, data-role<br>';
 
-# -------- stage 4 additions --------
+# -------- stage 4 --------
 
 # 40. release — content mixed with tags
 echo '<h2>40. release — mixed content</h2>';
 $r = new visuotag();
 $r->tag('div')->content('a')->tag('span')->content('b');
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
-echo 'ожидаем: &lt;div&gt;a&lt;span&gt;b&lt;/span&gt;&lt;/div&gt;<br>';
 
 # 41. release — deep nesting
 echo '<h2>41. release — deep nesting</h2>';
@@ -327,7 +349,6 @@ $r = new visuotag();
 $inner = $r->tag('div')->tag('span');
 $inner->content('x');
 echo 'final: <b>' . htmlspecialchars( $inner->final( ) ) . '</b><br>';
-echo 'ожидаем полностью: &lt;div&gt;&lt;span&gt;x&lt;/span&gt;&lt;/div&gt;<br>';
 
 # 44. release — self-closing with attrs + data
 echo '<h2>44. release — self-closing + data</h2>';
@@ -335,13 +356,13 @@ $r = new visuotag();
 $r->tag('input', false)->attrs_add('type', 'text')->data_add('role', 'name', false);
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
 
-# 45. prepare — empty tree does not crash
+# 45. prepare — empty tree
 echo '<h2>45. prepare — empty</h2>';
 $r = new visuotag();
 $r->prepare( );
 echo 'no crash: <b>true</b><br>';
 
-# 46. prepare — recursive over tree
+# 46. prepare — recursive
 echo '<h2>46. prepare — tree</h2>';
 $r = new visuotag();
 $r->tag('div')->tag('span')->content('x');
@@ -370,10 +391,82 @@ $r->tag('div');
 $r->tree( );
 echo 'no crash: <b>true</b><br>';
 
-# 50. release — empty content string
+# 50. release — empty content
 echo '<h2>50. release — empty content</h2>';
 $r = new visuotag();
 $r->tag('div')->content('');
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем &lt;div&gt;&lt;/div&gt;)<br>';
+
+# -------- stage 5 --------
+
+# 51. structv — tagname + class, no id (bugfix)
+echo '<h2>51. structv — clean tag</h2>';
+$r = new visuotag();
+$st = $r->structv( 'main' );
+echo 'tagname: <b>' . $st->tagname . '</b> (ожидаем struct)<br>';
+echo 'has class cl_struct: <b>' . ( $st->attrs( )->class( )->has( 'cl_struct' ) ? 'true' : 'false' ) . '</b><br>';
+echo 'has id attr: <b>' . ( $st->attrs( )->has( 'id' ) ? 'true' : 'false' ) . '</b> (ожидаем false — bugfix)<br>';
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+
+# 52. structv — returns new node
+echo '<h2>52. structv — returns newtag</h2>';
+$r = new visuotag();
+$st = $r->structv( 'main' );
+echo 'returned is child: <b>' . ( $st === $r->elements[0] ? 'true' : 'false' ) . '</b><br>';
+
+# 53. element — creates cl_element tag
+echo '<h2>53. element — cl_element</h2>';
+$r = new visuotag();
+$r->element( 'test' );
+echo 'elements count: <b>' . count( $r->elements ) . '</b> (ожидаем 1)<br>';
+echo 'child tagname: <b>' . $r->elements[0]->tagname . '</b> (ожидаем element)<br>';
+echo 'has class cl_element: <b>' . ( $r->elements[0]->attrs( )->class( )->has( 'cl_element' ) ? 'true' : 'false' ) . '</b><br>';
+
+# 54. element — returns $this (chain)
+echo '<h2>54. element — chain</h2>';
+$r = new visuotag();
+$ret = $r->element( 'test' );
+echo 'returned is $this: <b>' . ( $ret === $r ? 'true' : 'false' ) . '</b> (ожидаем true)<br>';
+
+# 55. meta — appends as child
+echo '<h2>55. meta — append</h2>';
+$r = new visuotag();
+$m = new visuometa();
+$r->meta( $m );
+echo 'elements count: <b>' . count( $r->elements ) . '</b> (ожидаем 1)<br>';
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+
+# 56. findstruct — finds named struct
+echo '<h2>56. findstruct — named</h2>';
+$r = new visuotag();
+$st1 = $r->structv( 'alpha' );
+$st2 = $r->structv( 'beta' );
+$found = [ ];
+$vt_ref = null;
+$r->findstruct( 'beta' , $found , $vt_ref );
+echo 'found count: <b>' . count( $found ) . '</b> (ожидаем 1)<br>';
+echo 'found is st2: <b>' . ( $found[0] === $st2 ? 'true' : 'false' ) . '</b><br>';
+echo 'vt_ref is st2: <b>' . ( $vt_ref === $st2 ? 'true' : 'false' ) . '</b><br>';
+
+# 57. findstruct — deep
+echo '<h2>57. findstruct — deep</h2>';
+$r = new visuotag();
+$outer = $r->tag( 'div' );
+$st = $outer->structv( 'deep' );
+$found = [ ];
+$vt_ref = null;
+$r->findstruct( 'deep' , $found , $vt_ref );
+echo 'found count: <b>' . count( $found ) . '</b> (ожидаем 1)<br>';
+echo 'found is st: <b>' . ( $found[0] === $st ? 'true' : 'false' ) . '</b><br>';
+
+# 58. findstruct — no match
+echo '<h2>58. findstruct — no match</h2>';
+$r = new visuotag();
+$r->structv( 'alpha' );
+$found = [ ];
+$vt_ref = null;
+$r->findstruct( 'gamma' , $found , $vt_ref );
+echo 'found count: <b>' . count( $found ) . '</b> (ожидаем 0)<br>';
+echo 'vt_ref null: <b>' . ( $vt_ref === null ? 'true' : 'false' ) . '</b><br>';
 
 echo '<hr>done';

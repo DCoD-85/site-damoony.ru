@@ -79,30 +79,40 @@ class visuotag {
 		return $return ? $newtag : $target;
 	}
 
-	public function structv ( string $visuostruct_name , null|visuostruct $visuostruct = null ) {
-		$newtag = $this->tag( 'struct' , true , true , class: 'cl_struct' );
+	# ------------------------------------------------------------
+	#  Hooks: struct / element / meta
+	# ------------------------------------------------------------
+
+	# Создать узел-заглушку для структуры (visuostruct).
+	# Возвращает новый узел — дальнейшая настройка через ->visuostruct_name.
+	public function structv ( string $visuostruct_name , null|visuostruct $visuostruct = null ) : visuotag {
+		$newtag = $this->tag( 'struct' , true , class: 'cl_struct' );
 		$newtag->visuostruct_name = $visuostruct_name;
-		$newtag->visuostruct = $visuostruct;
-
-		$return_new_tag = true;
-
-		return $return_new_tag == true ? $newtag : $this;
+		$newtag->visuostruct      = $visuostruct;
+		return $newtag;
 	}
 
-	public function element ( string $visuoelement_name , null|visuoelement $visuoelement = null , bool $init = false ) {
+	# Создать узел-заглушку для элемента (visuoelement).
+	# Возвращает $this — цепочка продолжается на текущем узле.
+	public function element ( string $visuoelement_name , null|visuoelement $visuoelement = null , bool $init = false ) : visuotag {
 		$newtag = $this->tag( 'element' , true , class: 'cl_element' );
 
 		$visuoelement = $visuoelement ?: new visuoelement( $this->visuorelease , null );
 		$visuoelement->name = $visuoelement_name;
-		if( $init === true ) $visuoelement->init( );
+		if ( $init === true ) $visuoelement->init( );
 		$newtag->visuoelement = $visuoelement;
 
-		$return_new_tag = false;
-
-		return $return_new_tag == true ? $newtag : $this;
+		return $this;
 	}
 
-	public function struct_set ( string $visuostruct_name , visuostruct $visuostruct ) {
+	# Добавить meta как поддерево
+	public function meta ( visuometa $visuometa ) : visuotag {
+		$this->append( $visuometa->as_tag( ) );
+		return $this;
+	}
+
+	# Найти структуру по имени и привязать visuostruct
+	public function struct_set ( string $visuostruct_name , visuostruct $visuostruct ) : visuotag {
 		$return = [ ];
 		$vt = new visuotag( $this->visuorelease , null , 'root' , true );
 		$this->root( )->findstruct( $visuostruct_name , $return , $vt );
@@ -111,10 +121,34 @@ class visuotag {
 		return $this;
 	}
 
-	public function meta ( visuometa $visuometa ){
-		$this->append( $visuometa->as_tag( ) );
-		return $this;
+	# Рекурсивный поиск struct-узлов по имени.
+	# Возвращает через $return массив найденных узлов и через $vt — последний найденный.
+	public function findstruct ( string $structname , array &$return = [] , null|visuotag &$vt = null ) : void {
+		# log
+		if ( $this->visuorelease ) {
+			$this->visuorelease->visuolog->add( 'Поиск структуры: ' . $structname , __METHOD__ , __FILE__ , __LINE__ );
+		}
+
+		foreach ( $this->elements as $v ) {
+			if ( ! is_object( $v ) ) continue;
+
+			# именованный struct: совпало — сохраняем
+			if ( $v->visuostruct_name !== null && $v->visuostruct_name !== '' ) {
+				if ( $v->visuostruct_name === $structname ) {
+					$return[ ] = $v;
+					$vt = $v;
+				}
+				continue;
+			}
+
+			# без имени — идём глубже
+			$v->findstruct( $structname , $return , $vt );
+		}
 	}
+
+	# ------------------------------------------------------------
+	#  Tree / children
+	# ------------------------------------------------------------
 
 	public function clear ( ) : visuotag {
 		$this->elements = [ ];
@@ -172,7 +206,10 @@ class visuotag {
 		}
 	}
 
-	# --- attrs ---
+	# ------------------------------------------------------------
+	#  Attrs
+	# ------------------------------------------------------------
+
 	public function attrs ( ) : visuoattrs {
 		return $this->attrs;
 	}
@@ -209,7 +246,10 @@ class visuotag {
 		return $this;
 	}
 
-	# --- data ---
+	# ------------------------------------------------------------
+	#  Data
+	# ------------------------------------------------------------
+
 	public function data ( ) : visuoattrsdata {
 		return $this->attrs( )->data( );
 	}
@@ -222,7 +262,10 @@ class visuotag {
 		return $this;
 	}
 
-	# --- shortcuts ---
+	# ------------------------------------------------------------
+	#  Shortcuts
+	# ------------------------------------------------------------
+
 	public function id ( string $value ) : visuotag {
 		return $this->attrs_add( 'id' , $value );
 	}
@@ -328,33 +371,6 @@ class visuotag {
 	# find tag (from root, descending)
 	public function _html ( ) : null|visuotag { return $this->root( )->find( 'html' ); }
 	public function _body ( ) : null|visuotag { return $this->root( )->find( 'body' ); }
-
-	# поиск структуры
-	# TODO: relies on $v->getstruct() which does not exist yet;
-	#       used only by struct_set() which has no external callers.
-	#       Revisit when refactoring visuostruct (stage 5).
-	public function findstruct ( string $structname , array &$return = [] , null|visuotag &$vt = null ){
-		# log
-		if( $this->visuorelease ) $this->visuorelease->visuolog->add( 'Поиск структуры: ' . $structname , __METHOD__ , __FILE__ , __LINE__ );
-		#
-		if( ! is_object( $this ) ) return false;
-		$elements = $this->elements;
-		if( ! empty( $elements ) ){
-			foreach( $elements as $k=>$v ){
-				if( is_object( $v ) ){
-					if( $v->visuostruct_name == '' ){
-						$v->getstruct( $structname , $return , $vt );
-					}
-					else if( $v->visuostruct_name != '' ){
-						if( $v->visuostruct_name == $structname ){
-							$return[ ] = $v;
-							$vt = $v;
-						}
-					}
-				}
-			}
-		}
-	}
 
 	public function tree ( ) : void {
 		# return $this->root( )->releasetree( true );
@@ -482,14 +498,11 @@ class visuotag {
 
 		foreach ( $elements as $v ) {
 			if ( is_object( $v ) ) {
-				if ( $v->visuostruct_name == '' ) {
+				if ( $v->visuostruct_name === null || $v->visuostruct_name === '' ) {
 					$html .= $v->releasetree( $tree , $count + 1 );
 				} elseif ( $v->visuostruct !== null ) {
 					# skip — struct-узлы не отображаются отдельно
-				} elseif ( $v->visuostruct_name !== null ) {
-					# TODO: $v->type / $v->name не существуют в visuotag.
-					#       Ветка недостижима, пока visuostruct_name не устанавливается
-					#       (только через structv()). Пересмотреть на этапе 5.
+				} else {
 					$html .= $tag_before . $tmp_tag_before . '[ ' . $v->tagname . ( $v->tag_closed ? '' : ' /' ) . ' ][ struct: ' . $v->visuostruct_name . ' ]' . '<br />';
 				}
 			} else {
