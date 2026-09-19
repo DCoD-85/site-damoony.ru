@@ -133,18 +133,7 @@ class algoritm_lang_form
 		$center = $main->alliasglobal->center;
 		$right = $main->alliasglobal->right;
 		
-		$db = $main->db->db( );
-		$query = $db->query( );
-		$query->droptable( 'testingtable' );
 		
-		$query = $db->query( );
-		$query->createtable( 'testingtable' , [
-			'`id` int( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT' ,
-			'`status` enum( \'activated\' , \'unactivated\' ) NOT NULL DEFAULT \'activated\'' ,
-			# "`created_timestamp` timestamp NOT NULL DEFAULT current_timestamp( ) COMMENT 'Дата создания'" ,
-			# "`created_users_id` int( 10 ) UNSIGNED NOT NULL COMMENT 'Автор'"
-		] );
-		# print $db->log( );
 
 		$inputlogin_login = new \visuoelement( $main->visuorelease );
 		$inputlogin_login->input( )->text( );
