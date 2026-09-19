@@ -134,7 +134,6 @@ class algoritm_lang_form
 		$right = $main->alliasglobal->right;
 		
 		$db = $main->db;
-		echo '<h2>1. CREATE</h2>';
 		$db->schema( )->drop( 'testusers' )->run( );
 		$db->schema( )->create(
 			table: 'testusers' ,
@@ -149,7 +148,6 @@ class algoritm_lang_form
 			primary: 'id' ,
 			indexes: [ [ 'name'=>'idx_email' , 'columns'=>[ 'email' ] , 'unique'=>true ] ] ,
 		)->run( );
-		echo 'ok<br>';
 
 		$inputlogin_login = new \visuoelement( $main->visuorelease );
 		$inputlogin_login->input( )->text( );
