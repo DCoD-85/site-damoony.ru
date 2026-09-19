@@ -14,7 +14,7 @@ class main {
 	# basevars
 	# source
 	public null|render $render = null;
-	public user $user;
+	public null|user $user = null;
 	public blacklist $blacklist;
 	public vardump $vardump;
 	public log $log;
@@ -156,6 +156,16 @@ class main {
 	private function main_error( string $title , string $message ){
 		die( '<! doctype><html><head><title>' . $title . '</title><head><body><div>' . $message . '</div></body></html>' );
 	} 
+
+	# --- guard: is user a guest? (works even if user module is disabled) ---
+	public function is_guest ( ) : bool {
+		return $this->user === null ? true : $this->user->is_guest( );
+	}
+	
+	# --- guard: is user authorized? ---
+	public function is_auth ( ) : bool {
+		return ! $this->is_guest( );
+	}
 }
 
 # class path

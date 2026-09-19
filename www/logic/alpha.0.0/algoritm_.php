@@ -53,7 +53,7 @@ class algoritm_ {
 	#   HELPERS
 	# ===============================================================
 	public function is_ajax ()    : bool { return (bool) $this->main->render->getdata( 'render_ajax' ); }
-	public function is_guest ()   : bool { return $this->main->user->is_guest( ); }
+	public function is_guest ()   : bool { return $this->main->is_guest( ); }
 	public function is_post ()    : bool { return ! empty( $_POST ); }
 	public function is_default () : bool { return $this->main->library->url->static_base[ 2 ] == ''; }
 
@@ -163,7 +163,7 @@ class algoritm_ {
 			if( class_exists( $class ) ){
 				$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
 				if( $this->algoritm_classes[ $url_base_pos ]->logged == false
-					|| ( $this->algoritm_classes[ $url_base_pos ]->logged == true && $main->user->is_guest( ) == false )
+					|| ( $this->algoritm_classes[ $url_base_pos ]->logged == true && $main->is_guest( ) == false )
 				){
 					$this->algoritm_classes[ $url_base_pos ]->algoritm( );
 					$this->algoritm_classes[ $url_base_pos ]->release( );
@@ -172,7 +172,6 @@ class algoritm_ {
 				}
 			} else {
 				http_response_code( 403 );
-				print '<div>' . gettype( $this->algoritm_classes[ $url_base_pos - 1 ] ) . '</div>';
 				$this->algoritm_classes[ $url_base_pos - 1 ]->release( );
 			}
 		} else {
@@ -220,7 +219,7 @@ class algoritm_ {
 		$domain = $main->main_settings->domain_accepted( false );
 		$allias = $main->main_settings->allias_accepted( );
 
-		if( $main->user->is_guest( ) == false ){
+		if( $main->is_guest( ) == false ){
 			return true;
 		}
 
