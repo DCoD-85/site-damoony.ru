@@ -1,179 +1,152 @@
-<?php
+<?PHP
 
-/*
-    ---
-    ---
-    ---
-*/
+# ------------------------------------------------------------
+#  visuostruct_ajax — структура AJAX-ответа
+#  Собирает JSON: { error, address, layers: { header, top, left, center, right, bottom } }
+# ------------------------------------------------------------
 
 class visuostruct_ajax {
-	# vars
+	# --- refs ---
 	public null|visuostruct $visuostruct = null;
 
+	# --- state ---
 	public bool $error = false;
+
+	# --- layers ---
 	public null|visuostruct_ajax_address $address = null;
-	public null|visuostruct_ajax_header $header = null;
-	public null|visuostruct_ajax_top $top = null;
-	public null|visuostruct_ajax_left $left = null;
-	public null|visuostruct_ajax_center $center = null;
-	public null|visuostruct_ajax_right $right = null;
-	public null|visuostruct_ajax_bottom $bottom = null;
-	# methods
-	public function __construct ( visuostruct $visuostruct ) {
+	public null|visuostruct_ajax_header  $header  = null;
+	public null|visuostruct_ajax_top     $top     = null;
+	public null|visuostruct_ajax_left    $left    = null;
+	public null|visuostruct_ajax_center  $center  = null;
+	public null|visuostruct_ajax_right   $right   = null;
+	public null|visuostruct_ajax_bottom  $bottom  = null;
+
+	# --- methods ---
+	public function __construct ( null|visuostruct $visuostruct = null ) {
 		$this->visuostruct = $visuostruct;
 	}
-	public function address ( ) {
-		return $this->address = is_null( $this->address ) ? new visuostruct_ajax_address( $this ) : $this->address;
-	}
-	public function header ( ) {
-		return $this->header = is_null( $this->header ) ? new visuostruct_ajax_header( $this ) : $this->header;
-	}
-	public function top ( ) {
-		return is_null( $this->top ) ? $this->top = new visuostruct_ajax_top( $this ) : $this->top;
-	}
-	public function left ( ) {
-		return is_null( $this->left ) ? $this->left = new visuostruct_ajax_left( $this ) : $this->left;
-	}
-	public function center ( ) {
-		return is_null( $this->center ) ? $this->center = new visuostruct_ajax_center( $this ) : $this->center;
-	}
-	public function right ( ) {
-		return is_null( $this->right ) ? $this->right = new visuostruct_ajax_right( $this ) : $this->right;
-	}
-	public function bottom ( ) {
-		return $this->bottom = is_null( $this->bottom ) ? new visuostruct_ajax_bottom( $this ) : $this->bottom;
-	}
 
-	public function as_json ( ) {
-		$structs = [ ];
-		$structs[ 'error' ] = $this->error;
-		$structs[ 'address' ] = $this->address ? $this->address->release( ) : null;
-		$structs[ 'layers' ] = [ ];
-		$structs[ 'layers' ][ 'header' ] = $this->header ? $this->header->release( ) : null;
-		$structs[ 'layers' ][ 'top' ] = $this->top ? $this->top->release( ) : null;
-		$structs[ 'layers' ][ 'left' ] = $this->left ? $this->left->release( ) : null;
-		$structs[ 'layers' ][ 'center' ] = $this->center ? $this->center->release( ) : null;
-		$structs[ 'layers' ][ 'right' ] = $this->right ? $this->right->release( ) : null;
-		$structs[ 'layers' ][ 'bottom' ] = $this->bottom ? $this->bottom->release( ) : null;
+	public function address ( ) : visuostruct_ajax_address { return $this->address ??= new visuostruct_ajax_address( $this ); }
+	public function header  ( ) : visuostruct_ajax_header  { return $this->header  ??= new visuostruct_ajax_header ( $this ); }
+	public function top     ( ) : visuostruct_ajax_top     { return $this->top     ??= new visuostruct_ajax_top    ( $this ); }
+	public function left    ( ) : visuostruct_ajax_left    { return $this->left    ??= new visuostruct_ajax_left   ( $this ); }
+	public function center  ( ) : visuostruct_ajax_center  { return $this->center  ??= new visuostruct_ajax_center ( $this ); }
+	public function right   ( ) : visuostruct_ajax_right   { return $this->right   ??= new visuostruct_ajax_right  ( $this ); }
+	public function bottom  ( ) : visuostruct_ajax_bottom  { return $this->bottom  ??= new visuostruct_ajax_bottom ( $this ); }
 
-		return json_encode( $structs );
+	public function as_json ( ) : string {
+		$structs = [
+			'error'   => $this->error ,
+			'address' => $this->address?->release( ) ,
+			'layers'  => [
+				'header' => $this->header?->release( ) ,
+				'top'    => $this->top?->release( ) ,
+				'left'   => $this->left?->release( ) ,
+				'center' => $this->center?->release( ) ,
+				'right'  => $this->right?->release( ) ,
+				'bottom' => $this->bottom?->release( ) ,
+			] ,
+		];
+
+		$json = json_encode( $structs , JSON_UNESCAPED_UNICODE );
+		return $json === false ? '{}' : $json;
 	}
 }
 
-# 
-class visuostruct_ajax_address {
-	# vars
-	public visuostruct $visuostruct;
-	public visuostruct_ajax $visuostruct_ajax;
-	public null|string $address = null;
-	# methods
+# ------------------------------------------------------------
+#  Base для всех ajax-элементов
+# ------------------------------------------------------------
+
+abstract class visuostruct_ajax_element {
+	# --- refs ---
+	public null|visuostruct      $visuostruct      = null;
+	public null|visuostruct_ajax $visuostruct_ajax = null;
+
+	# --- methods ---
 	public function __construct ( visuostruct_ajax $visuostruct_ajax ) {
 		$this->visuostruct_ajax = $visuostruct_ajax;
-		$this->visuostruct = $visuostruct_ajax->visuostruct;
+		$this->visuostruct      = $visuostruct_ajax->visuostruct;
 	}
-	public function set ( null|string $address ) {
+}
+
+# ------------------------------------------------------------
+#  address — URL текущей страницы
+# ------------------------------------------------------------
+
+class visuostruct_ajax_address extends visuostruct_ajax_element {
+	# --- state ---
+	public null|string $address = null;
+
+	public function set ( null|string $address ) : void {
 		$this->address = $address;
 	}
-	public function astag ( ) {
+
+	public function astag ( ) : null|string {
 		return $this->address;
 	}
-	public function release ( ) {
+
+	public function release ( ) : null|string {
 		return $this->address;
 	}
 }
 
-# 
-class visuostruct_ajax_header {
-	# vars
-	public visuostruct $visuostruct;
-	public visuostruct_ajax $visuostruct_ajax;
+# ------------------------------------------------------------
+#  header — html без layer-обёртки
+# ------------------------------------------------------------
+
+class visuostruct_ajax_header extends visuostruct_ajax_element {
+	# --- state ---
 	public null|visuotag $visuotag = null;
-	# methods
-	public function __construct ( visuostruct_ajax $visuostruct_ajax ) {
-		$this->visuostruct_ajax = $visuostruct_ajax;
-		$this->visuostruct = $visuostruct_ajax->visuostruct;
-	}
-	public function set ( null|visuotag $visuotag ) {
+
+	public function set ( null|visuotag $visuotag ) : void {
 		$this->visuotag = $visuotag;
 	}
-	public function astag ( ) {
+
+	public function astag ( ) : null|visuotag {
 		return $this->visuotag;
 	}
-	public function release ( ) {
-		return ! is_null( $this->visuotag ) ? $this->visuotag->root( )->release( ) : null;
+
+	public function release ( ) : null|string {
+		return $this->visuotag?->root( )->release( );
 	}
 }
 
-# 
-class visuostruct_ajax_top {
-	# vars
-	public visuostruct $visuostruct;
-	public visuostruct_ajax $visuostruct_ajax;
+# ------------------------------------------------------------
+#  Базовый слой: visuotag + layer-метка
+# ------------------------------------------------------------
+
+abstract class visuostruct_ajax_layer extends visuostruct_ajax_element {
+	# --- state ---
 	public null|visuotag $visuotag = null;
-	# methods
-	public function __construct ( visuostruct_ajax $visuostruct_ajax ) {
-		$this->visuostruct_ajax = $visuostruct_ajax;
-		$this->visuostruct = $visuostruct_ajax->visuostruct;
-	}
-	public function set ( null|visuotag $visuotag ) {
+
+	# имя слоя в DOM (dt_top, dt_left, ...)
+	abstract public function layer ( ) : string;
+
+	public function set ( null|visuotag $visuotag ) : void {
 		$this->visuotag = $visuotag;
 	}
-	public function astag ( ) {
+
+	public function astag ( ) : null|visuotag {
 		return $this->visuotag;
 	}
-	public function release ( ) {
-		return ! is_null( $this->visuotag )
-			? [ 'layer'=>'dt_top' , 'html'=>$this->visuotag->root( )->release( ) ]
-			: null;
+
+	public function release ( ) : null|array {
+		if ( $this->visuotag === null ) return null;
+		return [
+			'layer' => $this->layer( ) ,
+			'html'  => $this->visuotag->root( )->release( ) ,
+		];
 	}
 }
 
-# 
-class visuostruct_ajax_center {
-	# vars
-	public visuostruct $visuostruct;
-	public visuostruct_ajax $visuostruct_ajax;
-	public null|visuotag $visuotag = null;
-	# methods
-	public function __construct ( visuostruct_ajax $visuostruct_ajax ) {
-		$this->visuostruct_ajax = $visuostruct_ajax;
-		$this->visuostruct = $visuostruct_ajax->visuostruct;
-	}
-	public function set ( null|visuotag $visuotag ) {
-		$this->visuotag = $visuotag;
-	}
-	public function astag ( ) {
-		return $this->visuotag;
-	}
-	public function release ( ) {
-		return ! is_null( $this->visuotag )
-			? [ 'layer'=>'dt_center' , 'html'=>$this->visuotag->root( )->release( ) ]
-			: null;
-	}
-}
+# ------------------------------------------------------------
+#  Слои (top, left, center, right, bottom)
+# ------------------------------------------------------------
 
-# 
-class visuostruct_ajax_bottom {
-	# vars
-	public visuostruct $visuostruct;
-	public visuostruct_ajax $visuostruct_ajax;
-	public null|visuotag $visuotag = null;
-	# methods
-	public function __construct ( visuostruct_ajax $visuostruct_ajax ) {
-		$this->visuostruct_ajax = $visuostruct_ajax;
-		$this->visuostruct = $visuostruct_ajax->visuostruct;
-	}
-	public function set ( null|visuotag $visuotag ) {
-		$this->visuotag = $visuotag;
-	}
-	public function astag ( ) {
-		return $this->visuotag;
-	}
-	public function release ( ) {
-		return ! is_null( $this->visuotag )
-			? [ 'layer'=>'dt_bottom' , 'html'=>$this->visuotag->root( )->release( ) ]
-			: null;
-	}
-}
+class visuostruct_ajax_top    extends visuostruct_ajax_layer { public function layer ( ) : string { return 'dt_top';    } }
+class visuostruct_ajax_left   extends visuostruct_ajax_layer { public function layer ( ) : string { return 'dt_left';   } }
+class visuostruct_ajax_center extends visuostruct_ajax_layer { public function layer ( ) : string { return 'dt_center'; } }
+class visuostruct_ajax_right  extends visuostruct_ajax_layer { public function layer ( ) : string { return 'dt_right';  } }
+class visuostruct_ajax_bottom extends visuostruct_ajax_layer { public function layer ( ) : string { return 'dt_bottom'; } }
 
 ?>
