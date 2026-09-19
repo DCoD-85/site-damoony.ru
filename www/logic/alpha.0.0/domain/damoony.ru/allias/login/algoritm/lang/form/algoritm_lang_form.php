@@ -133,7 +133,23 @@ class algoritm_lang_form
 		$center = $main->alliasglobal->center;
 		$right = $main->alliasglobal->right;
 		
-		
+		$db = $main->db;
+		echo '<h2>1. CREATE</h2>';
+		$db->schema( )->drop( 'testusers' )->run( );
+		$db->schema( )->create(
+			table: 'testusers' ,
+			columns: [
+				col( name: 'id'     , type: 'int'    , unsigned: true , auto: true , nullable: false ) ,
+				col( name: 'login'  , type: 'string' , length: 64 , nullable: false ) ,
+				col( name: 'email'  , type: 'string' , length: 128 , nullable: false ) ,
+				col( name: 'role'   , type: 'enum'   , values: [ 'user' , 'admin' ] , default: 'user' ) ,
+				col( name: 'bio'    , type: 'text' ) ,
+				col( name: 'created', type: 'timestamp' , default: 'CURRENT_TIMESTAMP' ) ,
+			] ,
+			primary: 'id' ,
+			indexes: [ [ 'name'=>'idx_email' , 'columns'=>[ 'email' ] , 'unique'=>true ] ] ,
+		)->run( );
+		echo 'ok<br>';
 
 		$inputlogin_login = new \visuoelement( $main->visuorelease );
 		$inputlogin_login->input( )->text( );

@@ -13,6 +13,7 @@ class db_mysqli_query implements db_query_interface {
 	public string $query_type = '';             // SELECT / INSERT / UPDATE / DELETE / OTHER
 	
 	# --- result state ---
+	public bool $executed = false;
 	public null|\mysqli_stmt $stmt = null;
 	public null|\mysqli_result $result = null;
 	public int $affected_rows = 0;
@@ -71,17 +72,17 @@ class db_mysqli_query implements db_query_interface {
 	# ===============================================================
 	
 	# lazy execution: any result method triggers the query
-	private function execute ( ) : void {
-		if ( $this->stmt !== null || $this->last_error !== '' ) return;
+		private function execute ( ) : void {
+		if ( $this->executed ) return;
+		$this->executed = true;
 		
-		# 1. parse original SQL for %s/%d
+		# parse %s/%d → ?
 		[ $sql_prepared , $sql_types ] = $this->parse_sql( $this->sql );
 		$this->types = $sql_types;
 		
-		# 2. apply limit — modifies sql_prepared by reference, appends types and values
+		# limit only for SELECT/UPDATE/DELETE
 		$this->apply_limit( $sql_prepared );
 		
-		# 3. validate
 		$this->validate_types( );
 		$this->log_query = $this->build_log( $sql_prepared );
 		
@@ -91,20 +92,32 @@ class db_mysqli_query implements db_query_interface {
 			return;
 		}
 		
-		# prepare
+		# 1. no values → direct query (SHOW, CREATE, DROP, ALTER, simple SELECT)
+		if ( empty( $this->values ) ) {
+			$result = @$link->query( $sql_prepared );
+			if ( $result === false ) {
+				$this->last_error = $link->error;
+				return;
+			}
+			if ( $result instanceof \mysqli_result ) {
+				$this->result = $result;
+			} else {
+				$this->affected_rows = $link->affected_rows;
+				$this->insert_id = $link->insert_id;
+			}
+			return;
+		}
+		
+		# 2. with values → prepared statement
 		$stmt = @$link->prepare( $sql_prepared );
 		if ( $stmt === false ) {
 			$this->last_error = $link->error;
 			return;
 		}
 		
-		# bind params
-		if ( ! empty( $this->values ) ) {
-			$bind_string = $this->build_bind_string( );
-			$stmt->bind_param( $bind_string , ...$this->values );
-		}
+		$bind_string = $this->build_bind_string( );
+		$stmt->bind_param( $bind_string , ...$this->values );
 		
-		# execute
 		if ( ! $stmt->execute( ) ) {
 			$this->last_error = $stmt->error;
 			$stmt->close( );
@@ -115,10 +128,10 @@ class db_mysqli_query implements db_query_interface {
 		$this->affected_rows = $stmt->affected_rows;
 		$this->insert_id = $stmt->insert_id;
 		
-		# get result for SELECT
-		if ( $this->query_type === 'SELECT' ) {
-			$result = $stmt->get_result( );
-			if ( $result !== false ) $this->result = $result;
+		# take result for any query that returns rows
+		$result = $stmt->get_result( );
+		if ( $result !== false ) {
+			$this->result = $result;
 		}
 	}
 	
@@ -236,15 +249,28 @@ class db_mysqli_query implements db_query_interface {
 	
 	private function detect_type ( string $sql ) : string {
 		$trimmed = ltrim( $sql );
-		$upper = mb_strtoupper( mb_substr( $trimmed , 0 , 10 ) );
+		$upper = mb_strtoupper( mb_substr( $trimmed , 0 , 12 ) );
 		
-		if ( mb_strpos( $upper , 'SELECT' ) === 0 ) return 'SELECT';
-		if ( mb_strpos( $upper , 'INSERT' ) === 0 ) return 'INSERT';
-		if ( mb_strpos( $upper , 'UPDATE' ) === 0 ) return 'UPDATE';
-		if ( mb_strpos( $upper , 'DELETE' ) === 0 ) return 'DELETE';
-		if ( mb_strpos( $upper , 'CREATE' ) === 0 ) return 'CREATE';
-		if ( mb_strpos( $upper , 'DROP' )   === 0 ) return 'DROP';
-		if ( mb_strpos( $upper , 'ALTER' )  === 0 ) return 'ALTER';
+		# queries that return rows (treated like SELECT)
+		if ( mb_strpos( $upper , 'SELECT' )   === 0 ) return 'SELECT';
+		if ( mb_strpos( $upper , 'SHOW' )     === 0 ) return 'SHOW';
+		if ( mb_strpos( $upper , 'DESCRIBE' ) === 0 ) return 'SHOW';
+		if ( mb_strpos( $upper , 'DESC ' )    === 0 ) return 'SHOW';
+		if ( mb_strpos( $upper , 'EXPLAIN' )  === 0 ) return 'SHOW';
+		
+		# write queries
+		if ( mb_strpos( $upper , 'INSERT' )   === 0 ) return 'INSERT';
+		if ( mb_strpos( $upper , 'REPLACE' )  === 0 ) return 'INSERT';
+		if ( mb_strpos( $upper , 'UPDATE' )   === 0 ) return 'UPDATE';
+		if ( mb_strpos( $upper , 'DELETE' )   === 0 ) return 'DELETE';
+		
+		# DDL
+		if ( mb_strpos( $upper , 'CREATE' )   === 0 ) return 'CREATE';
+		if ( mb_strpos( $upper , 'DROP' )     === 0 ) return 'DROP';
+		if ( mb_strpos( $upper , 'ALTER' )    === 0 ) return 'ALTER';
+		if ( mb_strpos( $upper , 'TRUNCATE' ) === 0 ) return 'TRUNCATE';
+		if ( mb_strpos( $upper , 'RENAME' )   === 0 ) return 'ALTER';
+		
 		return 'OTHER';
 	}
 	
@@ -330,9 +356,9 @@ class db_mysqli_query implements db_query_interface {
 	#   LIMIT
 	# ===============================================================
 	
-		private function apply_limit ( string &$sql ) : void {
+	private function apply_limit ( string &$sql ) : void {
 		if ( $this->no_limit ) return;
-		if ( $this->query_type !== 'SELECT' && $this->query_type !== 'UPDATE' && $this->query_type !== 'DELETE' ) return;
+		if ( $this->query_type !== 'SELECT' ) return;		
 		if ( stripos( $sql , ' LIMIT ' ) !== false ) return;
 		
 		# one() - single row

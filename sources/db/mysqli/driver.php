@@ -39,12 +39,22 @@ class db_mysqli implements db_driver_interface {
 		
 		if ( $this->link !== null ) $this->close( );
 		
-		$this->link = @new \mysqli( $row->dbhost , $row->username , $row->password , $row->dbname );
-		
+		# PHP 8.3: mysqli throws by default - switch it off so we handle it manually
+		mysqli_report( MYSQLI_REPORT_OFF );
+
+		try {
+			$this->link = new \mysqli( $row->dbhost , $row->username , $row->password , $row->dbname );
+		} catch ( \Throwable $e ) {
+			$this->last_error = 'Connection failed: ' . $e->getMessage( );
+			$this->link = null;
+			error( 'DB connection failed' , $this->last_error , __FILE__ , __LINE__ );
+			return;
+		}
+
 		if ( $this->link->connect_errno ) {
 			$this->last_error = $this->link->connect_error;
-			error( 'DB connection failed' , $this->last_error , __FILE__ , __LINE__ );
 			$this->link = null;
+			error( 'DB connection failed' , $this->last_error , __FILE__ , __LINE__ );
 			return;
 		}
 		

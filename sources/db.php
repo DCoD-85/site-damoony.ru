@@ -93,6 +93,14 @@ class db {
 		return $this->driver->escape( $string );
 	}
 	
+    public function schema ( ) : db_schema {
+		if ( ! class_exists( 'db_schema' ) ) {
+			$path = __DIR__ . DS . 'db' . DS . 'schema.php';
+			( include_once $path ) or error_file( $path , __FILE__ , __LINE__ );
+		}
+		return new db_schema( $this );
+	}
+
 	# ===============================================================
 	#   NEW API
 	# ===============================================================
