@@ -49,7 +49,8 @@ class alliasglobal {
 		$this->left = new alliasglobal_left( $this );
 		$this->center = new alliasglobal_center( $this->main );
 		$this->right = new alliasglobal_right( $this );
-		$this->bottom = new alliasglobal_bottom( $this );	
+		$this->bottom = new alliasglobal_bottom( $this );
+
 	}
 
 	public function append ( object $object , string $name , array $vts , array $vtd ) {

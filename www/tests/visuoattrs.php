@@ -24,6 +24,7 @@ if ( ! class_exists( 'visuotag' ) ) {
 require $root . '/sources/visuo/sources/visuoattrs/visuoattrsclass.php';
 require $root . '/sources/visuo/sources/visuoattrs/visuoattrsstyle.php';
 require $root . '/sources/visuo/sources/visuoattrs/visuoattrsactions.php';
+require $root . '/sources/visuo/sources/visuoattrs/visuoattrsdata.php';
 require $root . '/sources/visuo/sources/visuoattrs.php';
 
 echo '<h1>Visuoattrs tests</h1>';
@@ -133,5 +134,23 @@ echo '<h2>15. Chainable</h2>';
 $a = new visuoattrs( $vt );
 $a->add( 'id' , 'x' )->class_add( 'y' )->style_add( 'z:1' )->actions_add( 'onclick' , 'q()' );
 echo 'release: <b>' . htmlspecialchars( $a->release( ) ) . '</b><br>';
+
+# 16. data через attrs
+echo '<h2>16. data через attrs</h2>';
+$a = new visuoattrs( $vt );
+$a->data_add( 'role' , 'admin' , false );
+$a->data_add( 'info' , [ 'x' => 1 ] );
+echo 'release: <b>' . htmlspecialchars( $a->release( ) ) . '</b><br>';
+echo 'ожидаем data-role="admin" data-info="{...}" в конце<br>';
+echo 'data get role: <b>' . htmlspecialchars( $a->data( )->get( 'role' ) ) . '</b> (ожидаем admin)<br>';
+
+# 17. data очищается clear()
+echo '<h2>17. data cleared by clear()</h2>';
+$a = new visuoattrs( $vt );
+$a->data_add( 'role' , 'admin' , false );
+$a->class_add( 'y' );
+$a->clear( );
+echo 'release: <b>' . htmlspecialchars( $a->release( ) ) . '</b> (ожидаем пусто)<br>';
+echo 'data has role: <b>' . ( $a->data( )->has( 'role' ) ? 'true' : 'false' ) . '</b> (ожидаем false)<br>';
 
 echo '<hr>done';

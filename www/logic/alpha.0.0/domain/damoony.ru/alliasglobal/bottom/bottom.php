@@ -35,6 +35,7 @@ class alliasglobal_bottom {
 		} else {
 			$this->algoritm( );
 		}
+
 	}
 
 	public function algoritm ( ) {
@@ -207,7 +208,9 @@ class alliasglobal_bottom {
 
 			$ve_input_submit = new \visuoelement( $this->visuorelease );
 			$ve_input_submit->input( )->submit( $ve_input_submit__data = new \visuoelement_input_submit__data( ) );
+			# здесь норм
 			$ve_input_submit__data->set( 'form[submit]' , 'Принять' );
+			# здесь прерывается работа сайта
 			$ve_input_cancel = new \visuoelement( $this->visuorelease );
 			$ve_input_cancel->input( )->button( $ve_input_cancel__data = new \visuoelement_input_button__data( ) );
 			$ve_input_cancel__data->set( 'form[cancel]' , 'Отказаться' );

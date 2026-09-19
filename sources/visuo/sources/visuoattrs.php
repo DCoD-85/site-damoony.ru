@@ -8,6 +8,7 @@ class visuoattrs {
 	private \visuoattrsclass   $class;
 	private \visuoattrsstyle   $style;
 	private \visuoattrsactions $actions;
+	private \visuoattrsdata $data;
 
 	# --- state ---
 	private array $elements = [ ];   # [ 'id' => 'x' , 'href' => '...' , ... ]
@@ -18,6 +19,7 @@ class visuoattrs {
 		$this->class    = new \visuoattrsclass( $this );
 		$this->style    = new \visuoattrsstyle( $this );
 		$this->actions  = new \visuoattrsactions( $this );
+		$this->data = new \visuoattrsdata( $this );
 	}
 
 	public function visuotag ( ) : null|\visuotag {
@@ -51,18 +53,20 @@ class visuoattrs {
 		return $this->elements;
 	}
 
-public function clear ( ) : visuoattrs {
-	$this->elements = [ ];
-	$this->class->clear( );
-	$this->style->clear( );
-	$this->actions->clear( );
-	return $this;
-}
+	public function clear ( ) : visuoattrs {
+		$this->elements = [ ];
+		$this->class->clear( );
+		$this->style->clear( );
+		$this->actions->clear( );
+		$this->data->clear( );
+		return $this;
+	}
 
 	# --- sub-classes accessors ---
 	public function class   ( ) : \visuoattrsclass   { return $this->class;   }
 	public function style   ( ) : \visuoattrsstyle   { return $this->style;   }
 	public function actions ( ) : \visuoattrsactions { return $this->actions; }
+	public function data ( ) : \visuoattrsdata { return $this->data; }
 
 	public function class_add    ( string $expr ) : visuoattrs { $this->class->add( $expr );    return $this; }
 	public function class_remove ( string $expr ) : visuoattrs { $this->class->remove( $expr ); return $this; }
@@ -70,7 +74,8 @@ public function clear ( ) : visuoattrs {
 	public function style_remove ( string $expr ) : visuoattrs { $this->style->remove( $expr ); return $this; }
 	public function actions_add    ( string $action , string $value ) : visuoattrs { $this->actions->add( $action , $value );    return $this; }
 	public function actions_remove ( string $action ) : visuoattrs { $this->actions->remove( $action ); return $this; }
-
+	public function data_add    ( string $name , null|bool|string|int|array $value , bool $to_json = true ) : visuoattrs { $this->data->add( $name , $value , $to_json ); return $this; }
+	public function data_remove ( string $name ) : visuoattrs { $this->data->remove( $name ); return $this; }
 	# --- release ---
 	# всё: generic + class + style + actions
 	public function release ( ) : string {
@@ -78,6 +83,7 @@ public function clear ( ) : visuoattrs {
 		$html .= $this->style->release( );
 		$html .= $this->actions->release( );
 		$html .= $this->attributes_release( );
+		$html .= $this->data->release( );
 		return $html;
 	}
 

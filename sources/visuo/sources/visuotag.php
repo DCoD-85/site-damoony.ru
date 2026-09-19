@@ -9,7 +9,6 @@ class visuotag {
 	public bool $root = false;
 	# vars .. [ attrs , data ]
 	public visuoattrs $attrs;
-	public visuodata $data;
 	public array $elements = [ ];
 	# vars [ tag | struct | element ]
 	# private null|visuotagdata $visuotagdata = null;
@@ -30,7 +29,6 @@ class visuotag {
 		$this->root = $visuotag === null ? true : false;
 
 		$this->attrs = new visuoattrs( $this );
-		$this->data = new visuodata( $this );
 	}
 	
 	public function visuorelease ( null|visuorelease $visuorelease ){
@@ -195,10 +193,11 @@ class visuotag {
 	# data
 	
 	public function data( ) {
-		return $this->data;
+		return $this->attrs( )->data( );
 	}
+
 	public function data_add ( string $data_name , null|bool|string|int|array $data_value , bool $data_tojson = true ) {
-		$this->data->add( $data_name , $data_value , $data_tojson );
+		$this->attrs( )->data_add( $data_name , $data_value , $data_tojson );
 		return $this;
 	}
 	
@@ -367,7 +366,6 @@ class visuotag {
 		$elements = $this->elements;
 		# attrs & data
 		$html_attrs = $this->attrs( )->release( );
-		$html_data = $this->data( )->release( );
 		
 		$tag_open = '<';
 		$tag_close = '>';
@@ -385,16 +383,16 @@ class visuotag {
 			}
 			else {
 				if( $this->visuostruct !== null ){
-					$html = $tag_open . $tagname . $html_attrs . $html_data . $tag_close . $html . $tag_open . '/' . $tagname . $tag_close;
+					$html = $tag_open . $tagname . $html_attrs . $tag_close . $html . $tag_open . '/' . $tagname . $tag_close;
 				}
 				else if( $this->visuoelement !== null ) {
 				} else {
-					$html = $tag_open . $tagname . $html_attrs . $html_data . $tag_close . $html . $tag_open . '/' . $tagname . $tag_close;
+					$html = $tag_open . $tagname . $html_attrs . $tag_close . $html . $tag_open . '/' . $tagname . $tag_close;
 				}
 			}
 		}
 		else {
-			$html =$tag_open . $tagname . $html_attrs . $html_data . ' /' . $tag_close;
+			$html =$tag_open . $tagname . $html_attrs . ' /' . $tag_close;
 		}
 		
 		return $html;
@@ -467,7 +465,7 @@ class visuotag {
 		$html_class = $this->attrs( )->class( )->release( false );
 		$html_style = $this->attrs( )->style( )->release( false );
 		$html_actions = $this->attrs( )->actions( )->release( false );
-		$html_data = $this->data->release( );
+		$html_data = $this->attrs( )->data( )->release( );
 		
 		$tmp_tag_before = '... ';
 		

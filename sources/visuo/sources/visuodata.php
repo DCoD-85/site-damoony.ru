@@ -1,74 +1,50 @@
 <?PHP
 
 class visuodata {
-	# --- refs ---
-	private null|\visuotag|\visuostruct $owner = null;
-
-	# --- state ---
-	private array $data = [ ];
-
-	# --- methods ---
-	public function __construct ( null|\visuotag|\visuostruct $owner = null ) {
-		$this->owner = $owner;
+	
+	private null|visuotag|visuostruct $struct = null;
+	public array $data = [ ];
+	public function __construct( null|visuotag|visuostruct $struct=null ){
+		$this->struct = $struct;
 	}
 
-	# --- data ---
-	public function add ( string $name , null|bool|string|int|array $value , bool $to_json = true ) : visuodata {
-		$this->data[ $name ] = [ 'value' => $value , 'json' => $to_json ];
-		return $this;
+	public function add( string $data_name , null|string|int|array $data_value , bool $data_tojson  = true ){
+		$data_json = $data_tojson ? $this->json_encode( $data_value ) : $data_value ;
+		
+		$this->data[ $data_name ] = [ $data_value , $data_tojson , $data_json ];
+		return $this->struct;
 	}
 
-	public function get ( string $name ) : mixed {
-		return array_key_exists( $name , $this->data )
-			? $this->data[ $name ][ 'value' ]
-			: null;
+	public function get( string $attr_name ){
+		return $this->data[ $attr_name ] ?? null;
 	}
-
-	public function has ( string $name ) : bool {
-		return array_key_exists( $name , $this->data );
-	}
-
-	public function remove ( string $name ) : visuodata {
-		unset( $this->data[ $name ] );
-		return $this;
-	}
-
-	public function clear ( ) : visuodata {
-		$this->data = [ ];
-		return $this;
-	}
-
-	public function all ( ) : array {
+	
+	public function json_encode( null|string|int|array $data ){
+		return str_replace( '"' , '&quot;' , json_encode( $data ) );
+	} 
+	public function json_decode( string $data ){
+		return json_decode( str_replace( '&quot;' , '"' , $data ) , true );
+	} 
+	
+	public function show( ){
+		$data = $this->data;
+		
 		return $this->data;
 	}
-
-	public function owner ( ) : null|\visuotag|\visuostruct {
-		return $this->owner;
+	public function prerelease( ){
 	}
-
-	# --- json helpers ---
-	public static function encode ( mixed $value ) : string {
-		$json = json_encode( $value , JSON_UNESCAPED_UNICODE );
-		return $json === false ? '' : $json;
-	}
-
-	public static function decode ( string $json ) : mixed {
-		return json_decode( $json , true );
-	}
-
-	# --- release ---
-	public function release ( ) : string {
-		if ( empty( $this->data ) ) return '';
-
+	public function release( ){
+		$data = $this->data;
 		$html = '';
-		foreach ( $this->data as $name => $entry ) {
-			$raw = $entry[ 'json' ]
-				? self::encode( $entry[ 'value' ] )
-				: (string) $entry[ 'value' ];
 
-			$html .= ' data-' . $name . '="' . htmlspecialchars( $raw , ENT_QUOTES ) . '"';
+		if( ! empty( $data ) ){
+			foreach( $data as $k=>$v ){
+				$html .= ' data-' . $k . '="' . $v[ 2 ] . '"';
+			}
 		}
 
 		return $html;
 	}
 }
+
+?>
