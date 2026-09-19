@@ -1,5 +1,5 @@
 <?PHP
-# Visuotag tests — baseline + stage 2 + stage 3
+# Visuotag tests — baseline + stage 2 + stage 3 + stage 4
 error_reporting( E_ALL );
 ini_set( 'display_errors' , '1' );
 header( 'Content-Type: text/html; charset=UTF-8' );
@@ -299,5 +299,81 @@ $r = new visuotag();
 $r->tag('a')->id('link')->attrs_class_add('btn')->attrs_style_add('color:blue')->attrs_actions_add('onclick', 'go()')->data_add('role', 'nav', false);
 echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
 echo 'ожидаем: class, style, onclick, id, data-role<br>';
+
+# -------- stage 4 additions --------
+
+# 40. release — content mixed with tags
+echo '<h2>40. release — mixed content</h2>';
+$r = new visuotag();
+$r->tag('div')->content('a')->tag('span')->content('b');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+echo 'ожидаем: &lt;div&gt;a&lt;span&gt;b&lt;/span&gt;&lt;/div&gt;<br>';
+
+# 41. release — deep nesting
+echo '<h2>41. release — deep nesting</h2>';
+$r = new visuotag();
+$r->tag('div')->tag('section')->tag('article')->tag('p')->content('deep');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+
+# 42. release — attrs on every level
+echo '<h2>42. release — attrs everywhere</h2>';
+$r = new visuotag();
+$r->tag('div')->id('a')->tag('span')->attrs_class_add('inner')->content('x');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+
+# 43. final — from nested node
+echo '<h2>43. final from nested</h2>';
+$r = new visuotag();
+$inner = $r->tag('div')->tag('span');
+$inner->content('x');
+echo 'final: <b>' . htmlspecialchars( $inner->final( ) ) . '</b><br>';
+echo 'ожидаем полностью: &lt;div&gt;&lt;span&gt;x&lt;/span&gt;&lt;/div&gt;<br>';
+
+# 44. release — self-closing with attrs + data
+echo '<h2>44. release — self-closing + data</h2>';
+$r = new visuotag();
+$r->tag('input', false)->attrs_add('type', 'text')->data_add('role', 'name', false);
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+
+# 45. prepare — empty tree does not crash
+echo '<h2>45. prepare — empty</h2>';
+$r = new visuotag();
+$r->prepare( );
+echo 'no crash: <b>true</b><br>';
+
+# 46. prepare — recursive over tree
+echo '<h2>46. prepare — tree</h2>';
+$r = new visuotag();
+$r->tag('div')->tag('span')->content('x');
+$r->prepare( );
+echo 'no crash: <b>true</b><br>';
+
+# 47. releasetree — simple tree
+echo '<h2>47. releasetree — simple</h2>';
+$r = new visuotag();
+$r->tag('div')->id('a')->content('x');
+$tree = $r->releasetree( );
+echo 'has debugtree_row: <b>' . ( strpos( $tree , 'debugtree_row' ) !== false ? 'true' : 'false' ) . '</b><br>';
+echo 'has content marker: <b>' . ( strpos( $tree , '[ content ]' ) !== false ? 'true' : 'false' ) . '</b><br>';
+
+# 48. releasetree — includes classname
+echo '<h2>48. releasetree — classname</h2>';
+$r = new visuotag();
+$r->tag('div');
+$tree = $r->releasetree( );
+echo 'has classname visuotag: <b>' . ( strpos( $tree , 'classname: visuotag' ) !== false ? 'true' : 'false' ) . '</b><br>';
+
+# 49. tree() no crash
+echo '<h2>49. tree()</h2>';
+$r = new visuotag();
+$r->tag('div');
+$r->tree( );
+echo 'no crash: <b>true</b><br>';
+
+# 50. release — empty content string
+echo '<h2>50. release — empty content</h2>';
+$r = new visuotag();
+$r->tag('div')->content('');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем &lt;div&gt;&lt;/div&gt;)<br>';
 
 echo '<hr>done';

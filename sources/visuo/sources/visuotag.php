@@ -356,7 +356,7 @@ class visuotag {
 		}
 	}
 
-	public function tree( ) {
+	public function tree ( ) : void {
 		# return $this->root( )->releasetree( true );
 	}
 
@@ -364,111 +364,106 @@ class visuotag {
 	#  Release
 	# ------------------------------------------------------------
 
-	public function release ( int $cicle = 0 ){
+	public function release ( int $cicle = 0 ) : string {
 		# log
-		if( $this->visuorelease ) $this->visuorelease->visuolog->add( 'Реализация тегов: ' . $cicle , __METHOD__ , __FILE__ , __LINE__ );
-		#
-		$html = '';
-		#
-		$root = $this->root;
-		$tagname = $this->tagname;
+		if ( $this->visuorelease ) {
+			$this->visuorelease->visuolog->add( 'Реализация тегов: ' . $cicle , __METHOD__ , __FILE__ , __LINE__ );
+		}
+
+		$html       = '';
+		$root       = $this->root;
+		$tagname    = $this->tagname;
 		$tag_closed = $this->tag_closed;
-		$elements = $this->elements;
-		# attrs & data
+		$elements   = $this->elements;
+
+		# attrs (включая class, style, actions, data-*)
 		$html_attrs = $this->attrs( )->release( );
 
-		$tag_open = '<';
-		$tag_close = '>';
-
-		if( $tag_closed  === true ){
-			foreach( $elements as $k=>$v ){
-				if( is_object( $v ) ){
-					$html .= $v->release( ++$cicle );
-				} else {
-					$html .= $v;
-				}
+		if ( $tag_closed === true ) {
+			# children first
+			foreach ( $elements as $v ) {
+				$html .= is_object( $v ) ? $v->release( $cicle + 1 ) : $v;
 			}
 
-			if( $root === true ){
+			# wrap:
+			# - root — не оборачивается
+			# - visuoelement-узлы — не оборачиваются здесь (их подготавливает prepare_visuoelement)
+			# - всё остальное — оборачивается в <tag ...>...</tag>
+			if ( $root === false && $this->visuoelement === null ) {
+				$html = '<' . $tagname . $html_attrs . '>' . $html . '</' . $tagname . '>';
 			}
-			else {
-				if( $this->visuostruct !== null ){
-					$html = $tag_open . $tagname . $html_attrs . $tag_close . $html . $tag_open . '/' . $tagname . $tag_close;
-				}
-				else if( $this->visuoelement !== null ) {
-				} else {
-					$html = $tag_open . $tagname . $html_attrs . $tag_close . $html . $tag_open . '/' . $tagname . $tag_close;
-				}
-			}
-		}
-		else {
-			$html =$tag_open . $tagname . $html_attrs . ' /' . $tag_close;
+		} else {
+			# self-closing
+			$html = '<' . $tagname . $html_attrs . ' />';
 		}
 
 		return $html;
 	}
 
-	public function final ( ){
+	public function final ( ) : string {
 		return $this->root( )->release( );
 	}
 
-	public function prepare ( int $count = 0 ) {
+	public function prepare ( int $count = 0 ) : void {
 		# log
-		if( $this->visuorelease ) $this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
-		#
+		if ( $this->visuorelease ) {
+			$this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
+		}
 
-		# attrs & data
-		if( $this->visuostruct !== null ) $this->prepare_visuostruct( );
-		else if( $this->visuoelement !== null ) $this->prepare_visuoelement( );
+		# hook by node type
+		if ( $this->visuostruct !== null ) {
+			$this->prepare_visuostruct( );
+		} elseif ( $this->visuoelement !== null ) {
+			$this->prepare_visuoelement( );
+		}
 
-		$elements = $this->elements;
-
-		foreach( $elements as $el ) {
-			if( is_object( $el ) ) {
-				$el->prepare( ++$count );
-				--$count;
-			}
-			else {
+		# recurse
+		foreach ( $this->elements as $el ) {
+			if ( is_object( $el ) ) {
+				$el->prepare( $count );
+			} else {
 				$this->prepare_visuotag( );
 			}
 		}
 	}
+
 	# prepare [ ... visuotag | visuostruct | visuoelement ]
-	private function prepare_visuotag ( ) {
+	private function prepare_visuotag ( ) : void {
 	}
-	private function prepare_visuostruct ( ) {
+
+	private function prepare_visuostruct ( ) : void {
 	}
-	private function prepare_visuoelement ( ) {
-		if( $this->visuoelement->init == false ){
+
+	private function prepare_visuoelement ( ) : void {
+		if ( $this->visuoelement->init == false ) {
 			$this->visuoelement->init( );
-			if( $this->visuoelement->visuotag_start !== null ){
+			if ( $this->visuoelement->visuotag_start !== null ) {
 				$this->visuoelement->release( $this );
 			}
 		}
 	}
 
-	public function releasetree( bool $tree = true , int $count = 0 ){
+	public function releasetree ( bool $tree = true , int $count = 0 ) : string {
 		# log
-		if( $this->visuorelease ) $this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
-		#
-		$html = '';
+		if ( $this->visuorelease ) {
+			$this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
+		}
 
-		#
-		$root = $this->root;
-		$tagname = $this->tagname;
+		$html       = '';
+		$root       = $this->root;
+		$tagname    = $this->tagname;
 		$tag_closed = $this->tag_closed;
-		$elements = $this->elements;
-		# attrs & data
-		$html_attrs = $this->attrs( )->attributes_release( );
-		$html_class = $this->attrs( )->class( )->release( false );
-		$html_style = $this->attrs( )->style( )->release( false );
+		$elements   = $this->elements;
+
+		# attrs (разложены по секциям — для debug-панели)
+		$html_attrs   = $this->attrs( )->attributes_release( );
+		$html_class   = $this->attrs( )->class( )->release( false );
+		$html_style   = $this->attrs( )->style( )->release( false );
 		$html_actions = $this->attrs( )->actions( )->release( false );
-		$html_data = $this->attrs( )->data( )->release( );
+		$html_data    = $this->attrs( )->data( )->release( );
 
 		$tmp_tag_before = '... ';
-
-		$tag_before = '';
-		for( $q = 0 ; $q < $count ; $q++ ) $tag_before .= $tmp_tag_before;
+		$tag_before     = str_repeat( $tmp_tag_before , $count );
 
 		$html .= '<div class="debugtree_row">';
 		$html .= $tag_before;
@@ -485,14 +480,17 @@ class visuotag {
 		$html .= '[ visuoelement: ' . (int)( $this->visuoelement ? true : false ) . ' ]';
 		$html .= '</div>';
 
-		foreach( $elements as $k=>$v ){
-			if( is_object( $v ) ){
-				if( $v->visuostruct_name == '' ){
-					$html .= $v->releasetree( $tree , ++$count );
-					$count--;
-				} else if( $v->visuostruct !== null ){
-				} else if( $v->visuostruct_name !== null ){
-					$html .= $tag_before . $tmp_tag_before . '[ ' . $v->tagname . ( $v->tag_closed ? '' : ' /' ) . ' ][ struct: ' . $v->visuostruct_name . ' ][ type: ' . $v->type . ' ][ ' . $v->name . ' ][ ' . ( $v->visuostruct !== null ? get_class( $v->visuostruct ) : 'NULL' ) . ' ]' . '<br />';
+		foreach ( $elements as $v ) {
+			if ( is_object( $v ) ) {
+				if ( $v->visuostruct_name == '' ) {
+					$html .= $v->releasetree( $tree , $count + 1 );
+				} elseif ( $v->visuostruct !== null ) {
+					# skip — struct-узлы не отображаются отдельно
+				} elseif ( $v->visuostruct_name !== null ) {
+					# TODO: $v->type / $v->name не существуют в visuotag.
+					#       Ветка недостижима, пока visuostruct_name не устанавливается
+					#       (только через structv()). Пересмотреть на этапе 5.
+					$html .= $tag_before . $tmp_tag_before . '[ ' . $v->tagname . ( $v->tag_closed ? '' : ' /' ) . ' ][ struct: ' . $v->visuostruct_name . ' ]' . '<br />';
 				}
 			} else {
 				$html .= '<div class="debugtree_row_content">' . $tag_before . $tmp_tag_before . '[ content ]' . '</div>';
