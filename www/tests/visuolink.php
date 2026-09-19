@@ -232,7 +232,8 @@ $l = new visuolink( $meta );
 $l->favicon( '/favicon.ico#v1' , true );
 $html = $l->as_tag( )->release( );
 echo 'release: <b>' . htmlspecialchars( $html ) . '</b><br>';
-echo 'якорь в конце: <b>' . ( preg_match( '/#v1"$/' , $html ) === 1 ? 'true' : 'false' ) . '</b> (ожидаем true)<br>';
+echo 'якорь в конце href: <b>' . ( strpos( $html , '#v1"' ) !== false ? 'true' : 'false' ) . '</b> (ожидаем true)<br>';
+echo 'cache-buster до якоря: <b>' . ( strpos( $html , '?76170#v1' ) !== false || preg_match( '/\?\d+#v1/' , $html ) === 1 ? 'true' : 'false' ) . '</b> (ожидаем true)<br>';
 
 # 27. resolve_rand без константы
 echo '<h2>27. resolve_rand</h2>';
