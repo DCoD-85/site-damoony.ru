@@ -1,17 +1,32 @@
 <?PHP
 
 class visuorelease_settings {
-# vars
-public visuorelease $visuorelease;
-private string $language = '';
-# methods
-public function __construct ( visuorelease $visuorelease ) {
-$this->visuorelease = $visuorelease;
-if( $_COOKIE[ 'language' ] ) $this->language = $_COOKIE[ 'language' ] ?: 'ru';
-}
-public function get ( string $varname ) {
-return $this->{$varname}?:null;
-}
-}
+	# --- refs ---
+	public null|\visuorelease $visuorelease = null;
 
-?>
+	# --- state ---
+	private string $language = 'ru';
+
+	# --- methods ---
+	public function __construct ( null|\visuorelease $visuorelease = null ) {
+		$this->visuorelease = $visuorelease;
+
+		$cookie_lang = $_COOKIE[ 'language' ] ?? null;
+		if ( is_string( $cookie_lang ) && $cookie_lang !== '' ) {
+			$this->language = $cookie_lang;
+		}
+	}
+
+	public function get ( string $varname ) : mixed {
+		return property_exists( $this , $varname )
+			? $this->{$varname}
+			: null;
+	}
+
+	public function set ( string $varname , mixed $value ) : visuorelease_settings {
+		if ( property_exists( $this , $varname ) ) {
+			$this->{$varname} = $value;
+		}
+		return $this;
+	}
+}
