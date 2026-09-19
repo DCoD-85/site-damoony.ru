@@ -1,92 +1,94 @@
 <?PHP
 
 class visuoattrs {
-	private null|visuotag $visuotag = null;
-	private visuoattrsclass $class;
-	private visuoattrsstyle $style;
-	private visuoattrsactions $actions;
-	public array $elements = [ ];
-	# functions
-	public function __construct ( null|visuotag $visuotag = null ){
+	# --- refs ---
+	private null|\visuotag $visuotag = null;
+
+	# --- sub-classes ---
+	private \visuoattrsclass   $class;
+	private \visuoattrsstyle   $style;
+	private \visuoattrsactions $actions;
+
+	# --- state ---
+	private array $elements = [ ];   # [ 'id' => 'x' , 'href' => '...' , ... ]
+
+	# --- methods ---
+	public function __construct ( null|\visuotag $visuotag = null ) {
 		$this->visuotag = $visuotag;
-		$this->class = new visuoattrsclass( $this );
-		$this->style = new visuoattrsstyle( $this );
-		$this->actions = new visuoattrsactions( $this );
+		$this->class    = new \visuoattrsclass( $this );
+		$this->style    = new \visuoattrsstyle( $this );
+		$this->actions  = new \visuoattrsactions( $this );
 	}
-	public function visuotag ( ) {
+
+	public function visuotag ( ) : null|\visuotag {
 		return $this->visuotag;
 	}
-	public function add( string $name , string $value , bool $add_empty = false , bool $return_visuotag = false ){
-		if( ! empty( $value ) || $add_empty === true ) $this->elements[ $name ] = $value;
-		return $return_visuotag ? $this->visuotag : $this;
+
+	# --- generic attributes ---
+	public function add ( string $name , string $value , bool $add_empty = false ) : visuoattrs {
+		if ( $value !== '' || $add_empty === true ) {
+			$this->elements[ $name ] = $value;
+		}
+		return $this;
 	}
-	public function remove ( string $name , bool $return_visuotag = false ) {
+
+	public function remove ( string $name ) : visuoattrs {
 		unset( $this->elements[ $name ] );
-		return $return_visuotag ? $this->visuotag : $this;
+		return $this;
 	}
-	public function get( string $name ){
-		return $this->elements[ $name ] ?: null;
+
+	public function get ( string $name ) : mixed {
+		return array_key_exists( $name , $this->elements )
+			? $this->elements[ $name ]
+			: null;
 	}
-	public function return_visuotag ( ) {
-		return $this->visuotag( );
+
+	public function has ( string $name ) : bool {
+		return array_key_exists( $name , $this->elements );
 	}
-	### attributes , class , class_add , class_remove
-	public function attributes ( ) {
-		# return $this->elements( );	
+
+	public function all ( ) : array {
+		return $this->elements;
 	}
-	
-	public function class ( ) {
-		return $this->class;
+
+public function clear ( ) : visuoattrs {
+	$this->elements = [ ];
+	$this->class->clear( );
+	$this->style->clear( );
+	$this->actions->clear( );
+	return $this;
+}
+
+	# --- sub-classes accessors ---
+	public function class   ( ) : \visuoattrsclass   { return $this->class;   }
+	public function style   ( ) : \visuoattrsstyle   { return $this->style;   }
+	public function actions ( ) : \visuoattrsactions { return $this->actions; }
+
+	public function class_add    ( string $expr ) : visuoattrs { $this->class->add( $expr );    return $this; }
+	public function class_remove ( string $expr ) : visuoattrs { $this->class->remove( $expr ); return $this; }
+	public function style_add    ( string $expr ) : visuoattrs { $this->style->add( $expr );    return $this; }
+	public function style_remove ( string $expr ) : visuoattrs { $this->style->remove( $expr ); return $this; }
+	public function actions_add    ( string $action , string $value ) : visuoattrs { $this->actions->add( $action , $value );    return $this; }
+	public function actions_remove ( string $action ) : visuoattrs { $this->actions->remove( $action ); return $this; }
+
+	# --- release ---
+	# всё: generic + class + style + actions
+	public function release ( ) : string {
+		$html  = $this->class->release( );
+		$html .= $this->style->release( );
+		$html .= $this->actions->release( );
+		$html .= $this->attributes_release( );
+		return $html;
 	}
-	public function class_add ( string $expierence , bool $return_visuotag = false ) {
-		$this->class->add( $expierence );
-		return $return_visuotag ? $this->visuotag : $this;
-	}
-	public function class_remove ( string $expierence , bool $return_visuotag = false ) {
-		$this->class->remove( $expierence );
-		return $return_visuotag ? $this->visuotag : $this;
-	}
-	### style , style_add , style_remove
-	public function style ( ) {
-		return $this->style;
-	}
-	public function style_add ( string $expierence , bool $return_visuotag = false ) {
-		$this->style->add( $expierence );
-		return $return_visuotag ? $this->visuotag : $this;
-	}
-	public function style_remove ( string $expierence , bool $return_visuotag = false ) {
-		$this->style->remove( $expierence );
-		return $return_visuotag ? $this->visuotag : $this;
-	}
-	
-	public function actions ( ) {
-		return $this->actions;
-	}
-	public function actions_add ( string $action , string $value , bool $json = false , bool $new = true , bool $return_visuotag = false ) {
-		$this->actions->add( $action , $value , $json , $new );
-		return $return_visuotag ? $this->visuotag : $this;
-	}
-	public function actions_remove ( string $action , bool $return_visuotag = false ) {
-		$this->actions->remove( $action );
-		return $return_visuotag ? $this->visuotag : $this;
-	}
-	
-	public function attributes_release( ) {
+
+	# только generic-атрибуты (без class/style/actions) — для releasetree()
+	public function attributes_release ( ) : string {
+		if ( empty( $this->elements ) ) return '';
+
 		$html = '';
-		$elements = $this->elements;
-		if( ! empty( $elements ) ) foreach( $elements as $name=>$value ) $html .= ' ' . $name . '="' . $value . '"';
-		return $html ? ' ' . trim( $html ) : '';
-	}
-	public function release( ){
-		$html = '';
-		$html_class = $this->class->release( );
-		$html_style = $this->style->release( );
-		$html_actions = $this->actions->release( );
-		$html_elements = $this->attributes_release( );
-		
-		$html = ( $html_class ? $html_class : '' ) . ( $html_style ? $html_style : '' ) . ( $html_actions ? $html_actions : '' ) . ( $html_elements ? $html_elements : '' );
+		foreach ( $this->elements as $name => $value ) {
+			$html .= ' ' . $name . '="' . htmlspecialchars( (string) $value , ENT_QUOTES ) . '"';
+		}
 		return $html;
 	}
 }
-
-?>

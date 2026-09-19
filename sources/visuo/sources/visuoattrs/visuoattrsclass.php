@@ -1,76 +1,71 @@
 <?PHP
 
 class visuoattrsclass {
-	# vars
-	public null|visuoattrs $visuoattrs = null;
-	public null|visuotag $visuotag = null;
-	public array $elements = [ ];
-	# methods
-	public function __construct ( visuoattrs $visuoattrs ){
+	# --- refs ---
+	public null|\visuoattrs $visuoattrs = null;
+	public null|\visuotag   $visuotag   = null;
+
+	# --- state ---
+	private array $elements = [ ];   # [ 'class-name' => true , ... ]
+
+	# --- methods ---
+	public function __construct ( \visuoattrs $visuoattrs ) {
 		$this->visuoattrs = $visuoattrs;
-		$this->visuotag = $visuoattrs->visuotag( );
+		$this->visuotag   = $visuoattrs->visuotag( );
 	}
-	public function parent ( ) {
+
+	public function parent ( ) : null|\visuotag {
 		return $this->visuotag;
 	}
-	public function add ( string $value , bool $generic = true ){
-		$value_arr = explode( ' ' , $value );
-		foreach( $value_arr as $v ){
-			$this->add_check( $v );
+
+	# --- add / remove ---
+	public function add ( string $value ) : visuoattrsclass {
+		foreach ( $this->split( $value ) as $class_name ) {
+			$this->elements[ $class_name ] = true;
 		}
-		
 		return $this;
 	}
-	private function add_check ( string $value ) {
-		$elements_list = $this->getlist( );
-		$bok = true;
-		foreach( $elements_list as $element ) if( $value == $element->value ) $bok = false;
-		
-		if( $bok === true ) $this->elements[ ] = new visuoattrsclass_element( $this , $value );
-	}
-	private function getlist ( ) {
-		return $this->elements;
-	}
-	public function get ( string $value ) {
-		# $value_arr = explode( ' ' , $value );
-		foreach( $this->elements as $element ) {
-			if( $element->value == $value ) return $value;
+
+	public function remove ( string $value ) : visuoattrsclass {
+		foreach ( $this->split( $value ) as $class_name ) {
+			unset( $this->elements[ $class_name ] );
 		}
-		return '';
-	}
-	public function remove ( string $value ) {
-		$value_arr = explode( ' ' , $value );
-		foreach( $value_arr as $value ){
-			foreach( $this->elements as $k=>$v ){
-				if( $v->value  == $value ){
-					unset( $this->elements[ $k ] );
-					break;
-				}
-			}
-		}
-		
 		return $this;
 	}
-	public function release ( bool $full = true ){
-		$return = '';
-		$elements = $this->elements;
-		if( ! empty( $elements ) ) foreach( $elements as $element ) $return .= trim( $element->value ) . ' ';
-		$return = trim( $return );
-		
-		return $return ? ( $full ? ' class="' . $return . '"' : $return ) : $return;
+
+	public function clear ( ) : visuoattrsclass {
+		$this->elements = [ ];
+		return $this;
+	}
+
+	# --- queries ---
+	public function has ( string $value ) : bool {
+		return isset( $this->elements[ $value ] );
+	}
+
+	public function get ( string $value ) : string {
+		return isset( $this->elements[ $value ] ) ? $value : '';
+	}
+
+	public function all ( ) : array {
+		return array_keys( $this->elements );
+	}
+
+	# --- release ---
+	public function release ( bool $full = true ) : string {
+		if ( empty( $this->elements ) ) return '';
+
+		$classes = htmlspecialchars( implode( ' ' , array_keys( $this->elements ) ) , ENT_QUOTES );
+
+		return $full ? ' class="' . $classes . '"' : $classes;
+	}
+
+	# --- internals ---
+	private function split ( string $value ) : array {
+		$value = trim( $value );
+		if ( $value === '' ) return [ ];
+
+		$parts = preg_split( '/\s+/' , $value );
+		return $parts === false ? [ ] : $parts;
 	}
 }
-
-class visuoattrsclass_element {
-	private visuoattrsclass $parent;
-	public string $name = '';
-	public string $value = '';
-	
-	public function __construct( visuoattrsclass $parent , string $value ){
-		$this->parent = $parent;
-		$this->value = $value;
-	}
-}
-
-
-?>
