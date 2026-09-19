@@ -1,5 +1,5 @@
 <?PHP
-# Visuotag tests — baseline + stage 2
+# Visuotag tests — baseline + stage 2 + stage 3
 error_reporting( E_ALL );
 ini_set( 'display_errors' , '1' );
 header( 'Content-Type: text/html; charset=UTF-8' );
@@ -241,5 +241,63 @@ $r = new visuotag();
 $r->tag('div');
 echo '_body: <b>' . var_export( $r->_body() , true ) . '</b> (ожидаем null)<br>';
 echo '_html: <b>' . var_export( $r->_html() , true ) . '</b> (ожидаем null)<br>';
+
+# -------- stage 3 additions --------
+
+# 31. attrs() returns visuoattrs
+echo '<h2>31. attrs() type</h2>';
+$r = new visuotag();
+$r->tag('div');
+echo 'attrs is visuoattrs: <b>' . ( $r->elements[0]->attrs( ) instanceof visuoattrs ? 'true' : 'false' ) . '</b><br>';
+
+# 32. attrs_add returns visuotag (chain)
+echo '<h2>32. attrs_add chain</h2>';
+$r = new visuotag();
+$v = $r->tag('div')->attrs_add('id', 'x')->attrs_add('data-x', 'y');
+echo 'chain works: <b>' . ( $v instanceof visuotag ? 'true' : 'false' ) . '</b><br>';
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+
+# 33. attrs_remove
+echo '<h2>33. attrs_remove</h2>';
+$r = new visuotag();
+$r->tag('div')->attrs_add('id', 'x')->attrs_remove('id');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем без id)<br>';
+
+# 34. class_add + class_remove
+echo '<h2>34. class add/remove</h2>';
+$r = new visuotag();
+$r->tag('div')->attrs_class_add('a b')->attrs_class_remove('a');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем class="b")<br>';
+
+# 35. style_add + style_remove
+echo '<h2>35. style add/remove</h2>';
+$r = new visuotag();
+$r->tag('div')->attrs_style_add('color:red;font-size:14px')->attrs_style_remove('color');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем font-size:14px)<br>';
+
+# 36. actions_add + actions_remove
+echo '<h2>36. actions add/remove</h2>';
+$r = new visuotag();
+$r->tag('div')->attrs_actions_add('onclick', 'a()')->attrs_actions_add('onmouseover', 'b()')->attrs_actions_remove('onclick');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем onmouseover, без onclick)<br>';
+
+# 37. data_add + data_remove
+echo '<h2>37. data add/remove</h2>';
+$r = new visuotag();
+$r->tag('div')->data_add('ajax', true)->data_add('role', 'admin', false)->data_remove('ajax');
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b> (ожидаем только data-role)<br>';
+
+# 38. data() returns visuoattrsdata
+echo '<h2>38. data() type</h2>';
+$r = new visuotag();
+$d = $r->tag('div')->data( );
+echo 'data is visuoattrsdata: <b>' . ( $d instanceof visuoattrsdata ? 'true' : 'false' ) . '</b><br>';
+
+# 39. full attr combination
+echo '<h2>39. full combination</h2>';
+$r = new visuotag();
+$r->tag('a')->id('link')->attrs_class_add('btn')->attrs_style_add('color:blue')->attrs_actions_add('onclick', 'go()')->data_add('role', 'nav', false);
+echo 'release: <b>' . htmlspecialchars( $r->release( ) ) . '</b><br>';
+echo 'ожидаем: class, style, onclick, id, data-role<br>';
 
 echo '<hr>done';

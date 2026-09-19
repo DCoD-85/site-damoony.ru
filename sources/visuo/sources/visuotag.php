@@ -91,7 +91,6 @@ class visuotag {
 
 	public function element ( string $visuoelement_name , null|visuoelement $visuoelement = null , bool $init = false ) {
 		$newtag = $this->tag( 'element' , true , class: 'cl_element' );
-		# $newtag->visuoelement_name = $visuoelement_name;
 
 		$visuoelement = $visuoelement ?: new visuoelement( $this->visuorelease , null );
 		$visuoelement->name = $visuoelement_name;
@@ -173,54 +172,58 @@ class visuotag {
 		}
 	}
 
-	# attrs
-	public function attrs ( ) {
+	# --- attrs ---
+	public function attrs ( ) : visuoattrs {
 		return $this->attrs;
 	}
-	public function attrs_add ( string $name , string $value ) {
+	public function attrs_add ( string $name , string $value ) : visuotag {
 		$this->attrs( )->add( $name , $value );
 		return $this;
 	}
-	public function attrs_remove ( string $name ) {
+	public function attrs_remove ( string $name ) : visuotag {
 		$this->attrs( )->remove( $name );
 		return $this;
 	}
-	public function attrs_class_add ( string $value ) {
-		$this->attrs( )->class_add($value );
+	public function attrs_class_add ( string $value ) : visuotag {
+		$this->attrs( )->class_add( $value );
 		return $this;
 	}
-	public function attrs_class_remove ( string $value ) {
+	public function attrs_class_remove ( string $value ) : visuotag {
 		$this->attrs( )->class_remove( $value );
 		return $this;
 	}
-	public function attrs_style_add ( string $value ) {
-		$this->attrs( )->style_add($value );
+	public function attrs_style_add ( string $value ) : visuotag {
+		$this->attrs( )->style_add( $value );
 		return $this;
 	}
-	public function attrs_style_remove ( string $value ) {
+	public function attrs_style_remove ( string $value ) : visuotag {
 		$this->attrs( )->style_remove( $value );
 		return $this;
 	}
-	public function attrs_actions_add ( string $action , string $value , bool $json = false , bool $new = true ) {
-		$this->attrs( )->actions_add( $action , $value , $json );
+	public function attrs_actions_add ( string $action , string $value ) : visuotag {
+		$this->attrs( )->actions_add( $action , $value );
 		return $this;
 	}
-	public function attrs_actions_remove ( string $action ) {
+	public function attrs_actions_remove ( string $action ) : visuotag {
 		$this->attrs( )->actions_remove( $action );
 		return $this;
 	}
 
-	# data
-	public function data( ) {
+	# --- data ---
+	public function data ( ) : visuoattrsdata {
 		return $this->attrs( )->data( );
 	}
-
-	public function data_add ( string $data_name , null|bool|string|int|array $data_value , bool $data_tojson = true ) {
+	public function data_add ( string $data_name , null|bool|string|int|array $data_value , bool $data_tojson = true ) : visuotag {
 		$this->attrs( )->data_add( $data_name , $data_value , $data_tojson );
 		return $this;
 	}
+	public function data_remove ( string $data_name ) : visuotag {
+		$this->attrs( )->data_remove( $data_name );
+		return $this;
+	}
 
-	public function id ( string $value ){
+	# --- shortcuts ---
+	public function id ( string $value ) : visuotag {
 		return $this->attrs_add( 'id' , $value );
 	}
 
