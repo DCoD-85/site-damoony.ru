@@ -26,3 +26,6 @@ Thumbs.db
 secure/*.config
 secure/*.xml
 secure/*.inc
+
+# Auto-generated language file
+www/language/save.txt.inc
