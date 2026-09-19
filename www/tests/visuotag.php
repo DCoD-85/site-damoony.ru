@@ -1,5 +1,5 @@
 <?PHP
-# Visuotag tests — baseline (current behavior)
+# Visuotag tests — baseline + stage 2
 error_reporting( E_ALL );
 ini_set( 'display_errors' , '1' );
 header( 'Content-Type: text/html; charset=UTF-8' );
@@ -19,7 +19,7 @@ require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsdata.php';
 require $root_dir . '/sources/visuo/sources/visuoattrs.php';
 require $root_dir . '/sources/visuo/sources/visuotag.php';
 
-echo '<h1>Visuotag tests (baseline)</h1>';
+echo '<h1>Visuotag tests</h1>';
 
 # 1. empty root
 echo '<h2>1. Empty root</h2>';
@@ -102,7 +102,7 @@ $r1->tag('a');
 $r2 = new visuotag();
 $r2->tag('b')->tag('c');
 $r1->append($r2);
-echo 'r1 elements count: <b>' . count( $r1->elements ) . '</b> (ожидаем 2 — append сливает root-детей, а c — внутри b)<br>';
+echo 'r1 elements count: <b>' . count( $r1->elements ) . '</b> (ожидаем 2 — append сливает root-детей)<br>';
 echo 'release: <b>' . htmlspecialchars( $r1->release() ) . '</b><br>';
 
 # 12. prepend
@@ -165,5 +165,81 @@ echo '<h2>20. final</h2>';
 $r = new visuotag();
 $r->tag('div')->content('x');
 echo 'final: <b>' . htmlspecialchars( $r->final() ) . '</b><br>';
+
+# -------- stage 2 additions --------
+
+# 21. find — deep
+echo '<h2>21. find deep</h2>';
+$r = new visuotag();
+$a = $r->tag('div');
+$b = $a->tag('section');
+$c = $b->tag('span');
+echo 'find span is c: <b>' . ( $r->find('span') === $c ? 'true' : 'false' ) . '</b><br>';
+
+# 22. find by class
+echo '<h2>22. find by class</h2>';
+$r = new visuotag();
+$a = $r->tag('div');
+$a->attrs_class_add('box');
+$b = $r->tag('div');
+echo 'find class=box is a: <b>' . ( $r->find(class: 'box') === $a ? 'true' : 'false' ) . '</b><br>';
+
+# 23. find tag + class
+echo '<h2>23. find tag + class</h2>';
+$r = new visuotag();
+$a = $r->tag('div');
+$b = $r->tag('div');
+$b->attrs_class_add('x');
+echo 'find div.x is b: <b>' . ( $r->find('div', class: 'x') === $b ? 'true' : 'false' ) . '</b><br>';
+
+# 24. find — no match
+echo '<h2>24. find — no match</h2>';
+$r = new visuotag();
+$r->tag('div');
+echo 'find span: <b>' . var_export( $r->find('span') , true ) . '</b> (ожидаем null)<br>';
+
+# 25. find — id
+echo '<h2>25. find by id</h2>';
+$r = new visuotag();
+$a = $r->tag('div');
+$a->id('first');
+$b = $r->tag('div');
+$b->id('second');
+echo 'find id=second is b: <b>' . ( $r->find(id: 'second') === $b ? 'true' : 'false' ) . '</b><br>';
+
+# 26. parent eq
+echo '<h2>26. parent eq</h2>';
+$r = new visuotag();
+$d1 = $r->tag('div');
+$d2 = $d1->tag('div');
+$s = $d2->tag('span');
+echo 'span->div(0) is d2: <b>' . ( $s->div(0) === $d2 ? 'true' : 'false' ) . '</b><br>';
+echo 'span->div(1) is d1: <b>' . ( $s->div(1) === $d1 ? 'true' : 'false' ) . '</b><br>';
+
+# 27. parent eq negative
+echo '<h2>27. parent eq negative</h2>';
+$r = new visuotag();
+$d = $r->tag('div');
+echo 'd->parent("div", -1) is d: <b>' . ( $d->parent('div', -1) === $d ? 'true' : 'false' ) . '</b><br>';
+
+# 28. find not found in deep tree
+echo '<h2>28. find missing in deep tree</h2>';
+$r = new visuotag();
+$r->tag('div')->tag('section')->tag('article');
+echo 'find aside: <b>' . var_export( $r->find('aside') , true ) . '</b> (ожидаем null)<br>';
+
+# 29. find — first wins
+echo '<h2>29. find first match</h2>';
+$r = new visuotag();
+$first = $r->tag('span');
+$r->tag('span');
+echo 'find span is first: <b>' . ( $r->find('span') === $first ? 'true' : 'false' ) . '</b><br>';
+
+# 30. _body / _html — null when missing
+echo '<h2>30. _body when missing</h2>';
+$r = new visuotag();
+$r->tag('div');
+echo '_body: <b>' . var_export( $r->_body() , true ) . '</b> (ожидаем null)<br>';
+echo '_html: <b>' . var_export( $r->_html() , true ) . '</b> (ожидаем null)<br>';
 
 echo '<hr>done';

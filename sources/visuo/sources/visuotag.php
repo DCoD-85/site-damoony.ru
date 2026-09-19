@@ -79,7 +79,7 @@ class visuotag {
 		return $return ? $newtag : $target;
 	}
 
-	public function structv( string $visuostruct_name , null|visuostruct $visuostruct = null ) {
+	public function structv ( string $visuostruct_name , null|visuostruct $visuostruct = null ) {
 		$newtag = $this->tag( 'struct' , true , true , class: 'cl_struct' );
 		$newtag->visuostruct_name = $visuostruct_name;
 		$newtag->visuostruct = $visuostruct;
@@ -103,7 +103,7 @@ class visuotag {
 		return $return_new_tag == true ? $newtag : $this;
 	}
 
-	public function struct_set( string $visuostruct_name , visuostruct $visuostruct ) {
+	public function struct_set ( string $visuostruct_name , visuostruct $visuostruct ) {
 		$return = [ ];
 		$vt = new visuotag( $this->visuorelease , null , 'root' , true );
 		$this->root( )->findstruct( $visuostruct_name , $return , $vt );
@@ -233,56 +233,103 @@ class visuotag {
 		return $this->elements[ 0 ] ?? $this;
 	}
 
-	# Поисковые функции
-	# find
-	public function find ( null|string $tagname = null , null|visuotag $visuotag = null , int $eq = 0 , int $fec = 0 , int $cicle = 0 , null|string $class = null , null|string $id = null ):visuotag|null {
-		# log
-		if( $this->visuorelease ) if( $cicle == 0 ) $this->visuorelease->visuolog->add( 'Поиск тега: ' . $tagname , __METHOD__ , __FILE__ , __LINE__ );
-		#
-		if( is_null( $visuotag ) ){
-			if( is_null( $tagname ) ) {
-				if( $class !== null ){
-					if( $this->attrs( )->class( )->get( $class ) == $class ){
-						$visuotag = $this;
-						return $visuotag;
-					}
-				} else if( $id !== null ){
-					$is_id = $this->attrs( )->get( 'id' );
-					if( ! is_null( $is_id ) && $is_id == $id ){
-						$visuotag = $this;
-						return $visuotag;
-					}
-				}
-			}
-			else {
-				if( $this->tagname == $tagname ){
-					if( $class !== null ){
-						if( $this->attrs( )->class( )->get( $class ) == $class ){
-							$visuotag = $this;
-							return $visuotag;
-						}
-					} else {
-						$visuotag = $this;
-						return $visuotag;
-					}
-				}
-			}
+	# ------------------------------------------------------------
+	#  Navigation
+	# ------------------------------------------------------------
 
-			$elements = $this->elements;
-			if( ! empty( $elements ) ){
-				foreach( $elements as $k=>$v ){
-					if( gettype( $v ) == 'object' ){
-						# if( get_class( $v )  == 'visuotag' ){
-							$visuotag = $v->find( $tagname , $visuotag , $eq , $fec , ++$cicle , $class , $id );
-						# }
-					}
+	public function parent ( string $tagname = '' , int $eq = 0 ) : visuotag {
+		if ( $eq < 0 ) return $this;
+		if ( $this->root === true ) return $this;
+
+		$parent = $this->visuotag;
+		if ( $parent === null ) return $this;
+
+		$feq = 0;
+
+		if ( $tagname !== '' ) {
+			while ( $parent !== null ) {
+				if ( $parent->tagname === $tagname ) {
+					if ( $feq === $eq ) return $parent;
+					$feq++;
+				}
+				if ( $parent->visuotag === null ) return $parent;
+				$parent = $parent->visuotag;
+			}
+		} else {
+			while ( $parent !== null ) {
+				if ( $feq === $eq ) return $parent;
+				if ( $parent->visuotag === null ) return $parent;
+				$parent = $parent->visuotag;
+				$feq++;
+			}
+		}
+
+		return $this;
+	}
+
+	public function root  ( ) : visuotag { return $this->parent( 'root'  ); }
+	public function html  ( ) : visuotag { return $this->parent( 'html'  ); }
+	public function head  ( ) : visuotag { return $this->parent( 'head'  ); }
+	public function title ( ) : visuotag { return $this->parent( 'title' ); }
+	public function body  ( ) : visuotag { return $this->parent( 'body'  ); }
+
+	public function div  ( int $eq = 0 ) : visuotag { return $this->parent( 'div'  , $eq ); }
+	public function span ( int $eq = 0 ) : visuotag { return $this->parent( 'span' , $eq ); }
+
+	# ------------------------------------------------------------
+	#  Find
+	# ------------------------------------------------------------
+
+	public function find ( null|string $tagname = null ,
+	                       null|visuotag $visuotag = null ,
+	                       int $eq = 0 ,
+	                       int $fec = 0 ,
+	                       int $cicle = 0 ,
+	                       null|string $class = null ,
+	                       null|string $id = null ) : null|visuotag {
+		# log
+		if ( $this->visuorelease && $cicle === 0 ) {
+			$this->visuorelease->visuolog->add( 'Поиск тега: ' . $tagname , __METHOD__ , __FILE__ , __LINE__ );
+		}
+
+		if ( $visuotag !== null ) return $visuotag;
+
+		# match by tag / class / id
+		if ( $tagname === null ) {
+			if ( $class !== null ) {
+				if ( $this->attrs( )->class( )->get( $class ) === $class ) return $this;
+			} elseif ( $id !== null ) {
+				$is_id = $this->attrs( )->get( 'id' );
+				if ( $is_id !== null && $is_id === $id ) return $this;
+			}
+		} else {
+			if ( $this->tagname === $tagname ) {
+				if ( $class !== null ) {
+					if ( $this->attrs( )->class( )->get( $class ) === $class ) return $this;
+				} else {
+					return $this;
 				}
 			}
 		}
+
+		# depth-first search
+		foreach ( $this->elements as $v ) {
+			if ( ! is_object( $v ) ) continue;
+			$visuotag = $v->find( $tagname , $visuotag , $eq , $fec , $cicle + 1 , $class , $id );
+			if ( $visuotag !== null ) return $visuotag;
+		}
+
 		return $visuotag;
 	}
 
+	# find tag (from root, descending)
+	public function _html ( ) : null|visuotag { return $this->root( )->find( 'html' ); }
+	public function _body ( ) : null|visuotag { return $this->root( )->find( 'body' ); }
+
 	# поиск структуры
+	# TODO: relies on $v->getstruct() which does not exist yet;
+	#       used only by struct_set() which has no external callers.
+	#       Revisit when refactoring visuostruct (stage 5).
 	public function findstruct ( string $structname , array &$return = [] , null|visuotag &$vt = null ){
 		# log
 		if( $this->visuorelease ) $this->visuorelease->visuolog->add( 'Поиск структуры: ' . $structname , __METHOD__ , __FILE__ , __LINE__ );
@@ -306,69 +353,14 @@ class visuotag {
 		}
 	}
 
-	public function parent( string $tagname = '' , int $eq = 0 , string $id = '' , string $class = '' ){
-		# if( $this->tagname == $tagname ) return ;
-		if( $eq < 0 ) return $this;
-
-		if( $this->root === true ) return $this;
-		$parent = $this->visuotag;
-		if( $parent === null ) return $this;
-		$feq = 0;
-
-		if( $tagname != '' ){
-			while( $parent !== null ){
-				if( $parent->tagname == $tagname ){
-					if( $feq == $eq ) return $parent;
-					$feq++;
-				}
-
-				if( $parent->visuotag === null ) return $parent;
-				$parent = $parent->visuotag;
-			}
-		} else {
-			while( $parent !== null ){
-				if( $feq == $eq ) return $parent;
-				if( $parent->visuotag === null ) return $parent;
-				$parent = $parent->visuotag;
-				$feq++;
-			}
-		}
-		return $this;
-	}
-	public function root( ) {
-		return $this->parent( 'root' );
-	}
-	public function html( ) {
-		return $this->parent( 'html' );
-	}
-	public function head( ) {
-		return $this->parent( 'head' );
-	}
-	public function title( ) {
-		return $this->parent( 'title' );
-	}
-	public function body( ) {
-		return $this->parent( 'body' );
-	}
-	public function div( int $eq = 0 ){
-		return $this->parent( 'div' , $eq );
-	}
-	public function span( int $eq = 0 ) {
-		return $this->parent( 'span' , $eq );
-	}
-
-	# find tag
-	public function _html( ) {
-		return $this->root( )->find( 'html' );
-	}
-	public function _body( ) {
-		return $this->root( )->find( 'body' );
-	}
-
 	public function tree( ) {
 		# return $this->root( )->releasetree( true );
 	}
-	# release | final
+
+	# ------------------------------------------------------------
+	#  Release
+	# ------------------------------------------------------------
+
 	public function release ( int $cicle = 0 ){
 		# log
 		if( $this->visuorelease ) $this->visuorelease->visuolog->add( 'Реализация тегов: ' . $cicle , __METHOD__ , __FILE__ , __LINE__ );
@@ -440,19 +432,10 @@ class visuotag {
 	}
 	# prepare [ ... visuotag | visuostruct | visuoelement ]
 	private function prepare_visuotag ( ) {
-		# log
-		# if( $this->visuorelease ) $this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
-		#
 	}
 	private function prepare_visuostruct ( ) {
-		# log
-		# if( $this->visuorelease ) $this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
-		#
 	}
 	private function prepare_visuoelement ( ) {
-		# log
-		# if( $this->visuorelease ) $this->visuorelease->visuolog->add( '' , __METHOD__ , __FILE__ , __LINE__ );
-		#
 		if( $this->visuoelement->init == false ){
 			$this->visuoelement->init( );
 			if( $this->visuoelement->visuotag_start !== null ){
