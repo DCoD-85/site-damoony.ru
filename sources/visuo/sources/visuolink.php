@@ -1,58 +1,63 @@
 <?PHP
 
 class visuolink {
-	# vars
+	# --- refs ---
 	public null|visuometa $visuometa = null;
-	public string $name = '';
+
+	# --- state ---
 	public string $type = '';
+
+	# --- sub ---
 	public null|visuolink_favicon $favicon = null;
-	public null|visuolink_css $css = null;
-	public null|visuolink_js $js = null;
-	
-	# methods
-	public function __construct( visuometa $visuometa ){
+	public null|visuolink_css     $css     = null;
+	public null|visuolink_js      $js      = null;
+
+	# --- methods ---
+	public function __construct ( visuometa $visuometa ) {
 		$this->visuometa = $visuometa;
 	}
 
-	public function favicon ( string $href ) {
+	public function favicon ( string $href ) : visuolink_favicon {
 		$this->type = 'favicon';
-		return $this->favicon = new visuolink_favicon ( $this , $href );
+		return $this->favicon = new visuolink_favicon( $this , $href );
 	}
-	public function css ( string $href ) {
+
+	public function css ( string $href ) : visuolink_css {
 		$this->type = 'css';
-		return $this->css = new visuolink_css ( $this , $href );
+		return $this->css = new visuolink_css( $this , $href );
 	}
-	
-	public function js ( string $href ) {
+
+	public function js ( string $href ) : visuolink_js {
 		$this->type = 'js';
-		return $this->js = new visuolink_js ( $this , $href );
+		return $this->js = new visuolink_js( $this , $href );
 	}
-	public function as_tag( ) {
+
+	public function as_tag ( ) : visuotag {
+		if ( $this->type === '' ) return new visuotag( );
+		if ( $this->{$this->type} === null ) return new visuotag( );
 		return $this->{$this->type}->as_tag( );
 	}
 }
 
 class visuolink_favicon {
-	# vars
-	# vars [ private ]
+	# --- refs ---
 	public visuolink $visuolink;
-	# vars [ public ]
-	private bool $rand = true;
-	# vars [ public ] : data
-	public string $d_rel = 'icon';
+
+	# --- state ---
+	public string $d_rel  = 'icon';
 	public string $d_href = '/favicon.ico';
 	public string $d_type = 'image/x-icon';
-	# methods
+
+	# --- methods ---
 	public function __construct ( visuolink $visuolink , string $href ) {
 		$this->visuolink = $visuolink;
-		$this->d_href = $href;
+		$this->d_href    = $href;
 	}
-	public function as_tag ( ) {
+
+	public function as_tag ( ) : visuotag {
 		$vt = new visuotag( );
-		if( $this->rand ) $this->href .= '?' . rand( 11111 , 99999 ); 
-		
 		$vt->tag( 'link' , false )
-			->attrs_add( 'rel' , $this->d_rel )
+			->attrs_add( 'rel'  , $this->d_rel  )
 			->attrs_add( 'href' , $this->d_href )
 			->attrs_add( 'type' , $this->d_type );
 		return $vt;
@@ -60,49 +65,46 @@ class visuolink_favicon {
 }
 
 class visuolink_css {
-	# vars
-	# vars [ private ]
+	# --- refs ---
 	public visuolink $visuolink;
-	# vars [ public ]
-	private bool $rand = true; 
+
+	# --- state ---
 	public string $href = '';
-	# methods
+
+	# --- methods ---
 	public function __construct ( visuolink $visuolink , string $href ) {
 		$this->visuolink = $visuolink;
-		$this->href = $href;
+		$this->href      = $href;
 	}
-	public function as_tag ( ) {
-		if( $this->rand ) $this->href .= '?' . rand( 11111 , 99999 ); 
-		
+
+	public function as_tag ( ) : visuotag {
 		$vt = new visuotag( );
 		$vt->tag( 'link' , false )
 			->attrs_add( 'href' , $this->href )
 			->attrs_add( 'type' , 'text/css' )
-			->attrs_add( 'rel' , 'stylesheet' );
-		
+			->attrs_add( 'rel'  , 'stylesheet' );
 		return $vt;
 	}
 }
 
 class visuolink_js {
-	# vars
-	# vars [ private ]
+	# --- refs ---
 	public visuolink $visuolink;
-	# vars [ public ]
-	private bool $rand = true;
+
+	# --- state ---
 	public string $href = '';
-	# methods
+
+	# --- methods ---
 	public function __construct ( visuolink $visuolink , string $href ) {
 		$this->visuolink = $visuolink;
-		$this->href = $href;
+		$this->href      = $href;
 	}
-	public function as_tag ( ) {
-		if( $this->rand ) $this->href .= '?' . rand( 11111 , 99999 ); 
+
+	public function as_tag ( ) : visuotag {
 		$vt = new visuotag( );
 		$vt->tag( 'script' )
-			->attrs_add( 'src' , $this->href )
+			->attrs_add( 'src'  , $this->href )
 			->attrs_add( 'type' , 'text/javascript' );
-		
 		return $vt;
 	}
 }
