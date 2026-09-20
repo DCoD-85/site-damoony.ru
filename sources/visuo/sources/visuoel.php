@@ -1,8 +1,20 @@
 <?PHP
 
 # visuoel — база и корень дерева UI-элементов.
-# Обёртка: <tag class="css_class">[children]</tag>.
-# Наследники переопределяют $tag / $css_class, init() и фабрики.
+#
+# Инициализация:
+#   init()
+#     ├── build()                       ← фаза 1: собственный скелет
+#     └── foreach elements:             ← фаза 2: дети пришиваются в vt_end
+#           visuoel  → $el->init(); $this->vt_end->append( $el->vt_start )
+#           visuotag → $this->vt_end->append( $el )
+#
+# vt_start — верх поддерева (attach point для родителя).
+# vt_end   — узел-слот: дети пришиваются сюда.
+#            у одиночных элементов (input, link_simple) vt_start === vt_end.
+#            у контейнеров (form, table) vt_end — вложенный узел (form_body, tbody).
+#
+# elements[] — список детей: visuoel | visuotag.
 
 class visuoel {
 	# --- refs ---
@@ -35,32 +47,43 @@ class visuoel {
 		return new visuoel__data( $this );
 	}
 
-	public function init ( ) : void {
-		if ( $this->init ) return;
-		$this->init = true;
-
+	# Фаза 1: скелет. Переопределяется в наследниках.
+	protected function build ( ) : void {
 		$vt = new visuotag( );
 		$vt = $vt->tag( $this->tag , class : $this->css_class );
-
-		foreach ( $this->elements as $el ) {
-			$el->init( );
-			if ( $el->vt_start === null ) continue;
-			$vt->append( $el->vt_start );
-		}
-
 		$this->vt_start = $vt;
 		$this->vt_end   = $vt;
 	}
 
-	public function add ( visuoel $el ) : static {
-		$el->parent = $this;
+	# Фаза 1 + фаза 2.
+	public function init ( ) : void {
+		if ( $this->init ) return;
+		$this->init = true;
+
+		$this->build( );
+
+		if ( $this->vt_end === null ) return;
+
+		foreach ( $this->elements as $el ) {
+			if ( $el instanceof visuoel ) {
+				$el->init( );
+				if ( $el->vt_start === null ) continue;
+				$this->vt_end->append( $el->vt_start );
+			} elseif ( $el instanceof visuotag ) {
+				$this->vt_end->append( $el );
+			}
+		}
+	}
+
+	public function add ( visuoel|visuotag $el ) : static {
+		if ( $el instanceof visuoel ) {
+			$el->parent = $this;
+		}
 		$this->elements[ ] = $el;
 		return $this;
 	}
 
 	# --- lazy factories ---
-	# Общий параметр null|visuoel__data — чтобы наследники могли сузить возврат,
-	# не нарушая контравариантность параметра.
 	public function form ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->visuoel_form === null ) {
 			$this->visuoel_form  = new visuoel_form( $this , $__data );
@@ -107,7 +130,7 @@ class visuoel__data {
 		$this->node = $node;
 	}
 
-	public function add ( visuoel $el ) : static {
+	public function add ( visuoel|visuotag $el ) : static {
 		$this->node->add( $el );
 		return $this;
 	}
