@@ -1,0 +1,38 @@
+<?PHP
+
+class visuoel_tabs_page extends visuoel_group_element {
+	protected string $css_class = 'tab_page';
+
+	public null|visuotag $vt_title = null;
+
+	protected function make_default_data ( ) : visuoel__data {
+		return new visuoel_tabs_page__data( $this );
+	}
+
+	protected function build ( ) : void {
+		$id = 'tab_' . spl_object_id( $this );
+		$d  = $this->__data;
+
+		$title = new visuotag( );
+		$title = $title->tag( 'span' , class : 'tab_title' );
+		$title->data_add( 'tab-target' , $id , false );
+		$title->attrs_actions_add( 'onclick' , 'visuotabs_show(this)' );
+		if ( $d->title !== '' ) $title->content( $d->title );
+		$this->vt_title = $title;
+
+		$page = new visuotag( );
+		$page = $page->tag( 'div' , class : 'tab_page' , id : $id );
+
+		$this->vt_start = $page;
+		$this->vt_end   = $page;
+	}
+}
+
+class visuoel_tabs_page__data extends visuoel_group_element__data {
+	public string $title = '';
+
+	public function set ( string $title ) : static {
+		$this->title = $title;
+		return $this;
+	}
+}
