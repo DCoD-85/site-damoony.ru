@@ -1,20 +1,10 @@
 <?PHP
 
 # visuoel — база и корень дерева UI-элементов.
-#
-# Инициализация:
-#   init()
-#     ├── build()                       ← фаза 1: собственный скелет
-#     └── foreach elements:             ← фаза 2: дети пришиваются в vt_end
-#           visuoel  → $el->init(); $this->vt_end->append( $el->vt_start )
-#           visuotag → $this->vt_end->append( $el )
-#
-# vt_start — верх поддерева (attach point для родителя).
-# vt_end   — узел-слот: дети пришиваются сюда.
-#            у одиночных элементов (input, link_simple) vt_start === vt_end.
-#            у контейнеров (form, table) vt_end — вложенный узел (form_body, tbody).
-#
-# elements[] — список детей: visuoel | visuotag.
+# ...
+# $singleton — режим фабрик:
+#   true  — повторный вызов возвращает тот же элемент (одна форма на корень);
+#   false — каждый вызов создаёт новый элемент (много элементов в группе).
 
 class visuoel {
 	# --- refs ---
@@ -23,16 +13,18 @@ class visuoel {
 
 	# --- state ---
 	public bool $init = false;
+	public bool $singleton = true;
 	public null|visuoel__data $__data = null;
 	public null|visuotag $vt_start = null;
 	public null|visuotag $vt_end   = null;
 	public array $elements = [ ];
 
 	# --- groups (lazy) ---
-	public null|visuoel_group $visuoel_group = null;
-	public null|visuoel_form  $visuoel_form  = null;
+	public null|visuoel_group  $visuoel_group  = null;
+	public null|visuoel_form   $visuoel_form   = null;
+	public null|visuoel_primer $visuoel_primer = null;
 
-	# --- wrap config (override in subclasses) ---
+	# --- wrap config ---
 	protected string $tag       = 'div';
 	protected string $css_class = 'visuoel';
 
@@ -47,7 +39,6 @@ class visuoel {
 		return new visuoel__data( $this );
 	}
 
-	# Фаза 1: скелет. Переопределяется в наследниках.
 	protected function build ( ) : void {
 		$vt = new visuotag( );
 		$vt = $vt->tag( $this->tag , class : $this->css_class );
@@ -55,7 +46,6 @@ class visuoel {
 		$this->vt_end   = $vt;
 	}
 
-	# Фаза 1 + фаза 2.
 	public function init ( ) : void {
 		if ( $this->init ) return;
 		$this->init = true;
@@ -83,14 +73,58 @@ class visuoel {
 		return $this;
 	}
 
+	public function remove ( visuoel|visuotag $el ) : bool {
+		foreach ( $this->elements as $i => $child ) {
+			if ( $child === $el ) {
+				if ( $child instanceof visuoel ) $child->parent = null;
+				unset( $this->elements[ $i ] );
+				$this->elements = array_values( $this->elements );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public function remove_class ( string $class ) : int {
+		$removed = 0;
+		foreach ( $this->elements as $i => $child ) {
+			if ( $child instanceof $class ) {
+				if ( $child instanceof visuoel ) $child->parent = null;
+				unset( $this->elements[ $i ] );
+				$removed++;
+			}
+		}
+		$this->elements = array_values( $this->elements );
+		return $removed;
+	}
+
+	public function clear ( ) : static {
+		foreach ( $this->elements as $child ) {
+			if ( $child instanceof visuoel ) $child->parent = null;
+		}
+		$this->elements = [ ];
+		return $this;
+	}
+
 	# --- lazy factories ---
 	public function form ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->visuoel_form === null ) {
-			$this->visuoel_form  = new visuoel_form( $this , $__data );
-			$this->visuoel_group = $this->visuoel_form;
-			$this->elements[ ]   = $this->visuoel_form;
-		}
-		return $this->visuoel_form;
+		if ( $this->singleton && $this->visuoel_form !== null ) return $this->visuoel_form;
+
+		$el = new visuoel_form( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_form = $el;
+		$this->elements[ ]  = $el;
+		return $el;
+	}
+
+	public function primer ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_primer !== null ) return $this->visuoel_primer;
+
+		$el = new visuoel_primer( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_primer = $el;
+		$this->elements[ ]    = $el;
+		return $el;
 	}
 
 	# --- getters ---
@@ -132,6 +166,19 @@ class visuoel__data {
 
 	public function add ( visuoel|visuotag $el ) : static {
 		$this->node->add( $el );
+		return $this;
+	}
+
+	public function remove ( visuoel|visuotag $el ) : bool {
+		return $this->node->remove( $el );
+	}
+
+	public function remove_class ( string $class ) : int {
+		return $this->node->remove_class( $class );
+	}
+
+	public function clear ( ) : static {
+		$this->node->clear( );
 		return $this;
 	}
 }

@@ -1,11 +1,11 @@
 <?PHP
 
 # visuoel_form — группа form.
-# Переопределяем build(): обёртка группы — <div class="blockform">.
-# (b) — своя обёртка на уровне группы, элемент form_form идёт внутрь без своей.
+# $singleton = true: один form_form на группу.
 
 class visuoel_form extends visuoel_group {
 	protected string $css_class = 'blockform';
+	public bool $singleton = true;
 
 	public null|visuoel_form_form $visuoel_form_form = null;
 
@@ -20,15 +20,17 @@ class visuoel_form extends visuoel_group {
 		$this->vt_end   = $vt;
 	}
 
-	# Переопределяем родительский visuoel::form():
-	# на группе form() создаёт не группу, а элемент form_form.
 	public function form ( null|visuoel__data $__data = null ) : visuoel_form_form {
-		if ( $this->visuoel_form_form === null ) {
-			$data = $__data instanceof visuoel_form_form__data ? $__data : null;
-			$this->visuoel_form_form = new visuoel_form_form( $this , $data );
-			$this->elements = [ $this->visuoel_form_form ];
+		if ( $this->singleton && $this->visuoel_form_form !== null ) {
+			return $this->visuoel_form_form;
 		}
-		return $this->visuoel_form_form;
+
+		$data = $__data instanceof visuoel_form_form__data ? $__data : null;
+		$el = new visuoel_form_form( $this , $data );
+
+		if ( $this->singleton ) $this->visuoel_form_form = $el;
+		$this->elements = [ $el ];
+		return $el;
 	}
 
 	public function get_form_form__data ( ) : null|visuoel_form_form__data {

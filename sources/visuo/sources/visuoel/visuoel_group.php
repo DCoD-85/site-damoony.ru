@@ -1,8 +1,8 @@
 <?PHP
 
-# visuoel_group — база для групп (form, input, table, block, link, user).
-# Обёртка по умолчанию: <div class="group">[vt_end === vt_start]</div>.
-# Конкретные группы переопределяют $css_class, а при необходимости — build().
+# visuoel_group — база для групп (form, primer, input, table, block, link, user).
+# $singleton наследуется от visuoel: по умолчанию true.
+# Группа-наследник может переопределить: protected $singleton = false.
 
 class visuoel_group extends visuoel {
 	protected string $css_class = 'group';
