@@ -1,7 +1,7 @@
 <?PHP
 
-# visuoel_group_element — база для всех элементов групп.
-# Обёртка: <div class="element"> ... </div>.
+# visuoel_group_element — база для элементов групп.
+# Обёртка по умолчанию: <div class="element">[children]</div>.
 
 class visuoel_group_element extends visuoel {
 	protected string $css_class = 'element';
