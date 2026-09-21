@@ -1,10 +1,20 @@
 <?PHP
 
 # visuoel — база и корень дерева UI-элементов.
-# ...
+#
+# Инициализация:
+#   init()
+#     ├── build()                       ← фаза 1: собственный скелет
+#     └── foreach elements:             ← фаза 2: дети пришиваются в vt_end
+#           visuoel  → $el->init(); $this->vt_end->append( $el->vt_start )
+#           visuotag → $el->prepare(); $this->vt_end->append( $el )
+#
+# vt_start — верх поддерева (attach point для родителя).
+# vt_end   — узел-слот: дети пришиваются сюда.
+#
 # $singleton — режим фабрик:
-#   true  — повторный вызов возвращает тот же элемент (одна форма на корень);
-#   false — каждый вызов создаёт новый элемент (много элементов в группе).
+#   true  — повторный вызов возвращает тот же элемент;
+#   false — каждый вызов создаёт новый.
 
 class visuoel {
 	# --- refs ---
@@ -20,12 +30,11 @@ class visuoel {
 	public array $elements = [ ];
 
 	# --- groups (lazy) ---
-		public null|visuoel_group  $visuoel_group  = null;
-	public null|visuoel_form   $visuoel_form   = null;
-	public null|visuoel_primer $visuoel_primer = null;
-	public null|visuoel_tabs   $visuoel_tabs   = null;
+	public null|visuoel_group $visuoel_group = null;
+	public null|visuoel_form  $visuoel_form  = null;
+	public null|visuoel_tabs  $visuoel_tabs  = null;
 
-	# --- wrap config ---
+	# --- wrap config (override in subclasses) ---
 	protected string $tag       = 'div';
 	protected string $css_class = 'visuoel';
 
@@ -119,16 +128,6 @@ class visuoel {
 		return $el;
 	}
 
-	public function primer ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_primer !== null ) return $this->visuoel_primer;
-
-		$el = new visuoel_primer( $this , $__data );
-		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
-		$this->visuoel_primer = $el;
-		$this->elements[ ]    = $el;
-		return $el;
-	}
-	
 	public function tabs ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_tabs !== null ) return $this->visuoel_tabs;
 

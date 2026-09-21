@@ -11,10 +11,6 @@ $visuoelpath = __DIR__ . DS . 'visuoel' . DS;
 ( include_once $file = $visuoelpath . 'visuoel_form' . DS . 'visuoel_form_form.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_form.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
-( include_once $file = $visuoelpath . 'visuoel_primer' . DS . 'visuoel_primer_text.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuoelpath . 'visuoel_primer' . DS . 'visuoel_primer_image.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuoelpath . 'visuoel_primer.php' ) or error_file( $file , __FILE__ , __LINE__ );
-
 ( include_once $file = $visuoelpath . 'visuoel_tabs' . DS . 'visuoel_tabs_page.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_tabs.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
