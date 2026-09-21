@@ -133,6 +133,7 @@ class algoritm_lang_form
 		$center = $main->alliasglobal->center;
 		$right = $main->alliasglobal->right;
 		
+		/*
 		$db = $main->db;
 		$db->schema( )->drop( 'testusers' )->run( );
 		$db->schema( )->create(
@@ -199,9 +200,31 @@ class algoritm_lang_form
 
 		$vt_center = new \visuotag( );
 		$vt_center->element( 'tablebox' , $tablebox );
+		*/
+
+		# testвц
+		
+		$vt_center = new \visuotag( );
+		
+		$inputlogin_login = new \visuoelement( $visuorelease );
+		$inputlogin_login->input( )->text( );
+		$inputlogin_login->get_input_text__data( )->set( 'form[login]' , label_comment : 'Логин' );
+		
+		$inputlogin_login2 = new \visuoelement( $visuorelease );
+		$inputlogin_login2->input( )->text( );
+		$inputlogin_login2->get_input_text__data( )->set( 'form[login]' , label_comment : 'Логин2' );
+
+		$form = new \visuoelement( $visuorelease );
+		$form->form( )->form( );
+		$form__data = $form->get_form_form__data( );
+		$form__data->set( 'testform', 'post' , 'test' , title_text : 'Форма авторизации' , form_jquery : true );
+		$form__data->add( $inputlogin_login );
+		$form__data->add( $inputlogin_login2 );
+		
+		$vt_center->element( 'tablebox' , $form );
 
 		$center->visuotag( )->append( $vt_center );
-
+		
 		return true;
 	}
 

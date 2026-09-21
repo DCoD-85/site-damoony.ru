@@ -20,9 +20,10 @@ class visuoel {
 	public array $elements = [ ];
 
 	# --- groups (lazy) ---
-	public null|visuoel_group  $visuoel_group  = null;
+		public null|visuoel_group  $visuoel_group  = null;
 	public null|visuoel_form   $visuoel_form   = null;
 	public null|visuoel_primer $visuoel_primer = null;
+	public null|visuoel_tabs   $visuoel_tabs   = null;
 
 	# --- wrap config ---
 	protected string $tag       = 'div';
@@ -60,6 +61,7 @@ class visuoel {
 				if ( $el->vt_start === null ) continue;
 				$this->vt_end->append( $el->vt_start );
 			} elseif ( $el instanceof visuotag ) {
+				$el->prepare( );
 				$this->vt_end->append( $el );
 			}
 		}
@@ -124,6 +126,16 @@ class visuoel {
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
 		$this->visuoel_primer = $el;
 		$this->elements[ ]    = $el;
+		return $el;
+	}
+	
+	public function tabs ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_tabs !== null ) return $this->visuoel_tabs;
+
+		$el = new visuoel_tabs( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_tabs = $el;
+		$this->elements[ ]  = $el;
 		return $el;
 	}
 

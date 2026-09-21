@@ -23,17 +23,10 @@ $visuosources = __DIR__ . DS . 'sources' . DS;
 ( include_once $file = $visuosources . 'visuoelement.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuoelements.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuostruct.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoelement.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoelements.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 # new: visuoel (base + group + element) — строится параллельно visuoelement
-# new: visuoel (base + group + element) — строится параллельно visuoelement
-# new: visuoel (base + group + element) — строится параллельно visuoelement
 ( include_once $file = $visuosources . 'visuoel.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoel' . DS . 'visuoel_group.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoel' . DS . 'visuoel_group_element.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoel' . DS . 'visuoel_form' . DS . 'visuoel_form_form.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoel' . DS . 'visuoel_form.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuosources . 'visuoels.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 ( include_once $file = $visuosources . 'visuorelease.php' ) or error_file( $file , __FILE__ , __LINE__ );
 

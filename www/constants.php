@@ -13,4 +13,6 @@ if( ! defined( 'DB_LIMIT_ONE' ) )  define( 'DB_LIMIT_ONE'  , 1 );
 if( ! defined( 'DB_LIMIT_PAGE' ) ) define( 'DB_LIMIT_PAGE' , 10 );
 if( ! defined( 'DB_LIMIT_MAX' ) )  define( 'DB_LIMIT_MAX'  , 1000 );
 
+if( ! defined( 'VISUOLINK_RAND_DEFAULT' ) ) define( 'VISUOLINK_RAND_DEFAULT' , true );
+
 ?>

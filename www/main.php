@@ -41,7 +41,7 @@ class main {
 
 	
 	public \algoritm_ $algoritm_;
-	public null|\damoony\www\algoritm|\damoony\login\algoritm|\damoony\oxydog\algoritm $algoritm = null;
+	public null|\damoony\www\algoritm|\damoony\login\algoritm $algoritm = null;
 	# public subalgoritm $subalgoritm;
 
 	# visuo
@@ -110,7 +110,6 @@ class main {
 		$url = $main->library->url( );
 		$static_domain = $main->main_settings->domain_accepted( false );
 		$static_allias = $url->static_allias[ 1 ];
-		
 		# domain
 		$this->domain = new domain( $this );
 		$this->domainglobal = new domainglobal( $this );
@@ -199,8 +198,8 @@ class main_path {
 class main_settings {
 	# vars
 	public null|main $main = null;
-	public string $domain_real_name;	# С‚РµРєСѓС‰РµРµ СЂРµР°Р»СЊРЅРѕРµ РЅР°Р·РІР°РЅРёРµ РґРѕРјРµРЅР°
-	public string $allias_real_name;		# С‚РµРєСѓС‰РµРµ СЂРµР°Р»СЊРЅРѕРµ РЅР°Р·РІР°РЅРёРµ Р°Р»Р»РёР°СЃР°
+	public string $domain_real_name;	# 
+	public string $allias_real_name;		# 
 	private string $language;
 	private string $render;
 	public bool $visuoelement_render_classic = true;

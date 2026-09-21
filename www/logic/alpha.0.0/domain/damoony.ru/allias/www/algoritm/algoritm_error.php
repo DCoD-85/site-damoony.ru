@@ -1,9 +1,16 @@
 <?PHP
 
+namespace damoony\www;
+
+use \main;
+use \algoritm_;
+use \algoritmdata_;
+use \visuotag;
+use \visuoelement;
+
 class algoritm_error
 	extends algoritm_ {
 	# vars
-	public algoritm $algoritm;
 	public array $args = [ ];
 	# methods
 	public function __construct( main $main , array $args = [ ] ) {

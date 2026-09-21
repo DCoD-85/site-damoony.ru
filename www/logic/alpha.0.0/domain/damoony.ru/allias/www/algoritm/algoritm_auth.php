@@ -1,12 +1,24 @@
 <?PHP
 
-class algoritm_auth {
+namespace damoony\www;
+
+use \main;
+use \algoritm_;
+use \algoritmdata_;
+use \visuotag;
+use \visuorelease;
+use \visuoelement;
+
+class algoritm_auth
+	extends algoritm_ {
 	# vars
-	public algoritm $algoritm;
 	public array $args = [ ];
 	# methods
-	public function __construct ( algoritm $algoritm ) {
-		$this->algoritm = $algoritm;
+	public function __construct( main $main , array $args = [ ] ) {
+		$this->main = $main;
+		$this->args = $args;
+		$this->algoritm = $main->algoritm;
+		$this->algoritmdata = new algoritmdata_( );
 	}
 	public function args ( array $args ) {
 		$this->args = $args;
@@ -25,10 +37,10 @@ class algoritm_auth {
 		$top = $main->alliasglobal->center;
 		$center = $main->alliasglobal->center;
 		
-		$scheme = $main->alliasglobal->scheme;
-		$scheme->load( 'auth' );
+		$scheme = $main->alliasscheme;
+		$scheme->load( 'error' );
 
-		$vt_center = new visuotag( $this->visuorelease );
+		$vt_center = new visuotag( $main->visuorelease );
 		$vt_center->tag( 'div' )->content( 'Вы должны быть зарегистрированы для просмотра данной страницы' );
 
 		$center->visuotag( )->append( $vt_center );

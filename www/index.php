@@ -118,6 +118,6 @@ $url = null;// 'https://login.damoony2.ru/ru-ru/form';
 $main_settings = new main_settings( );
 
 $main = new main( $main_settings );
-$main->main( $url );
+$main->main( );
 
 ?>

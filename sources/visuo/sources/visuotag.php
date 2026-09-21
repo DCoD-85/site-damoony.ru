@@ -17,9 +17,11 @@ class visuotag {
 	public array $elements = [ ];   # [ visuotag | string , ... ]
 
 	# --- hooks ---
+		# --- hooks ---
 	private null|visuostruct  $visuostruct      = null;
 	private null|string       $visuostruct_name = null;
 	private null|visuoelement $visuoelement     = null;
+	private null|visuoel      $visuoel          = null;
 
 	### methods
 	public function __construct ( null|visuorelease $visuorelease = null ,
@@ -101,6 +103,18 @@ class visuotag {
 		$visuoelement->name = $visuoelement_name;
 		if ( $init === true ) $visuoelement->init( );
 		$newtag->visuoelement = $visuoelement;
+
+		return $this;
+	}
+	# Создать узел-заглушку для visuoel (новый UI-движок).
+	# Возвращает $this — цепочка продолжается на текущем узле.
+	# Плейсхолдер в release не оборачивается: содержимое — вывод $visuoel->release().
+	public function el ( null|visuoel $visuoel = null , bool $init = false ) : visuotag {
+		$newtag = $this->tag( 'el' , true , class: 'cl_el' );
+
+		$visuoel = $visuoel ?: new visuoel( );
+		if ( $init === true ) $visuoel->init( );
+		$newtag->visuoel = $visuoel;
 
 		return $this;
 	}
@@ -405,7 +419,7 @@ class visuotag {
 			# - root — не оборачивается
 			# - visuoelement-узлы — не оборачиваются здесь (их подготавливает prepare_visuoelement)
 			# - всё остальное — оборачивается в <tag ...>...</tag>
-			if ( $root === false && $this->visuoelement === null ) {
+			if ( $root === false && $this->visuoelement === null && $this->visuoel === null ) {
 				$html = '<' . $tagname . $html_attrs . '>' . $html . '</' . $tagname . '>';
 			}
 		} else {
@@ -431,6 +445,8 @@ class visuotag {
 			$this->prepare_visuostruct( );
 		} elseif ( $this->visuoelement !== null ) {
 			$this->prepare_visuoelement( );
+		} elseif ( $this->visuoel !== null ) {
+			$this->prepare_visuoel( );
 		}
 
 		# recurse
@@ -456,6 +472,16 @@ class visuotag {
 			if ( $this->visuoelement->visuotag_start !== null ) {
 				$this->visuoelement->release( $this );
 			}
+		}
+	}
+
+	private function prepare_visuoel ( ) : void {
+		if ( ! $this->visuoel->init ) {
+			$this->visuoel->init( );
+		}
+		if ( $this->visuoel->vt_start !== null ) {
+			$this->visuoel->vt_start->visuotag = $this;
+			$this->elements[ ] = $this->visuoel->vt_start;
 		}
 	}
 

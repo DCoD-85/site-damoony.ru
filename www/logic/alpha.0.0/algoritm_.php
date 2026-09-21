@@ -4,7 +4,7 @@ class algoritm_ {
 	# --- core references ---
 	public main $main;
 
-	public \damoony\www\algoritm|\damoony\login\algoritm|\damoony\oxydog\algoritm $algoritm;
+	public \damoony\www\algoritm|\damoony\login\algoritm $algoritm;
 	public array $args = [ ];
 	public null|algoritmdata_ $algoritmdata = null;
 	public string $path = '';
