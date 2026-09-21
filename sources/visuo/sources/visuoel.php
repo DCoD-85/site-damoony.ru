@@ -33,6 +33,7 @@ class visuoel {
 	public null|visuoel_group $visuoel_group = null;
 	public null|visuoel_form  $visuoel_form  = null;
 	public null|visuoel_tabs  $visuoel_tabs  = null;
+	public null|visuoel_input $visuoel_input = null;
 
 	# --- wrap config (override in subclasses) ---
 	protected string $tag       = 'div';
@@ -49,9 +50,9 @@ class visuoel {
 		return new visuoel__data( $this );
 	}
 
+	# Корень — прозрачный. Обёртку рисуют только группа и элемент группы.
 	protected function build ( ) : void {
 		$vt = new visuotag( );
-		$vt = $vt->tag( $this->tag , class : $this->css_class );
 		$this->vt_start = $vt;
 		$this->vt_end   = $vt;
 	}
@@ -138,6 +139,16 @@ class visuoel {
 		return $el;
 	}
 
+	public function input ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_input !== null ) return $this->visuoel_input;
+
+		$el = new visuoel_input( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_input = $el;
+		$this->elements[ ]   = $el;
+		return $el;
+	}
+
 	# --- getters ---
 	public function data ( ) : null|visuoel__data {
 		return $this->__data;
@@ -153,6 +164,21 @@ class visuoel {
 
 	public function is_root ( ) : bool {
 		return $this->parent === null;
+	}
+	public function get_input_text__data ( ) : null|visuoel_input_text__data {
+		return $this->visuoel_input?->get_text__data( );
+	}
+
+	public function get_input_hidden__data ( ) : null|visuoel_input_hidden__data {
+		return $this->visuoel_input?->get_hidden__data( );
+	}
+
+	public function get_input_password__data ( ) : null|visuoel_input_password__data {
+		return $this->visuoel_input?->get_password__data( );
+	}
+
+	public function get_input_submit__data ( ) : null|visuoel_input_submit__data {
+		return $this->visuoel_input?->get_submit__data( );
 	}
 
 	public function release ( ) : string {

@@ -97,8 +97,8 @@ $html = $root->release( );
 echo 'is_string: <b>' . var_export( is_string( $html ) , true ) . '</b> (ожидаем true)<br>';
 echo 'len: <b>' . strlen( $html ) . '</b> (ожидаем &gt; 0)<br>';
 
-echo '<h2>17. HTML contains &lt;div class="visuoel"&gt;</h2>';
-echo 'contains: <b>' . var_export( str_contains( $html , 'class="visuoel"' ) , true ) . '</b> (ожидаем true)<br>';
+echo '<h2>17. HTML НЕ содержит обёртки &lt;div class="visuoel"&gt;</h2>';
+echo 'not contains: <b>' . var_export( ! str_contains( $html , 'class="visuoel"' ) , true ) . '</b> (ожидаем true)<br>';
 
 echo '<h2>18. HTML contains &lt;div class="blockform"&gt;</h2>';
 echo 'contains: <b>' . var_export( str_contains( $html , 'class="blockform"' ) , true ) . '</b> (ожидаем true)<br>';
