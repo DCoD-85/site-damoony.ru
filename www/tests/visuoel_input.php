@@ -113,7 +113,7 @@ echo 'is_string: <b>' . var_export( is_string( $html ) , true ) . '</b><br>';
 echo 'len: <b>' . strlen( $html ) . '</b><br>';
 
 echo '<h2>17. HTML содержит &lt;div class="input"&gt;</h2>';
-echo 'not contains: <b>' . var_export( ! str_contains( $html , 'class="input"' ) , true ) . '</b> (ожидаем true)<br>';
+echo 'contains: <b>' . var_export( str_contains( $html , 'class="input"' ) , true ) . '</b> (ожидаем true)<br>';
 
 echo '<h2>18. HTML содержит &lt;input type="text"&gt;</h2>';
 echo 'contains type: <b>' . var_export( str_contains( $html , 'type="text"' ) , true ) . '</b><br>';
