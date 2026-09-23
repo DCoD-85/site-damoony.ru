@@ -46,6 +46,13 @@ class visuoel_form_form extends visuoel_group_element {
 		$this->vt_start = $form;   # <form> node
 		$this->vt_end   = $body;   # <div class="form_body"> node
 	}
+
+	public function fieldset ( null|visuoel__data $__data = null ) : visuoel_form_fieldset {
+		$data = $__data instanceof visuoel_form_fieldset__data ? $__data : null;
+		$el = new visuoel_form_fieldset( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
 }
 
 class visuoel_form_form__data extends visuoel_group_element__data {

@@ -29,12 +29,14 @@ class visuoel {
 	public null|visuotag $vt_end   = null;
 	public array $elements = [ ];
 
-	public null|visuoel_group  $visuoel_group  = null;
-	public null|visuoel_form   $visuoel_form   = null;
-	public null|visuoel_tabs   $visuoel_tabs   = null;
-	public null|visuoel_input  $visuoel_input  = null;
-	public null|visuoel_field  $visuoel_field  = null;
-	public null|visuoel_button $visuoel_button = null;
+	public null|visuoel_group   $visuoel_group   = null;
+	public null|visuoel_form    $visuoel_form    = null;
+	public null|visuoel_tabs    $visuoel_tabs    = null;
+	public null|visuoel_input   $visuoel_input   = null;
+	public null|visuoel_field   $visuoel_field   = null;
+	public null|visuoel_button  $visuoel_button  = null;
+	public null|visuoel_block   $visuoel_block   = null;
+	public null|visuoel_message $visuoel_message = null;
 
 	# --- wrap config (override in subclasses) ---
 	protected string $tag       = 'div';
@@ -167,6 +169,26 @@ class visuoel {
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
 		$this->visuoel_button = $el;
 		$this->elements[ ]    = $el;
+		return $el;
+	}
+
+	public function block ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_block !== null ) return $this->visuoel_block;
+
+		$el = new visuoel_block( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_block = $el;
+		$this->elements[ ]   = $el;
+		return $el;
+	}
+
+	public function message ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_message !== null ) return $this->visuoel_message;
+
+		$el = new visuoel_message( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_message = $el;
+		$this->elements[ ]     = $el;
 		return $el;
 	}
 	
