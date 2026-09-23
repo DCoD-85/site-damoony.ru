@@ -39,6 +39,8 @@ require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox_group.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio_group.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input.php';
 
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field__element.php';
@@ -50,6 +52,8 @@ require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_select.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field.php';
 
 echo '<h1>visuoel — field tests</h1>';
@@ -375,6 +379,98 @@ echo '<h2>37. Живой рендер (checkbox)</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
 
 echo '<h2>38. Живой рендер (radio)</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h2 . '</div>';
+
+echo '<hr>';
+echo '<h1>checkbox_group / radio_group</h1>';
+
+$ve = new visuoel( );
+
+$interests = $ve->field( )->checkbox_group( );
+$interests->data( )->set( 'interests' )->label( 'Интересы' )->hint( 'Выберите один или несколько' );
+$interests->data( )->options( [
+	'sport' => 'Спорт' ,
+	'music' => 'Музыка' ,
+	'books' => 'Книги' ,
+] );
+$interests->data( )->selected( [ 'music' , 'books' ] );
+
+$ve->init( );
+$h = $ve->release( );
+
+echo '<h2>39. field/checkbox_group — структура</h2>';
+foreach ( [
+	'<div class="field field_checkbox_group">' ,
+	'<div class="field_label">Интересы</div>' ,
+	'<div class="options">' ,
+	'<div class="option">' ,
+	'<input type="checkbox"' ,
+	'name="interests[]"' ,
+	'value="sport"' ,
+	'value="music"' ,
+	'value="books"' ,
+	'Спорт' ,
+	'Музыка' ,
+	'Книги' ,
+	'checked="checked"' ,
+	'<div class="hint">Выберите один или несколько</div>' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h , $needle ) , true ) . '</b><br>';
+}
+
+echo '<h2>40. field/checkbox_group — selected: 2 из 3</h2>';
+echo 'checked count: <b>' . substr_count( $h , 'checked="checked"' ) . '</b> (ожидаем 2)<br>';
+echo 'music checked: <b>' . var_export( (bool) preg_match( '/value="music"[^>]*checked="checked"/' , $h ) , true ) . '</b><br>';
+echo 'books checked: <b>' . var_export( (bool) preg_match( '/value="books"[^>]*checked="checked"/' , $h ) , true ) . '</b><br>';
+echo 'sport NOT checked: <b>' . var_export( ! preg_match( '/value="sport"[^>]*checked="checked"/' , $h ) , true ) . '</b><br>';
+
+echo '<h2>41. field/radio_group — структура</h2>';
+$ve2 = new visuoel( );
+$gender = $ve2->field( )->radio_group( );
+$gender->data( )->set( 'gender' )->label( 'Пол' )->required( );
+$gender->data( )->options( [
+	'm' => 'Мужской' ,
+	'f' => 'Женский' ,
+] );
+$gender->data( )->selected( 'f' );
+
+$ve2->init( );
+$h2 = $ve2->release( );
+
+foreach ( [
+	'<div class="field field_radio_group">' ,
+	'<div class="field_label">Пол</div>' ,
+	'<input type="radio"' ,
+	'name="gender"' ,
+	'value="m"' ,
+	'value="f"' ,
+	'checked="checked"' ,
+	'Мужской' ,
+	'Женский' ,
+	'required="required"' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h2 , $needle ) , true ) . '</b><br>';
+}
+
+echo 'name="gender" count: <b>' . substr_count( $h2 , 'name="gender"' ) . '</b> (ожидаем 2)<br>';
+echo 'checked count: <b>' . substr_count( $h2 , 'checked="checked"' ) . '</b> (ожидаем 1)<br>';
+echo 'f checked: <b>' . var_export( (bool) preg_match( '/value="f"[^>]*checked="checked"/' , $h2 ) , true ) . '</b><br>';
+echo 'm NOT checked: <b>' . var_export( ! preg_match( '/value="m"[^>]*checked="checked"/' , $h2 ) , true ) . '</b><br>';
+
+echo '<h2>42. Полный HTML (checkbox_group)</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h )
+	. '</pre>';
+
+echo '<h2>43. Полный HTML (radio_group)</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h2 )
+	. '</pre>';
+
+echo '<h2>44. Живой рендер (checkbox_group)</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
+
+echo '<h2>45. Живой рендер (radio_group)</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h2 . '</div>';
 
 echo '<hr>done';

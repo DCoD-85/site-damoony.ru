@@ -60,6 +60,34 @@ class visuoel_input extends visuoel_group {
 		return $el;
 	}
 
+	public function checkbox ( null|visuoel__data $__data = null ) : visuoel_input_checkbox {
+		$data = $__data instanceof visuoel_input_checkbox__data ? $__data : null;
+		$el = new visuoel_input_checkbox( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function radio ( null|visuoel__data $__data = null ) : visuoel_input_radio {
+		$data = $__data instanceof visuoel_input_radio__data ? $__data : null;
+		$el = new visuoel_input_radio( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function checkbox_group ( null|visuoel__data $__data = null ) : visuoel_input_checkbox_group {
+		$data = $__data instanceof visuoel_input_checkbox_group__data ? $__data : null;
+		$el = new visuoel_input_checkbox_group( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function radio_group ( null|visuoel__data $__data = null ) : visuoel_input_radio_group {
+		$data = $__data instanceof visuoel_input_radio_group__data ? $__data : null;
+		$el = new visuoel_input_radio_group( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
 	public function submit ( null|visuoel__data $__data = null ) : visuoel_input_submit {
 		$data = $__data instanceof visuoel_input_submit__data ? $__data : null;
 		$el = new visuoel_input_submit( $this , $data );
@@ -130,7 +158,7 @@ class visuoel_input extends visuoel_group {
 		}
 		return null;
 	}
-	
+
 	public function get_submit__data ( ) : null|visuoel_input_submit__data {
 		foreach ( $this->elements as $el ) {
 			if ( $el instanceof visuoel_input_submit ) return $el->data( );

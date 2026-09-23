@@ -77,6 +77,20 @@ class visuoel_field extends visuoel_group {
 		$this->elements[ ] = $el;
 		return $el;
 	}
+
+	public function checkbox_group ( null|visuoel__data $__data = null ) : visuoel_field_checkbox_group {
+		$data = $__data instanceof visuoel_field_checkbox_group__data ? $__data : null;
+		$el = new visuoel_field_checkbox_group( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function radio_group ( null|visuoel__data $__data = null ) : visuoel_field_radio_group {
+		$data = $__data instanceof visuoel_field_radio_group__data ? $__data : null;
+		$el = new visuoel_field_radio_group( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
 }
 
 class visuoel_field__data extends visuoel_group__data {
