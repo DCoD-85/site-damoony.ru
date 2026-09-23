@@ -5,6 +5,12 @@ class visuoel_tabs_page extends visuoel_group_element {
 
 	public null|visuotag $vt_title = null;
 
+	public function data ( ) : visuoel_tabs_page__data {
+		/** @var visuoel_tabs_page__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_tabs_page__data( $this );
 	}

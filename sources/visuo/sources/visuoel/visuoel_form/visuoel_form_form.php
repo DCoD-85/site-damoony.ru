@@ -15,6 +15,12 @@ class visuoel_form_form extends visuoel_group_element {
 	protected string $tag       = 'form';
 	protected string $css_class = 'form_form';
 
+	public function data ( ) : visuoel_form_form__data {
+		/** @var visuoel_form_form__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_form_form__data( $this );
 	}

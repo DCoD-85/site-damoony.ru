@@ -1,6 +1,12 @@
 <?PHP
 
 abstract class visuoel_block__element extends visuoel_group_element {
+	public function data ( ) : visuoel_block__element__data {
+		/** @var visuoel_block__element__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_block__element__data( $this );
 	}

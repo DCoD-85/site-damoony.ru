@@ -3,6 +3,12 @@
 abstract class visuoel_message__element extends visuoel_group_element {
 	abstract protected function message_type ( ) : string;
 
+	public function data ( ) : visuoel_message__element__data {
+		/** @var visuoel_message__element__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_message__element__data( $this );
 	}

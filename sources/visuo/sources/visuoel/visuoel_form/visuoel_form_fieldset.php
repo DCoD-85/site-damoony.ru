@@ -10,6 +10,12 @@ class visuoel_form_fieldset extends visuoel_group_element {
 	protected string $tag       = 'fieldset';
 	protected string $css_class = 'form_fieldset';
 
+	public function data ( ) : visuoel_form_fieldset__data {
+		/** @var visuoel_form_fieldset__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_form_fieldset__data( $this );
 	}

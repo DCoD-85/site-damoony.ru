@@ -8,6 +8,12 @@ abstract class visuoel_field__element extends visuoel_group_element {
 	abstract protected function input_type ( ) : string;
 	abstract protected function make_input ( ) : visuoel_input__element;
 
+	public function data ( ) : visuoel_field__element__data {
+		/** @var visuoel_field__element__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_field__element__data( $this );
 	}

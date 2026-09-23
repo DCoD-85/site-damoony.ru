@@ -7,6 +7,12 @@
 abstract class visuoel_input__element extends visuoel_group_element {
 	abstract protected function input_type ( ) : string;
 
+	public function data ( ) : visuoel_input__element__data {
+		/** @var visuoel_input__element__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input__element__data( $this );
 	}
@@ -23,8 +29,9 @@ abstract class visuoel_input__element extends visuoel_group_element {
 		if ( $d->value        !== '' ) $vt->attrs_add( 'value'        , $d->value );
 		if ( $d->placeholder  !== '' ) $vt->attrs_add( 'placeholder'  , $d->placeholder );
 		if ( $d->autocomplete !== '' ) $vt->attrs_add( 'autocomplete' , $d->autocomplete );
-		if ( $d->accept !== '' )       $vt->attrs_add( 'accept'       , $d->accept );
+		if ( $d->accept       !== '' ) $vt->attrs_add( 'accept'       , $d->accept );
 		if ( $d->multiple )            $vt->attrs_add( 'multiple'     , 'multiple' );
+		if ( $d->checked )             $vt->attrs_add( 'checked'      , 'checked' );
 		if ( $d->required )            $vt->attrs_add( 'required'     , 'required' );
 		if ( $d->readonly )            $vt->attrs_add( 'readonly'     , 'readonly' );
 		if ( $d->disabled )            $vt->attrs_add( 'disabled'     , 'disabled' );
@@ -40,7 +47,8 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 	public string $value        = '';
 	public string $placeholder  = '';
 	public string $autocomplete = '';
-		public string $accept       = '';
+	public string $accept       = '';
+	public bool   $checked      = false;
 	public bool   $required     = false;
 	public bool   $multiple     = false;
 	public int    $rows         = 0;
@@ -87,6 +95,11 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 		return $this;
 	}
 
+	public function checked ( bool $v = true ) : static {
+		$this->checked = $v;
+		return $this;
+	}
+
 	public function rows ( int $rows ) : static {
 		$this->rows = $rows;
 		return $this;
@@ -121,7 +134,7 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 		$this->placeholder_option = $label;
 		return $this;
 	}
-	
+
 	public function required ( bool $v = true ) : static {
 		$this->required = $v;
 		return $this;

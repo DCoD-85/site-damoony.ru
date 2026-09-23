@@ -10,6 +10,12 @@
 abstract class visuoel_button__element extends visuoel_group_element {
 	abstract protected function button_type ( ) : string;
 
+	public function data ( ) : visuoel_button__element__data {
+		/** @var visuoel_button__element__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_button__element__data( $this );
 	}
