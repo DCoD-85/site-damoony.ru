@@ -31,6 +31,27 @@ class visuoel_input extends visuoel_group {
 		$this->elements[ ] = $el;
 		return $el;
 	}
+	
+	public function email ( null|visuoel__data $__data = null ) : visuoel_input_email {
+		$data = $__data instanceof visuoel_input_email__data ? $__data : null;
+		$el = new visuoel_input_email( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function file ( null|visuoel__data $__data = null ) : visuoel_input_file {
+		$data = $__data instanceof visuoel_input_file__data ? $__data : null;
+		$el = new visuoel_input_file( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function textarea ( null|visuoel__data $__data = null ) : visuoel_input_textarea {
+		$data = $__data instanceof visuoel_input_textarea__data ? $__data : null;
+		$el = new visuoel_input_textarea( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
 
 	public function submit ( null|visuoel__data $__data = null ) : visuoel_input_submit {
 		$data = $__data instanceof visuoel_input_submit__data ? $__data : null;
@@ -75,6 +96,27 @@ class visuoel_input extends visuoel_group {
 		return null;
 	}
 
+		public function get_email__data ( ) : null|visuoel_input_email__data {
+		foreach ( $this->elements as $el ) {
+			if ( $el instanceof visuoel_input_email ) return $el->data( );
+		}
+		return null;
+	}
+
+	public function get_file__data ( ) : null|visuoel_input_file__data {
+		foreach ( $this->elements as $el ) {
+			if ( $el instanceof visuoel_input_file ) return $el->data( );
+		}
+		return null;
+	}
+
+	public function get_textarea__data ( ) : null|visuoel_input_textarea__data {
+		foreach ( $this->elements as $el ) {
+			if ( $el instanceof visuoel_input_textarea ) return $el->data( );
+		}
+		return null;
+	}
+	
 	public function get_submit__data ( ) : null|visuoel_input_submit__data {
 		foreach ( $this->elements as $el ) {
 			if ( $el instanceof visuoel_input_submit ) return $el->data( );

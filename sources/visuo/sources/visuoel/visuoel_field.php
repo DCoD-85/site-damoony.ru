@@ -36,6 +36,26 @@ class visuoel_field extends visuoel_group {
 		$this->elements[ ] = $el;
 		return $el;
 	}
+		public function email ( null|visuoel__data $__data = null ) : visuoel_field_email {
+		$data = $__data instanceof visuoel_field_email__data ? $__data : null;
+		$el = new visuoel_field_email( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function file ( null|visuoel__data $__data = null ) : visuoel_field_file {
+		$data = $__data instanceof visuoel_field_file__data ? $__data : null;
+		$el = new visuoel_field_file( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
+	public function textarea ( null|visuoel__data $__data = null ) : visuoel_field_textarea {
+		$data = $__data instanceof visuoel_field_textarea__data ? $__data : null;
+		$el = new visuoel_field_textarea( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
 }
 
 class visuoel_field__data extends visuoel_group__data {
@@ -74,9 +94,13 @@ abstract class visuoel_field__element extends visuoel_group_element {
 		$inp->value        = $d->value;
 		$inp->placeholder  = $d->placeholder;
 		$inp->autocomplete = $d->autocomplete;
+		$inp->accept       = $d->accept;
 		$inp->required     = $d->required;
 		$inp->readonly     = $d->readonly;
 		$inp->disabled     = $d->disabled;
+		$inp->multiple     = $d->multiple;
+		$inp->rows         = $d->rows;
+		$inp->cols         = $d->cols;
 
 		$input_el->init( );
 		if ( $input_el->vt_start !== null ) {

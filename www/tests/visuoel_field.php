@@ -33,11 +33,17 @@ require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_submit.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_reset.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_button.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_email.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_file.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input.php';
 
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_text.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_password.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_email.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_file.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_textarea.php';
 
 echo '<h1>visuoel — field tests</h1>';
 
@@ -129,6 +135,7 @@ foreach ( [
 echo '<h2>18. HTML НЕ содержит &lt;div class="input"&gt; внутри field (bugfix: bypass input group)</h2>';
 echo 'no double-wrap: <b>' . var_export( ! str_contains( $html , 'class="input"' ) , true ) . '</b> (ожидаем true)<br>';
 
+# --- сценарий: форма логина ---
 echo '<hr>';
 echo '<h1>Сценарий: форма логина на field + input</h1>';
 
@@ -181,6 +188,49 @@ echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow
 	. '</pre>';
 
 echo '<h2>21. Живой рендер</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
+
+# --- новые типы ---
+echo '<hr>';
+echo '<h1>Новые типы: email, file, textarea</h1>';
+
+$ve = new visuoel( );
+$grp = $ve->field( );
+
+$em = $grp->email( );
+$em->data( )->set( 'email' )->label( 'Email' )->required( );
+
+$fl = $grp->file( );
+$fl->data( )->set( 'avatar' )->label( 'Аватар' )->accept( 'image/*' );
+
+$ta = $grp->textarea( );
+$ta->data( )->set( 'bio' )->label( 'О себе' )->rows( 5 )->cols( 40 )->placeholder( 'Расскажите о себе' );
+
+$ve->init( );
+$h = $ve->release( );
+
+echo '<h2>22. field/email</h2>';
+echo 'type=email: <b>' . var_export( str_contains( $h , 'type="email"' ) , true ) . '</b><br>';
+echo 'id=field_email: <b>' . var_export( str_contains( $h , 'id="field_email"' ) , true ) . '</b><br>';
+echo 'label Email: <b>' . var_export( str_contains( $h , '>Email<' ) , true ) . '</b><br>';
+
+echo '<h2>23. field/file</h2>';
+echo 'type=file: <b>' . var_export( str_contains( $h , 'type="file"' ) , true ) . '</b><br>';
+echo 'accept=image/*: <b>' . var_export( str_contains( $h , 'accept="image/*"' ) , true ) . '</b><br>';
+
+echo '<h2>24. field/textarea</h2>';
+echo '&lt;textarea: <b>' . var_export( str_contains( $h , '<textarea' ) , true ) . '</b><br>';
+echo 'rows=5: <b>' . var_export( str_contains( $h , 'rows="5"' ) , true ) . '</b><br>';
+echo 'cols=40: <b>' . var_export( str_contains( $h , 'cols="40"' ) , true ) . '</b><br>';
+echo 'placeholder: <b>' . var_export( str_contains( $h , 'placeholder="Расскажите о себе"' ) , true ) . '</b><br>';
+echo '&lt;/textarea&gt;: <b>' . var_export( str_contains( $h , '</textarea>' ) , true ) . '</b><br>';
+
+echo '<h2>25. Полный HTML (новые типы)</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h )
+	. '</pre>';
+
+echo '<h2>26. Живой рендер (новые типы)</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
 
 echo '<hr>done';

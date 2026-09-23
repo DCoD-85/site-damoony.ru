@@ -23,6 +23,8 @@ abstract class visuoel_input__element extends visuoel_group_element {
 		if ( $d->value        !== '' ) $vt->attrs_add( 'value'        , $d->value );
 		if ( $d->placeholder  !== '' ) $vt->attrs_add( 'placeholder'  , $d->placeholder );
 		if ( $d->autocomplete !== '' ) $vt->attrs_add( 'autocomplete' , $d->autocomplete );
+		if ( $d->accept !== '' )       $vt->attrs_add( 'accept'       , $d->accept );
+		if ( $d->multiple )            $vt->attrs_add( 'multiple'     , 'multiple' );
 		if ( $d->required )            $vt->attrs_add( 'required'     , 'required' );
 		if ( $d->readonly )            $vt->attrs_add( 'readonly'     , 'readonly' );
 		if ( $d->disabled )            $vt->attrs_add( 'disabled'     , 'disabled' );
@@ -38,7 +40,11 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 	public string $value        = '';
 	public string $placeholder  = '';
 	public string $autocomplete = '';
+	public string $accept       = '';
 	public bool   $required     = false;
+	public bool   $multiple     = false;
+	public int    $rows         = 0;
+	public int    $cols         = 0;
 
 	public function set ( string $name , string $value = '' , string $placeholder = '' ) : static {
 		$this->name        = $name;
@@ -64,6 +70,26 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 
 	public function autocomplete ( string $autocomplete ) : static {
 		$this->autocomplete = $autocomplete;
+		return $this;
+	}
+
+	public function accept ( string $accept ) : static {
+		$this->accept = $accept;
+		return $this;
+	}
+
+	public function multiple ( bool $v = true ) : static {
+		$this->multiple = $v;
+		return $this;
+	}
+
+	public function rows ( int $rows ) : static {
+		$this->rows = $rows;
+		return $this;
+	}
+
+	public function cols ( int $cols ) : static {
+		$this->cols = $cols;
 		return $this;
 	}
 
