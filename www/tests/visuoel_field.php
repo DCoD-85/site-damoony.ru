@@ -37,15 +37,20 @@ require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_file.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input.php';
 
-require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field__element.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_text.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_password.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_email.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_file.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_textarea.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_select.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field.php';
 
 echo '<h1>visuoel — field tests</h1>';
 
@@ -299,6 +304,77 @@ echo '<h2>30. Живой рендер (select)</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
 
 echo '<h2>31. Живой рендер (select multiple)</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h2 . '</div>';
+
+echo '<hr>';
+echo '<h1>checkbox / radio</h1>';
+
+$ve = new visuoel( );
+
+$agree = $ve->field( )->checkbox( );
+$agree->data( )->set( 'agree' )->label( 'Согласен с условиями' )->required( );
+
+$news = $ve->field( )->checkbox( );
+$news->data( )->set( 'news' )->label( 'Подписаться на новости' )->checked( )->hint( 'Раз в неделю' );
+
+$ve->init( );
+$h = $ve->release( );
+
+echo '<h2>32. field/checkbox — структура</h2>';
+foreach ( [
+	'<div class="field field_checkbox">' ,
+	'<label>' ,
+	'<input type="checkbox"' ,
+	'id="field_agree"' ,
+	'name="agree"' ,
+	'value="1"' ,
+	'required="required"' ,
+	'Согласен с условиями' ,
+	'</label>' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h , $needle ) , true ) . '</b><br>';
+}
+
+echo '<h2>33. field/checkbox — checked + hint</h2>';
+echo 'checked="checked": <b>' . var_export( str_contains( $h , 'checked="checked"' ) , true ) . '</b><br>';
+echo 'Подписаться: <b>' . var_export( str_contains( $h , 'Подписаться на новости' ) , true ) . '</b><br>';
+echo 'hint: <b>' . var_export( str_contains( $h , '<div class="hint">Раз в неделю</div>' ) , true ) . '</b><br>';
+
+echo '<h2>34. field/radio — структура</h2>';
+$ve2 = new visuoel( );
+
+$m = $ve2->field( )->radio( );
+$m->data( )->set( 'gender' , 'm' )->label( 'Мужской' )->checked( );
+
+$f = $ve2->field( )->radio( );
+$f->data( )->set( 'gender' , 'f' )->label( 'Женский' );
+
+$ve2->init( );
+$h2 = $ve2->release( );
+
+echo 'field_radio: <b>' . var_export( str_contains( $h2 , 'class="field field_radio"' ) , true ) . '</b><br>';
+echo 'type="radio": <b>' . var_export( str_contains( $h2 , 'type="radio"' ) , true ) . '</b><br>';
+echo 'id=field_gender_m: <b>' . var_export( str_contains( $h2 , 'id="field_gender_m"' ) , true ) . '</b><br>';
+echo 'id=field_gender_f: <b>' . var_export( str_contains( $h2 , 'id="field_gender_f"' ) , true ) . '</b><br>';
+echo 'name="gender" x2: <b>' . substr_count( $h2 , 'name="gender"' ) . '</b> (ожидаем 2)<br>';
+echo 'checked="checked": <b>' . var_export( str_contains( $h2 , 'checked="checked"' ) , true ) . '</b><br>';
+echo 'Мужской: <b>' . var_export( str_contains( $h2 , 'Мужской' ) , true ) . '</b><br>';
+echo 'Женский: <b>' . var_export( str_contains( $h2 , 'Женский' ) , true ) . '</b><br>';
+
+echo '<h2>35. Полный HTML (checkbox)</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h )
+	. '</pre>';
+
+echo '<h2>36. Полный HTML (radio)</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h2 )
+	. '</pre>';
+
+echo '<h2>37. Живой рендер (checkbox)</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
+
+echo '<h2>38. Живой рендер (radio)</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h2 . '</div>';
 
 echo '<hr>done';
