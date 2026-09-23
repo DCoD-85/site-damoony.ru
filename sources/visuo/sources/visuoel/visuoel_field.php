@@ -56,6 +56,13 @@ class visuoel_field extends visuoel_group {
 		$this->elements[ ] = $el;
 		return $el;
 	}
+
+	public function select ( null|visuoel__data $__data = null ) : visuoel_field_select {
+		$data = $__data instanceof visuoel_field_select__data ? $__data : null;
+		$el = new visuoel_field_select( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
 }
 
 class visuoel_field__data extends visuoel_group__data {
@@ -87,20 +94,25 @@ abstract class visuoel_field__element extends visuoel_group_element {
 		}
 
 		# input
+		# input
 		$input_el = $this->make_input( );
 		$inp = $input_el->data( );
-		$inp->id           = 'field_' . $d->name;
-		$inp->name         = $d->name;
-		$inp->value        = $d->value;
-		$inp->placeholder  = $d->placeholder;
-		$inp->autocomplete = $d->autocomplete;
-		$inp->accept       = $d->accept;
-		$inp->required     = $d->required;
-		$inp->readonly     = $d->readonly;
-		$inp->disabled     = $d->disabled;
-		$inp->multiple     = $d->multiple;
-		$inp->rows         = $d->rows;
-		$inp->cols         = $d->cols;
+		$inp->id                 = 'field_' . $d->name;
+		$inp->name               = $d->name;
+		$inp->value              = $d->value;
+		$inp->placeholder        = $d->placeholder;
+		$inp->autocomplete       = $d->autocomplete;
+		$inp->accept             = $d->accept;
+		$inp->required           = $d->required;
+		$inp->readonly           = $d->readonly;
+		$inp->disabled           = $d->disabled;
+		$inp->multiple           = $d->multiple;
+		$inp->rows               = $d->rows;
+		$inp->cols               = $d->cols;
+		$inp->options            = $d->options;
+		$inp->selected           = $d->selected;
+		$inp->size               = $d->size;
+		$inp->placeholder_option = $d->placeholder_option;
 
 		$input_el->init( );
 		if ( $input_el->vt_start !== null ) {

@@ -40,11 +40,15 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 	public string $value        = '';
 	public string $placeholder  = '';
 	public string $autocomplete = '';
-	public string $accept       = '';
+		public string $accept       = '';
 	public bool   $required     = false;
 	public bool   $multiple     = false;
 	public int    $rows         = 0;
 	public int    $cols         = 0;
+	public array  $options      = [ ];       # [ value => label , ... ]
+	public mixed  $selected     = null;      # string | array | null
+	public int    $size         = 0;
+	public string $placeholder_option = '';  # первый option с пустым value
 
 	public function set ( string $name , string $value = '' , string $placeholder = '' ) : static {
 		$this->name        = $name;
@@ -93,6 +97,31 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 		return $this;
 	}
 
+	public function options ( array $options ) : static {
+		$this->options = $options;
+		return $this;
+	}
+
+	public function option ( string|int $value , string $label ) : static {
+		$this->options[ $value ] = $label;
+		return $this;
+	}
+
+	public function selected ( mixed $selected ) : static {
+		$this->selected = $selected;
+		return $this;
+	}
+
+	public function size ( int $size ) : static {
+		$this->size = $size;
+		return $this;
+	}
+
+	public function placeholder_option ( string $label ) : static {
+		$this->placeholder_option = $label;
+		return $this;
+	}
+	
 	public function required ( bool $v = true ) : static {
 		$this->required = $v;
 		return $this;

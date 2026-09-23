@@ -227,8 +227,8 @@ class visuotag {
 	public function attrs ( ) : visuoattrs {
 		return $this->attrs;
 	}
-	public function attrs_add ( string $name , string $value ) : visuotag {
-		$this->attrs( )->add( $name , $value );
+	public function attrs_add ( string $name , string $value , bool $add_empty = false ) : visuotag {
+		$this->attrs( )->add( $name , $value , $add_empty );
 		return $this;
 	}
 	public function attrs_remove ( string $name ) : visuotag {

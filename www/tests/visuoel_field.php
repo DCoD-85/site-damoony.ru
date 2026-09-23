@@ -36,6 +36,7 @@ require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_email.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_file.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_input.php';
 
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field.php';
@@ -44,6 +45,7 @@ require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_email.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_file.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_textarea.php';
+require $root_dir . '/sources/visuo/sources/visuoel/visuoel_field/visuoel_field_select.php';
 
 echo '<h1>visuoel — field tests</h1>';
 
@@ -232,5 +234,71 @@ echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow
 
 echo '<h2>26. Живой рендер (новые типы)</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
+
+echo '<hr>';
+echo '<h1>Select</h1>';
+
+$ve = new visuoel( );
+$grp = $ve->field( );
+
+$city = $grp->select( );
+$city->data( )->set( 'city' )->label( 'Город' )->required( );
+$city->data( )->placeholder_option( '— выберите —' );
+$city->data( )->options( [
+	'msk' => 'Москва' ,
+	'spb' => 'Санкт-Петербург' ,
+	'nsk' => 'Новосибирск' ,
+] );
+$city->data( )->selected( 'msk' );
+
+$ve->init( );
+$h = $ve->release( );
+
+echo '<h2>27. field/select — структура</h2>';
+foreach ( [
+	'<div class="field field_select">' ,
+	'<label for="field_city">Город</label>' ,
+	'<select' ,
+	'id="field_city"' ,
+	'name="city"' ,
+	'required="required"' ,
+	'<option value="">— выберите —</option>' ,
+	'<option value="msk" selected="selected">Москва</option>' ,
+	'<option value="spb">Санкт-Петербург</option>' ,
+	'<option value="nsk">Новосибирск</option>' ,
+	'</select>' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h , $needle ) , true ) . '</b><br>';
+}
+
+echo '<h2>28. field/select — optgroup + multiple</h2>';
+$ve2 = new visuoel( );
+$roles = $ve2->field( )->select( );
+$roles->data( )->set( 'roles' )->label( 'Роли' )->multiple( );
+$roles->data( )->options( [
+	'admin' => 'Администратор' ,
+	'mod'   => 'Модератор' ,
+	'user'  => 'Пользователь' ,
+] );
+$roles->data( )->selected( [ 'admin' , 'user' ] );
+
+$ve2->init( );
+$h2 = $ve2->release( );
+
+echo 'multiple: <b>' . var_export( str_contains( $h2 , 'multiple="multiple"' ) , true ) . '</b><br>';
+echo 'admin selected: <b>' . var_export( str_contains( $h2 , 'value="admin" selected="selected"' ) , true ) . '</b><br>';
+echo 'user selected: <b>' . var_export( str_contains( $h2 , 'value="user" selected="selected"' ) , true ) . '</b><br>';
+echo 'mod NOT selected: <b>' . var_export( ! str_contains( $h2 , 'value="mod" selected' ) , true ) . '</b><br>';
+
+echo '<h2>29. Полный HTML (select)</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h )
+	. '</pre>';
+
+echo '<h2>30. Живой рендер (select)</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h . '</div>';
+
+echo '<h2>31. Живой рендер (select multiple)</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h2 . '</div>';
 
 echo '<hr>done';

@@ -53,6 +53,13 @@ class visuoel_input extends visuoel_group {
 		return $el;
 	}
 
+	public function select ( null|visuoel__data $__data = null ) : visuoel_input_select {
+		$data = $__data instanceof visuoel_input_select__data ? $__data : null;
+		$el = new visuoel_input_select( $this , $data );
+		$this->elements[ ] = $el;
+		return $el;
+	}
+
 	public function submit ( null|visuoel__data $__data = null ) : visuoel_input_submit {
 		$data = $__data instanceof visuoel_input_submit__data ? $__data : null;
 		$el = new visuoel_input_submit( $this , $data );
@@ -113,6 +120,13 @@ class visuoel_input extends visuoel_group {
 	public function get_textarea__data ( ) : null|visuoel_input_textarea__data {
 		foreach ( $this->elements as $el ) {
 			if ( $el instanceof visuoel_input_textarea ) return $el->data( );
+		}
+		return null;
+	}
+	
+	public function get_select__data ( ) : null|visuoel_input_select__data {
+		foreach ( $this->elements as $el ) {
+			if ( $el instanceof visuoel_input_select ) return $el->data( );
 		}
 		return null;
 	}
