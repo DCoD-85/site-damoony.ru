@@ -39,6 +39,12 @@ $visuoelpath = __DIR__ . DS . 'visuoel' . DS;
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_radio_group.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
+( include_once $file = $visuoelpath . 'visuoel_button__element.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_button' . DS . 'visuoel_button_submit.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_button' . DS . 'visuoel_button_reset.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_button' . DS . 'visuoel_button_button.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_button.php' ) or error_file( $file , __FILE__ , __LINE__ );
+
 ( include_once $file = $visuoelpath . 'visuoel_form' . DS . 'visuoel_form_form.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_form.php' ) or error_file( $file , __FILE__ , __LINE__ );
 

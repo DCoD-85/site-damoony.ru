@@ -29,11 +29,12 @@ class visuoel {
 	public null|visuotag $vt_end   = null;
 	public array $elements = [ ];
 
-	public null|visuoel_group $visuoel_group = null;
-	public null|visuoel_form  $visuoel_form  = null;
-	public null|visuoel_tabs  $visuoel_tabs  = null;
-	public null|visuoel_input $visuoel_input = null;
-	public null|visuoel_field $visuoel_field = null;
+	public null|visuoel_group  $visuoel_group  = null;
+	public null|visuoel_form   $visuoel_form   = null;
+	public null|visuoel_tabs   $visuoel_tabs   = null;
+	public null|visuoel_input  $visuoel_input  = null;
+	public null|visuoel_field  $visuoel_field  = null;
+	public null|visuoel_button $visuoel_button = null;
 
 	# --- wrap config (override in subclasses) ---
 	protected string $tag       = 'div';
@@ -159,6 +160,16 @@ class visuoel {
 		return $el;
 	}
 
+	public function button ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_button !== null ) return $this->visuoel_button;
+
+		$el = new visuoel_button( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_button = $el;
+		$this->elements[ ]    = $el;
+		return $el;
+	}
+	
 	# --- getters ---
 	public function data ( ) : null|visuoel__data {
 		return $this->__data;
