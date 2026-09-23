@@ -11,6 +11,10 @@ class visuoel_group_element extends visuoel {
 		return new visuoel_group_element__data( $this );
 	}
 
+	public function data ( ) : visuoel_group_element__data {
+		return $this->__data;
+	}
+
 	protected function build ( ) : void {
 		$vt = new visuotag( );
 		$vt = $vt->tag( 'div' , class : $this->css_class );

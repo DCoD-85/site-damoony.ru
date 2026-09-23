@@ -123,6 +123,8 @@ class visuoel {
 	}
 
 	# --- lazy factories ---
+
+	/** @return visuoel_form */
 	public function form ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_form !== null ) return $this->visuoel_form;
 
@@ -133,6 +135,7 @@ class visuoel {
 		return $el;
 	}
 
+	/** @return visuoel_tabs */
 	public function tabs ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_tabs !== null ) return $this->visuoel_tabs;
 
@@ -143,6 +146,7 @@ class visuoel {
 		return $el;
 	}
 
+	/** @return visuoel_input */
 	public function input ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_input !== null ) return $this->visuoel_input;
 
@@ -152,7 +156,8 @@ class visuoel {
 		$this->elements[ ]   = $el;
 		return $el;
 	}
-	
+
+	/** @return visuoel_field */
 	public function field ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_field !== null ) return $this->visuoel_field;
 
@@ -163,6 +168,7 @@ class visuoel {
 		return $el;
 	}
 
+	/** @return visuoel_button */
 	public function button ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_button !== null ) return $this->visuoel_button;
 
@@ -173,6 +179,7 @@ class visuoel {
 		return $el;
 	}
 
+	/** @return visuoel_block */
 	public function block ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_block !== null ) return $this->visuoel_block;
 
@@ -183,6 +190,7 @@ class visuoel {
 		return $el;
 	}
 
+	/** @return visuoel_message */
 	public function message ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_message !== null ) return $this->visuoel_message;
 
@@ -193,6 +201,7 @@ class visuoel {
 		return $el;
 	}
 
+	/** @return visuoel_table */
 	public function table ( null|visuoel__data $__data = null ) : visuoel {
 		if ( $this->singleton && $this->visuoel_table !== null ) return $this->visuoel_table;
 
@@ -202,7 +211,7 @@ class visuoel {
 		$this->elements[ ]   = $el;
 		return $el;
 	}
-	
+
 	# --- getters ---
 	public function data ( ) : null|visuoel__data {
 		return $this->__data;
@@ -219,6 +228,7 @@ class visuoel {
 	public function is_root ( ) : bool {
 		return $this->parent === null;
 	}
+
 	public function get_input_text__data ( ) : null|visuoel_input_text__data {
 		return $this->visuoel_input?->get_text__data( );
 	}

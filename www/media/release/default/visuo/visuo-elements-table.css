@@ -19,6 +19,8 @@
 .cols_35 { width : 35% ; }
 .cols_36 { width : 36% ; }
 .cols_40 { width : 40% ; }
+.cols_42 { width : 42% ; }
+.cols_43 { width : 43% ; }
 .cols_45 { width : 45% ; }
 .cols_50 { width : 50% ; }
 .cols_55 { width : 55% ; }
@@ -48,7 +50,7 @@
 
 .visuotable { width : 100% ; }
 .visuotable .ttype { }
-.visuotable .ttype .row { }
+.visuotable .ttype .row { display : flex ; }
 .visuotable .ttype .row .col { vertical-align : top ; }
 .visuotable .ttype .row .col .col-inside { padding : 0px ; }
 .visuotable .ttype .row .col.colelsinline .col-inside { display : flex ; }
