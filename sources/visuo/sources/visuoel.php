@@ -37,6 +37,7 @@ class visuoel {
 	public null|visuoel_button  $visuoel_button  = null;
 	public null|visuoel_block   $visuoel_block   = null;
 	public null|visuoel_message $visuoel_message = null;
+	public null|visuoel_table   $visuoel_table   = null;
 
 	# --- wrap config (override in subclasses) ---
 	protected string $tag       = 'div';
@@ -189,6 +190,16 @@ class visuoel {
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
 		$this->visuoel_message = $el;
 		$this->elements[ ]     = $el;
+		return $el;
+	}
+
+	public function table ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_table !== null ) return $this->visuoel_table;
+
+		$el = new visuoel_table( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_table = $el;
+		$this->elements[ ]   = $el;
 		return $el;
 	}
 	

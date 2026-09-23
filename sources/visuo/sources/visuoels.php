@@ -3,12 +3,23 @@
 if( ! defined( 'DS' ) ) define( 'DS' , DIRECTORY_SEPARATOR );
 if( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
 
+# --- visuotag stack (visuoel depends on it) ---
+( include_once $file = __DIR__ . DS . 'visuoattrs' . DS . 'visuoattrsclass.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = __DIR__ . DS . 'visuoattrs' . DS . 'visuoattrsstyle.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = __DIR__ . DS . 'visuoattrs' . DS . 'visuoattrsactions.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = __DIR__ . DS . 'visuoattrs' . DS . 'visuoattrsdata.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = __DIR__ . DS . 'visuoattrs.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = __DIR__ . DS . 'visuotag.php' ) or error_file( $file , __FILE__ , __LINE__ );
+
+# --- visuoel base ---
+( include_once $file = __DIR__ . DS . 'visuoel.php' ) or error_file( $file , __FILE__ , __LINE__ );
+
 $visuoelpath = __DIR__ . DS . 'visuoel' . DS;
 
+# --- block ---
 ( include_once $file = $visuoelpath . 'visuoel_group.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_group_element.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
-# --- block ---
 ( include_once $file = $visuoelpath . 'visuoel_block__element.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_block' . DS . 'visuoel_block_text.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_block' . DS . 'visuoel_block_html.php' ) or error_file( $file , __FILE__ , __LINE__ );
@@ -69,5 +80,11 @@ $visuoelpath = __DIR__ . DS . 'visuoel' . DS;
 ( include_once $file = $visuoelpath . 'visuoel_button' . DS . 'visuoel_button_reset.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_button' . DS . 'visuoel_button_button.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_button.php' ) or error_file( $file , __FILE__ , __LINE__ );
+
+# --- table ---
+( include_once $file = $visuoelpath . 'visuoel_table' . DS . 'visuoel_table_section.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_table' . DS . 'visuoel_table_row.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_table' . DS . 'visuoel_table_cell.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_table.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 ?>
