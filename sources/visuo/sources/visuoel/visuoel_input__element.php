@@ -18,6 +18,7 @@ abstract class visuoel_input__element extends visuoel_group_element {
 		$vt = $vt->tag( 'input' , tag_closed : false );
 		$vt->attrs_add( 'type' , $this->input_type( ) );
 
+		if ( $d->id           !== '' ) $vt->attrs_add( 'id'           , $d->id );
 		if ( $d->name         !== '' ) $vt->attrs_add( 'name'         , $d->name );
 		if ( $d->value        !== '' ) $vt->attrs_add( 'value'        , $d->value );
 		if ( $d->placeholder  !== '' ) $vt->attrs_add( 'placeholder'  , $d->placeholder );
@@ -32,6 +33,7 @@ abstract class visuoel_input__element extends visuoel_group_element {
 }
 
 class visuoel_input__element__data extends visuoel_group_element__data {
+	public string $id           = '';
 	public string $name         = '';
 	public string $value        = '';
 	public string $placeholder  = '';
@@ -42,6 +44,11 @@ class visuoel_input__element__data extends visuoel_group_element__data {
 		$this->name        = $name;
 		$this->value       = $value;
 		$this->placeholder = $placeholder;
+		return $this;
+	}
+
+	public function id ( string $id ) : static {
+		$this->id = $id;
 		return $this;
 	}
 

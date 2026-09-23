@@ -29,11 +29,11 @@ class visuoel {
 	public null|visuotag $vt_end   = null;
 	public array $elements = [ ];
 
-	# --- groups (lazy) ---
 	public null|visuoel_group $visuoel_group = null;
 	public null|visuoel_form  $visuoel_form  = null;
 	public null|visuoel_tabs  $visuoel_tabs  = null;
 	public null|visuoel_input $visuoel_input = null;
+	public null|visuoel_field $visuoel_field = null;
 
 	# --- wrap config (override in subclasses) ---
 	protected string $tag       = 'div';
@@ -145,6 +145,16 @@ class visuoel {
 		$el = new visuoel_input( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
 		$this->visuoel_input = $el;
+		$this->elements[ ]   = $el;
+		return $el;
+	}
+	
+	public function field ( null|visuoel__data $__data = null ) : visuoel {
+		if ( $this->singleton && $this->visuoel_field !== null ) return $this->visuoel_field;
+
+		$el = new visuoel_field( $this , $__data );
+		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
+		$this->visuoel_field = $el;
 		$this->elements[ ]   = $el;
 		return $el;
 	}
