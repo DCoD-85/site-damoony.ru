@@ -1,0 +1,97 @@
+/*
+	visuoel :: field family
+	Стилизация .field, .field_label, .hint, .error, .options, .option
+	Не трогает .el / .el-input-* (старая схема).
+*/
+
+.field {
+	display : flex ;
+	flex-direction : column ;
+	gap : 4px ;
+	margin-bottom : 15px ;
+}
+
+.field > label ,
+.field_label {
+	font-weight : 600 ;
+	font-size : 15px ;
+	color : #333 ;
+	margin-bottom : 4px ;
+}
+
+.field .label_comment {
+	font-weight : 400 ;
+	color : #999 ;
+	font-size : 13px ;
+	margin-left : 6px ;
+}
+
+.field input[type=text] ,
+.field input[type=email] ,
+.field input[type=password] ,
+.field input[type=file] ,
+.field select ,
+.field textarea {
+	background : #FFF ;
+	border : solid #DDD 1px ;
+	border-radius : 3px ;
+}
+
+.field .hint {
+	font-size : 13px ;
+	color : #999 ;
+	margin-top : 2px ;
+}
+
+.field .error {
+	font-size : 13px ;
+	color : #C33 ;
+	margin-top : 2px ;
+}
+
+/* checkbox / radio одиночные — label оборачивает input */
+
+.field.field_checkbox ,
+.field.field_radio {
+	flex-direction : row ;
+	align-items : center ;
+	gap : 8px ;
+	margin-bottom : 10px ;
+}
+
+.field.field_checkbox > label ,
+.field.field_radio > label {
+	display : inline-flex ;
+	align-items : center ;
+	gap : 8px ;
+	font-weight : 400 ;
+	cursor : pointer ;
+	color : #333 ;
+	margin-bottom : 0 ;
+}
+
+/* группы checkbox_group / radio_group */
+
+.field .options {
+	display : flex ;
+	flex-direction : column ;
+	gap : 6px ;
+	margin-top : 4px ;
+}
+
+.field .option label {
+	display : inline-flex ;
+	align-items : center ;
+	gap : 8px ;
+	font-weight : 400 ;
+	cursor : pointer ;
+	color : #333 ;
+}
+
+/* кнопка submit без обёртки field */
+
+.form_body > .input {
+	display : flex ;
+	justify-content : flex-end ;
+	margin-top : 10px ;
+}
