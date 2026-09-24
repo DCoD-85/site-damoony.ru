@@ -140,4 +140,76 @@ echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow
 echo '<h2>14. Живой рендер field_radio</h2>';
 echo '<div style="border:1px dashed #888;padding:10px;">' . $h4 . '</div>';
 
+# --- 15. field_textarea ---
+echo '<hr><h2>15. field_textarea</h2>';
+
+$ve5 = new visuoel( );
+$t5 = $ve5->field( )->textarea( );
+$t5->data( )->name = 'bio';
+$t5->data( )->label( 'О себе' );
+$t5->data( )->hint( 'Пара слов, необязательно' );
+$t5->data( )->rows = 4;
+$t5->data( )->cols = 40;
+
+$ve5->init( );
+$h5 = $ve5->release( );
+
+foreach ( [
+	'<div class="field field_textarea">' ,
+	'<label class="field-label"' ,
+	'for="field_bio"' ,
+	'<div class="border-box">' ,
+	'<textarea' ,
+	'rows="4"' ,
+	'cols="40"' ,
+	'name="bio"' ,
+	'</textarea>' ,
+	'<div class="hint">' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h5 , $needle ) , true ) . '</b><br>';
+}
+
+echo '<h2>16. HTML field_textarea</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h5 ) . '</pre>';
+
+# --- 17. field_select ---
+echo '<hr><h2>17. field_select</h2>';
+
+$ve6 = new visuoel( );
+$s6 = $ve6->field( )->select( );
+$s6->data( )->name = 'city';
+$s6->data( )->label( 'Город' );
+$s6->data( )->hint( 'Где вы живёте' );
+$s6->data( )->options = [ '' => '— выберите —' , 'msk' => 'Москва' , 'spb' => 'Санкт-Петербург' ];
+
+$ve6->init( );
+$h6 = $ve6->release( );
+
+foreach ( [
+	'<div class="field field_select">' ,
+	'<label class="field-label"' ,
+	'for="field_city"' ,
+	'<div class="border-box">' ,
+	'<select' ,
+	'name="city"' ,
+	'<option' ,
+	'value="msk"' ,
+	'Москва' ,
+	'</select>' ,
+	'<div class="hint">' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h6 , $needle ) , true ) . '</b><br>';
+}
+
+echo '<h2>18. HTML field_select</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h6 ) . '</pre>';
+
+echo '<h2>19. Живой рендер field_textarea</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h5 . '</div>';
+
+echo '<h2>20. Живой рендер field_select</h2>';
+echo '<div style="border:1px dashed #888;padding:10px;">' . $h6 . '</div>';
+
 echo '<hr>done';
