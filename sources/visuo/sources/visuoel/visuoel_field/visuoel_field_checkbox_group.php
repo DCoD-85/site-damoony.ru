@@ -3,17 +3,19 @@
 # visuoel_field_checkbox_group — контейнер для N visuoel_field_checkbox.
 #
 # <div class="field field_checkbox_group">
-#   <div class="field_label">Интересы</div>
-#   <div class="options">
-#     <!-- сюда пришиваются дочерние field_checkbox -->
+#   <div class="box">
+#     <div class="field-label">Интересы</div>
+#     <div class="options">
+#       <!-- сюда пришиваются дочерние field_checkbox -->
+#     </div>
+#     <div class="hint">…</div>
+#     <div class="error">…</div>
 #   </div>
-#   <div class="hint">…</div>
-#   <div class="error">…</div>
 # </div>
 #
 # Использование:
 #   $g = $ve->field()->checkbox_group()->label( 'Интересы' );
-#   $g->add( $ve->field()->checkbox()->label( 'Футбол' )->value( 'football' )->checked( true ) );
+#   $g->add( $ve->field()->checkbox()->label( 'Спорт' )->value( 'sport' )->checked( true ) );
 #   $g->add( $ve->field()->checkbox()->label( 'Музыка' )->value( 'music' ) );
 
 class visuoel_field_checkbox_group extends visuoel_field__element {
@@ -31,9 +33,11 @@ class visuoel_field_checkbox_group extends visuoel_field__element {
 		$field = new visuotag( );
 		$field = $field->tag( 'div' , class : 'field field_checkbox_group' );
 
+		$box = $field->tag( 'div' , class : 'box' );
+
 		# заголовок группы
-		if ( $d->label !== '' ) {
-			$label = $field->tag( 'div' , class : 'field_label' );
+		if ( $d->show_label && $d->label !== '' ) {
+			$label = $box->tag( 'div' , class : 'field-label' );
 			$label->content( htmlspecialchars( $d->label , ENT_QUOTES ) );
 			if ( $d->label_comment !== '' ) {
 				$label->tag( 'span' , class : 'label_comment' )->content( htmlspecialchars( $d->label_comment , ENT_QUOTES ) );
@@ -41,14 +45,16 @@ class visuoel_field_checkbox_group extends visuoel_field__element {
 		}
 
 		# слот для дочерних field_checkbox (vt_end)
-		$options = $field->tag( 'div' , class : 'options' );
+		$options = $box->tag( 'div' , class : 'options' );
 
-		# hint / error — сиблинги options, добавляются до пришивания детей
-		if ( $d->hint !== '' ) {
-			$field->tag( 'div' , class : 'hint' )->content( $d->hint );
+		# hint
+		if ( $d->show_hint && $d->hint !== '' ) {
+			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
 		}
+
+		# error
 		if ( $d->error !== '' ) {
-			$field->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->error );
 		}
 
 		$this->vt_start = $field;

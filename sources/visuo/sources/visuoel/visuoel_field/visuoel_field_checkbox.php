@@ -41,7 +41,9 @@ class visuoel_field_checkbox extends visuoel_field__element {
 
 		$input_el = $this->make_input( );
 		$inp = $input_el->data( );
-		$inp->id       = 'field_' . $d->name;
+		# id: убираем [] из name; если name групповой (с []), добавляем суффикс value
+		$id_base = rtrim( $d->name , '[]' );
+		$inp->id = 'field_' . $id_base . ( str_ends_with( $d->name , '[]' ) ? '_' . $d->value : '' );
 		$inp->name     = $d->name;
 		$inp->value    = $d->value !== '' ? $d->value : '1';
 		$inp->checked  = $d->checked;

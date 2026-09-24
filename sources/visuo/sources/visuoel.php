@@ -83,6 +83,10 @@ class visuoel {
 
 	public function add ( visuoel|visuotag $el ) : static {
 		if ( $el instanceof visuoel ) {
+			# элемент может быть только у одного родителя: снимаем со старого
+			if ( $el->parent !== null && $el->parent !== $this ) {
+				$el->parent->remove( $el );
+			}
 			$el->parent = $this;
 		}
 		$this->elements[ ] = $el;
