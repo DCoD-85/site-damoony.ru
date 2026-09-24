@@ -39,7 +39,7 @@ class visuoel_input_select extends visuoel_input__element {
 
 		foreach ( $d->options as $value => $label ) {
 			$opt = $vt->tag( 'option' );
-			$opt->attrs_add( 'value' , (string) $value );
+			$opt->attrs_add( 'value' , (string) $value , true );
 			if ( in_array( (string) $value , array_map( 'strval' , $selected_list ) , true ) ) {
 				$opt->attrs_add( 'selected' , 'selected' );
 			}
