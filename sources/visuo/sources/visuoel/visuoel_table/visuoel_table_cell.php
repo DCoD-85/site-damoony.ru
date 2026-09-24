@@ -59,7 +59,8 @@ class visuoel_table_cell extends visuoel_group_element {
 			$vt->attrs_style_add( 'width: ' . $d->width . '%;' );
 		}
 
-		$inner = $vt->tag( 'div' , class : 'col-inside' );
+		$inner = $vt->tag( 'div' , class : 'col-inside' )
+			->tag( 'div' , class : 'col_block' );
 
 		if ( $d->content !== '' ) {
 			$inner->content( $d->is_html ? $d->content : htmlspecialchars( $d->content , ENT_QUOTES ) );
