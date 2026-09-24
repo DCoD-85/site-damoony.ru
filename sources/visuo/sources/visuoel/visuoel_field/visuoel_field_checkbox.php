@@ -1,11 +1,18 @@
 <?PHP
 
-# field/checkbox — label оборачивает <input type="checkbox"> и текст.
+# visuoel_field_checkbox — label оборачивает border-box + name.
+#
 #   <div class="field field_checkbox">
-#     <label>
-#       <input type="checkbox" name="agree" />
-#       Текст подписи
-#     </label>
+#     <div class="box">
+#       <label class="field-label">
+#         <span class="border-box">
+#           <input class="el-checkbox" type="checkbox" ...>
+#         </span>
+#         <span class="field-name">Запомнить меня</span>
+#       </label>
+#       <div class="hint">…</div>
+#       <div class="error">…</div>
+#     </div>
 #   </div>
 
 class visuoel_field_checkbox extends visuoel_field__element {
@@ -27,9 +34,11 @@ class visuoel_field_checkbox extends visuoel_field__element {
 		$field = new visuotag( );
 		$field = $field->tag( 'div' , class : 'field field_checkbox' );
 
-		$label = $field->tag( 'label' );
+		$box = $field->tag( 'div' , class : 'box' );
 
-		# input внутри label
+		# label оборачивает input + name
+		$label = $box->tag( 'label' , class : 'field-label' );
+
 		$input_el = $this->make_input( );
 		$inp = $input_el->data( );
 		$inp->id       = 'field_' . $d->name;
@@ -40,21 +49,24 @@ class visuoel_field_checkbox extends visuoel_field__element {
 		$inp->disabled = $d->disabled;
 
 		$input_el->init( );
+
+		$border = $label->tag( 'span' , class : 'border-box' );
 		if ( $input_el->vt_start !== null ) {
-			$label->append( $input_el->vt_start );
+			$border->append( $input_el->vt_start );
 		}
 
-		# текст подписи
 		if ( $d->label !== '' ) {
-			$label->content( ' ' . htmlspecialchars( $d->label , ENT_QUOTES ) );
+			$label->tag( 'span' , class : 'field-name' )->content( $d->label );
 		}
 
-		# hint / error — вне label
-		if ( $d->hint !== '' ) {
-			$field->tag( 'div' , class : 'hint' )->content( $d->hint );
+		# hint
+		if ( $d->show_hint && $d->hint !== '' ) {
+			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
 		}
+
+		# error
 		if ( $d->error !== '' ) {
-			$field->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->error );
 		}
 
 		$this->vt_start = $field;

@@ -1,22 +1,24 @@
 <?PHP
 
-# visuoel_field_checkbox_group — группа чекбоксов с заголовком.
+# visuoel_field_checkbox_group — контейнер для N visuoel_field_checkbox.
 #
 # <div class="field field_checkbox_group">
 #   <div class="field_label">Интересы</div>
 #   <div class="options">
-#     <div class="option"><label><input type="checkbox" …> …</label></div>
+#     <!-- сюда пришиваются дочерние field_checkbox -->
 #   </div>
 #   <div class="hint">…</div>
+#   <div class="error">…</div>
 # </div>
+#
+# Использование:
+#   $g = $ve->field()->checkbox_group()->label( 'Интересы' );
+#   $g->add( $ve->field()->checkbox()->label( 'Футбол' )->value( 'football' )->checked( true ) );
+#   $g->add( $ve->field()->checkbox()->label( 'Музыка' )->value( 'music' ) );
 
 class visuoel_field_checkbox_group extends visuoel_field__element {
 	protected function input_type ( ) : string {
 		return 'checkbox_group';
-	}
-
-	protected function make_input ( ) : visuoel_input__element {
-		return new visuoel_input_checkbox_group( $this );
 	}
 
 	protected function make_default_data ( ) : visuoel__data {
@@ -38,21 +40,10 @@ class visuoel_field_checkbox_group extends visuoel_field__element {
 			}
 		}
 
-		# options
-		$input_el = $this->make_input( );
-		$inp = $input_el->data( );
-		$inp->name     = $d->name;
-		$inp->options  = $d->options;
-		$inp->selected = $d->selected;
-		$inp->required = $d->required;
-		$inp->disabled = $d->disabled;
+		# слот для дочерних field_checkbox (vt_end)
+		$options = $field->tag( 'div' , class : 'options' );
 
-		$input_el->init( );
-		if ( $input_el->vt_start !== null ) {
-			$field->append( $input_el->vt_start );
-		}
-
-		# hint / error
+		# hint / error — сиблинги options, добавляются до пришивания детей
 		if ( $d->hint !== '' ) {
 			$field->tag( 'div' , class : 'hint' )->content( $d->hint );
 		}
@@ -61,7 +52,7 @@ class visuoel_field_checkbox_group extends visuoel_field__element {
 		}
 
 		$this->vt_start = $field;
-		$this->vt_end   = $field;
+		$this->vt_end   = $options;
 	}
 }
 
