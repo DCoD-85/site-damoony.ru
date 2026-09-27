@@ -83,7 +83,12 @@ class visuorelease {
 			return;
 		}
 
-		# HTML (по умолчанию)
+		# применить переопределения блоков из visuostruct_html
+		if ( $struct instanceof visuostruct_html && $this->main->visuopage !== null ) {
+			$this->main->visuopage->apply( $struct );
+		}
+
+		# HTML
 		$this->debug_attach( $log , $debug );
 		print $this->visuorender->html( $this->visuotag , $this->visuometa );
 		$this->visuotag_final = $this->visuotag;

@@ -28,7 +28,8 @@ class main {
 	# visuo
 	public gmod  $gmod;
 	public mod  $mod;
-	
+	public null|visuopage $visuopage = null;
+
 	# domain
 	public null|domain $domain = null;
 	public null|domainglobal $domainglobal = null;
@@ -67,6 +68,7 @@ class main {
 		
 		# 
 		$this->visuorelease = $this->visuorelease ?: new visuorelease( $this );
+		$this->visuopage = $this->visuopage ?: new visuopage( $this );
 		$this->visuostruct = $this->visuostruct ?: new visuostruct( $this );
 		
 		$this->render = $this->render ?: new render( $this );
