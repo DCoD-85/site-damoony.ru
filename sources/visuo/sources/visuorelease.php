@@ -73,22 +73,25 @@ class visuorelease {
 	public function final ( bool $log = false , bool $debug = false ) : void {
 		$struct = $this->main?->visuostruct?->current( );
 
-		if ( $struct instanceof visuostruct_min ) {
-			print $struct->as_json( );
-			return;
+		# структура решает, что отдать
+		if ( $struct !== null ) {
+			$type = $struct->return_type( );
+
+			if ( $type === 'json' ) {
+				header( 'Content-Type: application/json; charset=UTF-8' );
+				print $struct->as_json( );
+				return;
+			}
+
+			if ( $type === 'html' ) {
+				if ( $this->main->visuopage !== null ) {
+					$this->main->visuopage->apply( $struct );
+				}
+				# дальше — общий HTML-путь
+			}
 		}
 
-		if ( $struct instanceof visuostruct_ajax ) {
-			print $struct->as_json( );
-			return;
-		}
-
-		# применить переопределения блоков из visuostruct_html
-		if ( $struct instanceof visuostruct_html && $this->main->visuopage !== null ) {
-			$this->main->visuopage->apply( $struct );
-		}
-
-		# HTML
+		# HTML (по умолчанию или для visuostruct_html)
 		$this->debug_attach( $log , $debug );
 		print $this->visuorender->html( $this->visuotag , $this->visuometa );
 		$this->visuotag_final = $this->visuotag;
