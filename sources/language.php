@@ -81,7 +81,7 @@ class language {
 	# ===============================================================
 	
 	private function path ( string $name ) : string {
-		$dir = dirname( __DIR__ ) . DS . 'www' . DS . 'language';
+		$dir = dirname( __DIR__ ) . DS . 'language';
 		
 		if ( $name === 'save' ) {
 			return $dir . DS . 'save.txt.inc';

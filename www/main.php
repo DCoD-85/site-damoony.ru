@@ -223,7 +223,12 @@ class main_settings {
 	}
 	public function init ( ) {
 		# init
-		$this->loadExternalConfig( __DIR__ . DS . '..' . DS . 'secure' . DS . 'main_settings.config' );
+		$root = dirname( __DIR__ );
+
+		$this->loadExternalConfig( $root . DS . 'config' . DS . 'site.config'   );
+		$this->loadExternalConfig( $root . DS . 'config' . DS . 'render.config' );
+		$this->loadExternalConfig( $root . DS . 'config' . DS . 'lang.config'   );
+		$this->loadExternalConfig( $root . DS . 'secure' . DS . 'db.secure'     );
 
 		$url = $this->main->library->url( );
 		$url_allias = $url->static_allias;

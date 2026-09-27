@@ -11,10 +11,12 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Configs with secrets
-secure/*.config
-secure/*.xml
-secure/*.inc
+# Секреты — глобально, по расширению
+*.secure
+
+# secure/ — папку держим в git, но только заглушку
+secure/*
+!secure/.gitkeep
 
 # Auto-generated language file
-www/language/save.txt.inc
+language/save.txt.inc
