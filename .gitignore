@@ -1,17 +1,6 @@
 ﻿# Слепки — локальные, в репозиторий не идут
 _backup_*/
 
-# Старые версии файлов — локальные (но _archive\README.md — да)
-_archive/*
-!_archive/README.md
-
-# Аудит — оставляем документацию, но не мусор
-_audit/*
-!_audit/sitemap.md
-!_audit/conventions.md
-!_audit/cleanup-log.txt
-!_audit/visuo-architecture.md
-
 # Системное
 Thumbs.db
 .DS_Store

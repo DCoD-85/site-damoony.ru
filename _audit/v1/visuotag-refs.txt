@@ -1,0 +1,27 @@
+﻿
+Path                                                       LineNumber Line                                             
+----                                                       ---------- ----                                             
+E:\OSPanel543\domains\damoony2.ru\sources\other\debug.php          26 	public null|visuotag $vt = null;                
+E:\OSPanel543\domains\damoony2.ru\sources\other\debug.php          82 		$vt_in = new visuotag( null , null , 'root' , t
+                                                                      rue , true );                                    
+E:\OSPanel543\domains\damoony2.ru\sources\other\debug.php          89 		$vt_from = new visuotag( null , null , 'root' ,
+                                                                       true , true );                                  
+E:\OSPanel543\domains\damoony2.ru\sources\other\debug.php          97 		$vt_other = new visuotag( null , null , 'root' 
+                                                                      , true , true );                                 
+E:\OSPanel543\domains\damoony2.ru\sources\other\debug.php         100 		$vt = new visuotag( null , null , 'root' , true
+                                                                       , true );                                       
+E:\OSPanel543\domains\damoony2.ru\sources\other\debug.php         181 		$vt = new visuotag( null , null , 'root' , true
+                                                                       , true );                                       
+E:\OSPanel543\domains\damoony2.ru\sources\other\loader.php         43 		$vt = new visuotag( null , null , 'root' , true
+                                                                       , true );                                       
+E:\OSPanel543\domains\damoony2.ru\sources\other\loader.php         63 		$vt = new visuotag( null , null , 'root' , true
+                                                                       , true );                                       
+E:\OSPanel543\domains\damoony2.ru\sources\other\loader.php         83 		$vt = new visuotag( null , null , 'root' , true
+                                                                       , true );                                       
+E:\OSPanel543\domains\damoony2.ru\sources\visuo\visuo.php          15 ( include_once $file = $visuosources . 'visuotag.
+                                                                      php' ) or error_file( $file , __FILE__ , __LINE__
+                                                                       );                                              
+E:\OSPanel543\domains\damoony2.ru\sources\visuo\visuo.php          38 	# visuotag []                                   
+E:\OSPanel543\domains\damoony2.ru\sources\visuo\visuo.php          39 	$visuosources . 'visuotag.php' ,                
+
+
