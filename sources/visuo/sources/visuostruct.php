@@ -5,12 +5,22 @@ class visuostruct {
 	public null|\main $main = null;
 
 	# --- state ---
+	public null|visuostruct_html $html = null;
 	public null|visuostruct_min  $min  = null;
 	public null|visuostruct_ajax $ajax = null;
 
 	# --- methods ---
 	public function __construct ( null|\main $main = null ) {
 		$this->main = $main;
+	}
+
+	public function html ( ) : visuostruct_html {
+		if ( $this->html === null ) {
+			$path = __DIR__ . DS . 'visuostruct' . DS . 'visuostruct_html.php';
+			( include_once $path ) or error_file( $path , __FILE__ , __LINE__ );
+			$this->html = new visuostruct_html( $this );
+		}
+		return $this->html;
 	}
 
 	public function min ( ) : visuostruct_min {
@@ -29,6 +39,19 @@ class visuostruct {
 			$this->ajax = new visuostruct_ajax( $this );
 		}
 		return $this->ajax;
+	}
+
+	/**
+	 * Текущая структура — та, что программист уже создал.
+	 * Приоритет: min > ajax > html > null.
+	 *
+	 * @return null|visuostruct_html|visuostruct_min|visuostruct_ajax
+	 */
+	public function current ( ) : null|object {
+		if ( $this->min  !== null ) return $this->min;
+		if ( $this->ajax !== null ) return $this->ajax;
+		if ( $this->html !== null ) return $this->html;
+		return null;
 	}
 }
 

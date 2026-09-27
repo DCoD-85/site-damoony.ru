@@ -39,6 +39,22 @@ class visuostruct_min {
 	public function referer ( ) : visuostruct_min_referer {
 		return $this->referer ??= new visuostruct_min_referer( $this );
 	}
+
+	# ------------------------------------------------------------
+	#  AS JSON
+	# ------------------------------------------------------------
+	public function as_json ( ) : string {
+		$data = [
+			'error'    => $this->error?->release( )    ?? false ,
+			'messages' => $this->messages?->release( ) ?? ''    ,
+			'release'  => $this->release?->release( )  ?? null  ,
+			'form'     => $this->form?->release( )     ?? null  ,
+			'referer'  => $this->referer?->release( )  ?? null  ,
+		];
+
+		$json = json_encode( $data , JSON_UNESCAPED_UNICODE );
+		return $json === false ? '{}' : $json;
+	}
 }
 
 # ------------------------------------------------------------

@@ -64,17 +64,42 @@ class visuorelease {
 	}
 
 	# ------------------------------------------------------------
-	#  FINAL
+	#  FINAL — точка входа.
+	#  Смотрит, какую структуру создал программист, и решает:
+	#    visuostruct_min  → JSON min
+	#    visuostruct_ajax → JSON ajax
+	#    null / visuostruct_html → HTML
 	# ------------------------------------------------------------
 	public function final ( bool $log = false , bool $debug = false ) : void {
-		# отладочная панель — прицепляем к дереву ДО рендера
+		$struct = $this->main?->visuostruct?->current( );
+
+		if ( $struct instanceof visuostruct_min ) {
+			print $struct->as_json( );
+			return;
+		}
+
+		if ( $struct instanceof visuostruct_ajax ) {
+			print $struct->as_json( );
+			return;
+		}
+
+		# HTML (по умолчанию)
 		$this->debug_attach( $log , $debug );
-
-		# HTML через visuorender
 		print $this->visuorender->html( $this->visuotag , $this->visuometa );
-
-		# сохранить финальный (для отладки)
 		$this->visuotag_final = $this->visuotag;
+	}
+
+	# ------------------------------------------------------------
+	#  FINAL AJAX — помечает <html> как ajax-режим, потом final()
+	# ------------------------------------------------------------
+	public function final_ajax ( bool $log = false , bool $debug = false ) : void {
+		$html = $this->visuotag->root( )->find( 'html' );
+		if ( $html !== null ) {
+			$html->data_add( 'ajax'      , true  );
+			$html->data_add( 'ajax-init' , false );
+		}
+
+		$this->final( $log , $debug );
 	}
 
 	# ------------------------------------------------------------
@@ -148,16 +173,13 @@ class visuorelease {
 	}
 
 	# ------------------------------------------------------------
-	#  LEGACY — заглушки для AJAX-вызовов из алгоритмов.
-	#  Удалить после рефактора структур (min/ajax).
+	#  LEGACY — заглушки.
+	#  Алгоритмы пока зовут их, но больше они не нужны —
+	#  структура уже сохранена в visuostruct::current().
 	# ------------------------------------------------------------
 	public function release_min ( null|\visuostruct_min $struct = null , bool $min = true , bool $json = true ) : void {
 	}
 
 	public function release_struct ( null|\visuostruct_ajax $struct = null , bool $min = true , bool $json = true ) : void {
-	}
-
-	public function final_ajax ( bool $log = false , bool $debug = false ) : void {
-		$this->final( $log , $debug );
 	}
 }
