@@ -3,24 +3,25 @@
 class visuorelease {
 	# --- refs ---
 	public null|\main $main = null;
-	public \visuolog  $visuolog;
+	public \visuolog $visuolog;
+	public \visuorender $visuorender;
 	public \visuorelease_settings $settings;
 
 	# --- state ---
-	public null|\visuometa $visuometa  = null;
-	public null|\visuotag  $visuotag   = null;
+	public null|\visuometa $visuometa = null;
+	public null|\visuotag  $visuotag = null;
 	public null|\visuotag  $visuotag_final = null;
-	public string          $release_alternative = '';
 
 	# --- methods ---
 	public function __construct ( null|\main $main = null ,
 	                              null|\visuorelease_settings $settings = null ) {
-		$this->visuolog  = new visuolog( );
-		$this->main      = $main;
-		$this->settings  = $settings ?? new visuorelease_settings( $this );
+		$this->main        = $main;
+		$this->visuolog    = new visuolog( );
+		$this->visuorender = new visuorender( );
+		$this->settings    = $settings ?? new visuorelease_settings( $this );
 
-		$this->visuometa     = new visuometa( $this );
-		$this->visuotag      = new visuotag( $this );
+		$this->visuometa      = new visuometa( $this );
+		$this->visuotag       = new visuotag( $this );
 		$this->visuotag_final = new visuotag( $this );
 
 		$this->init( );
@@ -37,10 +38,10 @@ class visuorelease {
 	# без схемы: doctype + html + head + body
 	private function schemenone_init ( ) : void {
 		$this->visuotag
-			->tag( '! doctype' , false , return: false )
-			->tag( 'html' , class: 'cl_html' )
-			->tag( 'head' , class: 'cl_head' , return: false )
-			->tag( 'body' , class: 'cl_body' )
+			->tag( '! doctype' , false , return : false )
+			->tag( 'html' , class : 'cl_html' )
+			->tag( 'head' , class : 'cl_head' , return : false )
+			->tag( 'body' , class : 'cl_body' )
 			->root( );
 	}
 
@@ -63,21 +64,25 @@ class visuorelease {
 	}
 
 	# ------------------------------------------------------------
-	#  Release
+	#  FINAL
 	# ------------------------------------------------------------
+	public function final ( bool $log = false , bool $debug = false ) : void {
+		# отладочная панель — прицепляем к дереву ДО рендера
+		$this->debug_attach( $log , $debug );
 
-	private function release ( bool $log = false , bool $debug = false ) : string {
-		# встроить meta в <head>
-		$this->visuotag->root( )->find( 'head' )->meta( $this->visuometa );
+		# HTML через visuorender
+		print $this->visuorender->html( $this->visuotag , $this->visuometa );
 
-		# подготовить и релизнуть
-		$this->visuotag->prepare( );
-		$this->visuotag->release( );
-
+		# сохранить финальный (для отладки)
 		$this->visuotag_final = $this->visuotag;
+	}
 
-		# отладочная панель
-		$body = $this->visuotag_final->body( );
+	# ------------------------------------------------------------
+	#  DEBUG
+	# ------------------------------------------------------------
+	private function debug_attach ( bool $log , bool $debug ) : void {
+		$body = $this->visuotag->body( );
+		if ( $body === null ) return;
 
 		$end    = microtime( true );
 		$start  = $GLOBALS[ 'start' ] ?? $end;
@@ -140,69 +145,19 @@ class visuorelease {
 			$dt_debug = $body->find( 'div' , class : 'dt_debug' );
 			if ( $dt_debug !== null ) $dt_debug->append( $vt_debug );
 		}
-
-		return $this->visuotag_final->final( );
 	}
 
 	# ------------------------------------------------------------
-	#  Alternative releases (min / ajax)
+	#  LEGACY — заглушки для AJAX-вызовов из алгоритмов.
+	#  Удалить после рефактора структур (min/ajax).
 	# ------------------------------------------------------------
-
-	public function release_min ( null|\visuostruct_min $struct = null ,
-	                              bool $min = true ,
-	                              bool $json = true ) : void {
-		$this->main->render->setdata( 'min' , $min );
-
-		if ( $struct === null ) return;
-
-		$release_json = [
-			'error'    => $struct->error(    )->release( ) ,
-			'messages' => $struct->messages( )->release( ) ,
-			'release'  => $struct->release(  )->release( ) ,
-			'form'     => $struct->form(     )->release( ) ,
-			'referer'  => $struct->referer(  )->release( ) ,
-		];
-
-		$this->release_alternative = $json ? ( json_encode( $release_json ) ?: '' ) : '';
+	public function release_min ( null|\visuostruct_min $struct = null , bool $min = true , bool $json = true ) : void {
 	}
 
-	public function release_struct ( null|\visuostruct_ajax $struct = null ,
-	                                 bool $min = true ,
-	                                 bool $json = true ) : void {
-		$this->main->render->setdata( 'min' , $min );
-
-		if ( $struct === null ) return;
-
-		$this->release_alternative = $struct->as_json( );
-	}
-
-	private function release_alternative_value ( ) : string {
-		return $this->release_alternative;
-	}
-
-	# ------------------------------------------------------------
-	#  Final
-	# ------------------------------------------------------------
-
-	public function final ( bool $log = false , bool $debug = false ) : void {
-		if ( $this->main->render->getdata( 'min' ) == false ) {
-			print $this->release( $log , $debug );
-		} else {
-			print $this->release_alternative_value( );
-		}
+	public function release_struct ( null|\visuostruct_ajax $struct = null , bool $min = true , bool $json = true ) : void {
 	}
 
 	public function final_ajax ( bool $log = false , bool $debug = false ) : void {
-		$html = $this->visuotag->root( )->find( 'html' );
-		if ( $html !== null ) {
-			$html->data_add( 'ajax'      , true  );
-			$html->data_add( 'ajax-init' , false );
-		}
-
-		if ( $this->main->render->getdata( 'min' ) == false ) {
-			print $this->release( $log , $debug );
-		} else {
-			print $this->release_alternative_value( );
-		}
+		$this->final( $log , $debug );
 	}
 }

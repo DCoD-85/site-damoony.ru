@@ -28,6 +28,7 @@ $visuosources = __DIR__ . DS . 'sources' . DS;
 ( include_once $file = $visuosources . 'visuoel.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuoels.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
+( include_once $file = $visuosources . 'visuorender.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuorelease.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 ?>
