@@ -1,90 +1,41 @@
-/* visuotable_html — настоящая <table> */
-
-.visuotable_html {
-	width : 100% ;
-	border-collapse : collapse ;
-}
-
-.visuotable_html td ,
-.visuotable_html th {
-	vertical-align : top ;
-	padding : 8px 10px ;
-	border : 1px solid #DDD ;
-}
-
-.visuotable_html tr.header td ,
-.visuotable_html tr.header th {
-	font-weight : 600 ;
-	background : #EEE ;
-}
 
 
+.visuotable { width : 100% ; }
+.visuotable .ttype { }
+.visuotable .ttype .row { display : flex ; }
+.visuotable .ttype .row .col { vertical-align : top ; }
+.visuotable .ttype .row .col .col-inside { padding : 0px ; }
+.visuotable .ttype .row .col.colelsinline .col-inside .col_block { display : flex ; }
 
 
-/* --- register_block: таблица полей --- */
+.visuotable .thead .row .col { }
+.visuotable .thead .row .col .field-content { font-weight : bold ; }
+.visuotable .thead .row .col .col-inside { }
+.visuotable .thead .row.header .col .col-inside { font-weight : 600 ; }
 
-.register_block {
-	max-width : 900px ;
-	margin : 30px auto ;
-	background : #FFF ;
-	border-radius : 5px ;
-	box-shadow : 0 1px 5px rgba(0,0,0,0.08) ;
-}
+.visuotable .tbody .row .col .col-inside { }
 
-.register_block .visuotable {
-	background : #FFF ;
-}
 
-.register_block .ttype.tbody .row {
-	background : #FFF ;
-}
+.visuotable .tbody .row { }
+.visuotable .tbody .row .col { background : #EEE ; border-bottom : solid #DDD 1px ; }
+.visuotable .tbody .row .col .col-inside { }
+.visuotable .tbody .row:first-child .col:first-child { border-top-left-radius : 5px ; }
+.visuotable .tbody .row:first-child .col:last-child { border-top-right-radius : 5px ; }
+.visuotable .tbody .row:first-child .col:only-child { border-radius : 5px 5px 0 0 ; }
+.visuotable .tbody .row:last-child .col:first-child { border-bottom-left-radius : 5px ; }
+.visuotable .tbody .row:last-child .col:last-child { border-bottom-right-radius : 5px ; }
+.visuotable .tbody .row:last-child .col:only-child { border-radius : 0 0 5px 5px ; }
+.visuotable .tbody .row:last-child .col { border : none ; }
+.visuotable .tbody .row:only-child .col:first-child { border-radius : 5px 0px 0px 5px ; }
+.visuotable .tbody .row:only-child .col:last-child { border-radius : 0px 5px 5px 0px ; }
+.visuotable .tbody .row:only-child .col:only-child { border-radius :5px ; }
 
-.register_block .ttype.tbody .row .col {
-	border-bottom : solid #EEE 1px ;
-}
+.visuotable .tfoot .row { }
+.visuotable .tfoot .row .col { }
+.visuotable .tfoot .row .col .col-inside { padding-top : 20px ; }
 
-.register_block .ttype.tbody .row:last-child .col {
-	border : none ;
-}
-
-/* padding внутри ячеек — только для формы регистрации */
-.register_block .col .col-inside {
-	padding : 10px 12px ;
-}
-
-.register_block .ttype.thead .row .col .col-inside {
-	font-weight : 600 ;
-	color : #333 ;
-	background : #F7F9FC ;
-	padding : 12px ;
-}
-
-/* поля формы: не тянутся на всю ширину, максимум 400px */
-.register_block .col-inside input[type=text] ,
-.register_block .col-inside input[type=email] ,
-.register_block .col-inside input[type=password] ,
-.register_block .col-inside select ,
-.register_block .col-inside textarea {
-	width : 100% ;
-	max-width : 400px ;
-}
-
-/* текст описания */
-.register_block .col-inside {
-	color : #666 ;
-	font-size : 14px ;
-	line-height : 1.4 ;
-}
-
-/* звёздочка обязательности */
-.register_block .ttype.tbody .row .col:last-child .col-inside {
-	text-align : center ;
-	color : #C33 ;
-	font-weight : 700 ;
-	font-size : 16px ;
-}
-
-/* кнопка submit — вне таблицы */
-.register_block .button {
-	margin : 15px 0 0 12px ;
-}
+.ttype .table_block .div-inside { padding : 15px ; }
+.ttype.thead .table_block .div-inside { font-weight : 400 ; margin-bottom : 10px ; padding : 15px ; border-bottom : solid #CCC 1px ; }
+.ttype.thead .table_block:hover .div-inside { background : #CCC ; border-radius : 3px ; }
+.ttype.tbody .table_block .div-inside { padding : 15px ; color : #666 ; }
+.ttype.t .table_block .div-inside { font-weight : 900 ; padding : 10px ; }

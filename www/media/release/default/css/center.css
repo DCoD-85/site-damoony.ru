@@ -1,4 +1,4 @@
-.center { }
+.dt_center { padding : 10px ; }
 
 .center_title { font-size : 22px ; padding : 10px ; background : #D3D3D3 ; color : #999 ; border-bottom : solid #BBB 3px ; }
 .center_title .title_link { }

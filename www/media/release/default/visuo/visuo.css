@@ -1,6 +1,4 @@
-
-/* FORM */
-/* INPUT :: SELECT :: reset :: button */
+/*
 input[ type=text ] ,
 input[ type=password ] ,
 input[ type=file ] ,
@@ -49,3 +47,5 @@ input:focus {
 }
 input[type=button]:disabled { background : #EEE ! important ; color : #CCC ! important ; }
 input[type=button]:disabled:hover { background : #EEE ! important ; }
+
+*/

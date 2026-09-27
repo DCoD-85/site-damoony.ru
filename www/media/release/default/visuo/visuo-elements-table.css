@@ -1,41 +1,4 @@
 
-.cols_3 { width : 3% ; }
-.cols_5 { width : 5% ; }
-.cols_7 { width : 7% ; }
-.cols_8 { width : 8% ; }
-.cols_10 { width : 10% ; }
-.cols_13 { width : 13% ; }
-.cols_15 { width : 15% ; }
-.cols_16 { width : 16% ; }
-.cols_18 { width : 18% ; }
-.cols_20 { width : 20% ; }
-.cols_24 { width : 24% ; }
-.cols_25 { width : 25% ; }
-.cols_28 { width : 28% ; }
-.cols_30 { width : 30% ; }
-.cols_32 { width : 32% ; }
-.cols_33 { width : 33% ; }
-.cols_34 { width : 34% ; }
-.cols_35 { width : 35% ; }
-.cols_36 { width : 36% ; }
-.cols_40 { width : 40% ; }
-.cols_42 { width : 42% ; }
-.cols_43 { width : 43% ; }
-.cols_45 { width : 45% ; }
-.cols_50 { width : 50% ; }
-.cols_55 { width : 55% ; }
-.cols_60 { width : 60% ; }
-.cols_65 { width : 65% ; }
-.cols_66 { width : 66% ; }
-.cols_67 { width : 67% ; }
-.cols_70 { width : 70% ; }
-.cols_75 { width : 75% ; }
-.cols_80 { width : 80% ; }
-.cols_85 { width : 85% ; }
-.cols_90 { width : 90% ; }
-.cols_95 { width : 95% ; }
-.cols_100 { width : 100% ; }
-
 .visuotablebox { border-radius : 3px ; }
 .visuotablebox .hhead { padding : 10px 10px 0px 10px ; }
 .visuotablebox .hhead .span-link { cursor : pointer ; display : inline-block ; margin : 0px ; padding : 15px 10px 10px 10px ; background : #EEE ; border-right : solid #DDD 1px ; }
@@ -51,7 +14,7 @@
 .visuotable { width : 100% ; }
 .visuotable .ttype { }
 .visuotable .ttype .row { display : flex ; }
-.visuotable .ttype .row .col { vertical-align : top ; }
+.visuotable .ttype .row .col { vertical-align : top ; background : #DDD ; }
 .visuotable .ttype .row .col .col-inside { padding : 0px ; }
 .visuotable .ttype .row .col.colelsinline .col-inside { display : flex ; }
 
