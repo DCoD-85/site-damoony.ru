@@ -41,17 +41,41 @@ class visuostruct {
 		return $this->ajax;
 	}
 
-	/**
-	 * Текущая структура — та, что программист уже создал.
-	 * Приоритет: min > ajax > html > null.
-	 *
-	 * @return null|visuostruct_html|visuostruct_min|visuostruct_ajax
-	 */
+	# ---------------------------------------------------------------
+	#   CURRENT — точка входа для visuorelease::final().
+	#   1) если структура уже создана — вернуть её
+	#   2) если нет — определить по контексту: min / ajax / html
+	# ---------------------------------------------------------------
 	public function current ( ) : null|object {
 		if ( $this->min  !== null ) return $this->min;
 		if ( $this->ajax !== null ) return $this->ajax;
 		if ( $this->html !== null ) return $this->html;
-		return null;
+
+		return match ( $this->detect_mode( ) ) {
+			'min'  => $this->min( ) ,
+			'ajax' => $this->ajax( ) ,
+			default => $this->html( ) ,
+		};
+	}
+
+	# ---------------------------------------------------------------
+	#   DETECT MODE — какой формат ожидает клиент
+	#   1) URL-параметр ?_mode=min|ajax|html
+	#   2) заголовок X-Render-Mode
+	#   3) по умолчанию — html
+	# ---------------------------------------------------------------
+	private function detect_mode ( ) : string {
+		$get = $_GET[ '_mode' ] ?? null;
+		if ( $get === 'min'  ) return 'min';
+		if ( $get === 'ajax' ) return 'ajax';
+		if ( $get === 'html' ) return 'html';
+
+		$header = $_SERVER[ 'HTTP_X_RENDER_MODE' ] ?? null;
+		if ( $header === 'min'  ) return 'min';
+		if ( $header === 'ajax' ) return 'ajax';
+		if ( $header === 'html' ) return 'html';
+
+		return 'html';
 	}
 }
 
