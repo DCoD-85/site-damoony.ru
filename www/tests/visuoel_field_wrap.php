@@ -305,4 +305,27 @@ echo 'групп ровно одна: <b>' . var_export( $count_groups9 === 1 , 
 dump_html( $h9 , '25. HTML field_radio_group' );
 live( $h9 , '26. Live field_radio_group' );
 
+# --- 27. field_block ---
+echo '<hr><h2>27. field_block</h2>';
+
+$ve10 = new visuoel( );
+$b = new \visuoel_field_block( );
+$b->data( )->text( 'Просто текст описания' );
+
+$ve10->add( $b );                         // ← ДОБАВИТЬ ЭТУ СТРОКУ
+$ve10->init( );
+$h10 = $ve10->release( );
+
+foreach ( [
+	'<div class="field field_block">' ,
+	'<div class="box">' ,
+	'<div class="field-content">Просто текст описания</div>' ,
+] as $needle ) {
+	echo htmlspecialchars( $needle ) . ': <b>' . var_export( str_contains( $h10 , $needle ) , true ) . '</b><br>';
+}
+
+echo '<h2>28. HTML field_block</h2>';
+echo '<pre style="background:#f4f4f4;padding:10px;border:1px solid #ccc;overflow:auto;">'
+	. htmlspecialchars( $h10 ) . '</pre>';
+	
 echo '<hr>done';

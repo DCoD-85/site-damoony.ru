@@ -30,7 +30,9 @@ class library {
 		$this->vars = class_exists( 'library_vars' ) ?  new library_vars( $this ) : error_class( 'library_vars' , __FILE__ , __LINE__ );
 		$this->file = class_exists( 'library_file' ) ?  new library_file( $this ) : error_class( 'library_file' , __FILE__ , __LINE__ );
 		$this->image = class_exists( 'library_image' ) ?  new library_image( $this ) : error_class( 'library_image' , __FILE__ , __LINE__ );
-	
+
+		// init library classes
+		$this->url->init( );
 	}
 
 	public function gen ( ) {

@@ -52,10 +52,18 @@ class algoritm_ {
 	# ===============================================================
 	#   HELPERS
 	# ===============================================================
+	# ===============================================================
+	#   HELPERS
+	# ===============================================================
 	public function is_ajax ()    : bool { return (bool) $this->main->render->getdata( 'render_ajax' ); }
 	public function is_guest ()   : bool { return $this->main->is_guest( ); }
 	public function is_post ()    : bool { return ! empty( $_POST ); }
-	public function is_default () : bool { return $this->main->library->url->static_base[ 2 ] == ''; }
+
+	public function is_default () : bool {
+		$pos = count( explode( '_' , get_class( $this ) ) ) - 1;
+		$url_base = $this->main->library->url->static_base;
+		return ( $url_base[ $pos ] ?? '' ) === '';
+	}
 
 	# ===============================================================
 	#   ROUTING FRAMEWORK - default -> ajax -> role
@@ -100,7 +108,6 @@ class algoritm_ {
 	# ===============================================================
 	public function clear ( ) {
 		$url = $this->main->library->url( );
-		$url->init( );
 	}
 
 	public function debug ( ) {
@@ -121,7 +128,7 @@ class algoritm_ {
 		$url_vars = $url->static_vars;
 
 		$static_domain = $main->main_settings->domain_accepted( false );
-		$static_allias = $url->static_allias[ 1 ];
+		$static_allias = $main->main_settings->allias_accepted( );
 
 		$in_array = false;
 		$args = [ ];

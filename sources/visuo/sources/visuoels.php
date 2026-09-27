@@ -62,6 +62,8 @@ $visuoelpath = __DIR__ . DS . 'visuoel' . DS;
 
 # --- field ---
 ( include_once $file = $visuoelpath . 'visuoel_field__element.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_field__button.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_block.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_text.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_password.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_email.php' ) or error_file( $file , __FILE__ , __LINE__ );
@@ -72,6 +74,9 @@ $visuoelpath = __DIR__ . DS . 'visuoel' . DS;
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_radio.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_checkbox_group.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_radio_group.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_submit.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_reset.php' ) or error_file( $file , __FILE__ , __LINE__ );
+( include_once $file = $visuoelpath . 'visuoel_field' . DS . 'visuoel_field_button.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuoelpath . 'visuoel_field.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
 # --- button ---

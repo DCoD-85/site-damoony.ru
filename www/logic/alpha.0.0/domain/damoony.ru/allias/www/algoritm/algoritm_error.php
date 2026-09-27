@@ -10,31 +10,27 @@ use \visuoelement;
 
 class algoritm_error
 	extends algoritm_ {
-	# vars
-	public array $args = [ ];
-	# methods
-	public function __construct( main $main , array $args = [ ] ) {
-		$this->main = $main;
-		$this->args = $args;
-		$this->algoritm = $main->algoritm;
-		$this->algoritmdata = new algoritmdata_( );
+
+	# ---------------------------------------------------------------
+	#   ALGORITM — пустой (стаб)
+	# ---------------------------------------------------------------
+	public function algoritm ( ) {
 	}
-	
-	public function args ( array $args ) {
-		$this->args = $args;
-	}
-	
-	public function algoritm ( ){
-	}
-	
+
+	# ---------------------------------------------------------------
+	#   RELEASE — минуя систему маршрутизации, сразу в default()
+	# ---------------------------------------------------------------
 	public function release ( ) {
 		$this->default( );
 	}
-	
+
+	# ---------------------------------------------------------------
+	#   DEFAULT — страница 404
+	# ---------------------------------------------------------------
 	public function default ( ) {
 		$main = $this->algoritm->main;
 		$visuorelease = $main->visuorelease;
-		
+
 		$library = $main->library;
 		$link = $library->link( );
 		$url = $library->url( );
@@ -43,7 +39,7 @@ class algoritm_error
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
 		$center = $main->alliasglobal->center;
-		
+
 		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 
@@ -57,9 +53,7 @@ class algoritm_error
 				->tag( 'div' , class : 'error_title' )->content( 'Page not found<hr />Страница не найдена' );
 
 		$center->visuotag( )->append( $vt_center );
-		
 	}
-	
 }
 
 ?>

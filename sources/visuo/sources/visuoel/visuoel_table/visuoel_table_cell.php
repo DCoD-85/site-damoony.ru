@@ -2,18 +2,21 @@
 
 # Ячейка. Дивный режим:
 #   <div class="col [cols_N] [colelsinline] [extra]" style="width: N%">
-#     <div class="col-inside">…</div>
+#     <div class="col-inside">
+#       <div class="col_block">
+#         <!-- сюда пришиваются дети в порядке вызовов add/set/html -->
+#       </div>
+#     </div>
 #   </div>
 # HTML:
 #   <td rowspan="2" colspan="3" style="width: N%">…</td>
 #
-# Ширина:
-#   ->width( 42 )           → inline style="width: 42%"  (любое число)
-#   ->col( 'cols_45' )      → class="col cols_45"        (из CSS)
-#   ->col( 'my_class' )     → class="col my_class"
+# Порядок рендера внутри col_block = порядок вызовов в цепочке:
+#   ->add(A)->set('text')->add(B)   → A, field_block, B
+#   ->set('text')->add(A)->add(B)   → field_block, A, B
 #
-# Если задан ->col( … ) с классом — width из CSS, inline style не добавляется.
-# Если задан только ->width( … ) — inline style.
+# Голый текст (через set/html) оборачивается в visuoel_field_block —
+# структура обёртки живёт в самом visuoel_field_block, не здесь.
 
 class visuoel_table_cell extends visuoel_group_element {
 	public function data ( ) : visuoel_table_cell__data {
@@ -46,7 +49,7 @@ class visuoel_table_cell extends visuoel_group_element {
 			return;
 		}
 
-		# дивный режим
+		# дивный режим — только скелет
 		$class = 'col';
 		if ( $d->class  !== '' ) $class .= ' ' . $d->class;
 		if ( $d->inline )        $class .= ' colelsinline';
@@ -54,17 +57,12 @@ class visuoel_table_cell extends visuoel_group_element {
 		$vt = new visuotag( );
 		$vt = $vt->tag( 'div' , class : $class );
 
-		# width через inline-style только если не задан CSS-класс
 		if ( $d->width > 0 && $d->class === '' ) {
 			$vt->attrs_style_add( 'width: ' . $d->width . '%;' );
 		}
 
 		$inner = $vt->tag( 'div' , class : 'col-inside' )
 			->tag( 'div' , class : 'col_block' );
-
-		if ( $d->content !== '' ) {
-			$inner->content( $d->is_html ? $d->content : htmlspecialchars( $d->content , ENT_QUOTES ) );
-		}
 
 		$this->vt_start = $vt;
 		$this->vt_end   = $inner;
@@ -80,15 +78,35 @@ class visuoel_table_cell extends visuoel_group_element {
 		return false;
 	}
 
+	# --- content block ---
+
+	private function ensure_content_block ( ) : void {
+		$d = $this->data( );
+
+		if ( $d->content === '' ) return;
+
+		if ( $d->content_block === null ) {
+			$block = new visuoel_field_block( );
+			$block->parent = $this;
+			$d->content_block = $block;
+			$this->elements[ ] = $block;
+		}
+
+		$d->content_block->data( )->content = $d->content;
+		$d->content_block->data( )->is_html = $d->is_html;
+	}
+
 	# --- proxies to data (fluent) ---
 
 	public function set ( string $text ) : static {
 		$this->data( )->set( $text );
+		$this->ensure_content_block( );
 		return $this;
 	}
 
 	public function html ( string $html ) : static {
 		$this->data( )->html( $html );
+		$this->ensure_content_block( );
 		return $this;
 	}
 
@@ -126,6 +144,8 @@ class visuoel_table_cell__data extends visuoel_group_element__data {
 	public string $content = '';
 	public bool   $is_html = false;
 	public string $class   = '';
+
+	public null|visuoel_field_block $content_block = null;
 
 	public function width   ( int $w )         : static { $this->width   = $w ;       return $this; }
 	public function colspan ( int $c )         : static { $this->colspan = $c ;       return $this; }

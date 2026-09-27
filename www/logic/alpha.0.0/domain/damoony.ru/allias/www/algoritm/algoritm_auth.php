@@ -11,32 +11,29 @@ use \visuoelement;
 
 class algoritm_auth
 	extends algoritm_ {
-	# vars
-	public array $args = [ ];
-	# methods
-	public function __construct( main $main , array $args = [ ] ) {
-		$this->main = $main;
-		$this->args = $args;
-		$this->algoritm = $main->algoritm;
-		$this->algoritmdata = new algoritmdata_( );
+
+	# ---------------------------------------------------------------
+	#   ALGORITM — пустой (стаб)
+	# ---------------------------------------------------------------
+	public function algoritm ( ) {
 	}
-	public function args ( array $args ) {
-		$this->args = $args;
-	}
-	
-	public function algoritm ( ){
-	}
-	
+
+	# ---------------------------------------------------------------
+	#   RELEASE — минуя систему маршрутизации, сразу в default()
+	# ---------------------------------------------------------------
 	public function release ( ) {
 		$this->default( );
 	}
-	
+
+	# ---------------------------------------------------------------
+	#   DEFAULT — сообщение «нужна авторизация»
+	# ---------------------------------------------------------------
 	public function default ( ) {
 		$main = $this->algoritm->main;
 		$visuorelease = $main->visuorelease;
 		$top = $main->alliasglobal->center;
 		$center = $main->alliasglobal->center;
-		
+
 		$scheme = $main->alliasscheme;
 		$scheme->load( 'error' );
 
@@ -45,7 +42,6 @@ class algoritm_auth
 
 		$center->visuotag( )->append( $vt_center );
 	}
-	
 }
 
 ?>

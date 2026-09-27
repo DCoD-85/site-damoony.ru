@@ -14,8 +14,6 @@ class library_url {
 	
 	public function __construct( null|library $library ) {
 		$this->library = $library;
-		# init
-		$this->init( );
 	}
 	
 	public function init ( ) {
@@ -24,11 +22,11 @@ class library_url {
 		$path_domain = $main->main_path->get_domain( );
 		$path_url = $main->main_path->get_url( );
 		
-		
 		$this->static_domain = $this->domain( false , $path_domain );
 		$this->static_allias = $this->domain( true , $path_domain );
 		$this->static_base = $this->url( $path_url );
 		$this->static_vars = $this->vars( $path_url );
+
 	} 
 
 	public function about ( ){

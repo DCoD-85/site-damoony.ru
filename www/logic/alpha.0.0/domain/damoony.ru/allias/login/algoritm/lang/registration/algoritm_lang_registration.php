@@ -137,31 +137,32 @@ class algoritm_lang_registration
 		$center = $main->alliasglobal->center;
 		$right = $main->alliasglobal->right;
 
-
 		$ve = new visuoel( );
+		$tabs = $ve->tabs( );
 
-		$form = $ve->form( )->form( );
-		
-		
-		
+		# =====================================================
+		# Таб 1: Регистрация
+		# =====================================================
+		$page_reg = $tabs->page( );
+		$page_reg->data( )->set( 'Регистрация' );
+
+		$form_grp = new \visuoel_form( );
+		$form = $form_grp->form( );
+		$page_reg->add( $form_grp );
 
 		$form->data( )->set( 'register_form' , 'post' , '/register' , title_text : 'Регистрация' , form_jquery : true );
 
-		# csrf — прямо в форму, вне таблицы
+		# csrf — вне таблицы
 		$csrf = new \visuoel_input_hidden( );
 		$csrf->data( )->set( 'csrf' , 'x' );
-		$form->data( )->add( $csrf );
+		$form->add( $csrf );
 
-		# --- таблица полей ---
+		# таблица полей
 		$table = new \visuoel_table( );
-		$form->data( )->add( $table );
+		$form->add( $table );
 
-		$fdsa = new visuotag( );
-		$fdsa->tag( 'div' , class : 'headdd' )->tag( 'span' )->content( 'Поле' );
-		# шапка
 		$head = $table->head( )->row( );
-		# $head->cell( width : 42 )->set( 'Поле' );
-		$head->cell( width : 42 )->add( $fdsa );
+		$head->cell( width : 42 )->set( 'Поле' );
 		$head->cell( width : 43 )->set( 'Описание' );
 		$head->cell( width : 15 )->set( 'Обязательно' );
 
@@ -169,60 +170,76 @@ class algoritm_lang_registration
 
 		# --- login ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_text( );
-		$inp->data( )->set( 'login' )->placeholder( 'username' )->required( );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_text( );
+		$f->data( )->set( 'login2' )->label( 'Login' )->placeholder( 'username1' )->required( )->hide_label( )->hide_hint( );
+		
+		$f2 = new \visuoel_field_text( );
+		$f2->data( )->set( 'login' )->placeholder( 'username2' )->required( )->hide_label( )->hide_hint( );
+		
+		$f3 = new \visuoel_field_text( );
+		$f3->data( )->set( 'login3' )->placeholder( 'username3' )->required( )->hide_label( )->hide_hint( );
+
+		$row->cell( width : 42 , inline : true )->add( $f )->add( $f2 )->set( 'asd' )->add( $f3 );
 		$row->cell( width : 43 )->set( 'Латиница, цифры, от 3 до 32 символов' );
 		$row->cell( width : 15 )->set( '*' );
 
 		# --- email ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_email( );
-		$inp->data( )->set( 'email' )->placeholder( 'user@example.com' )->required( );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_email( );
+		$f->data( )->set( 'email' )->placeholder( 'user@example.com' )->required( )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Email для связи и восстановления пароля' );
 		$row->cell( width : 15 )->set( '*' );
 
 		# --- password ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_password( );
-		$inp->data( )->set( 'password' )->required( );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_password( );
+		$f->data( )->set( 'password' )->required( )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Минимум 8 символов' );
 		$row->cell( width : 15 )->set( '*' );
-		
+
 		# --- password_confirm ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_password( );
-		$inp->data( )->set( 'password_confirm' )->required( );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_password( );
+		$f->data( )->set( 'password_confirm' )->required( )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Повтор пароля' );
 		$row->cell( width : 15 )->set( '*' );
 
 		# --- birth_date ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_text( );
-		$inp->data( )->set( 'birth_date' )->placeholder( 'дд.мм.гггг' );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_text( );
+		$f->data( )->set( 'birth_date' )->placeholder( 'дд.мм.гггг' )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Формат: дд.мм.гггг' );
 		$row->cell( width : 15 )->set( '' );
 
 		# --- gender ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_radio_group( );
-		$inp->data( )->set( 'gender' )->options( [
-			'm' => 'Мужской' ,
-			'f' => 'Женский' ,
-			'x' => 'Другое' ,
-		] );
-		$row->cell( width : 42 )->add( $inp );
+		$g = new \visuoel_field_radio_group( );
+		$g->data( )->hide_label( )->hide_hint( );
+
+		$r = new \visuoel_field_radio( );
+		$r->data( )->set( 'gender' )->value( 'm' )->label( 'Мужской' );
+		$g->add( $r );
+
+		$r = new \visuoel_field_radio( );
+		$r->data( )->set( 'gender' )->value( 'f' )->label( 'Женский' );
+		$g->add( $r );
+
+		$r = new \visuoel_field_radio( );
+		$r->data( )->set( 'gender' )->value( 'x' )->label( 'Другое' );
+		$g->add( $r );
+
+		$row->cell( width : 42 )->add( $g );
 		$row->cell( width : 43 )->set( 'Пол' );
 		$row->cell( width : 15 )->set( '' );
 
 		# --- city ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_select( );
-		$inp->data( )->set( 'city' )
+		$f = new \visuoel_field_select( );
+		$f->data( )->set( 'city' )
 			->placeholder_option( '— выберите город —' )
 			->options( [
 				'msk' => 'Москва' ,
@@ -231,15 +248,17 @@ class algoritm_lang_registration
 				'ekb' => 'Екатеринбург' ,
 				'kzn' => 'Казань' ,
 			] )
-			->required( );
-		$row->cell( width : 42 )->add( $inp );
+			->required( )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Город проживания' );
 		$row->cell( width : 15 )->set( '*' );
 
 		# --- interests ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_checkbox_group( );
-		$inp->data( )->set( 'interests' )->options( [
+		$g = new \visuoel_field_checkbox_group( );
+		$g->data( )->hide_label( )->hide_hint( );
+
+		$opts = [
 			'sport'   => 'Спорт' ,
 			'music'   => 'Музыка' ,
 			'books'   => 'Книги' ,
@@ -248,41 +267,137 @@ class algoritm_lang_registration
 			'tech'    => 'Технологии' ,
 			'art'     => 'Искусство' ,
 			'science' => 'Наука' ,
-		] );
-		$row->cell( width : 42 )->add( $inp );
+		];
+		foreach ( $opts as $val => $lbl ) {
+			$c = new \visuoel_field_checkbox( );
+			$c->data( )->set( 'interests[]' )->value( $val )->label( $lbl );
+			$g->add( $c );
+		}
+
+		$row->cell( width : 42 )->add( $g );
 		$row->cell( width : 43 )->set( 'Направления: выберите одно или несколько' );
 		$row->cell( width : 15 )->set( '' );
 
 		# --- bio ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_textarea( );
-		$inp->data( )->set( 'bio' )->placeholder( 'Пара слов о вас' )->rows( 4 );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_textarea( );
+		$f->data( )->set( 'bio' )->placeholder( 'Пара слов о вас' )->rows( 4 )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'О себе (необязательно)' );
 		$row->cell( width : 15 )->set( '' );
 
 		# --- agree ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_checkbox( );
-		$inp->data( )->set( 'agree' )->required( );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_checkbox( );
+		$f->data( )->set( 'agree' )->required( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Принимаю пользовательское соглашение' );
 		$row->cell( width : 15 )->set( '*' );
 
 		# --- news ---
 		$row = $body->row( );
-		$inp = new \visuoel_input_checkbox( );
-		$inp->data( )->set( 'news' )->checked( );
-		$row->cell( width : 42 )->add( $inp );
+		$f = new \visuoel_field_checkbox( );
+		$f->data( )->set( 'news' )->checked( );
+		$row->cell( width : 42 )->add( $f );
 		$row->cell( width : 43 )->set( 'Подписаться на новости' );
 		$row->cell( width : 15 )->set( '' );
 
-		# --- submit ---
-		$submit = new \visuoel_button_submit( );
-		$submit->data( )->set( 'Зарегистрироваться' );
-		$form->data( )->add( $submit );
+		$bottom = $table->foot( );
+		
+		$row = $bottom->row( );
+		$submit = new \visuoel_field_submit( );
+		$submit->data( )->text( 'Регистрация' );
 
-		# --- обёртка ---
+		$row->cell( width : 42 )->add( $submit );
+		$row->cell( width : 43 )->set( '' );
+		$row->cell( width : 15 )->set( '');
+
+		# =====================================================
+		# Таб 2: Авторизация
+		# =====================================================
+		$page_auth = $tabs->page( );
+		$page_auth->data( )->set( 'Авторизация' );
+
+		$form_grp2 = new \visuoel_form( );
+		$form2 = $form_grp2->form( );
+		$page_auth->add( $form_grp2 );
+
+		$form2->data( )->set( 'login_form' , 'post' , '/login' , title_text : 'Вход' , form_jquery : true );
+
+		$csrf2 = new \visuoel_input_hidden( );
+		$csrf2->data( )->set( 'csrf' , 'x' );
+		$form2->add( $csrf2 );
+
+		$table2 = new \visuoel_table( );
+		$form2->add( $table2 );
+
+		$head2 = $table2->head( )->row( );
+		$head2->cell( width : 42 )->set( 'Поле' );
+		$head2->cell( width : 58 )->set( 'Описание' );
+
+		$body2 = $table2->body( );
+
+		$row = $body2->row( );
+		$f = new \visuoel_field_text( );
+		$f->data( )->set( 'login' )->placeholder( 'username или email' )->required( )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
+		$row->cell( width : 58 )->set( 'Логин или email' );
+
+		$row = $body2->row( );
+		$f = new \visuoel_field_password( );
+		$f->data( )->set( 'password' )->required( )->hide_label( )->hide_hint( );
+		$row->cell( width : 42 )->add( $f );
+		$row->cell( width : 58 )->set( 'Пароль' );
+
+		$row = $body2->row( );
+		$f = new \visuoel_field_checkbox( );
+		$f->data( )->set( 'remember' )->label( 'Запомнить меня' )->checked( );
+		$row->cell( width : 42 )->add( $f );
+		$row->cell( width : 58 )->set( 'Хранить сессию' );
+
+		$bottom = $table2->foot( );
+		
+		$row = $bottom->row( );
+		$submit = new \visuoel_field_submit( );
+		$submit->data( )->text( 'Регистрация' );
+
+		$row->cell( width : 42 )->add( $submit );
+		$row->cell( width : 43 )->set( '' );
+		$row->cell( width : 15 )->set( '');
+		
+
+		# =====================================================
+		# Таб 3: Памятка
+		# =====================================================
+		$page_memo = $tabs->page( );
+		$page_memo->data( )->set( 'Памятка' );
+
+		$memo = new visuotag( );
+		$memo = $memo->tag( 'div' , class : 'memo_block' );
+
+		$memo->tag( 'h2' )->content( 'Как зарегистрироваться' );
+		$memo->tag( 'p' )->content( 'Заполните поля формы «Регистрация». Все поля с пометкой * обязательны.' );
+
+		$memo->tag( 'h3' )->content( 'Логин' );
+		$memo->tag( 'p' )->content( 'Латиница и цифры, длина от 3 до 32 символов. Логин нельзя будет изменить после регистрации.' );
+
+		$memo->tag( 'h3' )->content( 'Пароль' );
+		$memo->tag( 'p' )->content( 'Минимум 8 символов. Рекомендуем использовать буквы обоих регистров, цифры и специальные символы.' );
+
+		$memo->tag( 'h3' )->content( 'Email' );
+		$memo->tag( 'p' )->content( 'Используется для подтверждения аккаунта и восстановления пароля. Указывайте действующий адрес.' );
+
+		$memo->tag( 'h3' )->content( 'Безопасность' );
+		$memo->tag( 'p' )->content( 'Никому не сообщайте свой пароль. Администрация сайта никогда не запрашивает пароль по email или в чате.' );
+
+		$memo->tag( 'h3' )->content( 'Нужна помощь?' );
+		$memo->tag( 'p' )->content( 'Пишите на noadmin@damoony.ru — ответим в течение суток.' );
+
+		$page_memo->add( $memo );
+
+		# =====================================================
+		# Рендер
+		# =====================================================
 		$vt_center = new visuotag( );
 		$vt_center->tag( 'div' , class : 'register_block' )->el( $ve );
 

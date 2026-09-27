@@ -86,7 +86,6 @@ class main {
 		$this->messages = new messages( $this );
 		$this->gmod = new gmod( $this );
 		$this->mod = new mod( $this );
-		
 		$this->config->init( );
 		$this->main_settings->init( );
 		$this->main_settings->set( 'connect_type' , 'http://' );
@@ -109,7 +108,8 @@ class main {
 		
 		$url = $main->library->url( );
 		$static_domain = $main->main_settings->domain_accepted( false );
-		$static_allias = $url->static_allias[ 1 ];
+		$static_allias = $main->main_settings->allias_accepted( );
+		
 		# domain
 		$this->domain = new domain( $this );
 		$this->domainglobal = new domainglobal( $this );
@@ -119,9 +119,9 @@ class main {
 		$this->alliaslocal = new ($static_domain.'\\alliaslocal')( $this );
 		$this->alliasglobal = new ($static_domain.'\\alliasglobal')( $this );
 		$this->alliasscheme = new ($static_domain.'\\alliasscheme')( $this );
-
+		
 		# algoritm
-		$main->algoritm = new ($static_domain . '\\' . $static_allias . '\\' . 'algoritm')( $this , [ ] ); // new algoritm( $this , [ ] );
+		$main->algoritm = new ($static_domain . '\\' . $static_allias . '\\' . 'algoritm')( $this , [ ] );
 		$main->algoritm->clear( );
 		$main->algoritm->start( );
 		$main->algoritm->debug( );
@@ -226,31 +226,30 @@ class main_settings {
 		$this->loadExternalConfig( __DIR__ . DS . '..' . DS . 'secure' . DS . 'main_settings.config' );
 
 		$url = $this->main->library->url( );
-		$url->init( );
 		$url_allias = $url->static_allias;
 		
 		$this->domain_real_name = $this->domains_real[ $url_allias[ 0 ] ];
-		$this->allias_real_name = $this->alliases_real[ $this->domain_real_name ][ $url_allias[ 1 ] ];
+		$this->allias_real_name = $this->alliases_real[ $this->domain_real_name ][ $url_allias[ 1 ] ?? '' ];
 		
 		# 
-		$this->skin_allias = $this->allias_real_name ?: 'www';
+		$this->skin_allias = $this->allias_real_name;
 
 		$v = new visuotag( );
 		
-		# РљСЂРѕСЃСЃ-РґРѕРјРµРЅРЅРѕРµ СЂР°Р·СЂРµС€РµРЅРёРµ
+		# Кросс-доменное разрешение
 		# header( 'Access-Control-Allow-Origin:*' , false , 200 );
 		# header( 'Access-Control-Allow-Credentials:true' , false , 200 );
 
 	}
 	/**
- * Р—Р°РіСЂСѓР¶Р°РµС‚ РІРЅРµС€РЅСЋСЋ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РёР· JSON С„Р°Р№Р»Р° Рё РґРёРЅР°РјРёС‡РµСЃРєРё РѕР±РЅРѕРІР»СЏРµС‚ СЃРІРѕР№СЃС‚РІР° РєР»Р°СЃСЃР°.
- * 
- * @param string $configPath РђР±СЃРѕР»СЋС‚РЅС‹Р№ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РєРѕРЅС„РёРіСѓСЂР°С†РёРё.
- * @return void
- */
+	 * Загружает внешнюю конфигурацию из JSON файла и динамически обновляет свойства класса.
+	 * 
+	 * @param string $configPath Абсолютный путь к файлу конфигурации.
+	 * @return void
+	 */
 	public function loadExternalConfig( string $configPath ) {
 		if( ! file_exists( $configPath ) ){
-			// Р•СЃР»Рё С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ, РјРѕР¶РЅРѕ Р·Р°Р»РѕРіРёСЂРѕРІР°С‚СЊ РѕС€РёР±РєСѓ РёР»Рё РїСЂРѕСЃС‚Рѕ РІС‹Р№С‚Рё
+			// Если файл не найден, можно залогировать ошибку или просто выйти
 			return;
 		}
 
@@ -258,12 +257,12 @@ class main_settings {
 		$configData = json_decode( $jsonContent , true );
 
 		if( json_last_error( ) !== JSON_ERROR_NONE || ! is_array( $configData ) ) {
-			// Р•СЃР»Рё JSON РЅРµРІР°Р»РёРґРµРЅ, РІС‹С…РѕРґРёРј, С‡С‚РѕР±С‹ РЅРµ РїРѕРІСЂРµРґРёС‚СЊ С‚РµРєСѓС‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё
+			// Если JSON невалиден, выходим, чтобы не повредить текущие настройки
 			return;
 		}
 
 		foreach( $configData as $property=>$value ){
-			// РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚Р°РєРѕРµ СЃРІРѕР№СЃС‚РІРѕ РІ С‚РµРєСѓС‰РµРј РєР»Р°СЃСЃРµ
+			// Проверяем, существует ли такое свойство в текущем классе
 			if ( property_exists( $this , $property ) ){
 				$this->$property = $value;
 			}
@@ -279,7 +278,7 @@ class main_settings {
 	}
 	public function alliases ( string $allias_name ) {
 		
-		# return $this->
+		# return $this
 		# return $this->{'alliases_' . $this->alliases_level}[ $this->domain_name ][ $allias_name ] ? $allias_name : null;
 	}
 	
@@ -293,8 +292,8 @@ class main_settings {
 	}
 	
 	public function default ( string $language ,
-													string $render ,
-													string $skin ) {
+	                        string $render ,
+	                        string $skin ) {
 		$this->language = $language;
 		$this->render = $render;
 		$this->skin = $skin;

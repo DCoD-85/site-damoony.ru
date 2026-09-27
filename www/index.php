@@ -55,8 +55,11 @@ if ( isset( $_COOKIE[ 'PHPSESSID' ] ) ){
 # 1 : Стартуем сессию:
 # session_start( );
 
-# 2 : Не показывать ошибки и предупреждения:
+# 2 : Показывать / Не показывать ошибки и предупреждения
+# Error_Reporting( E_ALL );
+# ini_set( 'display_errors' , '1' );
 Error_Reporting( ~E_ALL & ~E_NOTICE );
+
 # 3 : Константы времени
 define( 'SCRIPTSTART_MT' , $start );
 define( 'SCRIPTSTART_HR' , $start_hr );
