@@ -7,6 +7,8 @@ class domainglobal_header {
 	public function __construct ( main $main ) {
 		$this->main = $main;
 
+		$new_url_base = null;
+
 		$library = $main->library;
 		$link = $library->link( );
 		$url = $library->url( );
@@ -16,7 +18,7 @@ class domainglobal_header {
 		$url_vars = $url->static_vars;
 		
 		$lang = in_array( $url_base[ 0 ] , [ 'ru-ru' , 'en-en' , 'tests' ] );
-		$lang_cookie = in_array( $_COOKIE[ 'lang' ] , [ 'ru-ru' , 'en-en' , 'tests' ] );
+		$lang_cookie = in_array( $_COOKIE[ 'lang' ] ?? '' , [ 'ru-ru' , 'en-en' , 'tests' ] );
 		
 		if( $lang ){
 			$lang = $url_base[ 0 ];
@@ -79,7 +81,7 @@ class domainglobal_header {
 
 
 		# # SKIN
-		if( $_GET[ 'skin' ] ){
+		if( ! empty( $_GET[ 'skin' ] ) ){
 			$value = $_GET[ 'skin' ];
 			$exp = 0;
 			$path = '/';
