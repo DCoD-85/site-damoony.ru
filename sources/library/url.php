@@ -57,7 +57,7 @@ class library_url {
 		preg_match( '~^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?~i' , $str , $returnData );
 		
 		$return = [ ];
-		$this->vars_correct( $return , explode( '&' , $returnData[ 7 ] ) );
+		$this->vars_correct( $return , explode( '&' , $returnData[ 7 ] ?? '' ) );
 		
 		return $return;
 	}
@@ -67,7 +67,7 @@ class library_url {
 			foreach( $vars as $key => $value ) {
 				$cur = explode( '=' , $value );
 				$cur_key = $cur[ 0 ];
-				$cur_value = $cur[ 1 ];
+				$cur_value = $cur[ 1 ] ?? '';
 				$return[ $cur_key ] = $cur_value;
 			}
 		}
