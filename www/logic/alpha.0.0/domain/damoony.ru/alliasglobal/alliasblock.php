@@ -10,13 +10,12 @@ abstract class alliasblock {
 
 	# --- state ---
 	public \visuotag $visuotag;
-	public null|\visuotag $visuotag_title = null;
 	public string $alliasglobal_name = '';
-	public string $allias_accepted = '';
-	public bool $settings_on = false;
-	public bool $settings_asmenu = true;
+	public string $allias_accepted   = '';
+	public bool   $settings_on       = false;
+	public bool   $settings_asmenu   = true;
 
-	public null|alliasglobal_menu $alliasglobal_menu = null;
+	public null|alliasglobal_menu $menu = null;
 
 	# --- methods ---
 	public function __construct ( alliasglobal $alliasglobal ) {
@@ -25,20 +24,13 @@ abstract class alliasblock {
 		$this->visuorelease    = $this->main->visuorelease;
 		$this->visuotag        = new \visuotag( $this->visuorelease );
 		$this->allias_accepted = $this->main->main_settings->allias_accepted( );
+		$this->menu            = new alliasglobal_menu( $alliasglobal , $this->alliasglobal_name );
 
 		$this->init( );
 	}
 
 	protected function init ( ) : void {
-		$localname      = $this->alliasglobal_name;
-		$alliaslocal_on = $this->main->alliaslocal->{$localname}->settings_on ?? false;
-
-		if ( $alliaslocal_on === true ) {
-			$this->visuotag->clear( )->append( $this->main->alliaslocal->{$localname}->visuotag );
-		} else {
-			if ( $this->alliasglobal_menu !== null ) $this->alliasglobal_menu->clear( );
-			$this->algoritm( );
-		}
+		$this->algoritm( );
 	}
 
 	public function algoritm ( ) : void {

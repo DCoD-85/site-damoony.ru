@@ -20,7 +20,11 @@ class alliasglobal {
 	}
 
 	public function autoload ( bool $init = true ) : void {
+		# порядок: строки → меню → база блока → элементы
+		( include_once $path = 'alliasglobal' . DS . 'menu_row.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = 'alliasglobal' . DS . 'menu.php'     ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = 'alliasglobal' . DS . 'alliasblock.php' ) or error_file( $path , __FILE__ , __LINE__ );
+
 		( include_once $path = 'alliasglobal' . DS . 'top'    . DS . 'top.php'    ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = 'alliasglobal' . DS . 'left'   . DS . 'left.php'   ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = 'alliasglobal' . DS . 'center' . DS . 'center.php' ) or error_file( $path , __FILE__ , __LINE__ );
