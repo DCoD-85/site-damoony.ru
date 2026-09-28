@@ -22,6 +22,7 @@ class algoritm_ {
 	public int $count_pages = 0;
 
 	# --- page settings (override in child) ---
+	public bool  $logged     = false;
 	public array $available = [ '' ];
 	public bool  $auth      = false;
 	public bool  $search    = true;
@@ -134,7 +135,7 @@ class algoritm_ {
 		$args = [ ];
 
 		$url_base_pos = count( explode( '_' , get_class( $object ) ) ) - 1;
-		$url_base_real = $url_base;
+		if ( ! isset( $url_base_real[ $url_base_pos ] ) ) $url_base_real[ $url_base_pos ] = '';
 
 		if( $search === true ){
 			if( ! empty( $available ) ){
@@ -145,7 +146,7 @@ class algoritm_ {
 						mb_ereg( '^' . $base[ 0 ] . '$' , $url_base_real[ $url_base_pos ] , $matches );
 
 						if( ! empty( $matches ) ){
-							$args[ $matches[ 1 ] ] = $matches[ 2 ];
+							$args[ $matches[ 1 ] ?? '' ] = $matches[ 2 ] ?? '';
 							$url_base_real[ $url_base_pos ] = $base[ 1 ];
 							$available[ $key ] = $base[ 1 ];
 							break;
