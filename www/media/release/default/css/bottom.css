@@ -14,6 +14,27 @@
 .bottom_confidence p { font-size : 20px ; margin : 10px 0px ; text-indent : 20px ; }
 */
 
+.dt_bottom .nav { }
+.dt_bottom .nav .nav_unfon{ display : flex ; justify-content : flex-end ; }
+
+.dt_bottom .menulink_between { display : block ; font-weight : 100 ; margin : 10px 0px ; padding : 0 0px ; color : #CCC ; }
+.dt_bottom .menulink { display : grid ; justify-items : center ; position : relative ; }
+.dt_bottom .menulink.link_text { }
+.dt_bottom .menulink.link_link { }
+.dt_bottom .menulink.link_popup { }
+
+.dt_bottom .menulink a { display : block ; margin : 10px ; padding : 0px ; }
+.dt_bottom .menulink .span_text { color : #666 ; }
+.dt_bottom .menulink .span_text a { color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_bottom .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_bottom .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_bottom .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_bottom .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_bottom .menulink:hover .span_comment { display : block ; }
+.dt_bottom .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_bottom .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
 .bottom_nav { display : flex ; justify-content : space-between ; font-size : 16px ; color : #000 ; line-height : 1.5em ; }
 .bottom_nav a { margin-top : 5px ; line-height : 1.0em ; }
 .bottom_nav a::before { content : '' }

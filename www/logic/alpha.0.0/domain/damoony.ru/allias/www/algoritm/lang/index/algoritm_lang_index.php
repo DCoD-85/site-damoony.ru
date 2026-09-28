@@ -69,8 +69,14 @@ class algoritm_lang_index
 		$form->add( $btn );
 
 		# вставка в центр страницы
+		$main->alliasglobal->head->title( 'TEST TITLE' );
 		$main->alliasglobal->center->visuotag( )->el( $ve );
 
+		$bottom = $main->alliasglobal->bottom;
+		$bottom->copyright = 'ООО «Ромашка» &copy; 2026';
+		$bottom->agreement_href = '/policy/full';
+		$bottom->reload( );
+		
 		return true;
 	}
 

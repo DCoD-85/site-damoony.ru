@@ -15,6 +15,7 @@ class alliasscheme_www {
     public null|\visuotag $dt_center = null;
     public null|\visuotag $dt_right = null;
     public null|\visuotag $dt_bottom = null;
+    public null|\visuotag $dt_policy = null;
 	# methods
 	public function __construct ( alliasscheme $alliasscheme ) {
 		$this->alliasscheme = $alliasscheme;
@@ -122,6 +123,7 @@ class alliasscheme_www {
 							->tag( 'div' , class : 'dt_right' , return : false )
 						->parent( )
 						->tag( 'div' , class : 'dt_bottom' , return : false )
+					->parent( )->tag( 'div' , class : 'dt_policy' , return : true )
 					->parent( )->tag( 'div' , class : 'dt_debug' , return : true );
 		
 		$visuorelease->visuotag_set( $vt );
@@ -135,6 +137,7 @@ class alliasscheme_www {
 		$logic->dt_left = null;
 		$logic->dt_center = null;
 		$logic->dt_right = null;
+		$logic->dt_policy = null;
 		$logic->dt_bottom = null;
     }
     public function init ( ) {
@@ -151,6 +154,7 @@ class alliasscheme_www {
 		$logic->dt_center = $logic->dt_root->find( class : 'dt_center' );
 		$logic->dt_right = $logic->dt_root->find( class : 'dt_right' );
 		$logic->dt_bottom = $logic->dt_root->find( class : 'dt_bottom' );
+		$logic->dt_policy = $logic->dt_root->find( class : 'dt_policy' );
     }
 	
 	public function refresh ( bool $reload = false ) {
@@ -167,12 +171,14 @@ class alliasscheme_www {
 		! $logic->dt_center ?: $center = $main->alliasglobal->center->as_tag( );
 		! $logic->dt_right ?: $right = $main->alliasglobal->right->as_tag( );
 		! $logic->dt_bottom ?: $bottom = $main->alliasglobal->bottom->as_tag( );
+		! $logic->dt_policy ?: $policy = $main->alliasglobal->policy->as_tag( );
 		
 		! $logic->dt_top ?: $logic->dt_top->clear( )->append( $top );
 		! $logic->dt_left ?: $logic->dt_left->clear( )->append( $left );
 		! $logic->dt_center ?: $logic->dt_center->clear( )->append( $center );
 		! $logic->dt_right ?: $logic->dt_right->clear( )->append( $right );
 		! $logic->dt_bottom ?: $logic->dt_bottom->clear( )->append( $bottom );
+		! $logic->dt_policy ?: $logic->dt_policy->clear( )->append( $policy );
 	}
 
 	public function load ( ) {

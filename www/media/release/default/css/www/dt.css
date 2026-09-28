@@ -1,3 +1,18 @@
+/*
+	about : ;
+	author : ;
+	date : ;
+ */
+ 
+.dt { padding : 10px ; }
+.dt_top { position : relative ; }
+.dt_middle { position : relative ; display : grid ; grid-template-columns : 300px auto 200px ; border : solid #CCC ; border-width : 1px 0px ; }
+.dt_left { position : relative ; padding : 0px ; }
+.dt_center { position : relative ; padding : 0px ; border : solid #CCC ; border-width : 0px 1px 0px 0px ; }
+.dt_right { position : relative ; padding : 0px ; }
+.dt_bottom { position : relative ; padding : 0px ; }
+.dt_debug { position : relative ; padding : 0px ; }
+
 
 .dt_left .menuleft { margin : 10px 0px ; padding : 10px ; background : ; border-radius : 5px ; }
 .dt_left .menuleft .menulink_between { display : none ; }
@@ -40,13 +55,3 @@
 .dt_right .menuright .menulink:hover .span_comment { display : block ; }
 .dt_right .menuright .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
 .dt_right .menuright .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
-
-
-.block { padding : 0px ; }
-.block .block_head { font-weight : 600 ; padding : 15px 15px 5px 15px ; color : #666 ; border-bottom : dashed #CCC 1px ; }
-.block .block_body { padding : 10px ; }
-.block .body .row { padding : 10px 10px ; border-top : solid #DDD 1px ; }
-.block .body .empty { background : #CCC ; text-align : center ; }
-
-.block .block_body .visuotable .tfoot .row .col.colelsinline .col-inside { display : flex ; padding : 20px 10px 10px 10px ; border-top : solid #CCC 1px ; }
-.block .block_body .visuotable .tfoot .row .col.colelsinline .col-inside .el { padding : 0px ; }

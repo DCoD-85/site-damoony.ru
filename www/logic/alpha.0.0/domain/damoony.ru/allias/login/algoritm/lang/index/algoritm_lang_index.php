@@ -23,7 +23,7 @@ class algoritm_lang_index
 		$vt_test = new \visuotag( );
 		$vt_test->tag( 'div' )->content( 'ПЕРЕОПРЕДЕЛЕНИЕ CENTER' );
 		$struct->center = $vt_test;
-		print 'asd';
+
 		return true;
 
 		$var = $main->library->vars;

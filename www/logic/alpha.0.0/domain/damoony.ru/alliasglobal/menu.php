@@ -122,18 +122,22 @@ class alliasglobal_menu {
 		$rows = $this->lists[ $name ];
 		if ( empty( $rows ) ) return $vt;
 
-		$wrapper = $vt->tag( 'div' , class : 'menu menu_' . $this->menu_name );
-		$wrapper->data_add( 'list' , $name );
+		# wrapper: <div class="{name}">
+		$vt = $vt->tag( 'div' , class : $name );
 
-		$inner = $wrapper->tag( 'div' , class : 'menu_list' );
+		# background: <div class="{name}_fon menulink_fon">
+		$vt->tag( 'div' , class : $name . '_fon menulink_fon' );
+
+		# content: <div class="{name}_unfon">
+		$vt = $vt->tag( 'div' , class : $name . '_unfon' );
 
 		$count = count( $rows );
 		$i     = 0;
 		foreach ( $rows as $row ) {
 			$i++;
-			$inner->append( $row->as_tag( ) );
+			$vt->append( $row->as_tag( ) );
 			if ( $i < $count && $this->separator !== '' && $row->type !== 'between' ) {
-				$inner->tag( 'span' , class : 'menulink_between' )->content( $this->separator );
+				$vt->tag( 'span' , class : 'menulink_between' )->content( $this->separator );
 			}
 		}
 
