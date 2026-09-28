@@ -29,7 +29,6 @@ class algoritm_lang
 		$url_vars = $url->static_vars;
 		$center = $main->alliasglobal->center;
 
-		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 
 		# $href = $link->href( $url_domain , [ $url_base[ 0 ] , 'form' ] , $url_vars );

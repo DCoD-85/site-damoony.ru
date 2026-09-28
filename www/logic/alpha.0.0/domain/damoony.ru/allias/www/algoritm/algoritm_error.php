@@ -40,7 +40,6 @@ class algoritm_error
 		$url_vars = $url->static_vars;
 		$center = $main->alliasglobal->center;
 
-		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 
 		$scheme->load( 'error' );

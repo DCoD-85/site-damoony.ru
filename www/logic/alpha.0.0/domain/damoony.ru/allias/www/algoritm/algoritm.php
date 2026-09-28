@@ -30,7 +30,6 @@ class algoritm
 	public function start ( ) {
 		$main = $this->main;
 
-		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 
 		$scheme->load( 'www' );
