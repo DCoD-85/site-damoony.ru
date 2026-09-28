@@ -34,9 +34,9 @@ class algoritm_lang
 		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 		
-		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'form' ] , $url_vars );
-		http_response_code( 307 );
-		header( 'Location: ' . $href );
+		# $href = $link->href( $url_domain , [ $url_base[ 0 ] , 'form' ] , $url_vars );
+		# http_response_code( 307 );
+		# header( 'Location: ' . $href );
 	}
 }
 

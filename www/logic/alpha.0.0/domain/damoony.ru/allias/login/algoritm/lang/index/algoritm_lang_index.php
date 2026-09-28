@@ -1,74 +1,31 @@
 <?PHP
 
+namespace damoony\login;
+
 class algoritm_lang_index
-	extends algoritm_ {
-	# vars
-	public algoritm $algoritm;
-	public null|algoritmdata_ $algoritmdata = null;
-	public visuotag $vt;
-	public array $args = [ ];
-	# methods
-	public function __construct( main $main , array $args = [ ] ) {
-		$this->main = $main;
-		$this->args = $args;
-		$this->algoritm = $main->algoritm;
-		$this->algoritmdata = new algoritmdata_( );
-	}
+	extends \algoritm_ {
 	
+	# --- page settings ---
+	public array $available = [ '' ];
+	public bool  $auth      = false;
+	public bool  $search    = false;
+	public bool  $default   = true;
 	
-	public function args ( array $args ) {
-		$this->args = $args;
-	}
-	public function algoritm ( ) {
-		$_SESSION[ 'login' ][ 'redirect' ] = $_SERVER[ 'HTTP_REFERER' ];
-	}
-
-	public function release ( ) {
-		$main = $this->main;
-		if( $main->user->is_guest( ) ){
-			$this->algoritmdata->set( );
-		} else {
-			$this->algoritmdata->set( );
-		}
-
-		$available = [ '' ];
-		$auth = false;
-		$search = true;
-		$default = $this->main->library->url->static_base[ 2 ] == '' ? true : false;
-
-		$this->algoritmdata->set( $available , $auth , $search , $default );
-
-		# release
-		$this->release_( $this );
-	}
+	# --- ajax aliases (если form_jquery включён) ---
+	public function ajax_guest ()  { return $this->guest(); }
+	public function ajax_logged () { return $this->logged(); }
 	
-	public function default ( ) {
+	# --- guest handler: обработка POST от формы логина ---
+	public function guest () {
 		$main = $this->algoritm->main;
 		$visuorelease = $main->visuorelease;
-		$lang = $main->language;
+		$struct = $main->visuostruct->html( );
+		$vt_test = new \visuotag( );
+		$vt_test->tag( 'div' )->content( 'ПЕРЕОПРЕДЕЛЕНИЕ CENTER' );
+		$struct->center = $vt_test;
+		print 'asd';
+		return true;
 
-		$is_ajax = $main->render->getdata( 'render_ajax' );
-		$is_guest = $main->user->is_guest( );
-
-		if( $is_ajax && $_POST ){
-			return $this->ajax( );
-		} else {
-			if( $is_guest ) return $this->default_guest( );
-			else return $this->default_logged( );
-		}
-	}
-
-	public function ajax ( ) {
-		$main = $this->algoritm->main;
-		$is_guest = $main->user->is_guest( );
-		if( $is_guest ) return $this->ajax_guest( );
-		else return $this->ajax_logged( );
-	}
-
-	public function ajax_guest ( ) {
-		$main = $this->algoritm->main;
-		$visuorelease = $main->visuorelease;
-		
 		$var = $main->library->vars;
 		$library = $main->library;
 		$vars = $library->vars;
@@ -78,152 +35,157 @@ class algoritm_lang_index
 		$url_allias = $url->static_allias;
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
-		
-		$top = $main->alliasglobal->top;
 		$center = $main->alliasglobal->center;
-		$bottom = $main->alliasglobal->bottom;
 		
 		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 		
-		# struct
-		$struct = $main->visuostruct->ajax( );
+		if( ! $_POST ) return false;
 		
-		# struct : init
-		$struct_address = $struct->address( );
-		$struct_top = $struct->top( );
-		$struct_center = $struct->center( );
-		$struct_bottom = $struct->bottom( );
-		
-		$vt_top = new visuotag( );
-		$vt_top = $top->as_tag( );
-		$vt_center = new visuotag( );
-		$vt_center->tag( 'div' )->content( 'login' );
-		$vt_bottom = new visuotag( );
-		$vt_bottom = $bottom->as_tag( );
+		# vars
+		$struct = $main->visuostruct->min( );
 
-		# struct : set
-		# $struct_address->set( $link->href( true , true ) );
-		$struct_top->set( $top->as_tag( ) );
-		$struct_center->set( $vt_center );
-		$struct_bottom->set( $bottom->as_tag( ) );
+		$struct_error = $struct->error( );
+		$struct_messages = $struct->messages( );
+		$struct_release = $struct->release( );
+		$struct_form = $struct->form( );
+		$struct_referer = $struct->referer( );
 		
-		$visuorelease->release_struct( $struct );
+		$error = false;
+		$messages = $main->messages;
+		$release = [ 'html'=>new \visuotag( ) , 'layer'=>'' , 'popup'=>false , 'popup_back'=>true , 'popup_navigate'=>false ];
+		$form = [ 'reset'=>false , 'redirect'=>null , 'redirect_time'=>null ];
+		$referer = null;
+
+		$scheme->load( 'min' );
+
+		$_form = $_POST[ 'form' ];
+		$_formcheck = [
+			'login'=>[ $_form[ 'login' ] , $var->check( $_form[ 'login' ] , 'string' , 5 , 30 ) , 'Логин' ] ,
+			'password'=>[ $_form[ 'password' ] , $var->check( $_form[ 'password' ] , 'string' , 5 , 100 ) , 'Пароль' ] ,
+			'remember'=>[ $_form[ 'remember' ] , $var->check( $_form[ 'remember' ] , 'string' , 0 , 10 ) , 'Запомнить' ] ,
+			'submit'=>[ $_form[ 'submit' ] , $var->check( $_form[ 'submit' ] , 'string' , 0 , 20 ) , 'Подтвердить' ] ,
+		];
+		
+		foreach( $_formcheck as $key=>$value ){
+			$value_var = $value[ 0 ];
+			$value_check = $value[ 1 ];
+			$value_field = $value[ 2 ];
+
+			if( $value_check == false ) {
+				$error = true;
+				$var->error( $value_field );
+			}
+		}
+		
+		# Работа с бд
+		if( $error == false ){
+			$db = $main->db->db( );
+			$query = $db->query( );
+			$query->select( 'select * from toolsusers tu WHERE tu.login=%s AND tu.password=%s' , [ $_formcheck[ 'login' ][ 0 ] , md5( $_formcheck[ 'password' ][ 0 ] ) ] , limit : true , limitstep : 1 );
+			$results = $query->result( )[ 0 ];
+			
+			if( ! empty( $results ) ){
+				$main->user->profile->login( $results , $_formcheck );
+			} else{
+				$error = true;
+				$messages->add( 'error' , 'Вы ввели не верные учетные данные.' , 'Вы ввели не верные учетные данные.<br />' . $query->show( ) );
+			}
+		}
+		
+		if( $error == true ){
+			$release[ 'html' ];
+			$release[ 'layer' ] = '';
+			$release[ 'popup' ] = false;
+			$release[ 'popup_back' ] = false;
+			$release[ 'popup_navigate' ] = false;
+		} else {
+
+			if( isset( $_SESSION[ 'login' ][ 'redirect' ] ) ){
+				$form_redirect = $_SESSION[ 'login' ][ 'redirect' ];
+				unset( $_SESSION[ 'login' ][ 'redirect' ] );
+			} else {
+				$form_redirect = $link->href( $url_domain , [ $url_base[ 0 ] , 'redirect' ] );
+			}
+
+			# form
+			$form[ 'reset' ] = false;
+			$form[ 'redirect' ] = $form_redirect;
+			$form[ 'redirect_time' ] = 15000;
+			# result
+			$release[ 'html' ]->tag( 'div' )->content( 'RESULT!' );
+			$release[ 'layer' ] = '';
+			$release[ 'popup' ] = false;
+			
+			$messages->add( 'success' , 'Все хорошо.' , 'Вы будете автоматически перенаправлены.<br /><br /><a href="' . $form[ 'redirect' ] . '">Ручное перенаправление</a>' );
+		}
+
+		$struct_error->set( $error );
+		$struct_messages->set( $messages->as_tag( ) );
+		$struct_release->set( $release[ 'html' ] , $release[ 'layer' ] , $release[ 'popup' ] , $release[ 'popup_back' ] , $release[ 'popup_navigate' ] );
+		$struct_form->set( $form[ 'reset' ] , $form[ 'redirect' ] , $form[ 'redirect_time' ] );
+		$struct_referer->set( $referer );
+		
+		$visuorelease->release_min( $struct );
+
+		return true;
 	}
 
-	public function ajax_logged ( ) {
-
-	}
-
-	public function default_guest ( ) {
+	# --- logged handler: пользователь уже авторизован ---
+	public function logged () {
 		$main = $this->algoritm->main;
 		$visuorelease = $main->visuorelease;
 		
 		$library = $main->library;
+		$vars = $library->vars;
 		$link = $library->link( );
 		$url = $library->url( );
 		$url_domain = $url->static_domain;
 		$url_allias = $url->static_allias;
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
-
-		$left = $main->alliasglobal->left;
 		$center = $main->alliasglobal->center;
-		$right = $main->alliasglobal->right;
 		
-		$db = $main->db->db( );
-		$query = $db->query( );
-		$query->droptable( 'testingtable' );
+		$headers = $main->alliasglobal->headers;
+		$scheme = $main->alliasscheme;
 		
-		$query = $db->query( );
-		$query->createtable( 'testingtable' , [
-			'`id` int( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT' ,
-			'`status` enum( \'activated\' , \'unactivated\' ) NOT NULL DEFAULT \'activated\'' ,
-			# "`created_timestamp` timestamp NOT NULL DEFAULT current_timestamp( ) COMMENT 'Дата создания'" ,
-			# "`created_users_id` int( 10 ) UNSIGNED NOT NULL COMMENT 'Автор'"
-		] );
-		# print $db->log( );
-
-		$inputlogin_login = new visuoelement( $main->visuorelease );
-		$inputlogin_login->input( )->text( );
-		$inputlogin_login->get_input_text__data( )->set( 'form[login]' , label_comment : 'Логин' );
-		$inputlogin_password = new visuoelement( $main->visuorelease );
-		$inputlogin_password->input( )->password( );
-		$inputlogin_password->get_input_password__data( )->set( 'form[password]' , label_comment : 'Пароль' );
-		$inputlogin_remember = new visuoelement( $main->visuorelease );
-		$inputlogin_remember->input( )->checkbox( );
-		$inputlogin_remember->get_input_checkbox__data( )
-			->set( 'form[remember]' , text : 'Включите данный пункт, чтобы запомнить учетную запись в системе' , input_checked : true );
-		$inputlogin_submit = new visuoelement( $main->visuorelease );
-		$inputlogin_submit->input( )->submit( );
-		$inputlogin_submit->get_input_submit__data( )->set_label( 'Пароль' );
-		$inputlogin_reset = new visuoelement( $main->visuorelease );
-		$inputlogin_reset->input( )->reset( );
-		$inputlogin_reset->get_input_reset__data( )->set_label( 'Пароль' );
-
+		if( ! $_POST ) return false;
 		
-		$tablelogin = new visuoelement( $main->visuorelease );
-		$tablelogin->table( )->table( );
-		$tablelogin__data = $tablelogin->get_table_table__data( );
-		$tablelogin__data->clear( )
-			// ->add_thead( [ 'Логин' , [ $inputlogin_login ] ] )
-			->add_tbody( [ 'Данные для авторизации:' , [ $inputlogin_login , $inputlogin_password ] ] , colelsinline : [ false , true ] , colwidth : [ '30%' , '70%' ] )
-			->add_tbody( [ 'Контроль:' , [ 'Загрузка капчи' , 'Second' ] ] , colelsinline : [ false , true ] )
-			->add_tbody( [ 'Дополнительно:' , [ $inputlogin_remember ] ] )
-			->add_tfoot( [ 'Действия' , [ $inputlogin_submit , $inputlogin_reset ] ] , colelsinline : [ false , true ] );
+		# vars
+		$messages = $main->messages;
+		$error = false;
+
+		$struct = $main->visuostruct->min( );
+
+		$struct_error = $struct->error( );
+		$struct_messages = $struct->messages( );
+		$struct_release = $struct->release( );
+		$struct_form = $struct->form( );
+		$struct_referer = $struct->referer( );
 		
-			# die( $form->show( ) );
-		$form = new visuoelement( $visuorelease );
-		$form->form( )->form( );
-		$form__data = $form->get_form_form__data( );
-		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'login' ] , [ ] , use_all_adress_data : false );
+		$release = [ 'html'=>new \visuotag( ) , 'layer'=>null , 'popup'=>null , 'popup_opt'=>null ];
+		$form = [ 'reset'=>false , 'redirect'=>null , 'redirect_time'=>null ];
+		$referer = false;
+
+		$scheme->load( 'min' );
 		
-		$form__data->set( 'testform', 'post' , $href , title_text : 'Форма авторизации' , form_jquery : true );
-		$form__data->add( $tablelogin );
+		$messages->add( 'error' , 'Вы уже авторизованы' , 'Вы уже авторизованы;' );
+		$release[ 'html' ] = new \visuotag( );
+		$release[ 'layer' ] = '';
+		$release[ 'popup' ] = false;
+
+		$referer = null;
+
+		$struct_error->set( $error );
+		$struct_messages->set( $messages->as_tag( ) );
+		$struct_release->set( $release[ 'html' ] , $release[ 'layer' ] , $release[ 'popup' ] );
+		$struct_form->set( $form[ 'reset' ] ?: false , $form[ 'redirect' ] ?: null , $form[ 'redirect_time' ] ?: null );
+		$struct_referer->set( $referer );
 		
-		# $form->init( );
-		# print $form->show( );
-		# die( 'die: ' . __FILE__ . ' : ' . __LINE__ );
-
-		$vars = $main->library->vars;
-
-		$tablebox = new visuoelement( $visuorelease );
-		$tablebox->table( )->tablebox( );
-		$tablebox->get_table_tablebox__data( )->clear( );
-		$tablebox->get_table_tablebox__data( )->add_box( 'Форма авторизации' , $form );
-
-		$vt_center = new visuotag( );
-		$vt_center->element( 'tablebox' , $tablebox );
-
-		$center->visuotag( )->append( $vt_center );
+		$visuorelease->release_min( $struct );
 
 		return true;
 	}
-
-	public function default_logged ( ) {
-		$main = $this->algoritm->main;
-		$visuorelease = $main->visuorelease;
-		
-		$library = $main->library;
-		$link = $library->link( );
-		$url = $library->url( );
-		$url_domain = $url->static_domain;
-		$url_allias = $url->static_allias;
-		$url_base = $url->static_base;
-		$url_vars = $url->static_vars;
-
-		$left = $main->alliasglobal->left;
-		$center = $main->alliasglobal->center;
-		$right = $main->alliasglobal->right;
-
-		$vt_center = new visuotag( );
-		$vt_center->tag( 'div' , style : 'font-size : 20px ; margin : 100px auto ; text-align : center ; ' )->content( 'Вы уже авторизованы' );
-
-		$center->visuotag( )->append( $vt_center );
-
-		return true;
-	}
-	
 }
 
 ?>

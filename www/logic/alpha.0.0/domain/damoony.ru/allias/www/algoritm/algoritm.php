@@ -33,7 +33,7 @@ class algoritm
 		$headers = $main->alliasglobal->headers;
 		$scheme = $main->alliasscheme;
 
-		$scheme->load( 'login' );
+		$scheme->load( 'www' );
 
 		$this->logic( );
 		$this->release( );

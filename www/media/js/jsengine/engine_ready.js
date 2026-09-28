@@ -34,7 +34,6 @@ $( document ).ready( function( ) {
 				
 				engine.load.a( this , 'load' , { 'layerto' : layerto , 'src' : src } );
 			}
-			
 			return false;
 		} );
 	} );

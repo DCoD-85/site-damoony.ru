@@ -1,11 +1,5 @@
 <?PHP
 
-# visuostruct_html — контракт для HTML-страницы.
-# Программист задаёт:
-#   - visuotag — заменить содержимое блока
-#   - false    — отключить блок
-#   - null     — оставить дефолт из alliasglobal/local
-
 class visuostruct_html {
 	# --- refs ---
 	public null|visuostruct $visuostruct = null;
@@ -25,8 +19,10 @@ class visuostruct_html {
 		$this->visuostruct = $visuostruct;
 	}
 
-	# Переопределить один или несколько блоков.
-	# Не переданные — остаются null (дефолт).
+	public function return_type ( ) : string {
+		return 'html';
+	}
+
 	public function set (
 		null|visuotag|false $top    = null ,
 		null|visuotag|false $left   = null ,
@@ -42,7 +38,6 @@ class visuostruct_html {
 		return $this;
 	}
 
-	# Отключить блок (пусто вместо дефолта)
 	public function off ( string $block ) : static {
 		if ( property_exists( $this , $block ) ) {
 			$this->{$block} = false;

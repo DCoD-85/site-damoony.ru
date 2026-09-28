@@ -33,7 +33,7 @@ class visuostruct_ajax {
 	public function center  ( ) : visuostruct_ajax_center  { return $this->center  ??= new visuostruct_ajax_center ( $this ); }
 	public function right   ( ) : visuostruct_ajax_right   { return $this->right   ??= new visuostruct_ajax_right  ( $this ); }
 	public function bottom  ( ) : visuostruct_ajax_bottom  { return $this->bottom  ??= new visuostruct_ajax_bottom ( $this ); }
-
+	public function return_type ( ) : string {return 'json';}
 	public function as_json ( ) : string {
 		$structs = [
 			'error'   => $this->error ,

@@ -39,6 +39,10 @@ class visuostruct_min {
 	public function referer ( ) : visuostruct_min_referer {
 		return $this->referer ??= new visuostruct_min_referer( $this );
 	}
+	
+	public function return_type ( ) : string {
+		return 'json';
+	}
 
 	# ------------------------------------------------------------
 	#  AS JSON
