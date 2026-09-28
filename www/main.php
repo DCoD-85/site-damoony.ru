@@ -135,6 +135,13 @@ class main {
 	}
 	
 	public function release ( bool $log = false , bool $debug = false ){
+		# scripts: применяем эффекты до финального рендера
+		if ( $this->alliasglobal !== null ) {
+			foreach ( $this->alliasglobal->scripts as $script ) {
+				$script->run( );
+			}
+		}
+
 		$this->render->release( $log , $debug );
 	}
 
