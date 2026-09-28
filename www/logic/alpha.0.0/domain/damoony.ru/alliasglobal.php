@@ -52,7 +52,7 @@ class alliasglobal {
 		$this->policy = new alliasglobal_policy( $this );
 		$this->top    = new alliasglobal_top( $this );
 		$this->left   = new alliasglobal_left( $this );
-		$this->center = new alliasglobal_center( $this->main );
+		$this->center = new alliasglobal_center( $this );
 		$this->right  = new alliasglobal_right( $this );
 		$this->bottom = new alliasglobal_bottom( $this );
 

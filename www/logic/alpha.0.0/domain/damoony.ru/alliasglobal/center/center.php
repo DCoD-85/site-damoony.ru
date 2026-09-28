@@ -2,26 +2,21 @@
 
 namespace damoony;
 
-class alliasglobal_center {
-	# --- refs ---
-	public \main $main;
-	public \visuorelease $visuorelease;
-
+class alliasglobal_center extends alliasblock {
 	# --- state ---
+	public string $alliasglobal_name = 'center';
+	public bool   $settings_asmenu   = false;
+
+	# --- custom ---
 	public \visuotag $tmp;
-	public \visuotag $visuotag;
-	public string $settings_lang = '';
 
 	# --- methods ---
-	public function __construct ( \main $main ) {
-		$this->main          = $main;
-		$this->visuorelease  = $main->visuorelease;
-		$this->visuotag      = new \visuotag( );
-		$this->tmp           = new \visuotag( );
-		$this->settings_lang = $main->main_settings->get( 'language' );
+	public function __construct ( alliasglobal $alliasglobal ) {
+		$this->tmp = new \visuotag( );
+		parent::__construct( $alliasglobal );
 	}
 
-	public function visuotag ( ) { return $this->visuotag; }
-	public function as_tag   ( ) { return $this->visuotag; }
-	public function release  ( ) { }
+	protected function scheme  ( ) : void { }
+	protected function data    ( ) : void { }
+	protected function release ( ) : void { }
 }
