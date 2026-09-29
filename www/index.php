@@ -1,5 +1,4 @@
 <?PHP
-
 # ini_set('session.cookie_domain', '.damoony2.ru');
 # session_start();
 # 
@@ -114,7 +113,6 @@ function error_class ( string $classname , string $file , string $line ) {
 ( include_once $path = __DIR__ . DS . 'included.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 ( include_once $path = __DIR__ . DS . 'main.php' ) or error_file( $path , __FILE__ , __LINE__ );
-
 
 $url = null;// 'https://login.damoony2.ru/ru-ru/form';
 

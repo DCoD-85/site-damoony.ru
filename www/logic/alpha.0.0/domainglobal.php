@@ -16,10 +16,10 @@ class domainglobal {
 	public function autoload ( ) {
 		$main = $this->main;
 		
-		( include_once $path = 'domainglobal' . DS . 'header.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		# ( include_once $path = 'domainglobal' . DS . 'header.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		# ( include_once $path = 'domainglobal' . DS . 'scheme.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
-		$this->header = new domainglobal_header( $main );
+		# $this->header = new domainglobal_header( $main );
 		# $this->scheme = new domainglobal_scheme( $main );
 	}
 }
