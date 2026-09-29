@@ -4,7 +4,8 @@ class algoritm_ {
 	# --- core references ---
 	public main $main;
 
-	public \damoony\www\algoritm|\damoony\login\algoritm $algoritm;
+	# public \damoony\www\algoritm|\damoony\login\algoritm|\damoony\login\algoritm $algoritm;
+	public null|\algoritm_ $algoritm = null;
 	public array $args = [ ];
 	public null|algoritmdata_ $algoritmdata = null;
 	public string $path = '';
@@ -135,6 +136,8 @@ class algoritm_ {
 		$args = [ ];
 
 		$url_base_pos = count( explode( '_' , get_class( $object ) ) ) - 1;
+		$url_base_real = $url_base;
+
 		if ( ! isset( $url_base_real[ $url_base_pos ] ) ) $url_base_real[ $url_base_pos ] = '';
 
 		if( $search === true ){
@@ -155,6 +158,7 @@ class algoritm_ {
 				}
 			}
 		}
+		print $class . '<br />';
 
 		$in_array = in_array( $url_base_real[ $url_base_pos ] , $available ) ? $url_base_real[ $url_base_pos ] : false ;
 
@@ -165,6 +169,7 @@ class algoritm_ {
 		$path = $this->main->algoritm->basepath . $class . '.php';
 		$class = '\\' . $static_domain . '\\' . $static_allias . '\\' . $class;
 
+		
 		$this->on_route( $class , $path );
 
 		if( $in_array && include_once $path ){

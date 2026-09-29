@@ -24,11 +24,11 @@ class alliasglobal_left extends alliasblock {
 		$path  = __DIR__ . DS . $this->alliasglobal_name . '_' . $accept . '.php';
 		$class = '\\' . $domain . '\\alliasglobal_' . $this->alliasglobal_name . '_' . $accept;
 
-		if ( include_once $path ) {
-			if ( class_exists( $class ) ) {
-				new $class( $this );
-			}
-		}
+		if ( ! is_file( $path ) ) return;
+		if ( ! include_once $path ) return;
+		if ( ! class_exists( $class ) ) return;
+
+		new $class( $this );
 	}
 
 	protected function release ( ) : void {

@@ -35,14 +35,17 @@ class main {
 	public null|domainglobal $domainglobal = null;
 	
 	# allias
+		# allias
 	public null|\damoony\allias $allias = null;
 	public null|\damoony\alliasglobal $alliasglobal = null;
 	public null|\damoony\alliaslocal $alliaslocal = null;
 	public null|\damoony\alliasscheme $alliasscheme = null;
+	public null|\damoony\dataprovider $dataprovider = null;
 
 	
 	public \algoritm_ $algoritm_;
-	public null|\damoony\www\algoritm|\damoony\login\algoritm $algoritm = null;
+	# public null|\damoony\www\algoritm|\damoony\login\algoritm $algoritm = null;
+	public \algoritm_ $algoritm;
 	# public subalgoritm $subalgoritm;
 
 	# visuo
@@ -116,6 +119,9 @@ class main {
 		$this->domain = new domain( $this );
 		$this->domainglobal = new domainglobal( $this );
 		
+		# dataprovider — фасад домена
+		$this->dataprovider = new ($static_domain.'\\dataprovider')( $this );
+
 		# allias
 		$this->allias = new ($static_domain.'\\allias')( $this );
 		$this->alliaslocal = new ($static_domain.'\\alliaslocal')( $this );
@@ -241,19 +247,27 @@ class main_settings {
 
 		$url = $this->main->library->url( );
 		$url_allias = $url->static_allias;
-		
+		$url_base   = $url->static_base;
+
+		# --- язык: URL приоритетнее куки ---
+		$langs_available = [ 'ru-ru' , 'en-en' , 'ch-ch' ];
+		$base0       = $url_base[ 0 ] ?? '';
+		$cookie_lang = $_COOKIE[ 'language' ] ?? '';
+
+		if ( in_array( $base0 , $langs_available , true ) ) {
+			$this->language = $base0;
+		} elseif ( in_array( $cookie_lang , $langs_available , true ) ) {
+			$this->language = $cookie_lang;
+		}
+		# иначе — остаётся из __construct (по умолчанию 'ru-ru')
+
+		# --- остальное как было ---
 		$this->domain_real_name = $this->domains_real[ $url_allias[ 0 ] ];
 		$this->allias_real_name = $this->alliases_real[ $this->domain_real_name ][ $url_allias[ 1 ] ?? '' ];
-		
-		# 
+
 		$this->skin_allias = $this->allias_real_name;
 
 		$v = new visuotag( );
-		
-		# Кросс-доменное разрешение
-		# header( 'Access-Control-Allow-Origin:*' , false , 200 );
-		# header( 'Access-Control-Allow-Credentials:true' , false , 200 );
-
 	}
 	/**
 	 * Загружает внешнюю конфигурацию из JSON файла и динамически обновляет свойства класса.

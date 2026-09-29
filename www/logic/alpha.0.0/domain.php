@@ -31,6 +31,7 @@ class domain {
 		( include_once $path = __DIR__ . DS . 'domain' . DS . $domain_accepted . DS . 'alliaslocal.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = __DIR__ . DS . 'domain' . DS . $domain_accepted . DS . 'alliasglobal.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = __DIR__ . DS . 'domain' . DS . $domain_accepted . DS . 'alliasscheme.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'domain' . DS . $domain_accepted . DS . 'dataprovider.php' ) or error_file( $path , __FILE__ , __LINE__ );
 	}
 }
 

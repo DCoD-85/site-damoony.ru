@@ -7,6 +7,7 @@ class allias {
 	# vars
 	public \main $main;
 	public alliasinfo $alliasinfo;
+	
 	# methods
 	public function __construct ( \main $main ) {
 		$this->main = $main;
