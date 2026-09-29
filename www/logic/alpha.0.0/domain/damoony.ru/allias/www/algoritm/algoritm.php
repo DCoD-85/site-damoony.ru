@@ -14,19 +14,12 @@ class algoritm
 	public string $authpath  = __DIR__ . DS;
 	public string $authclass = 'algoritm_auth';
 
-	# ---------------------------------------------------------------
-	#   CONSTRUCTOR — переопределён, чтобы не падал на $this->algoritm
-	#   (в момент new $main->algoritm ещё null)
-	# ---------------------------------------------------------------
 	public function __construct ( \main $main , array $args = [ ] ) {
 		$this->main = $main;
 		$this->args = $args;
 		$this->algoritmdata = new \algoritmdata_( );
 	}
 
-	# ---------------------------------------------------------------
-	#   START — вызывается из main::logic() -> algoritm->start()
-	# ---------------------------------------------------------------
 	public function start ( ) {
 		$main = $this->main;
 
@@ -40,54 +33,25 @@ class algoritm
 		$scheme->reload( );
 	}
 
-	# ---------------------------------------------------------------
-	#   LOGIC — CORS-заголовки
-	# ---------------------------------------------------------------
 	public function logic ( ) {
 		$main = $this->main;
 
-		$library = $main->library;
-		$link = $library->link( );
-		$url = $library->url( );
-		$url_domain = $url->static_domain;
-		$url_allias = $url->static_allias;
-		$url_base = $url->static_base;
-		$url_vars = $url->static_vars;
-		$center = $main->alliasglobal->center;
-
+		$referer = $_SERVER[ 'HTTP_REFERER' ] ?? '';
 		$access_origin = '*';
-		if ( ! empty( $_SERVER[ 'HTTP_REFERER' ] ) ) {
-			$access_origin = substr( $_SERVER[ 'HTTP_REFERER' ] , 0 , strlen( $_SERVER[ 'HTTP_REFERER' ] ) - 1 );
+		if ( $referer !== '' ) {
+			$access_origin = substr( $referer , 0 , strlen( $referer ) - 1 );
 		}
+
 		header( 'Access-Control-Allow-Origin: ' . $access_origin );
 		header( 'Access-Control-Allow-Credentials: true' );
 		header( 'Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Accept, X-PINGOTHER, Content-Type' );
 	}
 
-	# ---------------------------------------------------------------
-	#   RELEASE — свой набор данных для algoritmdata
-	# ---------------------------------------------------------------
 	public function release ( ) {
-		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' , 'tests' ] , false , true , true );
-
+		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' ] , false , true , true );
 		$this->release_( $this );
 	}
 
-	# ---------------------------------------------------------------
-	#   DEFAULT — стаб
-	# ---------------------------------------------------------------
 	public function default ( ) {
-		$main = $this->main;
-		$visuorelease = $main->visuorelease;
-
-		$library = $main->library;
-		$link = $library->link( );
-		$url = $library->url( );
-		$url_domain = $url->static_domain;
-		$url_allias = $url->static_allias;
-		$url_base = $url->static_base;
-		$url_vars = $url->static_vars;
 	}
 }
-
-?>
