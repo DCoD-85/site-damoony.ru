@@ -12,6 +12,15 @@ function error_file ( $p , $f , $l ) { error( 'File' , $p , $f , $l ); }
 
 $root_dir = dirname( __DIR__ , 2 );
 
+# visuotag stack (visuoel depends on it)
+require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsclass.php';
+require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsstyle.php';
+require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsactions.php';
+require $root_dir . '/sources/visuo/sources/visuoattrs/visuoattrsdata.php';
+require $root_dir . '/sources/visuo/sources/visuoattrs.php';
+require $root_dir . '/sources/visuo/sources/visuotag.php';
+
+# visuoel base + группы
 require $root_dir . '/sources/visuo/sources/visuoel.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_group.php';
 require $root_dir . '/sources/visuo/sources/visuoel/visuoel_group_element.php';
