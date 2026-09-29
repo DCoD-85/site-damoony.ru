@@ -15,6 +15,8 @@ class alliasglobal {
 	public alliasglobal_bottom $bottom;
 
 	# --- scripts (typed properties) ---
+	# --- scripts (свойства) ---
+	public alliasglobal_script_headers $headers;
 	public alliasglobal_script_head $head;
 
 	# --- scripts (collection for iteration) ---
@@ -42,24 +44,29 @@ class alliasglobal {
 		( include_once $path = 'alliasglobal' . DS . 'bottom' . DS . 'bottom.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 		# 3. scripts
+		# --- autoload() ---
+		( include_once $path = 'alliasglobal' . DS . 'script' . DS . 'headers.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = 'alliasglobal' . DS . 'script' . DS . 'head.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 		if ( $init === true ) $this->init( );
 	}
 
-	public function init ( ) : void {
-		# blocks
-		$this->policy = new alliasglobal_policy( $this );
-		$this->top    = new alliasglobal_top( $this );
-		$this->left   = new alliasglobal_left( $this );
-		$this->center = new alliasglobal_center( $this );
-		$this->right  = new alliasglobal_right( $this );
-		$this->bottom = new alliasglobal_bottom( $this );
+public function init ( ) : void {
+	# scripts, которые могут редиректить — первыми
+	$this->headers              = new alliasglobal_script_headers( $this );
+	$this->scripts[ 'headers' ] = $this->headers;
 
-		# scripts
-		$this->head              = new alliasglobal_script_head( $this );
-		$this->scripts[ 'head' ] = $this->head;
-	}
+	$this->head                 = new alliasglobal_script_head( $this );
+	$this->scripts[ 'head' ]    = $this->head;
+
+	# blocks
+	$this->policy = new alliasglobal_policy( $this );
+	$this->top    = new alliasglobal_top( $this );
+	$this->left   = new alliasglobal_left( $this );
+	$this->center = new alliasglobal_center( $this );
+	$this->right  = new alliasglobal_right( $this );
+	$this->bottom = new alliasglobal_bottom( $this );
+}
 
 	# --- accessor (dynamic lookup by name) ---
 	public function script ( string $name ) : null|alliasglobalscript {

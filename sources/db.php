@@ -20,7 +20,7 @@ class db {
 	}
 	
 	private function read_db_type ( ) : void {
-		$path = dirname( __DIR__ ) . DS . 'secure' . DS . 'main_settings.config';
+		$path = dirname( __DIR__ ) . DS . 'secure' . DS . 'db.secure';
 		if ( ! is_file( $path ) ) return;
 		
 		$json = @file_get_contents( $path );
