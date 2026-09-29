@@ -47,7 +47,7 @@ class main {
 	# public null|\damoony\www\algoritm|\damoony\login\algoritm $algoritm = null;
 	public \algoritm_ $algoritm;
 	# public subalgoritm $subalgoritm;
-
+	
 	# visuo
 	public null|visuorelease $visuorelease = null;
 	public null|visuostruct $visuostruct = null;

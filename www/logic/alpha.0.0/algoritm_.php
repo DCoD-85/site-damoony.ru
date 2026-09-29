@@ -158,7 +158,6 @@ class algoritm_ {
 				}
 			}
 		}
-		print $class . '<br />';
 
 		$in_array = in_array( $url_base_real[ $url_base_pos ] , $available ) ? $url_base_real[ $url_base_pos ] : false ;
 
@@ -168,7 +167,6 @@ class algoritm_ {
 		$class = $this->main->algoritm->baseclass;
 		$path = $this->main->algoritm->basepath . $class . '.php';
 		$class = '\\' . $static_domain . '\\' . $static_allias . '\\' . $class;
-
 		
 		$this->on_route( $class , $path );
 
