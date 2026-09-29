@@ -213,8 +213,8 @@ class main_path {
 class main_settings {
 	# vars
 	public null|main $main = null;
-	public string $domain_real_name;	# 
-	public string $allias_real_name;		# 
+	public string $domain_real_name;
+	public string $allias_real_name;
 	private string $language;
 	private string $render;
 	public bool $visuoelement_render_classic = true;
@@ -226,6 +226,9 @@ class main_settings {
 	public array $domains_available = [ ];
 	public array $alliases_real = [ ];
 	public array $alliases_available = [ ];
+
+	# render engine
+	public array $render_engine = [ 'default' => 'algoritm' ];
 
 	# methods
 	public function __construct ( null|main $main = null , array $settings = [ 'render'=>'visuo' , 'language'=>'ru-ru' , 'skin'=>'default' ] ) {
@@ -318,7 +321,15 @@ class main_settings {
 	public function allias_accepted ( ) {
 		return $this->alliases_available[ $this->domain_real_name ][ $this->allias_real_name ] ? $this->allias_real_name : null;
 	}
-	
+	public function engine ( ) : string {
+		$allias = $this->allias_real_name;
+		if ( $allias === null || $allias === '' ) {
+			return $this->render_engine[ 'default' ] ?? 'algoritm';
+		}
+		return $this->render_engine[ $allias ]
+			?? $this->render_engine[ 'default' ]
+			?? 'algoritm';
+	}
 	public function default ( string $language ,
 	                        string $render ,
 	                        string $skin ) {
