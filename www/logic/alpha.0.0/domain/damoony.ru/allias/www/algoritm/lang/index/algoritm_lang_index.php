@@ -67,9 +67,13 @@ class algoritm_lang_index
 		$btn = new \visuoel_field_submit( );
 		$btn->data( )->text( 'Отправить' );
 		$form->add( $btn );
+		
+		$vt = new \visuotag( );
+
 		# вставка в центр страницы
 		$main->alliasglobal->head->title( 'TEST TITLE' );
 		$main->alliasglobal->center->visuotag( )->el( $ve );
+		$main->alliasglobal->right->override( $vt );
 
 		$bottom = $main->alliasglobal->bottom;
 		$bottom->copyright = 'ООО «Ромашка» &copy; 2026';

@@ -68,6 +68,7 @@ class algoritm_lang_index
 		$btn->data( )->text( 'Отправить' );
 		$form->add( $btn );
 
+
 		# вставка в центр страницы
 		$main->alliasglobal->head->title( 'TEST TITLE' );
 		$main->alliasglobal->center->visuotag( )->el( $ve );
