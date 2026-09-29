@@ -18,6 +18,9 @@ class language {
 	}
 	
 	public function load ( ) : self {
+		# перечитать язык — URL/куки могли обновиться в main_settings::init()
+		$this->language = $this->main->main_settings->get( 'language' ) ?? 'ru-ru';
+
 		$path = $this->path( $this->language );
 		$this->strings = $this->parser( $path );
 		return $this;

@@ -63,13 +63,19 @@ class library_url {
 	}
 	
 	public function vars_correct ( array &$return , array $vars ) {
-		if( ! empty( $vars ) ){
-			foreach( $vars as $key => $value ) {
-				$cur = explode( '=' , $value );
-				$cur_key = $cur[ 0 ];
-				$cur_value = $cur[ 1 ] ?? '';
-				$return[ $cur_key ] = $cur_value;
-			}
+		if ( empty( $vars ) ) return;
+
+		foreach ( $vars as $value ) {
+			# пустые пары — пропускаем (нет query, или хвост "&")
+			if ( $value === '' ) continue;
+
+			$cur = explode( '=' , $value , 2 );
+			$key = $cur[ 0 ];
+
+			# пустой ключ — не имеет смысла
+			if ( $key === '' ) continue;
+
+			$return[ $key ] = $cur[ 1 ] ?? '';
 		}
 	}
 	

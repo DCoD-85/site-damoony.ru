@@ -1,4 +1,5 @@
 <?PHP
+/*
 class domainglobal_header {
 	# vars
 	public main $main;
@@ -17,8 +18,8 @@ class domainglobal_header {
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
 		
-		$lang = in_array( $url_base[ 0 ] , [ 'ru-ru' , 'en-en' , 'tests' ] );
-		$lang_cookie = in_array( $_COOKIE[ 'lang' ] ?? '' , [ 'ru-ru' , 'en-en' , 'tests' ] );
+		$lang = in_array( $url_base[ 0 ] , [ 'ru-ru' , 'en-en' ] );
+		$lang_cookie = in_array( $_COOKIE[ 'lang' ] ?? '' , [ 'ru-ru' , 'en-en' ] );
 		
 		if( $lang ){
 			$lang = $url_base[ 0 ];
@@ -91,5 +92,7 @@ class domainglobal_header {
 			$ahref = $library->link( )->href( $url_domain , $url_base , use_all_adress_data : false );
 			header( 'Location: ' . $ahref , true );
 		}
+
 	}
 }
+*/
