@@ -106,4 +106,72 @@ class dataprovider_user extends dataprovider_base {
 	public function session_cleanup ( ) : int {
 		return $this->query( 'DELETE FROM sessions WHERE expires_at <= NOW( )' )->affected( );
 	}
+	
+	# --- PROFILE ---
+
+	public function update_timezone ( int $user_id , string $timezone ) : void {
+		$this->query(
+			'UPDATE users SET timezone = %s WHERE id = %s' ,
+			[ $timezone , $user_id ]
+		)->affected( );
+	}
+
+	public function update_lang ( int $user_id , string $lang ) : void {
+		$this->query(
+			'UPDATE users SET lang = %s WHERE id = %s' ,
+			[ $lang , $user_id ]
+		)->affected( );
+	}
+
+	public function update_password_hash ( int $user_id , string $password_hash ) : void {
+		$this->query(
+			'UPDATE users SET password_hash = %s WHERE id = %s' ,
+			[ $password_hash , $user_id ]
+		)->affected( );
+	}
+
+	public function profile_full ( int $user_id ) : array {
+		$row = $this->query(
+			'SELECT id, login, email, display_name, avatar, status,
+			        timezone, lang, created_at, last_login_at
+			 FROM users
+			 WHERE id = %s
+			 LIMIT 1' ,
+			[ $user_id ]
+		)->row( );
+		return $row ?: [ ];
+	}
+
+	# --- LOGIN ATTEMPTS ---
+
+	public function record_login_attempt ( string $login , string $ip , bool $success ) : void {
+		$this->query(
+			'INSERT INTO login_attempts ( login , ip , success )
+			 VALUES ( %s , %s , %d )' ,
+			[ $login , $ip , $success ? 1 : 0 ]
+		)->insert_id( );
+	}
+
+	// true — вход разрешён; false — заблокирован (слишком много неудач).
+	public function check_bruteforce ( string $login , string $ip , int $max = 5 , int $minutes = 15 ) : bool {
+		$minutes = max( 1 , min( 1440 , $minutes ) );
+		$row = $this->query(
+			'SELECT COUNT( * ) AS c
+			 FROM login_attempts
+			 WHERE success = 0
+			   AND created_at >= DATE_SUB( NOW( ) , INTERVAL %d MINUTE )
+			   AND ( login = %s OR ip = %s )' ,
+			[ $minutes , $login , $ip ]
+		)->row( );
+		$fails = (int) ( $row['c'] ?? 0 );
+		return $fails < $max;
+	}
+
+	public function login_attempts_cleanup ( int $days = 1 ) : int {
+		$days = max( 1 , min( 30 , $days ) );
+		return $this->query(
+			'DELETE FROM login_attempts WHERE created_at < DATE_SUB( NOW( ) , INTERVAL %d DAY )' ,
+			[ $days ]
+		)->affected( );
+	}
 }

@@ -1,148 +1,143 @@
 <?PHP
 
-class algoritm_lang_login {
-	# vars
-	public algoritm $algoritm;
-	public visuotag $vt;
-	public array $args = [ ];
-	public string $path_object;
-	# methods
-	public function __construct ( algoritm $algoritm , array $args = [ ] ) {
-		$this->algoritm = $algoritm;
-		$this->args = $args;
-	}
-	
-	public function args ( array $args ) {
-		$this->args = $args;
-	}
-	public function algoritm ( ) {
-	}
+namespace damoony\visuo;
+
+class algoritm_lang_login
+	extends \algoritm_ {
+
+	public array $available = [ 'login' ];
+	public bool  $auth      = false;
+	public bool  $search    = false;
+	public bool  $default   = true;
+
+	# ---------------------------------------------------------------
 	public function release ( ) {
-		$available = $this->available ?: [ '' ];
-		$search = false;
-		$default = true;
-		$this->algoritm->include_ext( $this , $available , $search , $default );
+		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
+		$this->release_( $this );
 	}
-	
-	public function default ( ) {
-		$main = $this->algoritm->main;
-		$visuorelease = $main->visuorelease;
-		
+
+	# ---------------------------------------------------------------
+	public function guest  ( ) { return $this->render( ); }
+	public function logged ( ) { return $this->redirect_profile( ); }
+
+	# ---------------------------------------------------------------
+	private function redirect_profile ( ) {
+		$main = $this->main;
 		$library = $main->library;
 		$link = $library->link( );
-		$url = $library->url( );
-		$url_domain = $url->static_domain;
-		$url_allias = $url->static_allias;
+		$url  = $library->url( );
 		$url_base = $url->static_base;
-		$url_vars = $url->static_vars;
-		$center = $main->alliasglobal->center;
-		
-		$headers = $main->alliasglobal->headers;
-		$scheme = $main->alliasscheme;
-		
-		if( $_POST ){
-			$scheme->load( 'min' );
-			
-			$visuotag = $visuorelease->visuotag( );
-			
-			$error = null;
-			$messages = null;
-			$result = null;
-			$form = null;
 
-			$vars = $main->library->vars;
-
-			$_form = $_POST[ 'form' ];
-			$_formcheck = [
-				'login'=>[ 'Логин' , $_form[ 'login' ] , 'string' , 5 , 20 ] ,
-				'password'=>[ 'Пароль' , $_form[ 'password' ] , 'string' , 5 , 100 ] ,
-				'remember'=>[ 'Запомнить' , $_form[ 'remember' ] , 'string' , 0 ] ,
-			];
-			
-			$error = false;
-			foreach( $_formcheck as $key=>$value ){
-				$var_field = $value[ 0 ];
-				$var_value = $value[ 1 ];
-				$var_type = $value[ 2 ];
-				$var_min = $value[ 3 ] ?: 0;
-				$var_max = $value[ 4 ] ?: 1000;
-				$var_check = $vars->check( $var_value  , $var_type , $var_min , $var_max );
-				
-				if( $var_type != $var_check ){
-					$error = true;
-					$main->messages->add( 'error' , 'Заполните поля правильно: ' . $var_field , 'Заполните поля правильно: [ ' . $var_field . ' ];' );
-				}
-			}
-			
-			# $main->messages->add( status: 'warning' , 'Вы ввели не верные учетные данные.' , 'Вы ввели не верные учетные данные.<br />' . $_formcheck[ 'remember' ][ 1 ] );
-
-			# Работа с бд
-			if( $error == false ){
-				$db = $main->db->db( );
-				$query = $db->query( );
-				$query->select( 'select * from toolsusers tu WHERE tu.login=%s AND tu.password=%s' , [ $_formcheck[ 'login' ][ 1 ] , md5( $_formcheck[ 'password' ][ 1 ] ) ] , limit : true , limitstep : 1 );
-				$results = $query->result( )[ 0 ];
-				
-				$main->messages->add( 'error' , 'Вы ввели не верные учетные данные.' , 'Вы ввели не верные учетные данные.<br />' . $_formcheck[ 'remember' ][ 1 ] );
-
-				if( ! empty( $results ) ){
-					$main->user->profile->login( $results , $_formcheck );
-				} else{
-					$error = true;
-					$main->messages->add( 'error' , 'Вы ввели не верные учетные данные.' , 'Вы ввели не верные учетные данные.<br />' . $query->show( ) );
-				}
-			}
-			
-
-			if( $error == true ){
-				$result = new visuotag( $visuorelease );
-				$result->tag( 'div' )->content( 'ERROR!' );
-			} else {
-				if( isset( $_SESSION[ 'login' ][ 'redirect' ] ) ){
-					$form_redirect = $_SESSION[ 'login' ][ 'redirect' ];
-					unset( $_SESSION[ 'login' ][ 'redirect' ] );
-				} else
-					$form_redirect = $link->href( $url_domain , [ $url_base[ 0 ] , 'redirect' ] );
-
-				$form[ 'reset' ] = false;
-				$form[ 'redirect' ] = $form_redirect;
-				$form[ 'redirect_time' ] = 3000;
-				$main->messages->add( 'success' , 'Все хорошо.' , 'Вы будете автоматически перенаправлены.<br /><br /><a href="' . $form[ 'redirect' ] . '">Ручное перенаправление</a>' );
-				# $result = $visuorelease->visuotag( )->release( );
-				$result = new visuotag( $visuorelease );
-				$result->tag( 'div' )->content( 'RESULT!' );
-			}
-
-			$messages = $main->messages->as_tag( ); // ->as_tag( )->root( )->release( );
-			$min = true; 
-
-			$release_json = [
-				'error'=>$error ?: null ,
-				'messages'=>$messages ?: null ,
-				'result'=>$result ?: null ,
-				'form'=>$form ?: null
-			];
-
-			$visuorelease->release_min( $error , $messages , $result , $form );
-
-		} else {
-			/*
-			$vt_center = new visuotag( );
-
-			if( $main->user->is_guest( ) )
-				$vt_center->tag( 'div' )->content( 'Вам нужно авторизоваться' );
-			else
-				$vt_center->tag( 'div' )->content( 'Вы уже авторизованы' );
-			
-			$center->visuotag( )->append( $vt_center );
-
-			*/
-			# $scheme->load( 'error' );
-
-			$this->algoritm->error_( $this );
-		}
+		$href = $link->href( false , [ $url_base[ 0 ] , 'profile' ] , use_all_adress_data : false );
+		redirect( $href );
 	}
-	
-}
 
-?>
+	# ---------------------------------------------------------------
+	private function render ( ) {
+		$main = $this->main;
+		$lang = $main->language;
+		$user = $main->user;
+
+		$errors    = [ ];
+		$post_login = '';
+
+		# --- POST ---
+		if ( $this->is_post( ) ) {
+			if ( ! csrf_check( ) ) {
+				$errors[ ] = $lang->get( 'ERROR_CSRF' , [ ] , 'Security error' );
+			} else {
+				$post_login = trim( (string) ( $_POST[ 'login' ] ?? '' ) );
+				$password   = (string) ( $_POST[ 'password' ] ?? '' );
+				$remember   = ! empty( $_POST[ 'remember' ] );
+
+				if ( $post_login === '' || $password === '' ) {
+					$errors[ ] = $lang->get( 'ERROR_LOGIN_FAILED' , [ ] , 'Invalid login or password' );
+				} elseif ( $user->authorize( $post_login , $password , $remember ) ) {
+					$this->redirect_profile( );
+					return true;
+				} else {
+					$errors[ ] = $lang->get( 'ERROR_LOGIN_FAILED' , [ ] , 'Invalid login or password' );
+				}
+			}
+		}
+
+		# --- title ---
+		$main->alliasglobal->head->title(
+			$lang->get( 'PAGE_LOGIN' , [ ] , 'Login' ) . ' — ' . $lang->get( 'VISUO_TITLE' , [ ] , 'visuo' )
+		);
+
+		# --- UI ---
+		$ve = new \visuoel( );
+
+		# ошибки
+		foreach ( $errors as $e ) {
+			$ve->message( )->error( )->data( )->set( $e );
+		}
+
+		# форма
+		$form = $ve->form( )->form( );
+		$form->data( )->set(
+			'visuo_login_form' ,
+			'post' ,
+			'' ,
+			'application/x-www-form-urlencoded' ,
+			false ,
+			$lang->get( 'PAGE_LOGIN' , [ ] , 'Login' ) ,
+			'visuo-form visuo-form-login'
+		);
+
+		# CSRF
+		$csrf = new \visuoel_input_hidden( );
+		$csrf->data( )->set( '_csrf' , csrf_token( ) );
+		$form->add( $csrf );
+
+		# login
+		$f_login = $ve->field( )->text( );
+		$f_login->data( )
+			->set( 'login' , $post_login )
+			->label( $lang->get( 'FORM_LOGIN_LABEL' , [ ] , 'Login' ) )
+			->required( )
+			->autocomplete( 'username' );
+		$form->add( $f_login );
+
+		# password
+		$f_pass = $ve->field( )->password( );
+		$f_pass->data( )
+			->set( 'password' )
+			->label( $lang->get( 'FORM_PASSWORD_LABEL' , [ ] , 'Password' ) )
+			->required( )
+			->autocomplete( 'current-password' );
+		$form->add( $f_pass );
+
+		# remember
+		$f_rem = $ve->field( )->checkbox( );
+		$f_rem->data( )
+			->set( 'remember' , '1' )
+			->label( $lang->get( 'FORM_REMEMBER_ME' , [ ] , 'Remember me' ) )
+			->checked( ! empty( $_POST[ 'remember' ] ) );
+		$form->add( $f_rem );
+
+		# submit
+		$f_btn = new \visuoel_field_submit( );
+		$f_btn->data( )->text( $lang->get( 'FORM_SUBMIT_LOGIN' , [ ] , 'Sign in' ) );
+		$form->add( $f_btn );
+
+		# ссылка на регистрацию — отдельный блок
+		$library  = $main->library;
+		$link     = $library->link( );
+		$url      = $library->url( );
+		$url_base = $url->static_base;
+		$reg_href = $link->href( false , [ $url_base[ 0 ] , 'registration' ] , use_all_adress_data : false );
+
+		$reg_block = $ve->block( )->html( );
+		$reg_block->data( )->set(
+			'<p class="visuo-form-link"><a href="' . h( $reg_href ) . '">'
+			. h( $lang->get( 'MENU_REGISTRATION' , [ ] , 'Registration' ) )
+			. '</a></p>'
+		);
+
+		$main->alliasglobal->center->visuotag( )->el( $ve );
+
+		return true;
+	}
+}

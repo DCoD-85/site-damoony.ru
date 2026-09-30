@@ -18,6 +18,22 @@ class algoritm
 		$this->main = $main;
 		$this->args = $args;
 		$this->algoritmdata = new \algoritmdata_( );
+
+		# подмена $main->user на visuo-user
+		$this->boot_user( );
+	}
+
+	# ---------------------------------------------------------------
+	#   boot_user — заменить $main->user на visuo-версию и загрузить сессию.
+	#   Идемпотентно: если уже visuo-user — просто boot().
+	# ---------------------------------------------------------------
+	private function boot_user ( ) : void {
+		$main = $this->main;
+
+		if ( ! ( $main->user instanceof \damoony\visuo\user ) ) {
+			$main->user = new \damoony\visuo\user( $main );
+		}
+		$main->user->boot( );
 	}
 
 	public function start ( ) {
@@ -25,7 +41,7 @@ class algoritm
 
 		$scheme = $main->alliasscheme;
 
-		$scheme->load( 'www' );
+		$scheme->load( 'visuo' );
 
 		$this->logic( );
 		$this->release( );

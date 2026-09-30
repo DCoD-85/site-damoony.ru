@@ -26,6 +26,12 @@ class language {
 		return $this;
 	}
 	
+	public function set_language ( string $code ) : self {
+		$this->language = $code;
+		$this->strings  = $this->parser( $this->path( $code ) );
+		return $this;
+	}
+
 	public function init ( ) : void {
 	}
 	

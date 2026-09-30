@@ -5,7 +5,13 @@ namespace damoony\visuo;
 class algoritm_lang
 	extends \algoritm_ {
 
-	public array $available = [ '' , 'index' , 'form' , 'login' , 'logout' , 'redirect' , 'profile' , 'agreement' , 'registration' ];
+	public array $available = [
+		'' , 'index' ,
+		'docs' ,
+		'news' ,
+		'downloads' , 'download' ,
+		'login' , 'logout' , 'registration' , 'profile' ,
+	];
 
 	public function release ( ) {
 		$default = ( $this->main->library->url->static_base[ 1 ] ?? '' ) === '' ? true : false;
@@ -22,8 +28,9 @@ class algoritm_lang
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
 
-		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'form' ] , $url_vars );
+		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'index' ] , $url_vars );
 		http_response_code( 307 );
 		header( 'Location: ' . $href );
+		exit;
 	}
 }

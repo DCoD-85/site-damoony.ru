@@ -11,6 +11,7 @@ class alliasscheme {
 	public null|alliasscheme_error $error = null;
 	public null|alliasscheme_min $min = null;
 	public null|alliasscheme_www $www = null;
+	public null|alliasscheme_visuo $visuo = null;
 	# methods
 	public function __construct ( \main $main ) {
 		$this->main = $main;
@@ -29,6 +30,7 @@ class alliasscheme {
 			( include_once $path = __DIR__ . DS . 'alliasscheme' . DS . 'alliasscheme_min.php' ) or error_file( $path , __FILE__ , __LINE__ );
 			# oxydog
 			( include_once $path = __DIR__ . DS . 'alliasscheme' . DS . 'alliasscheme_www.php' ) or error_file( $path , __FILE__ , __LINE__ );
+			( include_once $path = __DIR__ . DS . 'alliasscheme' . DS . 'alliasscheme_visuo.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		}
 
 		# init
@@ -44,6 +46,7 @@ class alliasscheme {
 		$this->min = new alliasscheme_min( $this );
 		# 
 		$this->www = new alliasscheme_www( $this );
+		$this->visuo = new alliasscheme_visuo( $this );
 	}
 
 	public function load ( string $schemename ) {
