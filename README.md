@@ -1,74 +1,74 @@
-﻿# Damoony2
+﻿# damoony.ru
 
-Сайт на PHP 8.3+ с модульной архитектурой.
-Домен: damoony2.ru
-Разработка: собственный движок, версия alpha.0.0.
+Движок для мультиязычных сайтов на PHP 8.4. Аллиасная архитектура, разделение на слои, UI-движок visuo.
 
-## Корень проекта
+## Что это
 
-    secure\     — настройки сайта (main_settings.config)
-    sources\    — движок сайта
-    www\        — корень сайта (DOCUMENT_ROOT)
-      ├── media\      — общедоступная статика (css, js, шрифты, иконки)
-      ├── mediaall\   — публичные загрузки (изображения, аудио)
-      └── logic\      — логика (закрыта .htaccess)
-    _audit\     — документация и логи аудита
-    _archive\   — старые версии файлов (не используются)
-    _backup_*\  — слепки перед крупными изменениями
+Не CMS, а фреймворк — инструмент для сборки сайтов. Аллиасы (`www`, `login`, `visuo`) — независимые модули поверх общего ядра. Каждый аллиас работает со своей БД, своими сессиями, своими URL.
 
-## Точка входа
+## Структура проекта
 
-    www\index.php
+    damoony.ru/
+    ├── www/                       веб-корень (DocumentRoot)
+    │   ├── index.php              точка входа
+    │   ├── main.php               ядро (main, main_settings)
+    │   ├── logic/alpha.0.0/       движок роутинга
+    │   │   ├── algoritm_.php      база роутера
+    │   │   └── domain/damoony.ru/
+    │   │       ├── allias/        аллиасы (www, login, visuo)
+    │   │       ├── alliasglobal/  общие блоки (top, left, center, right, bottom)
+    │   │       └── alliasscheme/  схемы страниц
+    │   ├── language/              тексты (ru-ru, en-en, ch-ch)
+    │   └── media/                 статика
+    ├── sources/                   движок БД, language, visuo UI
+    │   ├── db.php                 слой БД (mysqli-драйвер)
+    │   ├── language.php           загрузка .inc-файлов
+    │   └── visuo/                 visuotag, visuoel
+    ├── secure/                    конфиги БД, ключи
+    ├── config/                    site.config, render.config, lang.config
+    ├── docs/                      документация
+    └── CHANGELOG.md
 
-.htaccess переводит любой URL на index.php.
+## Требования
 
-## Как это работает
+- PHP 8.4 (extensions: `mysqli`, `mbstring`, `json`)
+- MariaDB 10.6+ или MySQL 8+
+- Apache 2.4
 
-1. index.php стартует сессию, определяет константы, подключает main.php.
-2. main.php подключает sources\include.php (движок) и logic\alpha.0.0\include.php (логика).
-3. sources\include.php разворачивает 18 модулей: render, user, db, core, library, visuo, gmod, mod и др.
-4. logic\alpha.0.0\include.php разбирает URL:
-   - находит домен в domain\,
-   - находит аллиас в allias\,
-   - запускает класс алгоритма через algoritm_.php.
+## Быстрый старт (dev)
 
-## Модули
+1. Клонировать репозиторий:
 
-GLOBAL MOD (gmod): sources\gmod\*\*.php
-MOD (mod):          sources\mod\*\*.php
-Подключаются динамически по имени модуля.
+       git clone git@github.com:DCoD-85/site-damoony.ru.git
+       cd site-damoony.ru
 
-## Логика аллиасов
+2. Настроить `secure/db.config` — хост, пользователь, пароль, БД.
 
-Домен: www\logic\alpha.0.0\domain\<домен>\
-Аллиас: www\logic\alpha.0.0\domain\<домен>\allias\<имя>\
-Класс:  allias\<имя>\algoritm\algoritm.php + lang\<язык>\
-Пример URL: https://login.damoony2.ru/en-en/form
+3. Настроить `config/site.config` — домены и аллиасы.
 
-## Подсистема visuo
+4. Создать БД и применить миграции:
 
-Собственный UI-движок: дерево элементов.
-Точка сборки: sources\visuo\visuo.php
-Корень дерева: visuotag.
-Релиз: visuorelease.
+       mysql -u root -e "CREATE DATABASE visuo_damoony CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+       mysql -u root visuo_damoony < www/logic/alpha.0.0/domain/damoony.ru/allias/visuo/migrations/apply_all.sql
 
-## Что делать при добавлении нового кода
+5. Открыть в браузере: `http://visuo.damoony2.ru/`
 
-1. PHP-класс — в sources\ или в logic\<версия>\.
-2. Подключение — через include.php, не напрямую.
-3. Имя файла — только латиница, без пробелов, без "копия".
-4. Старая версия — в _archive\, не рядом с живой.
-5. Крупное изменение — запись в _audit\cleanup-log.txt.
+## Рабочий процесс
 
-## Полезные файлы
+**Локальный (dev) → Git → Боевой (prod).**
 
-    _audit\sitemap.md     — карта включений (кто кого подключает)
-    _audit\conventions.md — правила именования
-    _audit\cleanup-log.txt — история изменений
+- Все правки — только локально.
+- Коммит → push в GitHub.
+- На боевом: `git pull`.
+- Никогда не править файлы на боевом вручную.
 
-## История
+## Документация
 
-- 2026-09-17 — аудит проекта. 471 рабочий файл, 21 файл в архиве.
-  Убрано: 4 дубликата image*.png, пустой BMP, старые версии JS,
-  устаревшие папки sources\other и sources\modules.
-  dbcheck.php (552 KB) вынесен в архив как справочник БД.
+- [docs/architecture.md](docs/architecture.md) — слои, модули, роутинг
+- [docs/deploy.md](docs/deploy.md) — деплой и откат
+- [docs/backup.md](docs/backup.md) — бэкапы и восстановление
+- [docs/development.md](docs/development.md) — правила разработки
+
+## Лицензия
+
+Private. Все права защищены.
