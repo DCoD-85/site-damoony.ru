@@ -149,3 +149,49 @@
 **Симптом:** при импорте `ERROR: ASCII '\0' appeared in the statement`.
 
 **Решение:** использовать `--result-file=`. Тогда mysqldump пишет файл сам, в UTF-8.
+
+## Clonezilla: полный образ SSD
+
+### Что за образ
+
+Первый образ создан **2026-10-01**. Лежит в `/mnt/data/clonezilla/damoony-sda-20261001/`. Размер **1.9 ГБ** (диск 119 ГБ, занято 6.7 ГБ, сжатие zstdmt).
+
+### Когда делать
+
+Раз в 2–3 месяца или после крупных изменений системы (обновление ядра, новые пакеты). Окно простоя ~30 минут.
+
+### Процедура создания
+
+1. **Подготовка:** скачать Clonezilla Live ISO, записать на USB через Rufus (**DD-режим**, не ISO)
+2. **По SSH:** systemctl stop apache2 php8.4-fpm mariadb cron
+sync
+systemctl poweroff
+3. **Физически:** вставить USB, включить сервер, F12 → USB first
+4. **В Clonezilla:**
+- `Default settings` → English → Don't touch keymap
+- `Start_Clonezilla`
+- `device-image` → `local_dev`
+- `sdb1` (HDD) → mount → `Beginner`
+- `savedisk`
+- Имя: `damoony-sda-YYYYMMDD`
+- Источник: **`sda`** (НЕ `sdb`!)
+- Опции: `-z9p zstdmt`, `fsck-y`, `-sgnoc` (не шифровать)
+- Подтверждение: `y`, `y`
+5. **После завершения:** `poweroff`, извлечь USB, включить сервер
+6. **Переместить в `clonezilla/`:** mv /mnt/data/damoony-sda-YYYYMMDD /mnt/data/clonezilla/
+
+### Процедура восстановления (при смерти SSD)
+
+1. Новый SSD установить в сервер
+2. Загрузиться с Clonezilla-USB
+3. `device-image` → `local_dev` → `/dev/sdb1` → `Beginner`
+4. `restoredisk` → выбрать `damoony-sda-YYYYMMDD` → целевой новый SSD
+5. Дождаться (~15 минут)
+6. Извлечь USB, загрузиться — система работает
+
+### Проверка образа
+ls -lah /mnt/data/clonezilla/damoony-sda-YYYYMMDD/
+du -sh /mnt/data/clonezilla/*
+cat /mnt/data/clonezilla/damoony-sda-YYYYMMDD/Info-img-size.txt
+
+Ожидаемый размер: 1.5–3 ГБ.
