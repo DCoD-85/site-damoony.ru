@@ -43,6 +43,34 @@ class algoritm_ {
 		$this->args = $args;
 	}
 
+	public function logic ( ) {
+		$main = $this->main;
+
+		$allowed = [ ];
+		$schemes = [ 'https://' , 'http://' ];
+
+		foreach ( $main->main_settings->domains_available as $domain => $enabled ) {
+			if ( ! $enabled ) continue;
+
+			foreach ( $schemes as $scheme ) {
+				$allowed[ $scheme . $domain ] = true;
+			}
+
+			foreach ( $main->main_settings->alliases_available[ $domain ] ?? [ ] as $allias => $ena ) {
+				if ( ! $ena || $allias === '' ) continue;
+				foreach ( $schemes as $scheme ) {
+					$allowed[ $scheme . $allias . '.' . $domain ] = true;
+				}
+			}
+		}
+
+		$origin = $_SERVER[ 'HTTP_ORIGIN' ] ?? '';
+		if ( $origin !== '' && isset( $allowed[ $origin ] ) ) {
+			header( 'Access-Control-Allow-Origin: ' . $origin );
+			header( 'Access-Control-Allow-Credentials: true' );
+			header( 'Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Accept, X-PINGOTHER, Content-Type' );
+		}
+	}
 	# ===============================================================
 	#   RELEASE FRAMEWORK
 	# ===============================================================

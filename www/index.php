@@ -57,7 +57,7 @@ if ( isset( $_COOKIE[ 'PHPSESSID' ] ) ){
 # 2 : Показывать / Не показывать ошибки и предупреждения
 # Error_Reporting( E_ALL );
 # ini_set( 'display_errors' , '1' );
-Error_Reporting( ~E_ALL & ~E_NOTICE );
+Error_Reporting( E_ALL & ~E_NOTICE & ~E_DEPRECATED );
 
 # 3 : Константы времени
 define( 'SCRIPTSTART_MT' , $start );

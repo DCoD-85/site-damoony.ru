@@ -17,7 +17,6 @@ $sources_modules = [
 	'vardump' ,
 	'log' ,
 	'core' ,
-	'config' ,
 	'db' ,
 	'library' ,
 	'system' ,

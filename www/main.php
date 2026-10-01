@@ -19,7 +19,6 @@ class main {
 	public vardump $vardump;
 	public log $log;
 	public core $core;
-	public config $config;
 	public db $db;
 	public null|library $library = null;
 	public system $system;
@@ -84,14 +83,12 @@ class main {
 		$this->blacklist = new blacklist( $this );
 		$this->log = new log( $this );
 		$this->vardump = new vardump( $this );
-		$this->config = new config( $this );
 		$this->db = new db( $this );
 		$this->library = new library( $this );
 		$this->language = new language( $this );
 		$this->messages = new messages( $this );
 		$this->gmod = new gmod( $this );
 		$this->mod = new mod( $this );
-		$this->config->init( );
 		$this->main_settings->init( );
 		$this->main_settings->set( 'connect_type' , 'http://' );
 		
@@ -232,12 +229,9 @@ class main_settings {
 
 	# methods
 	public function __construct ( null|main $main = null , array $settings = [ 'render'=>'visuo' , 'language'=>'ru-ru' , 'skin'=>'default' ] ) {
-		$this->main = $main;
-
-		# settings
-		$this->render = $_COOKIE[ 'render' ] ?: $settings[ 'render' ];
-		$this->language = $_COOKIE[ 'language' ] ?: $settings[ 'language' ];
-		$this->skin = $_COOKIE[ 'skin' ] ?: $settings[ 'skin' ];
+		$this->render   = $_COOKIE[ 'render'   ] ?? $settings[ 'render'   ];
+		$this->language = $_COOKIE[ 'language' ] ?? $settings[ 'language' ];
+		$this->skin     = $_COOKIE[ 'skin'     ] ?? $settings[ 'skin'     ];
 	}
 	public function init ( ) {
 		# init
