@@ -24,51 +24,58 @@ class alliasscheme_www {
 	}
 
 	public function meta ( ) {
-		
 		$main = $this->main;
 		$skin = $main->main_settings->skin( 'skin' );
 		$allias = $main->main_settings->skin( 'allias' );
-		# visuorelease
+
+		$media  = DSA . 'media' . DSA . 'www.damoony.ru' . DSA;
+		$shared = DSA . 'media' . DSA . 'shared' . DSA;
+
 		$meta = $this->visuorelease->meta( );
 		$meta->clear( );
-		$meta->link( )->favicon( '/media/favicon.ico#' . $allias );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'main.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'vardump.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'messages.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'popup.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . $allias . DSA . 'dt.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'top.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'left.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'center.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'right.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . 'bottom.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . '_' . DSA . 'log.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'css' . DSA . '_' . DSA . 'debug.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-input.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-form.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-table.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-tabs.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-field.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-buttons.css' );
-		$meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA . 'visuo-elements-block.css' );
-		# $meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuo.css' );
-		# $meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuo-elements-block.css' );
-		# $meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuo-elements-table.css' );
-		# $meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuo-elements-form.css' );
-		# $meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuo-elements-input.css' );
-		# $meta->link( )->css( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'visuo' . DSA . 'visuo-elements.css' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'js' . DSA . 'visuo' . DSA . 'visuo-elements-tabs.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'release' . DSA . $skin . DSA . 'js' . DSA . 'jquery-1.8.3.min.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'messages.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_confidence.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_prepare.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_popup.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_load.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_page.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_visuotablebox.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine.js' );
-		$meta->link( )->js( DSA . 'media' . DSA . 'js' . DSA . 'jsengine' . DSA . 'engine_ready.js' );
-		#
+
+		# --- favicon ---
+		$meta->link( )->favicon( $media . 'favicon.ico#' . $allias );
+
+		# --- скиновые css ---
+		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
+		$meta->link( )->css( $skin_css . 'main.css' );
+		$meta->link( )->css( $skin_css . 'vardump.css' );
+		$meta->link( )->css( $skin_css . 'messages.css' );
+		$meta->link( )->css( $skin_css . 'popup.css' );
+		$meta->link( )->css( $skin_css . 'top.css' );
+		$meta->link( )->css( $skin_css . 'left.css' );
+		$meta->link( )->css( $skin_css . 'center.css' );
+		$meta->link( )->css( $skin_css . 'right.css' );
+		$meta->link( )->css( $skin_css . 'bottom.css' );
+		$meta->link( )->css( $skin_css . $allias . DSA . 'dt.css' );
+
+		# --- css движка (visuoel) ---
+		$engine_css = $media . 'skin' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA;
+		$meta->link( )->css( $engine_css . 'visuo-elements-input.css' );
+		$meta->link( )->css( $engine_css . 'visuo-elements-form.css' );
+		$meta->link( )->css( $engine_css . 'visuo-elements-table.css' );
+		$meta->link( )->css( $engine_css . 'visuo-elements-tabs.css' );
+		$meta->link( )->css( $engine_css . 'visuo-elements-field.css' );
+		$meta->link( )->css( $engine_css . 'visuo-elements-buttons.css' );
+		$meta->link( )->css( $engine_css . 'visuo-elements-block.css' );
+
+		# --- js lib (vendor) ---
+		$meta->link( )->js( $media . 'scripts' . DSA . 'lib' . DSA . 'jquery-1.8.3.min.js' );
+
+		# --- js движка ---
+		$js_engine = $media . 'scripts' . DSA . 'engine' . DSA;
+		$meta->link( )->js( $js_engine . 'messages.js' );
+		$meta->link( )->js( $js_engine . 'engine_confidence.js' );
+		$meta->link( )->js( $js_engine . 'engine_prepare.js' );
+		$meta->link( )->js( $js_engine . 'engine_popup.js' );
+		$meta->link( )->js( $js_engine . 'engine_load.js' );
+		$meta->link( )->js( $js_engine . 'engine_page.js' );
+		$meta->link( )->js( $js_engine . 'engine_visuotablebox.js' );
+		$meta->link( )->js( $js_engine . 'engine.js' );
+		$meta->link( )->js( $js_engine . 'engine_ready.js' );
+
+		# --- cdn ---
 		$meta->link( )->js( 'https://cdn.plyr.io/3.8.4/plyr.js' );
 		$meta->link( )->css( 'https://cdn.plyr.io/3.8.4/plyr.css' );
 	}
