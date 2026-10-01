@@ -33,20 +33,6 @@ class algoritm
 		$scheme->reload( );
 	}
 
-	public function logic ( ) {
-		$main = $this->main;
-
-		$referer = $_SERVER[ 'HTTP_REFERER' ] ?? '';
-		$access_origin = '*';
-		if ( $referer !== '' ) {
-			$access_origin = substr( $referer , 0 , strlen( $referer ) - 1 );
-		}
-
-		header( 'Access-Control-Allow-Origin: ' . $access_origin );
-		header( 'Access-Control-Allow-Credentials: true' );
-		header( 'Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Accept, X-PINGOTHER, Content-Type' );
-	}
-
 	public function release ( ) {
 		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' ] , false , true , true );
 		$this->release_( $this );
