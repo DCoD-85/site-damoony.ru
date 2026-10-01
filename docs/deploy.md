@@ -91,3 +91,37 @@
 **Access denied for user damoony.** Нет прав на БД:
 
     mariadb -u root -e "GRANT ALL PRIVILEGES ON visuo_damoony.* TO 'damoony'@'localhost'; FLUSH PRIVILEGES;"
+
+
+	## Дампы БД
+
+### Создание
+
+Использовать `--result-file=`, **не** перенаправление `>` — PowerShell пишет UTF-16, mysql потом не читает.
+
+    # НЕПРАВИЛЬНО (сломает кодировку):
+    mysqldump.exe ... visuo_damoony > dump.sql
+
+    # ПРАВИЛЬНО:
+    mysqldump.exe --result-file=E:\dump_visuo.sql \
+      --default-character-set=utf8mb4 \
+      --single-transaction --routines --triggers \
+      visuo_damoony
+
+### Проверка дампа перед импортом
+
+    Select-String -Path E:\dump_visuo.sql -Pattern "русский"
+
+Если русский виден — файл чистый.
+
+### Импорт
+
+Только через `cmd /c` — PowerShell не поддерживает `<`:
+
+    cmd /c '"путь\mysql.exe" --skip-ssl --default-character-set=utf8mb4 \
+      -h 127.0.0.1 -u root -pqwe12345 visuo_damoony < E:\dump_visuo.sql'
+
+### Подключение к MariaDB
+
+- Хост — `127.0.0.1`, **не** `localhost` (Windows может резолвить в IPv6)
+- Флаг `--skip-ssl` — клиент 11.8 требует SSL по умолчанию

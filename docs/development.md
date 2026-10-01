@@ -166,3 +166,41 @@
 - `echo` — используй `visuotag`
 - Правки на боевом
 - Коммиты с сообщениями типа `fix` / `update` / `temp`
+
+## Нюансы MariaDB на Windows
+
+### Хост подключения
+
+Всегда указывать `-h 127.0.0.1`, не `localhost`.
+
+**Почему:** на Windows `localhost` может резолвиться в IPv6 `::1`, а MariaDB слушает только IPv4 `127.0.0.1`. Результат — `ERROR 2002: Can't connect to server`.
+
+### SSL
+
+Клиент MariaDB 11.8 требует SSL по умолчанию. Но сервер OSPanel стартует с `skip-ssl`. Результат — `ERROR 2026: TLS/SSL error: SSL is required, but the server does not support it`.
+
+**Решение:** флаг `--skip-ssl` в каждой команде клиента:
+
+    mysql.exe --skip-ssl -h 127.0.0.1 -u root -pqwe12345
+
+### Аутентификация
+
+MariaDB 11.8 может использовать `auth_gssapi_client` для root — PHP mysqli не поддерживает.
+
+**Проверка плагина:**
+
+    SELECT user, host, plugin FROM mysql.user WHERE user IN ('root','damoony');
+
+**Решение:** переключить на `mysql_native_password`:
+
+    ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('qwe12345');
+    ALTER USER 'damoony'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('qwe12345');
+    FLUSH PRIVILEGES;
+
+**Важно:** `CREATE USER`, `ALTER USER`, `GRANT` не работают в режиме `--skip-grant-tables` (ошибка `ERROR 1290`). Сначала стартовать сервер нормально.
+
+### Инициализация (создание БД с нуля)
+
+MariaDB, в отличие от MySQL, **не имеет** `mysqld --initialize-insecure`. Использовать:
+
+    mariadb-install-db.exe --datadir="путь" --password="пароль"

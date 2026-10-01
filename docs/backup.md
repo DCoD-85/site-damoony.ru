@@ -113,3 +113,39 @@
 - Файлы: старше 56 дней — удаляются
 
 **Если нужно хранить дольше** — скопировать в `/mnt/data/archive/` перед ротацией.
+
+## История инцидентов
+
+Три случая из реальной эксплуатации. Полезно помнить.
+
+### Инцидент 1. Thunar Trash унёс `/var/`
+
+**Что было:** файловый менеджер Thunar (GUI) использовался для удаления `/var/www/*`. Файлы ушли в `/root/.local/share/Trash/`, а `/var/run` при этом стал реальным каталогом вместо симлинка на `/run`.
+
+**Симптом:** Apache и MariaDB не стартовали. В логе: `mktemp: failed to create directory /var/lock/apache2`, `Failed to set up mount namespacing: /var/tmp`.
+
+**Восстановление:**
+1. Дамп БД (пока MariaDB ещё в памяти)
+2. Вернуть файлы из `/root/.local/share/Trash/files/`
+3. `mv /var/run /var/run.bak && ln -s /run /var/run`
+4. `systemctl restart mariadb apache2 php8.4-fpm`
+
+**Правило на будущее:** не использовать GUI-файловый менеджер для удаления системных каталогов. Только `rm` явных путей в терминале.
+
+### Инцидент 2. MariaDB 11.8 убрала `Etc/GMT-3`
+
+**Что было:** конфиг от MariaDB 10.8 (`my.ini`) содержал `default_time_zone = Etc/GMT-3`. MariaDB 11.8 этот формат не поддерживает.
+
+**Симптом:** `[ERROR] Fatal error: Illegal or unknown default time zone 'Etc/GMT-3'`. Сервер падает при старте.
+
+**Решение:** заменить на `default_time_zone = +03:00`.
+
+**Где править:** в `modules\database\MariaDB-11.8-Win10\my.ini` (сгенерированный при первом запуске) **и** в `userdata\config\MariaDB-11.8-Win10_my.ini` (шаблон).
+
+### Инцидент 3. PowerShell ломает кодировку mysqldump
+
+**Что было:** `mysqldump.exe ... > dump.sql` через PowerShell. Файл записан в UTF-16.
+
+**Симптом:** при импорте `ERROR: ASCII '\0' appeared in the statement`.
+
+**Решение:** использовать `--result-file=`. Тогда mysqldump пишет файл сам, в UTF-8.
