@@ -1,0 +1,63 @@
+================================================================
+05_ALLIAS — allias.php
+Слой аллиаса: определение, подключение модуля аллиаса.
+================================================================
+
+ПОДКЛЮЧАЕТСЯ ИЗ: main::logic()  → new \damoony\allias($main)
+РОЛЬ:            Знает какой аллиас активен, подключает его include.php.
+                 Двойник domain.php, только для аллиаса.
+
+================================================================
+A. class allias
+================================================================
+СВОЙСТВА
+  main       : main
+  alliasinfo : alliasinfo   — метаданные (создаётся сразу)
+
+МЕТОДЫ
+----------------------------------------------------------------
+
+__construct( main )
+    new alliasinfo($this)
+    Берёт из library: link, url, url_domain, url_allias, url_base, url_vars
+    (все — для чтения, реально не используются).
+    $allias_accepted = main_settings->allias_accepted()
+    alliasinfo->set('name', $allias_accepted)
+    Если null → error(true, true, ...)
+    include_once allias/<name>/include.php
+
+ЗАМЕЧАНИЯ
+- Копипаста шапки из domain.php: те же мёртвые $library/$link/$url/...
+- error(true, ...) — то же несоответствие типов, что и в domain.php.
+- Путь include: allias/<accepted>/include.php. Никакого namespace
+  не добавляется — <allias>/include.php сам подгружает всё нужное.
+
+================================================================
+B. class alliasinfo
+================================================================
+  Метаданные аллиаса. Полный аналог domaininfo.
+
+СВОЙСТВА
+  allias  : allias
+  name    : mixed
+  subname : mixed
+  history : array
+
+МЕТОДЫ
+  __construct( allias )
+  set( $var , $value , $add_as_array = false )
+      Пишет в свойство + history[$var][].
+  ashtml()   — ПУСТОЙ, заготовка.
+  astag()    — строит div-дерево для отладки (name/subname/history).
+      Отличие от domaininfo::astag(): в ветке history НЕ разбирает
+      вложенные массивы — просто выводит '- - - key = value'.
+      Логика та же запутанная ($vt_old/$vt3 переключаются вручную).
+
+ЗАМЕЧАНИЯ
+- Два info-класса (domaininfo, alliasinfo) должны быть унифицированы
+  в один базовый info + трейт astag(). Сейчас — дублирование.
+
+================================================================
+СВЯЗАННЫЕ
+  prev → 04_domain.txt
+  next → 06_alliasglobal.txt

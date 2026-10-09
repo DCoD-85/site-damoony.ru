@@ -1,0 +1,219 @@
+================================================================
+39_VISUOATTRS — visuoattrs + 4 подкласса
+Атрибуты visuotag: generic + class + style + actions + data-*.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/visuo/visuo.php (шаги 5–9)
+РОЛЬ: единый контейнер атрибутов для одного узла visuotag.
+      Разбит на 4 подкласса по типам атрибутов.
+
+ФАЙЛЫ
+  visuoattrs.php            — контейнер
+  visuoattrs/visuoattrsclass.php
+  visuoattrs/visuoattrsstyle.php
+  visuoattrs/visuoattrsactions.php
+  visuoattrs/visuoattrsdata.php
+
+================================================================
+A. visuoattrs — контейнер
+================================================================
+СВОЙСТВА
+  visuotag : ?visuotag      — обратная ссылка (узел-владелец)
+  class    : visuoattrsclass
+  style    : visuoattrsstyle
+  actions  : visuoattrsactions
+  data     : visuoattrsdata
+  elements : array          — generic-атрибуты [name => value]
+
+__construct(?visuotag)  — 4 подкласса получают $this
+
+GENERIC
+  add($name, $value, bool $add_empty = false)
+      Если value !== '' ИЛИ add_empty → elements[name]=value
+  remove($name)
+  get($name) : mixed         — null если нет
+  has($name) : bool
+  all() : array
+  clear()  — обнуляет всё + 4 подкласса
+
+ДОСТУП К ПОДКЛАССАМ
+  class()   → visuoattrsclass
+  style()   → visuoattrsstyle
+  actions() → visuoattrsactions
+  data()    → visuoattrsdata
+
+ПРОКСИ
+  class_add / class_remove
+  style_add / style_remove
+  actions_add / actions_remove
+  data_add / data_remove
+  (все возвращают $this для цепочек)
+
+RELEASE
+  release() : string
+      class + style + actions + generic + data
+      Порядок: class → style → actions → attributes → data
+  attributes_release() : string
+      Только generic-атрибуты, экранированные через htmlspecialchars.
+      Используется в visuotag::releasetree().
+
+ЗАМЕЧАНИЯ
+- add() c пустым value по умолчанию НЕ добавляет атрибут.
+  add_empty=true — добавить как name="" (для boolean-атрибутов).
+- release() порядок фиксирован — важно для читаемости HTML.
+
+================================================================
+B. visuoattrsclass — class="..."
+================================================================
+СВОЙСТВА
+  visuoattrs, visuotag
+  elements : [ className => true ]  — set
+
+add($value)
+  split по \s+ → каждый класс в set (дубликаты игнорируются).
+remove($value)  — split + unset
+clear()         — set = []
+has($value)     — isset
+get($value)     — $value если есть, иначе ''
+all()           — array_keys(elements)
+release($full=true) : string
+  full → ' class="a b c"' (HTML-экранирование всего через htmlspecialchars)
+  иначе → 'a b c'
+
+ЗАМЕЧАНИЯ
+- Порядок классов — в порядке добавления (PHP сохраняет порядок ключей).
+- htmlspecialchars применяется ко всей строке классов.
+
+================================================================
+C. visuoattrsstyle — style="..."
+================================================================
+СВОЙСТВА
+  elements : [ name => value ]
+
+add($expression, $pair_separator=';', $kv_separator=':')
+  Парсит 'color:red;font-size:12px' → elements[color]=red и т.д.
+  Пропускает пустые пары и пары без разделителя.
+  Пустое name — пропуск.
+
+remove($names)  — split по \s+ → unset каждой
+clear()
+has($name)      — array_key_exists
+get($name)      — value или ''
+all()           — все пары
+release($full=true) : string
+  Собирает 'name:value;name:value;'
+  full → ' style="...css..."'
+  иначе → css без обёртки
+  htmlspecialchars на всю строку css.
+
+ЗАМЕЧАНИЯ
+- Пары разделяются ';' и значения — ':' (первое вхождение).
+- Trailing ';' сохраняется (последняя пара тоже с ';').
+- clear() не разделяется по имени — только всё сразу.
+
+================================================================
+D. visuoattrsactions — onclick="..."
+================================================================
+СВОЙСТВА
+  elements : [ action => code ]
+
+add($action, $value) : $this
+  action → strtolower(trim())
+  Проверка: is_event() — /^on[a-z]+$/
+  Пустой value — пропуск.
+remove($action)
+clear()
+has($action) / get($action) : string / all()
+
+SHORTCUTS
+  onclick / ondblclick / onmousedown / onmouseup /
+  onmouseover / onmouseout / onmousemove
+
+release($full=true) : string
+  full → ' onclick="..." ondblclick="..."'
+  иначе → 'onclick="..." ...' (trim)
+  htmlspecialchars на каждый value.
+
+ЗАМЕЧАНИЯ
+- Валидация только по имени события (on[a-z]+). Регистр — к нижнему.
+- Значения (JS-код) НЕ проверяются — доверяем источнику.
+- htmlspecialchars экранирует кавычки в JS — учитывать при генерации
+  кода с одинарными/двойными кавычками.
+
+================================================================
+E. visuoattrsdata — data-*="..."
+================================================================
+СВОЙСТВА
+  owner : ?visuoattrs
+  data  : [ name => [ 'value' => mixed, 'json' => bool ] ]
+
+add($name, null|bool|string|int|array $value, bool $to_json = true)
+get($name) / has($name) / remove($name) / clear() / all() / owner()
+
+STATIC HELPERS
+  encode($value) : string   — json_encode + JSON_UNESCAPED_UNICODE
+  decode($json)  : mixed
+
+release() : string
+  Если data пусто — ''.
+  Для каждой пары:
+    raw = json ? encode(value) : (string) value
+    html .= ' data-<name>="' . htmlspecialchars(raw, ENT_QUOTES) . '"'
+
+ЗАМЕЧАНИЯ
+- to_json=true: значение сериализуется в JSON. Массивы/объекты
+  попадут как JSON в атрибут. Bool → 'true'/'false'.
+- to_json=false: прямое приведение к строке.
+- Атрибут всегда 'data-<name>', экранирование — htmlspecialchars.
+
+================================================================
+СВОДКА
+================================================================
+  visuoattrs          контейнер + generic
+    ├─ class          set классов, class="a b c"
+    ├─ style          пары name:value;, style="..."
+    ├─ actions        onclick/onmouseover/…, /^on[a-z]+$/
+    └─ data           data-* с json-сериализацией
+
+ПОРЯДОК RELEASE (важен для HTML):
+  class → style → actions → generic → data
+
+ИСПОЛЬЗОВАНИЕ
+  $vt->tag('a', class:'cta', style:'color:red')
+     ->attrs_add('href', '/x')
+     ->data_add('user', ['id'=>1, 'name'=>'A'])
+     ->attrs_actions_add('onclick', 'go()');
+
+ПРОКСИ В visuotag (см. 38_visuotag.txt)
+  attrs_add / attrs_remove / attrs_class_add / attrs_style_add /
+  attrs_actions_add / data_add / data_remove — все делегируют
+  сюда через ->attrs().
+
+ЗАМЕЧАНИЯ / БАГИ
+1. attrs->release() вызывает все подклассы БЕЗУСЛОВНО — даже если
+   ничего нет, каждый вернёт '' и не сломает вывод.
+2. visuoattrsclass::add() split по \s+ — если в классе пробел,
+   он разобьётся на два класса. Например, 'a b' → добавит 'a' и 'b'.
+   Так задумано.
+3. visuoattrsactions::is_event() /^on[a-z]+$/ — не пропустит
+   'onClick' (приведётся к 'onclick'), но не пропустит 'on_a'.
+   Плюс это правильно.
+4. data_add с массивом и to_json=true — типичный путь. Если
+   to_json=false и value=array → (string) array = 'Array' (notice).
+5. visuoattrsdata::encode() при false от json_encode → пустая строка
+   (не notice). Не критично.
+6. style_add с $kv_separator=':' — если в значении есть ':'
+   (например url('http://...')), будет ошибка. Ограничение парсера.
+7. Обратные ссылки: visuoattrs->visuotag (узел), visuoattrsclass
+   ->visuotag, style->visuotag и т.д. Позволяет подклассу вернуть
+   родителя через ->parent(). Используется редко.
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+----------------------------------------------------------------
+  prev → 38_visuotag.txt
+  next → 40_visuodata.txt      (visuodata — данные элемента)
+  next → 41_visuometa.txt
+  next → 42_visuoelement.txt   (legacy)
+  next → 43_visuoel.txt        (текущий API)

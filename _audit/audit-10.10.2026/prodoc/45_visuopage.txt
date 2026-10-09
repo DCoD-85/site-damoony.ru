@@ -1,0 +1,129 @@
+================================================================
+45_VISUOPAGE — sources/visuo/sources/visuopage.php
+Применяет переопределения из visuostruct_html к дереву.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/visuo/visuo.php (шаг 18)
+РОЛЬ:
+  Маленький, но важный класс. Работает ПОСЛЕ того, как схема
+  построила дерево (dt_top/dt_left/dt_center/dt_right/dt_bottom)
+  и программист в visuostruct_html задал override'ы.
+
+  Задача: заменить/очистить слоты dt_* в финальном дереве,
+  если в visuostruct_html указан override.
+
+ВЫЗЫВАЕТСЯ ИЗ: visuorelease::final(), ветка return_type='html'
+               → main->visuopage->apply($struct)
+
+================================================================
+СВОЙСТВА
+================================================================
+  main : ?\main
+
+  __construct(?main $main = null)
+
+================================================================
+МЕТОД apply(visuostruct_html $struct) : void
+================================================================
+
+ШАГИ
+  1. Если main === null → return.
+  2. Если main->visuorelease === null → return.
+  3. Если main->visuorelease->visuotag === null → return.
+
+  4. $vt_root = main->visuorelease->visuotag->root()
+     Если root === null → return.
+
+  5. foreach [top, left, center, right, bottom] as $name:
+       $override = $struct->{$name}
+
+       Если $override === null → continue (не трогаем слот).
+
+       $slot = $vt_root->find(class: 'dt_' . $name)
+       Если $slot === null → continue (нет такого слота в дереве).
+
+       Если $override === false:
+         $slot->clear()
+         continue
+
+       Если $override instanceof visuotag:
+         $slot->clear()->append($override)
+
+КОНТРАКТ
+  visuostruct_html->{$name} может быть:
+    null       — не переопределять (оставить дефолт из схемы)
+    false      — выключить слот (очистить)
+    visuotag   — заменить содержимое слота
+
+СЛОТЫ В ДЕРЕВЕ
+  Схемы (alliasscheme_*) создают в body:
+    <div class="dt">
+      <div class="dt_top">…</div>
+      <div class="dt_middle">
+        <div class="dt_left">…</div>
+        <div class="dt_center">…</div>
+        <div class="dt_right">…</div>
+      </div>
+      <div class="dt_bottom">…</div>
+    </div>
+  Схема в refresh() уже влила в них as_tag() блоков.
+  visuopage::apply() может это переопределить.
+
+ПРИМЕР
+  $s = $main->visuostruct->html();
+  $s->set(
+    top:    $custom_vt,
+    center: $other_vt,
+    left:   false,            // отключить
+  );
+  // final → visuopage->apply($s)
+  //   dt_top    ← $custom_vt
+  //   dt_center ← $other_vt
+  //   dt_left   ← пусто
+  //   dt_right  ← дефолт из схемы (не переопределён)
+
+================================================================
+ЗАМЕЧАНИЯ
+================================================================
+1. find(class: 'dt_top') ищет первый узел с классом dt_top.
+   Если в дереве таких несколько — берётся первый. Обычно один.
+
+2. append($override) добавляет children переданного visuotag в
+   slot (см. visuotag::append — «разворачивает» root).
+   То есть сам контейнер $override в дерево не попадает,
+   только его children.
+
+3. override === false → clear() слота. Сам div.dt_left остаётся,
+   но пустой. Если нужно убрать целиком — не поддерживается.
+
+4. Работает только для 5 стандартных слотов. Если схема имеет
+   другие слои (dt_policy, dt_debug) — visuopage их не трогает.
+   Для policy/debug override нет.
+
+5. visuostruct_html->meta не используется здесь. Если программист
+   задал свой meta — где он применяется? Скорее всего, в
+   visuorender::html (см. 46) при сборке <head>.
+
+6. Метод apply не возвращает ничего — void. Нельзя собрать
+   цепочку.
+
+7. Если apply вызван до того, как схема построила дерево, слоты
+   не найдутся → override'ы молча проигнорируются. Порядок важен.
+
+================================================================
+ПОТОК
+================================================================
+  main::release()
+    → render::release()
+        → visuorelease::final()
+            $struct = visuostruct->current()
+            if $struct instanceof visuostruct_html:
+              visuopage->apply($struct)   ← ЭТОТ ШАГ
+            visuorender->html($vt, $meta)
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+----------------------------------------------------------------
+  prev → 44_visuostruct.txt
+  next → 46_visuorender.txt

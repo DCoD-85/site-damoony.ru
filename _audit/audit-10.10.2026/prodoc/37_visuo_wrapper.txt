@@ -1,0 +1,94 @@
+================================================================
+37_VISUO_WRAPPER — sources/visuo.php + sources/visuo/visuo.php
+Загрузка движка visuo.
+================================================================
+
+namespace: (глобальный)
+
+================================================================
+A. sources/visuo.php — обёртка
+================================================================
+СОДЕРЖИМОЕ
+  include_once __DIR__ . DS . 'visuo' . DS . 'visuo.php';
+
+РОЛЬ
+  sources/include.php подключает модуль 'visuo' → этот файл
+  → настоящий движок в sources/visuo/visuo.php.
+  Мостик между плоской схемой sources/<mod>.php и подпапкой.
+
+================================================================
+B. sources/visuo/visuo.php — загрузчик движка
+================================================================
+РОЛЬ
+  Единая точка загрузки visuo. Подключает 18 файлов в фиксированном
+  порядке. Константы DS/DSA — страховка.
+
+ПОДГОТОВКА
+  define DS / DSA (если ещё не заданы)
+  $visuosources = __DIR__ . DS . 'sources' . DS
+
+ПОРЯДОК INCLUDE (важен)
+----------------------------------------------------------------
+  1.  visuorelease_settings.php     — настройки рендера
+  2.  visuolog.php                  — лог для debug-панели
+  3.  visuolink.php                 — ссылки
+  4.  visuotag.php                  — базовый HTML-builder  ★ ядро
+  5.  visuoattrs.php                — контейнер атрибутов
+  6.  visuoattrs/visuoattrsclass.php
+  7.  visuoattrs/visuoattrsstyle.php
+  8.  visuoattrs/visuoattrsactions.php
+  9.  visuoattrs/visuoattrsdata.php
+  10. visuometa.php                 — meta-теги
+  11. visuodata.php                 — данные элементов
+  12. visuoelement.php              — СТАРЫЙ API элементов
+  13. visuoelements.php             — реестр старых элементов
+  14. visuostruct.php               — структура страницы
+  15. visuoel.php                   — НОВЫЙ API элементов
+  16. visuoels.php                  — реестр новых элементов
+  17. visuorender.php               — старый рендер (легаси?)
+  18. visuopage.php                 — страница
+  19. visuorelease.php              — финальный рендер  ★ ядро
+
+ЗАМЕЧАНИЯ
+- Два параллельных API элементов:
+    visuoelement(s)  — старый (form/input/table/block)
+    visuoel(s)       — новый (block/button/field/form/input/...)
+  Оба сосуществуют.
+- visuorender.php загружается ПОСЛЕ обоих API — вероятно, легаси.
+- visuorelease_settings.php идёт ПЕРВЫМ — до visuotag,
+  значит visuotag может зависеть от настроек.
+- visuolog.php и visuolink.php — до visuotag (могут использоваться
+  внутри visuotag при построении).
+- Никаких new здесь не делается — только include.
+  Все объекты создаются позже, в main (visuorelease, visuopage,
+  visuostruct) и в блоках (visuotag, visuoelement).
+
+ПОДПАКЕТЫ (что ещё есть в sources/visuo/sources/)
+----------------------------------------------------------------
+  visuoelements/         — реализации старого API
+  visuoel/               — реализации нового API
+  visuoattrs/            — 4 файла: class/data/style/actions
+  visuostruct/           — 3 файла: html/ajax/min
+
+================================================================
+ДАЛЬШЕ — ПАКЕТ 9: разбор sources/visuo/
+================================================================
+  9.1 ✅ visuo.php (этот файл)
+  9.2 → visuotag.php                  ★ ядро HTML-билдинга
+  9.3 → visuoattrs*                   — атрибуты
+  9.4 → visuodata.php                 — данные элементов
+  9.5 → visuoelement.php + visuoelements/*
+  9.6 → visuoel.php + visuoel/*
+  9.7 → visuorelease + settings
+  9.8 → visuostruct + visuostruct/*
+  9.9 → visuometa.php
+  9.10 → visuopage.php
+  9.11 → visuolog.php
+  9.12 → visuolink.php
+  9.13 → visuorender.php
+  9.14 → visuoels.php
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+  prev → 36_gmod.txt
+  next → 38_visuotag.txt

@@ -1,0 +1,191 @@
+================================================================
+35_RENDER_MOD_SYSTEM_BLACKLIST
+render.php / mod.php / system.php / blacklist.php
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЮТСЯ ИЗ: sources/include.php
+
+================================================================
+A. render.php — class render + render__data
+================================================================
+РОЛЬ
+  Тонкая обёртка над visuorelease. Определяет, куда отдавать
+  финальный рендер: AJAX или обычный HTML.
+  Хранит пару флагов в render__data.
+
+class render
+  main         : ?\main
+  render__data : ?render__data
+
+  __construct( ?\main , ?render__data = null )
+      render__data = $render__data ?? new render__data($this)
+  init()                       — no-op (для совместимости)
+  data()      : render__data   — аксессор
+  getdata($name) : mixed       — прокси в render__data->get
+  setdata($varname, $varvalue) — прокси в render__data->set
+
+  release(bool $log = false, bool $debug = false)
+      if main === null → return
+      if ! isset(main->visuorelease) → return
+      $ajax = render__data->render_ajax
+      if $ajax → visuorelease->final_ajax($log, $debug)
+      else     → visuorelease->final($log, $debug)
+
+class render__data
+  render       : render
+
+  render_ajax  : bool = false    — рендерить как AJAX
+  min          : bool = false    — «минимальный» рендер
+                                   (пробрасывается в visuorelease)
+
+  __construct( render )
+  init(bool $render_ajax)        — установить render_ajax
+  set($varname, $varvalue)
+      property_exists → присвоить
+  get($varname)
+      property_exists → вернуть, иначе null
+
+ЗАМЕЧАНИЯ
+- render__data->min объявлен, но НЕ используется в render::release().
+  Пробрасывается внешним кодом в visuorelease::final(...)?
+  Или мёртвое поле — надо grep.
+- getdata/setdata — «горячие» аксессоры, используются для render_ajax.
+
+================================================================
+B. mod.php — class mod
+================================================================
+РОЛЬ
+  Контейнер модов. Автоподхват модулей из sources/mod/.
+  Аналогичен gmod, но с другим назначением («моды» vs «игровые»).
+
+СВОЙСТВА
+  main
+  mod_path : string = __DIR__ . DS . 'mod' . DS    — приватное
+  modules  : array                                  — ['name' => mod_<name>]
+
+МЕТОДЫ
+  __construct( ?main , bool $autoload = true )
+      autoload($autoload)
+
+  autoload(bool $autoload)
+      $dir = $main->library->dir()
+      $dir_scan = $dir->get($this->mod_path, /*included*/ true,
+                            /*dirs*/ true, /*files*/ false)
+      foreach $dir_scan as $path => $name:
+        $gmod_path  = $path . DS . $name . '.php'
+        $gmod_class = 'mod_' . $name
+        include_once + new $gmod_class($this)
+
+  init()
+      foreach modules: if (!$module->init()) → $init = false
+      (сообщение о неудачной инициализации закомментировано)
+
+  get(string $mod_name)
+      $this->modules[$mod_name] ?: null
+      ⚠ notice при отсутствии ключа (нет ?? оператора)
+
+  show_list()
+      Возвращает HTML-строку со списком mod <name>, class: [ <class> ].
+      ⚠ $return не инициализирована в начале → notice на первом проходе
+        (PHP 8: Warning: Undefined variable $return).
+
+ЗАМЕЧАНИЯ
+- Параметр $autoload у __construct пробрасывается в autoload(),
+  но там он ни на что не влияет (флаг не используется).
+- $gmod_class создаётся для модуля mod_<name> — префикс mod_ для
+  всех классов модов.
+- Пустая папка sources/mod/ (только index.php) — сейчас модулей нет.
+
+================================================================
+C. system.php — class system
+================================================================
+ПУСТЫШКА.
+  main : ?\main
+
+  __construct( ?\main ) — присваивает, больше ничего.
+
+Заголовочный комментарий прямо говорит:
+  - в main.php объявлено свойство $system, но НЕ инстанцируется
+  - grep по `new system(` пуст
+  - если через пару спринтов не появится — удалить из switchboard'а
+    и из main.
+
+================================================================
+D. blacklist.php — class blacklist
+================================================================
+РОЛЬ
+  Фильтр по IP. Режим blacklist (deny) или whitelist (allow).
+  Данные — в secure/blacklist/.
+
+СВОЙСТВА
+  main
+  mode     : bool = true            — true = blacklist, false = whitelist
+  data_dir : string                 — по умолчанию root/secure/blacklist
+
+МЕТОДЫ
+  __construct( ?main , ?string $data_dir = null )
+  init()
+      mode true  → check_blacklist()
+      mode false → check_whitelist()
+
+  check_blacklist()
+      ip = remote_ip(); если null → return
+      file = blacklist.txt; если не существует → return
+      если ip в файле → deny('Error: badip.')
+
+  check_whitelist()
+      ip = remote_ip(); если null → return
+      file = whitelist[_<domain>_<allias>].txt
+      если файл существует:
+        если ip в списке → allow()
+        иначе → deny('Error: access denied', 404)
+
+  allow() — hook, no-op (переопределить в тестах)
+  deny($message, $http_code = 0)
+      http_response_code + die(message)
+
+ВНУТРЕННИЕ
+  remote_ip()        — $_SERVER['REMOTE_ADDR']
+  blacklist_file()   → data_dir/blacklist.txt
+  whitelist_file()   → data_dir/whitelist[_<domain>_<allias>].txt
+  load_ips($file)    — парсит файл: skip '#' и пустые, иначе [ip => true]
+
+ФОРМАТ ФАЙЛА
+  - одна строка = один IP
+  - строки, начинающиеся с '#' — комментарии
+  - пустые строки игнорируются
+
+ЗАМЕЧАНИЯ
+1. mode = true — по умолчанию работает blacklist. Переключение в
+   whitelist — только через прямое присвоение $blacklist->mode = false
+   (в main.php этого нет).
+2. allow()/deny() public — чтобы в тестах переопределить.
+3. data_dir — root/secure/blacklist. Если папки нет — is_file
+   вернёт false, проверки просто пропустятся (не критично).
+4. Для whitelist по домену+аллиасу имя файла собирается в
+   whitelist_<domain>_<allias>.txt. Если main_settings не даёт
+   domain/allias — фолбэк на 'whitelist.txt'.
+
+================================================================
+СВОДКА
+================================================================
+  render    — обёртка visuorelease: ajax vs html
+  mod       — контейнер модов (sources/mod/), сейчас пусто
+  system    — ПУСТЫШКА (кандидат на удаление)
+  blacklist — фильтр IP (blacklist/whitelist), full impl
+
+АРХИТЕКТУРНЫЕ ЗАМЕТКИ
+  - render::release() — единая точка финального рендера.
+    main::release() вызывает script->run() → render->release().
+  - blacklist::init() вызывается в main::init() после gmod->init().
+  - mod::autoload() использует library_dir->get() с рекурсией.
+
+КАНДИДАТЫ НА УДАЛЕНИЕ
+  - system.php — сейчас нигде не инстанцируется и не используется.
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+----------------------------------------------------------------
+  prev → 34_library.txt
+  next → 36_gmod.txt

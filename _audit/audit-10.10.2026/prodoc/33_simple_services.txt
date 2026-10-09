@@ -1,0 +1,191 @@
+================================================================
+33_SIMPLE_SERVICES — user / messages / language / log / vardump
+Пять независимых сервисов из sources/.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЮТСЯ ИЗ: sources/include.php
+
+================================================================
+A. user.php — базовый класс user
+================================================================
+class user
+  main    : \main
+  profile : user_profile
+
+  __construct( \main )  — new user_profile($this)
+  is_guest()            — profile->get('guest')
+  authorized()          — profile->init()
+
+ЗАМЕНА
+  В аллиасах visuo/login — $main->user подменяется на
+  \damoony\<allias>\user extends \user (см. 22_visuo_user.txt).
+
+class user_profile
+  main, user
+  СВОЙСТВА
+    guest=true, role='', id='', status='', login='',
+    password='', hash='', data=[]
+
+  init()
+    Читает cookie login/password/hash.
+    Если все пусты — остаётся guest.
+    Иначе SELECT * FROM toolsusers WHERE login=%s AND password=%s
+    → если найдено: data=row, guest=false, id/login/password/status
+    → иначе: guest=true, data.login='Гость'
+
+  login( array $data , ?array $formcheck = null )
+    Записывает в toolsuserslogin: hash = md5(login.password.time())
+    Ставит cookie login/password/hash на 7 дней или на сессию
+    (зависит от remember).
+
+  logout()
+    Удаляет cookie login/password/hash.
+
+  set/get/data — простые аксессоры.
+
+ЗАМЕЧАНИЯ (безопасность)
+1. ПАРОЛЬ В КУКЕ. Это ранний код. В visuo уже сделана
+   нормальная схема через visuo_sid + session (см. 22). Базовый
+   user.php — легаси/заглушка.
+2. md5(login.password.time()) — слабый хеш.
+3. SQL toolsusers — старая схема.
+4. cookie ставится на '.host' через strrev-хак — как в index.php.
+
+================================================================
+B. messages.php — class messages
+================================================================
+  main
+  messages : array из { status, title, text }
+  STATUSES = [success, warning, error, console]
+
+  count() / has() / clear()
+  add($status, $title, $text)   — статус вне whitelist → 'console'
+  as_tag()  : visuotag
+      Для каждого сообщения:
+        div.message.message_<status>.new
+          div.container > div.divInside
+            div.time
+            div.messagebody > div.textbox (text)
+          div.buttons
+            div.button.close > img close.png
+            div.button.full > img full.png
+  release()  : string
+      Если пусто — ''.
+      Иначе — visuotag->root()->release()
+
+ЗАМЕЧАНИЯ
+- as_tag() требует $main для скина. Если main=null — skin='default'.
+- Иконки close.png / full.png в media/release/<skin>/icons/min/.
+- CSS-класс .message_<status> должен существовать.
+
+================================================================
+C. language.php — class language
+================================================================
+  main
+  language      : string = 'ru-ru'
+  strings       : array     — key → text
+  strings_tosave: array     — ключи, для которых вернулся default
+
+  __construct( \main )   — берёт язык из main_settings->get('language')
+  load()                 — перечитывает язык + загружает .inc
+  set_language($code)    — переключить язык
+  init()                 — пустой (hook)
+  get($key, $params=[], $default='')
+      Если strings[key] есть → возвращает его.
+      Иначе → default + запись в strings_tosave.
+      $params применяются через vsprintf.
+  savedefaults()
+      Дозапись отсутствующих ключей в save.txt.inc (авто-заглушка).
+  current()              — текущий код языка
+
+ВНУТРЕННЕЕ
+  path($name)
+      language/<name>.inc (кроме 'save' → save.txt.inc)
+  parser($path) : array
+      Формат файла:
+        # комментарий
+        KEY
+        \tстрока1
+        \tстрока2
+        NEXT_KEY
+        \t...
+      Многострочные значения — по табу.
+      trim финального значения.
+
+ЗАМЕЧАНИЯ
+- Формат — свой (не .ini, не .json): ключ без кавычек + табы.
+- savedefaults() сортирует ключи и пишет save.txt.inc с шапкой.
+- При get() отсутствующий ключ ДЕФОЛТИТ в strings_tosave —
+  позже savedefaults() сбросит их в файл.
+
+================================================================
+D. log.php — class log + log_row
+================================================================
+  main
+  rows : array of log_row
+
+  add($message, $method='', $file='', $line=0)  — накопить
+  all() / count() / has() / clear()
+  as_tag() : visuotag
+      Если rows пуст — пустой visuotag.
+      Иначе — каждый row->as_tag().
+  astag() — алиас
+
+log_row
+  message, method, file, line
+  as_tag()  → div.log-row
+              div.log-line    (номер строки)
+              div.log-message (текст)
+              div.log-source  (method file:line)
+  astag()  — алиас
+
+РОЛЬ
+  Лог-сообщения для debug-панели. Заполняется вручную
+  через add() из любого места кода.
+
+================================================================
+E. vardump.php — class vardump
+================================================================
+  main
+
+  vardump($var, $varname=null, $debug=false, $headers=true, $count=0, $visuotag=null)
+      Рекурсивный дамп переменной через visuotag.
+      Три ветки:
+        object — foreach по свойствам, рекурсия
+        array  — foreach по ключам, рекурсия
+        default — скаляр (string/int/float/bool/null)
+      Классы: my_vardump, my_vardump_row,
+              my_vardump_row_type/_name/_val/_start/_end/_box
+
+  my_vardump($var, $varname='', $debug=false, $headers=true, $count=0)
+      Legacy: возвращает HTML-строку (не visuotag).
+      Тот же смысл, но с jQuery-тогглами, инлайн-стилями,
+      кнопкой «Копировать».
+      Использует устаревшие конструкции.
+      Похоже, оставлен для совместимости.
+
+ЗАМЕЧАНИЯ
+1. Два параллельных API: vardump() (visuotag) и my_vardump() (HTML-строка).
+   Актуальный — vardump().
+2. В array-ветке vardump() странная проверка `is_object($var)` внутри
+   foreach — по факту всегда false, условие мёртвое.
+3. Inline JS onclick — генерируются в my_vardump().
+4. $headers=false убирает показ типа/длины.
+
+================================================================
+СВОДКА
+================================================================
+  user        — ранняя аутентификация + заготовка для allias-версий
+  messages    — стек сообщений (info/success/error/warning) → visuotag
+  language    — файловый i18n (.inc) + авто-дозаполнение save.txt.inc
+  log         — накопитель лог-строк → visuotag
+  vardump     — рекурсивный дамптер переменных → visuotag
+
+Все — простые сервисы без общих зависимостей друг от друга.
+================================================================
+СВЯЗАННЫЕ
+  prev → 32_db.txt
+  next → 34_library.txt
+  next → 35_render_mod_system.txt
+  next → 36_gmod.txt

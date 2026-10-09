@@ -1,0 +1,69 @@
+================================================================
+47_VISUODATA — sources/visuo/sources/visuodata.php
+Отдельный data-контейнер (не путать с visuoattrsdata).
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/visuo/visuo.php (шаг 11)
+РОЛЬ: контейнер для data-* атрибутов, привязанный к visuotag
+      или visuostruct через $struct.
+
+ОТЛИЧИЕ ОТ visuoattrsdata (см. 39)
+  visuoattrsdata — подкласс visuoattrs (атрибуты одного узла).
+                   Используется через $vt->data_add(...).
+                   Экранирование корректное (htmlspecialchars).
+  visuodata      — самостоятельный контейнер. Ни к visuotag,
+                   ни к visuoattrs напрямую не привязан (только
+                   через $struct). Похоже на заготовку/раннюю
+                   версию.
+
+СВОЙСТВА
+  struct : ?visuotag|visuostruct   — обратная ссылка
+  data   : [name => [value, to_json, json_string]]
+
+МЕТОДЫ
+  __construct(?visuotag|visuostruct $struct = null)
+
+  add($name, $value, bool $to_json = true)
+    data[name] = [value, to_json, json_string]
+    json_string = $to_json ? json_encode($value) : $value
+    Возвращает $this->struct   ← НЕ $this, а структуру!
+
+  get($name)
+    data[name] ?? null
+
+  json_encode($value) : string
+    json_encode + str_replace('"', '&quot;')
+    (своё «экранирование», не htmlspecialchars)
+
+  json_decode($json) : mixed
+    обратное — заменяет &quot; на "
+
+  show() : array          — возвращает $this->data
+  prerelease()            — пусто
+  release() : string
+    foreach data: ' data-<name>="<json_string>"'
+    ⚠ БЕЗ htmlspecialchars — потенциальный XSS при <, >, &, '.
+
+ЗАМЕЧАНИЯ / БАГИ
+1. add() возвращает $this->struct — цепочка уходит на структуру,
+   нельзя подряд добавить несколько data.
+2. release() не экранирует значения (только json_encode сделал
+   &quot;). Если значение содержит <, >, &, ' — попадёт в HTML
+   как есть. Для доверенных данных ок.
+3. Поля data хранятся как [value, to_json, json_string] — индексная
+   запись, не ассоциативная. Читать неудобно.
+4. prerelease() пустой — заготовка.
+5. show() возвращает сырой массив.
+
+ГДЕ ИСПОЛЬЗУЕТСЯ
+  Судя по конструктору (visuotag|visuostruct) — задумывался как
+  data-контейнер для visuostruct (или общего назначения).
+  Реально — надо проверить grep'ом:
+    grep -rn "new visuodata\|->data()\b" sources/visuo/ --include="*.php"
+  Скорее всего, активно НЕ используется. Если так — кандидат
+  на удаление вместе с visuoelement.
+
+ВЕРДИКТ
+  Дубль функциональности visuoattrsdata. Если grep подтвердит
+  отсутствие использования — удалить.

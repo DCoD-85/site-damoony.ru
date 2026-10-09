@@ -1,0 +1,67 @@
+================================================================
+04_DOMAIN — domain.php + domainglobal.php
+Слой домена: определение, подключение модулей домена.
+================================================================
+
+ПОДКЛЮЧАЮТСЯ ИЗ: main::logic()
+ПОРЯДОК:         new domain → new domainglobal
+
+================================================================
+A. domain.php → class domain
+================================================================
+СВОЙСТВА
+  main       : main
+  domaininfo : domaininfo
+
+МЕТОДЫ
+__construct( main )
+    new domaininfo($this); init()
+
+init( )
+    1. Берёт из library: link, url, url_domain, url_allias,
+       url_base, url_vars (для чтения, реально не используются).
+    2. $domain_accepted = main_settings->domain_accepted()
+    3. domaininfo->set('name', $domain_accepted)
+    4. Если пусто → error(true, true, ...)
+    5. include_once пяти модулей домена:
+         domain/<name>/allias.php
+         domain/<name>/alliaslocal.php
+         domain/<name>/alliasglobal.php
+         domain/<name>/alliasscheme.php
+         domain/<name>/dataprovider.php
+
+ЗАМЕЧАНИЯ
+- Мёртвые $library/$link/$url/... — копипаста из шаблона.
+- error(true, ...) — тип bool вместо string.
+
+================================================================
+B. domain.php → class domaininfo
+================================================================
+Метаданные домена. Полный аналог alliasinfo.
+
+СВОЙСТВА
+  domain, name, subname, history
+
+МЕТОДЫ
+  set($var, $value, $add_as_array = false)
+  ashtml()  — пустой
+  astag()   — div-дерево name/subname/history (запутанная логика)
+
+================================================================
+C. domainglobal.php → class domainglobal
+================================================================
+ПУСТЫШКА. Всё закомментировано.
+
+СВОЙСТВА
+  main, header (?domainglobal_header), scheme (?domainglobal_scheme)
+
+МЕТОДЫ
+  __construct( main , bool $autoload = true )
+  autoload( )  — тело пустое
+
+РОЛЬ: заглушка, чтобы main::logic() не падал на new domainglobal($this).
+
+================================================================
+СВЯЗАННЫЕ
+  prev → 03_main.txt
+  next → 05_allias.txt

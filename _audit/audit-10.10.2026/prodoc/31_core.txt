@@ -1,0 +1,161 @@
+================================================================
+31_CORE — sources/core.php + core/*
+Ядро: константы, окружение, пути, таймеры.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/include.php (модуль 'core')
+РОЛЬ: контейнер core + 4 подмодуля: const, env, path, time.
+
+================================================================
+A. core.php — class core
+================================================================
+СВОЙСТВА
+  main    : \main
+  modules : array = ['const','env','path','time']   — порядок загрузки
+
+  const : core_const
+  env   : core_env
+  path  : core_path
+  time  : core_time
+
+МЕТОДЫ
+  __construct( \main ) → init()
+  init( )
+      foreach modules:
+        file  = core/<name>.php
+        class = core_<name>
+        include_once + new $class($this)
+  get($name) / has($name)                    — динамический доступ
+  is_ajax()    → env->is_ajax()
+  is_cli()     → env->is_cli()
+  root()       → path->root
+  elapsed_ms() → time->elapsed_ms()
+
+ЗАМЕЧАНИЯ
+- Загрузка в фиксированном порядке. НЕ переставлять.
+- Прямые делегаты (is_ajax/is_cli/root/elapsed_ms) — «горячие» хелперы.
+
+================================================================
+B. core_const — const.php
+================================================================
+РОЛЬ: define() базовых констант, если ещё не заданы.
+
+  DS  = DIRECTORY_SEPARATOR
+  DSA = '/'
+  BR  = PHP_EOL
+  GL_LOG       = false
+  GL_DEBUG     = false
+  GL_DEBUGHARD = false
+
+МЕТОДЫ
+  __construct(core) → init()
+  init()    — все define через if(!defined(...))
+  get($name) — constant($name) или null
+
+ДУБЛИРОВАНИЕ
+- DS/DSA/BR уже определяются в index.php и constants.php.
+- GL_LOG/GL_DEBUG/GL_DEBUGHARD — уже в constants.php.
+- core_const — страховочный повтор. Имеет смысл только для
+  CLI / не-стандартных сценариев, где index.php не отработал.
+
+================================================================
+C. core_env — env.php
+================================================================
+РОЛЬ: определяет тип окружения + стратегию error_reporting.
+
+СВОЙСТВА
+  type : string = 'prod'       — 'prod' | 'dev'
+
+МЕТОДЫ
+  __construct(core) → apply()
+  set_type($type)  — сменить + apply()
+  is_prod() / is_dev()
+  is_cli()    — PHP_SAPI === 'cli'
+  is_ajax()   — HTTP_X_REQUESTED_WITH === 'xmlhttprequest'
+  php_version()  — PHP_VERSION
+  apply( )
+      dev  : error_reporting(E_ALL);           display_errors=1
+      prod : error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+             display_errors=0
+
+ЗАМЕЧАНИЯ
+- $type = 'prod' по умолчанию. Никак не переключается из конфига.
+  Dev-режим — только через ->set_type('dev') вручную.
+- apply() фактически повторяет то, что делает index.php [4].
+  Порядок: index.php ставит E_ALL&~NOTICE&~DEPRECATED → core_env
+  при prod ставит то же самое (идемпотентно).
+
+================================================================
+D. core_path — path.php
+================================================================
+РОЛЬ: абсолютные пути.
+
+СВОЙСТВА
+  sources : dirname(__DIR__)        — sources/
+  root    : dirname(sources)        — корень проекта
+  www     : root/www
+  secure  : root/secure
+  logic   : www/logic
+
+МЕТОДЫ
+  __construct(core) → init()
+  init()    — заполняет пути
+  get($name) : string
+
+ЗАМЕЧАНИЯ
+- Дерево проекта фиксировано: root/{sources,www,secure}.
+- www/logic — но logic лежит в www; путь используется для include
+  в main::init() через main_settings->get('logic').
+
+================================================================
+E. core_time — time.php
+================================================================
+РОЛЬ: таймеры.
+
+СВОЙСТВА
+  start_mt : microtime(true)   — на момент __construct
+  start_hr : hrtime(true)
+
+МЕТОДЫ
+  __construct(core) — стартует оба таймера
+  elapsed_ms()    : float  — миллисекунды через microtime
+  elapsed_hr_ms() : float  — миллисекунды через hrtime
+  reset()          — сбросить оба
+
+ЗАМЕЧАНИЯ
+- Дублирует SCRIPTSTART_MT / SCRIPTSTART_HR из index.php.
+- start_mt фиксируется позже, чем index.php-старт. Для полного
+  времени до этого места — использовать константы.
+- hrtime(true) — монотонный; предпочтителен для микро-замеров.
+  microtime(true) — wall-clock; может скакать при NTP.
+
+================================================================
+СВОДКА
+================================================================
+  core       — контейнер (thin)
+  core_const — define'ы (дублируют index/constants)
+  core_env   — окружение + error_reporting
+  core_path  — пути проекта
+  core_time  — таймеры
+
+ПОТОК
+  sources/include.php → new core($main)
+    → new core_const → define DS/DSA/BR/GL_*
+    → new core_env   → apply error_reporting
+    → new core_path  → заполнить пути
+    → new core_time  → старт таймеров
+
+  Доступ:
+    $main->core->is_ajax()
+    $main->core->root()
+    $main->core->elapsed_ms()
+    $main->core->path->logic
+    $main->core->env->is_dev()
+    $main->core->get('const')->get('GL_DEBUG')
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+----------------------------------------------------------------
+  prev → 30_sources_include.txt
+  next → 32_db.txt      (db.php + db/*)

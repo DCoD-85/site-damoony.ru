@@ -1,0 +1,44 @@
+================================================================
+18_VISUO_INCLUDE — allias/visuo/include.php
+Вход в аллиас visuo.
+================================================================
+
+namespace: (глобальный — файл работает в области allias::__construct)
+ВЫЗЫВАЕТСЯ ИЗ: damoony\allias::__construct()
+               через include_once allias/visuo/include.php
+КОНТЕКСТ:      $this = \damoony\allias
+
+ПОСЛЕДОВАТЕЛЬНОСТЬ (строго)
+----------------------------------------------------------------
+
+1. КОНСТАНТЫ ПУТЕЙ
+   VISUO_MEDIA_DOWNLOADS = dirname(__DIR__, 6) . DS . media . DS . downloads . DS
+   VISUO_MEDIA_IMG       = dirname(__DIR__, 6) . DS . media . DS . visuo . DS . img . DS
+
+   dirname(__DIR__, 6) — поднимается на 6 уровней вверх:
+     все же «www/». Путь для медиа visuo.
+
+2. КАРКАС
+   include_once helpers.php
+   include_once user.php
+
+   helpers.php — утилиты visuo.
+   user.php    — класс \damoony\visuo\user (замена базового $main->user).
+
+3. ПОДМЕНА $main->user НА VISUO-ВЕРСИЮ
+   if $this instanceof \damoony\allias:
+     $main = $this->main
+     if $main instanceof \main && !($main->user instanceof \damoony\visuo\user):
+       $main->user = new \damoony\visuo\user($main)
+       $main->user->boot()
+
+   Идемпотентно: не перезаписывает уже установленный visuo-user.
+   Здесь же — boot(): инициализация сессии/данных пользователя.
+
+4. АЛГОРИТМ
+   include_once algoritm/algoritm.php
+   (класс \damoony\visuo\algoritm)
+
+СМ. ТАКЖЕ
+  19_algoritm_base.txt    — база algoritm_ + algoritmdata_
+  20_visuo_algoritm.txt   — algoritm.php + auth + error

@@ -1,0 +1,67 @@
+================================================================
+36_GMOD — sources/gmod.php
+Контейнер игровых модулей.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/include.php (модуль 'gmod')
+
+РОЛЬ
+  Полная копия mod.php с заменой 'mod' → 'gmod'.
+  Автоподхват из sources/gmod/<name>/<name>.php.
+
+СОСТОЯНИЕ
+  Сейчас модулей нет — папка sources/gmod/ пуста
+  (только index.php, если он есть).
+  → new gmod($main) отработает без ошибок, modules = [].
+
+СВОЙСТВА
+  main
+  mod_path : string = __DIR__ . DS . 'gmod' . DS    — приватное
+  modules  : array = []                              — name → gmod_<name>
+
+МЕТОДЫ
+  __construct( ?main , bool $autoload = true )
+      autoload($autoload)
+  autoload(bool $autoload)
+      $dir = main->library->dir()
+      $dir_scan = $dir->get(mod_path, /*included*/ true,
+                            /*dirs*/ true, /*files*/ false)
+      foreach $dir_scan as $path => $name:
+        file  = $path . DS . $name . '.php'
+        class = 'gmod_' . $name
+        include_once + new $class($this)
+  init()
+      foreach modules: if (!$module->init()) → $init = false
+      (сообщение о неудаче — закомментировано)
+  get(string $gmod_name)
+      $this->modules[$gmod_name] ?: null
+  show_list()
+      HTML-строка со списком модулей
+      (та же $return-бага, что и в mod.php)
+
+ЗАМЕЧАНИЯ
+1. gmod.php и mod.php — двойники. Различаются только путём
+   и префиксом класса. Можно было бы вынести общую логику
+   в трейт или в один параметризованный класс — если этот
+   паттерн будут размножать.
+
+2. Никаких gmod-модулей пока нет. Когда появятся, они должны:
+   - лежать в sources/gmod/<name>/<name>.php
+   - объявлять class gmod_<name> с конструктором (gmod $gmod)
+   - иметь public function init() : bool
+
+3. Параметр $autoload в autoload() не используется — флаг висит.
+
+4. show_list() — с той же неинициализированной $return, что и
+   в mod.php. Потенциальный warning при вызове.
+
+================================================================
+СВЯЗАННЫЕ
+================================================================
+  mod.php       — двойник для «модов»
+  library/dir.php — сканер, который используется
+  main.php      — создаёт gmod в init(): $this->gmod = new gmod($this)
+
+  prev → 35_render_mod_system_blacklist.txt
+  next → 37_visuo_wrapper.txt  (sources/visuo.php — обёртка движка)

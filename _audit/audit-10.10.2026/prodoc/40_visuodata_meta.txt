@@ -1,0 +1,148 @@
+================================================================
+40_VISUODATA_META — visuodata.php + visuometa.php
+Два независимых контейнера: data-* узла и meta-теги страницы.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЮТСЯ ИЗ: sources/visuo/visuo.php (шаги 10–11)
+РОЛЬ: разные задачи — data для произвольного visuotag/visuostruct,
+      meta — единый набор <title>, <link> страницы.
+
+================================================================
+A. visuodata.php — class visuodata
+================================================================
+ВНИМАНИЕ: ЕСТЬ ДВА ПОХОЖИХ КЛАССА
+  visuoattrsdata — подкласс visuoattrs (см. 39). Актуальный для
+                   атрибутов visuotag: $vt->data_add(...).
+  visuodata      — этот файл. Отдельный контейнер, привязан
+                   к visuotag|visuostruct через $struct.
+
+ИСПОЛЬЗУЕТСЯ
+  Судя по сигнатуре, привязан к visuostruct (см. 45) — там
+  может быть собственная коллекция data-* для структуры.
+  Прямой связи с visuotag::data_add нет.
+
+СВОЙСТВА
+  struct : ?visuotag|visuostruct    — обратная ссылка
+  data   : [name => [value, to_json, json_string]]
+
+add($name, $value, bool $to_json = true)
+  data[name] = [ value, to_json, json_string ]
+  Возвращает $this->struct  ← не $this! Цепочка идёт на struct.
+get($name)   — [value, to_json, json_string] или null
+json_encode($data) : string
+  json_encode + str_replace('"', '&quot;')
+  Своё «экранирование кавычек», не htmlspecialchars.
+json_decode($data) : mixed
+  обратное — заменяет &quot; обратно на "
+show() : array    — возвращает $this->data (сырое)
+prerelease()      — пусто
+release() : string
+  Для каждой пары: ' data-<name>="<json_string>"'
+
+ЗАМЕЧАНИЯ / БАГИ
+1. add() возвращает $this->struct — цепочка идёт к структуре,
+   а не к самому visuodata. Нельзя собрать несколько data подряд.
+2. release() подставляет json_string БЕЗ htmlspecialchars. Если
+   json_encode вернул строку с '"', она уже заменена на &quot;,
+   но не экранированы <, >, &, '. Потенциальный XSS, если
+   значение пришло от пользователя.
+3. json_encode с null → 'null', с int → '123' (не в кавычках).
+4. Для сравнения: visuoattrsdata (39) делает это правильно —
+   через htmlspecialchars(ENT_QUOTES).
+5. visuodata — редкий/старый класс. Скорее всего для структур
+   (visuostruct), где нужен отдельный namespace data-*.
+
+================================================================
+B. visuometa.php — class visuometa + visuometa_title
+================================================================
+РОЛЬ
+  Собирает <title>, <link> (css/js/favicon) страницы.
+  visuorelease::meta() возвращает этот объект; блоки наполняют
+  его через ->title(), ->link(), а финальный рендер вызывает
+  ->as_tag().
+
+class visuometa
+  visuorelease : ?visuorelease
+  elements     : array of visuometa_title | visuolink
+  visuotag     : ?visuotag (deprecated, для совместимости)
+
+  __construct(?visuorelease)
+      visuotag = new visuotag() — заглушка (не используется)
+      Лог в visuolog.
+
+  visuorelease() : ?visuorelease
+
+  ФАБРИКИ
+    title() : visuometa_title
+        new visuometa_title($this) + elements[] = ...
+        Лог.
+    link() : visuolink
+        new visuolink($this) + elements[] = ...
+        Лог.
+
+  clear() : $this        — elements = []
+  visuotag()             — deprecated, отдаёт заглушку
+  visuotag_set($vt)      — deprecated
+
+  as_tag() : visuotag
+      Создаёт НОВЫЙ visuotag, append'ит каждый element->as_tag().
+      Безопасно вызывать повторно (новое дерево каждый раз).
+
+class visuometa_title
+  visuometa : visuometa
+  content   : string = ''
+
+  __construct(visuometa)
+  back() : visuometa
+  data($content = '') : visuometa_title
+      Устанавливает содержимое <title>.
+  as_tag() : visuotag
+      visuotag->tag('title')->content($this->content)
+      ЭКРАНИРОВАНИЕ: НЕТ. content() в visuotag тоже не экранирует.
+      Если title пришёл от пользователя — потенциальный XSS.
+
+ЗАМЕЧАНИЯ
+1. visuometa НЕ хранит свой visuotag; as_tag() собирает каждый раз
+   с нуля. Это значит, что вставка meta в дерево делается
+   через append($meta->as_tag()) — как в visuotag::meta().
+2. visuolink (см. отдельный doc в sources/visuo/sources/visuolink.php)
+   — аналогичный класс для <link>/<script>. Здесь только фабрика.
+3. title()->data('x') — цепочка. back() возвращает обратно к
+   visuometa (например, добавить ещё один link).
+4. Нет экранирования content в <title>. Это фиксится в visuotag
+   или здесь.
+
+ПРИМЕР ИСПОЛЬЗОВАНИЯ
+  $meta = $main->visuorelease->meta();
+  $meta->clear();
+  $meta->title()->data('Page title');
+  $meta->link()->css('/media/main.css');
+  $meta->link()->js('/media/engine.js');
+
+  // позже в body()-рендерере:
+  $vt->append($meta->as_tag());
+
+================================================================
+СВОДКА
+================================================================
+  visuodata      — независимый data-контейнер (для visuostruct).
+                   Дублирует функционал visuoattrsdata, но с
+                   другим владельцем и слегка другой логикой.
+                   release() без htmlspecialchars — потенциальный XSS.
+
+  visuometa      — фабрика meta-элементов (title/link).
+  visuometa_title — <title>.
+  visuolink      — отдельный класс (см. следующий doc).
+
+  Обе структуры строят visuotag при вызове as_tag().
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+----------------------------------------------------------------
+  prev → 39_visuoattrs.txt
+  next → 41_visuolink.txt      (visuolink — meta link/css/js)
+  next → 42_visuoelement.txt   (legacy)
+  next → 43_visuoel.txt        (текущий API)
+  next → 44_visuorelease.txt
+  next → 45_visuostruct.txt

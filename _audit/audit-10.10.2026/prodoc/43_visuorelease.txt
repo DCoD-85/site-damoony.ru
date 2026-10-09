@@ -1,0 +1,324 @@
+================================================================
+43_VISUORELEASE — sources/visuo/sources/visuorelease.php
+Финальный рендер. Точка входа main::release() → render->release().
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/visuo/visuo.php (шаг 19, последний)
+РОЛЬ:
+  Финальный узел движка. Хранит:
+    - visuolog       — лог
+    - visuorender    — HTML-рендер
+    - settings       — настройки (язык, минификация)
+    - visuometa      — meta-теги
+    - visuotag       — рабочее дерево страницы
+    - visuotag_final — снимок после рендера (для отладки/повторного вывода)
+  Решает: отдавать HTML, AJAX или JSON (по структуре).
+
+ЖИЗНЕННЫЙ ЦИКЛ
+  main::logic()
+    → new visuorelease($main)
+        → init() → schemenone_init() — базовый каркас
+  ... алгоритм наполняет дерево через alliasglobal схемы ...
+  main::release()
+    → render::release()
+        → visuorelease::final()  или  ::final_ajax()
+
+================================================================
+1. СВОЙСТВА
+================================================================
+  main            : ?\main
+  visuolog        : visuolog
+  visuorender     : visuorender
+  settings        : visuorelease_settings
+
+  visuometa       : ?visuometa        — meta-контейнер
+  visuotag        : ?visuotag         — рабочее дерево страницы
+  visuotag_final  : ?visuotag         — снимок после рендера
+
+================================================================
+2. КОНСТРУКТОР
+================================================================
+__construct(?main $main = null, ?visuorelease_settings $settings = null)
+  visuolog    = new visuolog()                — без online-режима
+  visuorender = new visuorender()
+  settings    = $settings ?? new visuorelease_settings($this)
+
+  visuometa      = new visuometa($this)
+  visuotag       = new visuotag($this)
+  visuotag_final = new visuotag($this)
+
+  init()
+
+settings() : visuorelease_settings
+
+================================================================
+3. INIT — базовый каркас (schemenone_init)
+================================================================
+init() → schemenone_init()
+
+Строит в visuotag:
+  <!doctype>                                     (tag_closed=false)
+  <html class="cl_html">
+    <head class="cl_head">                       (return:false)
+    <body class="cl_body">                       (return:false — оставит html)
+  →root()
+
+ВАЖНО
+  Все теги создаются через `return: false`, чтобы вернуться
+  к родителю. То есть после init():
+    visuotag — корень
+      html — ребёнок
+        head — пустой
+        body — пустой
+  Курсор (текущий узел) возвращается на root() в конце.
+
+  Этот каркас — заглушка. Схемы (alliasscheme_*) ПЕРЕЗАПИСЫВАЮТ
+  дерево через visuotag_set() своим собственным body().
+
+================================================================
+4. ГЕТТЕРЫ / СЕТТЕРЫ
+================================================================
+meta() : ?visuometa
+  → visuometa
+
+visuotag() : visuotag
+  → visuotag->_body()  ||  visuotag
+  То есть возвращает узел <body>, если он есть; иначе — весь корень.
+  Аккуратнее: _body() = root()->find('body').
+
+visuotag_set(visuotag $visuotag) : $this
+  Заменяет рабочее дерево. Используется схемами (alliasscheme_*):
+  после build() своё дерево отдаётся сюда.
+
+visuotag_clear() : void
+  root()->clear() у обоих деревьев (visuotag и visuotag_final).
+  Используется в схемах при reload().
+
+================================================================
+5. FINAL — точка входа финального рендера
+================================================================
+final(bool $log = false, bool $debug = false) : void
+
+АЛГОРИТМ
+  1. $struct = main->visuostruct?->current()
+     — текущая структура (или null).
+
+  2. Если $struct !== null:
+       $type = $struct->return_type()
+       Если 'json':
+         header('Content-Type: application/json; charset=UTF-8')
+         print $struct->as_json()
+         return  ← выходим, HTML не рендерим
+       Если 'html':
+         if main->visuopage !== null:
+           main->visuopage->apply($struct)
+         # дальше — общий HTML-путь
+
+  3. HTML-путь (по умолчанию или для visuostruct_html):
+       debug_attach($log, $debug)
+       print visuorender->html($this->visuotag, $this->visuometa)
+       visuotag_final = visuotag   ← снимок
+
+РЕЖИМЫ
+  visuostruct_min   → return_type()='json' → JSON
+  visuostruct_ajax  → return_type()='json' → JSON
+  visuostruct_html  → return_type()='html' → HTML
+  null              → HTML
+
+ЗАМЕЧАНИЯ
+- visuorender->html() принимает дерево + meta. Собирает итоговый
+  HTML (head + meta + body).
+- Снимок visuotag_final делается ПОСЛЕ рендера — но, поскольку
+  visuorender::html() не мутирует дерево (только читает),
+  visuotag_final и visuotag фактически указывают на одно и то же.
+  Возможно, задумка была другая — например, хранить рендер-дерево
+  до вставки meta. Сейчас — фактически алиас.
+
+================================================================
+6. FINAL AJAX
+================================================================
+final_ajax(bool $log = false, bool $debug = false) : void
+  $html = visuotag->root()->find('html')
+  if $html !== null:
+    $html->data_add('ajax'      , true)
+    $html->data_add('ajax-init' , false)
+  final($log, $debug)
+
+РОЛЬ
+  Помечает <html> data-атрибутами, чтобы фронтовый JS знал:
+    <html data-ajax="true" data-ajax-init="false" ...>
+  Дальше — обычный final(), который отдаст HTML (или JSON).
+
+  Вызывается из render::release() если render__data->render_ajax === true.
+
+ЗАМЕЧАНИЯ
+- data-ajax-init = false — какая-то «вторая» инициализация. Точный
+  смысл без JS-кода не ясен. Возможно, JS на первой загрузке
+  выставляет true (после инициализации).
+- Если <html> не найден — просто вызывается final(). Тогда data-ajax
+  не выставится, что может сломать фронт.
+
+================================================================
+7. DEBUG — панель отладки
+================================================================
+private debug_attach(bool $log, bool $debug) : void
+
+ШАГ 1. Берёт body = visuotag->body().
+       Если body === null → return (некуда вставлять).
+
+ШАГ 2. Считает время:
+         $end    = microtime(true)
+         $start  = $GLOBALS['start'] ?? $end
+         $number = ($end - $start) * 1000
+       → миллисекунды от начала скрипта.
+
+ШАГ 3. Если $log===true ИЛИ $debug===true:
+         Строит <div class="debugging hidden">:
+           div.debug_head
+             div.debug_head_title  → 'Debugging'
+             div.debug_head_link   → Log | Debug
+             div.debug_head_time   → Nms (по клику toggle hidden)
+           div#debug_log.debug_log
+           div#debug_tree.debug_tree
+
+         Наполнение:
+           title  = 'Debugging'
+           link   = две ссылки (Log / Debug) с jQuery-toggler
+           time   = <N>ms, onclick toggle .debugging
+           log    = visuolog->as_tag()  (если log===true)
+           tree   = body->root()->releasetree()  (если debug===true)
+             (это тот самый visuotag::releasetree())
+
+         Наконец: body->find('div', class:'dt_debug')
+                   → если найден, append(deb)
+
+ШАГ 4. Если ни log, ни debug:
+         Только <div class="debugging_onlytime">Nms</div>
+         → append в dt_debug.
+
+ЗАМЕЧАНИЯ
+- $GLOBALS['start'] — из index.php: `$start = microtime(true)`.
+  В глобальной области это доступно как $GLOBALS['start'].
+  Работает, но неявно. Параллельно есть SCRIPTSTART_MT —
+  более явный источник. Можно было бы использовать его.
+- debug-панель вставляется в div.dt_debug (слот схемы).
+  Если схема не создала dt_debug — debug-панель не появится.
+- HTML панели захардкожен в visuotag. Inline-JS использует jQuery.
+- `releasetree()` — метод visuotag (см. 38) — выводит структуру
+  в виде текста с отступами.
+
+================================================================
+8. LEGACY-ЗАГЛУШКИ
+================================================================
+release_min(?visuostruct_min $struct = null, bool $min = true, bool $json = true) : void
+release_struct(?visuostruct_ajax $struct = null, bool $min = true, bool $json = true) : void
+  Обе пусты (тело {}).
+
+  Согласно комментарию автора:
+    «Алгоритмы пока зовут их, но больше они не нужны —
+     структура уже сохранена в visuostruct::current().»
+
+  То есть вызовы остались в алгоритмах (старый код), но
+  логика перенесена в final(). Кандидаты на удаление.
+
+================================================================
+9. ВЗАИМОДЕЙСТВИЕ С ДРУГИМИ СЛОЯМИ
+================================================================
+
+С СХЕМАМИ (alliasscheme_*)
+  Схема перезаписывает дерево через visuotag_set():
+    visuorelease->visuotag_clear()
+    ... строит дерево ...
+    visuorelease->visuotag_set($vt)
+  То есть схема предоставляет финальный HTML-каркас.
+
+С visuostruct
+  visuostruct->current() возвращает активную структуру
+  (html / ajax / min). return_type() решает JSON/HTML.
+
+С visuopage
+  Для структур типа 'html' вызывается visuopage->apply($struct).
+  Что именно применяет — см. отдельный doc (45).
+
+С visuorender
+  visuorender->html($visuotag, $visuometa) — финальный HTML.
+  См. 46.
+
+С visuolog
+  visuolog->as_tag() — дерево логов для debug-панели.
+
+С meta
+  visuometa->as_tag() собирается в visuorender::html() в <head>.
+
+================================================================
+10. ПОТОК РЕНДЕРА (сводно)
+================================================================
+  index.php → main::main()
+    → main::init()  → new visuorelease(main)  (в main::init)
+       → init() → schemenone_init()          ← базовый каркас
+    → main::logic()
+       → algoritm->start()
+         → alliasscheme->load('visuo')
+             → схема строит своё дерево
+             → visuorelease->visuotag_set(схема_дерево)
+         → algoritm->release()   (наполнение через alliasglobal)
+         → alliasscheme->reload()  (пересборка)
+    → main::release()
+       → scripts[*]->run()      (head, headers)
+       → render->release()
+         → visuorelease->final()  или  ->final_ajax()
+            → debug_attach()
+            → visuorender->html()
+            → print
+
+================================================================
+11. ЗАМЕЧАНИЯ / БАГИ
+================================================================
+1. visuotag_final не имеет отличий от visuotag — оба указывают
+   на то же дерево. Похоже на недоработку (или рудимент
+   старой идеи: хранить дерево ДО финального HTML).
+
+2. final() уже отрендерил HTML, но visuotag_final = visuotag
+   присваивается ПОСЛЕ print. Смысл присваивания неясен.
+
+3. release_min / release_struct — пустые. Их вызовы остались
+   в старом коде алгоритмов. По grep — надо проверить, кто зовёт.
+
+4. debug_attach() вычисляет $start из $GLOBALS['start'].
+   Если запуск не через index.php (CLI / тесты) — $GLOBALS['start']
+   не установлен, используется $end → Nms = 0.
+   Лучше: SCRIPTSTART_MT.
+
+5. Inline-JS в debug-панели использует jQuery и eval-подобные
+   строки — не идеально для CSP.
+
+6. final_ajax() сначала помечает <html>, потом final(). Если
+   final() в JSON-ветке (struct->return_type()='json') — 
+   пометка <html> не попадёт никуда (JSON без дерева).
+   Возможно, не критично, но семантически спорно.
+
+7. В конструкторе settings создаётся через
+   `new visuorelease_settings($this)` — принимает visuorelease
+   как контекст. Но внутри settings он не используется
+   (см. 41).
+
+8. visuotag() возвращает `_body() ?: visuotag`.
+   Если в дереве нет <body> — вернёт корень. Может ввести
+   в заблуждение: ожидание «вернуть body», а вернулось всё.
+
+9. init() вызывается в конструкторе. То есть сразу после
+   new visuorelease() дерево уже содержит каркас
+   <!doctype><html><head></head><body></body></html>.
+   Если схема не перезапишет дерево — на выходе будет пустая
+   страница без ошибок.
+
+================================================================
+СВЯЗАННЫЕ
+================================================================
+  prev → 42c_visuoel_parts.txt
+  prev → 41_visuolink_log_settings.txt   (settings, log, link)
+  prev → 40_visuodata_meta.txt           (visuometa)
+  next → 44_visuostruct.txt              (visuostruct + 3 подтипа)
+  next → 45_visuopage.txt
+  next → 46_visuorender.txt

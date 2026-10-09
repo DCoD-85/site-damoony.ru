@@ -1,0 +1,135 @@
+================================================================
+10_ALLIASBLOCK — alliasglobal/alliasblock.php
+База для всех глобальных блоков.
+================================================================
+
+namespace: damoony
+abstract class alliasblock
+
+РОЛЬ:
+  Родитель top/left/center/right/bottom/policy/debug.
+  Инкапсулирует:
+    - контекст (main, alliasglobal, visuorelease)
+    - data() → try_filler() → default_data()
+    - menu (alliasglobal_menu)
+    - wrapper (тег + атрибуты)
+    - sections (именованные visuotag)
+    - ленивая сборка через assemble() + dirty
+
+СВОЙСТВА
+----------------------------------------------------------------
+  alliasglobal     : alliasglobal     — контейнер
+  main             : main
+  visuorelease     : visuorelease
+  alliasglobal_name: string           — имя блока ('top', 'left', …)
+  allias_accepted  : string           — текущий аллиас
+  enabled          : bool = true      — блок включён
+  filler_enabled   : bool = true      — разрешена подмена filler'ом
+  filler           : ?object = null   — активный filler
+  menu             : ?alliasglobal_menu
+  wrapper_tag      : string
+  wrapper_attrs    : array
+  sections         : array
+  dirty            : bool
+  visuotag         : visuotag
+
+ЖИЗНЕННЫЙ ЦИКЛ
+----------------------------------------------------------------
+  __construct( alliasglobal )
+    → menu = new alliasglobal_menu(...)
+    → init()
+  init()
+    → algoritm()
+  algoritm()
+    if enabled === false → return
+    → data()
+    → assemble()
+  data()
+    if try_filler() → return
+    → default_data()
+  default_data()  — пустой (переопределяется потомком)
+
+FILLER — try_filler()
+----------------------------------------------------------------
+  1. filler_enabled === false → false
+  2. Читает main_settings:
+       $domain    = domain_real_name           ('damoony.ru')
+       $domain_ns = domain_accepted(false)     ('damoony')
+       $allias    = allias_real_name           ('visuo')
+  3. Проверяет конфиг:
+       fillers[domain][allias][alliasglobal_name] — истинно?
+  4. ReflectionClass → папка блока.
+     Путь: <dir>/<name>_<allias>.php
+     Класс: \<ns>\alliasglobal_<name>_<allias>
+  5. Ленивая инициализация $this->filler:
+       if filler === null:
+         is_file? include_once? class_exists? new $class($this)
+  6. Если у filler есть is_enabled() и он выключен → false
+  7. method_exists(filler, 'data') → filler->data()
+  8. return true
+
+  ВАЖНО: filler не сбрасывается при rebuild — сохраняется
+  решение runtime.
+
+СБОРКА — assemble()
+----------------------------------------------------------------
+  root = new visuotag
+  if wrapper_tag !== '':
+    wrapper = root->tag(wrapper_tag)
+    for attrs: wrapper->attrs_add(key, val)
+    parent = wrapper
+  else parent = root
+  for sections as vt: parent->append(vt)
+  visuotag = root
+  dirty = false
+
+SECTIONS API
+----------------------------------------------------------------
+  section_add($name, $vt)   → пишет в sections, dirty=true
+  section_get($name)        → ?visuotag
+  section_has($name)        → bool
+  section_remove($name)     → удаляет, dirty=true
+  section_names()           → array
+  sections_clear()          → []
+
+WRAPPER API
+----------------------------------------------------------------
+  wrapper_set($tag, $attrs = [])
+  wrapper_clear()
+
+SWITCHERS
+----------------------------------------------------------------
+  show() / hide()
+  set_enabled(bool)
+  set_filler_enabled(bool)
+
+REBUILD
+----------------------------------------------------------------
+  rebuild()
+    menu?->clear()
+    # filler НЕ сбрасывается
+    wrapper_tag = ''; wrapper_attrs = []
+    sections = []
+    visuotag = new
+    algoritm()
+
+ACCESSORS
+----------------------------------------------------------------
+  as_tag()    : visuotag
+    enabled=false → пустой visuotag->root()
+    dirty → assemble()
+    → visuotag->root()
+
+  visuotag()  : visuotag
+    то же, но возвращает сам visuotag (не root)
+
+ЗАМЕЧАНИЯ
+----------------------------------------------------------------
+1. try_filler() — `! include_once $path` вернёт false только
+   при первом включении с ошибкой. При повторном include_once
+   вернёт true, даже если файл уже был подгружен.
+   Надёжнее: require_once + class_exists.
+2. default_data() пустой, но required — каждый блок обязан
+   его переопределить, чтобы подключить свой data-файл.
+3. Если filler включается, default_data() НЕ вызывается.
+   Это принципиально: либо default, либо filler.
