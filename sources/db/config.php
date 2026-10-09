@@ -26,33 +26,40 @@ class db_config {
 			error_file( $this->path , __FILE__ , __LINE__ );
 			return;
 		}
-		
-		$xml = @simplexml_load_file( $this->path );
-		if ( $xml === false ) {
+
+		$json = @file_get_contents( $this->path );
+		if ( $json === false ) {
+			error( 'DB config error' , 'Cannot read ' . $this->path , __FILE__ , __LINE__ );
+			return;
+		}
+
+		$data = @json_decode( $json , true );
+		if ( ! is_array( $data ) || ! isset( $data[ 'bases' ] ) || ! is_array( $data[ 'bases' ] ) ) {
 			error( 'DB config error' , 'Cannot parse ' . $this->path , __FILE__ , __LINE__ );
 			return;
 		}
-		
-		foreach ( $xml->base as $base ) {
-			$disabled = strtolower( (string) $base[ 'disabled' ] );
-			if ( $disabled === 'true' ) continue;
-			
+
+		foreach ( $data[ 'bases' ] as $base ) {
+			if ( ! is_array( $base ) ) continue;
+			if ( ! empty( $base[ 'disabled' ] ) ) continue;
+
 			$row = new db_config_row( $this );
-			$row->localname = (string) $base->localname;
-			$row->dbname    = (string) $base->dbname;
-			$row->dbhost    = (string) $base->dbhost;
-			$row->username  = (string) $base->username;
-			$row->password  = (string) $base->password;
-			$row->comment   = (string) $base->comment;
-			
+			$row->localname = (string) ( $base[ 'localname' ] ?? '' );
+			$row->dbname    = (string) ( $base[ 'dbname' ]    ?? '' );
+			$row->dbhost    = (string) ( $base[ 'dbhost' ]    ?? '' );
+			$row->username  = (string) ( $base[ 'username' ]  ?? '' );
+			$row->password  = (string) ( $base[ 'password' ]  ?? '' );
+			$row->comment   = (string) ( $base[ 'comment' ]   ?? '' );
+
+			if ( $row->localname === '' ) continue;
+
 			$this->rows[ $row->localname ] = $row;
-			
-			if ( strtolower( (string) $base[ 'default' ] ) === 'true' ) {
+
+			if ( ! empty( $base[ 'default' ] ) ) {
 				$this->default = $row;
 			}
 		}
-		
-		# if no default declared - first row
+
 		if ( $this->default === null && ! empty( $this->rows ) ) {
 			$this->default = reset( $this->rows );
 		}
