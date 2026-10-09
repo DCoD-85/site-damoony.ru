@@ -10,111 +10,65 @@ class algoritm_lang_index
 	public bool  $search    = true;
 	public bool  $default   = true;
 
-	# ---------------------------------------------------------------
-	#   RELEASE
-	# ---------------------------------------------------------------
 	public function release ( ) {
 		$default = $this->is_default( );
-
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-
 		$this->release_( $this );
 	}
 
-	# ---------------------------------------------------------------
-	#   GUEST
-	# ---------------------------------------------------------------
-	public function guest ( ) {
-		$main = $this->main;
+	public function guest ( )  { return $this->render( ); }
+	public function logged ( ) { return $this->render( ); }
 
-		# ------------------------------------------------------
-		#   POST → JSON min
-		# ------------------------------------------------------
+	private function render ( ) {
+		$main = $this->main;
+		$lang = $main->language;
+
+		$main->alliasglobal->head->title(
+			$lang->get( 'WWW_TITLE' , [ ] , 'www' ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
+		);
+
+		$center = $main->alliasglobal->center;
+
+		# --- POST: JSON min ---
 		if ( $this->is_post( ) ) {
 			$struct = $main->visuostruct->min( );
 			$struct->error( )->set( false );
 
-			$name = (string) ( $_POST[ 'name' ] ?? '' );
+			$name = trim( (string) ( $_POST[ 'name' ] ?? '' ) );
 
 			$messages = $main->messages;
-			$messages->add( 'success' , 'OK' , 'Hello, ' . $name. '!' );
+			$messages->add( 'success' , 'OK' , 'Hello, ' . htmlspecialchars( $name , ENT_QUOTES ) . '!' );
 			$struct->messages( )->set( $messages->as_tag( ) );
-			$struct->release( )->set( null );
 
 			return true;
 		}
 
-		# ------------------------------------------------------
-		#   GET → HTML через visuoel
-		# ------------------------------------------------------
+		# --- GET: HTML через visuoel ---
 		$ve = new \visuoel( );
 
-		# корневая форма
 		$form = $ve->form( )->form( );
 		$form->data( )->set(
-			'test_form' ,             # name="test_form"
-			'post' ,                  # method="post"
-			'' ,                      # action — пусто = текущий URL
-			form_jquery : true        # data-form-jquery + data-load
+			'test_form' ,
+			'post' ,
+			'' ,
+			form_jquery : true
 		);
 
-		# поле name
 		$field_name = new \visuoel_field_text( );
-		$field_name->data( )->set( 'name' )->placeholder( 'Ваше имя' );
+		$field_name->data( )->set( 'name' )->placeholder( 'Ваше имя' )->label( 'Имя' );
 		$form->add( $field_name );
 
-		# кнопка submit
 		$btn = new \visuoel_field_submit( );
 		$btn->data( )->text( 'Отправить' );
 		$form->add( $btn );
-		
-		$vt = new \visuotag( );
-
-		# вставка в центр страницы
-		$main->alliasglobal->head->title( 'TEST TITLE' );
-		$main->alliasglobal->center->visuotag( )->el( $ve );
-		$main->alliasglobal->right->override( $vt );
-
-		$bottom = $main->alliasglobal->bottom;
-		$bottom->copyright = 'ООО «Ромашка» &copy; 2026';
-		$bottom->agreement_href = '/policy/full';
-		$bottom->reload( );
-		
-		return true;
-	}
-
-	# ---------------------------------------------------------------
-	#   LOGGED
-	# ---------------------------------------------------------------
-	public function logged ( ) {
-		$main = $this->main;
-		$center = $main->alliasglobal->center;
 
 		$vt = new \visuotag( );
-
-		if ( $this->is_post( ) ) {
-			$name = (string) ( $_POST[ 'name' ] ?? '' );
-
-			$vt->tag( 'div' , class : 'result' )
-				->content( 'Logged POST: ' . htmlspecialchars( $name , ENT_QUOTES ) );
-		} else {
-			$form = $vt->tag( 'form' , class : 'mini_form' );
-			$form->attrs_add( 'method' , 'post' );
-
-			$inp = $form->tag( 'input' );
-			$inp->attrs_add( 'type' , 'text' );
-			$inp->attrs_add( 'name' , 'name' );
-			$inp->attrs_add( 'placeholder' , 'Ваше имя' );
-
-			$btn = $form->tag( 'button' );
-			$btn->attrs_add( 'type' , 'submit' );
-			$btn->content( 'Отправить' );
-		}
+		$vt->tag( 'h1' )->content( 'Эталонный аллиас www' );
+		$vt->tag( 'p' )->content( 'Одна страница — lang/index. Форма ниже — пример работы с visuoel.' );
+		$vt->el( $ve );
 
 		$center->visuotag( )->append( $vt );
 
 		return true;
 	}
 }
-
-?>

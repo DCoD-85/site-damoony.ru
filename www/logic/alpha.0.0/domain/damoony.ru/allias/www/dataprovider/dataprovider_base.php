@@ -7,15 +7,17 @@ abstract class dataprovider_base {
 	public \main $main;
 	public dataprovider $facade;
 
+	# --- state ---
+	protected string $localname = 'www_damoony';
+
 	# --- methods ---
 	public function __construct ( dataprovider $facade ) {
 		$this->facade = $facade;
 		$this->main   = $facade->main;
 	}
 
-	protected function query ( string $db_name ) : \db_query {
-		$db = $this->main->db->db( );
-		$db->open( $db_name );
-		return $db->query( );
+	protected function query ( string $sql , array $params = [ ] ) : \db_query_interface {
+		$this->main->db->open( $this->localname );
+		return $this->main->db->query( $sql , $params );
 	}
 }

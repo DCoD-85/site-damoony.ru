@@ -7,8 +7,7 @@ class dataprovider {
 	public \main $main;
 
 	# --- providers ---
-	public null|dataprovider_news     $news     = null;
-	public null|dataprovider_feedback $feedback = null;
+	public null|dataprovider_test $test = null;
 
 	# --- methods ---
 	public function __construct ( \main $main ) {
@@ -19,11 +18,9 @@ class dataprovider {
 	private function autoload ( ) : void {
 		$base = __DIR__ . DS;
 
-		( include_once $path = $base . 'dataprovider_base.php'     ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = $base . 'dataprovider_news.php'     ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = $base . 'dataprovider_feedback.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = $base . 'dataprovider_base.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = $base . 'dataprovider_test.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
-		$this->news     = new dataprovider_news( $this );
-		$this->feedback = new dataprovider_feedback( $this );
+		$this->test = new dataprovider_test( $this );
 	}
 }
