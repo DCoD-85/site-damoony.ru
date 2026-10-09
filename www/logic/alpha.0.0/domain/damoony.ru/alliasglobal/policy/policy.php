@@ -68,7 +68,7 @@ class alliasglobal_policy extends alliasblock {
 	}
 
 	# ===============================================================
-	#   ТЕКСТ + ФОРМА
+	#   ТЕКСТ + ФОРМА (на visuoel)
 	# ===============================================================
 
 	private function make_confidence_form ( ) : \visuotag {
@@ -82,48 +82,55 @@ class alliasglobal_policy extends alliasblock {
 
 		$vt_confidence = $this->make_confidence_text( );
 
-		$ve_input_checkbox = new \visuoelement( $this->visuorelease );
-		$ve_input_checkbox->input( )->checkbox( $d1 = new \visuoelement_input_checkbox__data( ) );
-		$d1->set( 'form[read]' , label : '' , label_comment : '' , text : 'Я внимительно прочитал условия соглашения' );
+		# --- корень visuoel ---
+		$ve = new \visuoel( );
 
-		$ve_input_checkbox_pd = new \visuoelement( $this->visuorelease );
-		$ve_input_checkbox_pd->input( )->checkbox( $d2 = new \visuoelement_input_checkbox__data( ) );
-		$d2->set( 'form[get]' , label : '' , label_comment : '' , text : 'Я даю право на обработку персональных данных' );
-
-		$ve_input_checkbox_confirm = new \visuoelement( $this->visuorelease );
-		$ve_input_checkbox_confirm->input( )->checkbox( $d3 = new \visuoelement_input_checkbox__data( ) );
-		$d3->set( 'form[accept]' , label : '' , label_comment : '' , text : 'Я соглашаюсь с условиями пользовательского соглашения' );
-
-		$ve_input_submit = new \visuoelement( $this->visuorelease );
-		$ve_input_submit->input( )->submit( $ds = new \visuoelement_input_submit__data( ) );
-		$ds->set( 'form[submit]' , 'Принять' );
-
-		$ve_input_cancel = new \visuoelement( $this->visuorelease );
-		$ve_input_cancel->input( )->button( $dc = new \visuoelement_input_button__data( ) );
-		$dc->set( 'form[cancel]' , 'Отказаться' );
-
-		$ve_table = new \visuoelement( $this->visuorelease );
-		$ve_table->table( )->table( $dt = new \visuoelement_table_table__data( ) );
-		$dt->add_tbody( [ $vt_confidence ] , colspan : [ 2 ] );
-		$dt->add_tfoot( [ [ $ve_input_checkbox ]         , [ ] ] , colelsinline : [ false , true ] );
-		$dt->add_tfoot( [ [ $ve_input_checkbox_pd ]      , [ ] ] , colelsinline : [ false , true ] );
-		$dt->add_tfoot( [ [ $ve_input_checkbox_confirm ] , [ $ve_input_submit ] ] , colelsinline : [ false , true ] );
-
-		$ve_form = new \visuoelement( $this->visuorelease );
-		$ve_form->form( )->form( $df = new \visuoelement_form_form__data( ) );
-		$df->set(
+		# --- форма ---
+		$form = $ve->form( )->form( );
+		$form->data( )->set(
 			'form' ,
 			'post' ,
 			$link->href( [ 'www' , $url_allias[ 0 ] ] , [ $url_base[ 0 ] , 'policy' , 'agreement' ] ) ,
 			form_jquery : true
 		);
 
-		$ve_form->get_form_form__data( )->add( $ve_table );
-		$ve_form->get_form_form__data( )->init( );
+		# --- текст соглашения (visuotag прямо в форму) ---
+		$form->add( $vt_confidence );
 
+		# --- чекбокс: прочитал ---
+		$cb = $ve->field( )->checkbox( );
+		$cb->data( )
+			->set( 'form[read]' )
+			->label( 'Я внимительно прочитал условия соглашения' );
+		$form->add( $cb );
+
+		# --- чекбокс: обработка ПД ---
+		$cb = $ve->field( )->checkbox( );
+		$cb->data( )
+			->set( 'form[get]' )
+			->label( 'Я даю право на обработку персональных данных' );
+		$form->add( $cb );
+
+		# --- чекбокс: согласие ---
+		$cb = $ve->field( )->checkbox( );
+		$cb->data( )
+			->set( 'form[accept]' )
+			->label( 'Я соглашаюсь с условиями пользовательского соглашения' );
+		$form->add( $cb );
+
+		$btn = new \visuoel_field_submit( $form );
+		$btn->data( )->set( 'form[submit]' );
+		$btn->data( )->text( 'Принять' );
+		$form->add( $btn );
+
+		$btn = new \visuoel_field_button( $form );
+		$btn->data( )->set( 'form[cancel]' );
+		$btn->data( )->text( 'Отказаться' );
+		$form->add( $btn );
+
+		# --- обёртка ---
 		$vt = new \visuotag( );
-		$vt->tag( 'div' , class : 'policy_confidence_inner' )
-			->element( 'form' , $ve_form );
+		$vt->tag( 'div' , class : 'policy_confidence_inner' )->el( $ve );
 
 		return $vt->root( );
 	}
