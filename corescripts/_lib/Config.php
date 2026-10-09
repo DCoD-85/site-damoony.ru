@@ -42,6 +42,37 @@ class Config {
 		return true;
 	}
 
+		# --- array-key API (без парсинга точек) ---
+
+	public function hasKeys ( array $keys ) : bool {
+		$ref = $this->data;
+		foreach ( $keys as $k ) {
+			if ( ! is_array( $ref ) || ! array_key_exists( $k , $ref ) ) return false;
+			$ref = $ref[ $k ];
+		}
+		return true;
+	}
+
+	public function getKeys ( array $keys , mixed $default = null ) : mixed {
+		$ref = $this->data;
+		foreach ( $keys as $k ) {
+			if ( ! is_array( $ref ) || ! array_key_exists( $k , $ref ) ) return $default;
+			$ref = $ref[ $k ];
+		}
+		return $ref;
+	}
+
+	public function setKeys ( array $keys , mixed $value ) : void {
+		$ref = &$this->data;
+		foreach ( $keys as $k ) {
+			if ( ! isset( $ref[ $k ] ) || ! is_array( $ref[ $k ] ) ) {
+				$ref[ $k ] = [ ];
+			}
+			$ref = &$ref[ $k ];
+		}
+		$ref = $value;
+	}
+
 	public function set ( string $path , mixed $value ) : void {
 		$keys = explode( '.' , $path );
 		$ref  = &$this->data;

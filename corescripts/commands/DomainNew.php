@@ -103,6 +103,94 @@ class DomainNew {
 			$ctx?->step( 'Синтаксис PHP' , true , 'все файлы OK' );
 		}
 
+		# 6. регистрация в site.config (по флагу --register)
+		if ( ! empty( $params[ 'register' ] ) ) {
+			self::register( $r , $domain , $ns , $ctx );
+		}
+
 		return $r;
+	}
+	
+	# ============================================================
+	#   REGISTER — регистрация домена в site.config
+	# ============================================================
+
+	private static function register ( Result $r , string $domain , string $ns , ?Context $ctx = null ) : void {
+		$path = PROJECT_ROOT . '/config/site.config';
+
+		try {
+			$cfg = new Config( $path );
+		} catch ( Throwable $e ) {
+			$r->error( "Не открыть site.config: " . $e->getMessage( ) );
+			return;
+		}
+
+		# --- 1. domains_real ---
+		if ( ! $cfg->hasKeys( [ 'domains_real' , $domain ] ) ) {
+			$cfg->setKeys( [ 'domains_real' , $domain ] , $domain );
+			$r->step( 'site.config: domains_real' , true , $domain );
+			$ctx?->step( 'site.config: domains_real' , true , $domain );
+		} else {
+			$r->warn( "domains_real.{$domain} уже есть — пропускаю" );
+		}
+
+		# --- 2. domains_available ---
+		if ( ! $cfg->hasKeys( [ 'domains_available' , $domain ] ) ) {
+			$cfg->setKeys( [ 'domains_available' , $domain ] , true );
+			$r->step( 'site.config: domains_available' , true , $domain );
+			$ctx?->step( 'site.config: domains_available' , true , $domain );
+		}
+
+		# --- 3. domains_namespace ---
+		if ( ! $cfg->hasKeys( [ 'domains_namespace' , $domain ] ) ) {
+			$cfg->setKeys( [ 'domains_namespace' , $domain ] , $ns );
+			$r->step( 'site.config: domains_namespace' , true , $ns );
+			$ctx?->step( 'site.config: domains_namespace' , true , $ns );
+		}
+
+		# --- 4. alliases_real ---
+		if ( ! $cfg->hasKeys( [ 'alliases_real' , $domain ] ) ) {
+			$cfg->setKeys( [ 'alliases_real' , $domain ] , [
+				''    => 'www' ,
+				'www' => 'www' ,
+			] );
+			$r->step( 'site.config: alliases_real' , true , 'www' );
+			$ctx?->step( 'site.config: alliases_real' , true , 'www' );
+		}
+
+		# --- 5. alliases_available ---
+		if ( ! $cfg->hasKeys( [ 'alliases_available' , $domain ] ) ) {
+			$cfg->setKeys( [ 'alliases_available' , $domain ] , [
+				'www' => true ,
+			] );
+			$r->step( 'site.config: alliases_available' , true , 'www' );
+			$ctx?->step( 'site.config: alliases_available' , true , 'www' );
+		}
+
+		# --- 6. fillers ---
+		if ( ! $cfg->hasKeys( [ 'fillers' , $domain ] ) ) {
+			$cfg->setKeys( [ 'fillers' , $domain ] , [
+				'www' => [
+					'top'    => false ,
+					'left'   => false ,
+					'center' => false ,
+					'right'  => false ,
+					'bottom' => false ,
+					'policy' => false ,
+					'debug'  => false ,
+				] ,
+			] );
+			$r->step( 'site.config: fillers' , true , 'www' );
+			$ctx?->step( 'site.config: fillers' , true , 'www' );
+		}
+
+		# --- save ---
+		try {
+			$cfg->save( );
+			$r->step( 'site.config сохранён' , true , 'backup: site.config.bak' );
+			$ctx?->step( 'site.config сохранён' , true , 'backup: site.config.bak' );
+		} catch ( Throwable $e ) {
+			$r->error( "Не сохранить site.config: " . $e->getMessage( ) );
+		}
 	}
 }
