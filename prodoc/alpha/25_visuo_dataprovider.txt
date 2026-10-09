@@ -1,0 +1,211 @@
+================================================================
+25_VISUO_DATAPROVIDER — allias/visuo/dataprovider/*
+Фасад данных аллиаса visuo. 8 файлов.
+================================================================
+
+namespace: damoony\visuo
+ПОДКЛЮЧАЕТСЯ ИЗ: \damoony\dataprovider::autoload() при сканировании
+                 allias/*/dataprovider/dataprovider.php
+РОЛЬ: Единая точка доступа к данным visuo. Оборачивает SQL
+      за методами-аксессорами.
+
+ИЕРАРХИЯ
+  \damoony\dataprovider         (внешний фасад домена)
+    → \damoony\visuo\dataprovider         (фасад аллиаса)
+      → dataprovider_base                 (abstract)
+        → dataprovider_user
+        → dataprovider_doc
+        → dataprovider_news
+        → dataprovider_files
+        → dataprovider_stats
+        → dataprovider_audit
+
+================================================================
+A. dataprovider.php — фасад аллиаса
+================================================================
+СВОЙСТВА
+  main
+  user  (?dataprovider_user)
+  doc   (?dataprovider_doc)
+  news  (?dataprovider_news)
+  files (?dataprovider_files)
+  stats (?dataprovider_stats)
+  audit (?dataprovider_audit)
+
+МЕТОДЫ
+  __construct( \main ) → autoload()
+  autoload()  — include всех dp-файлов + new каждого
+
+ИСПОЛЬЗОВАНИЕ
+  $main->dataprovider->current->doc->article_by_slug(...)
+  $main->dataprovider->visuo->doc->...
+  $main->dataprovider->current->user->by_login(...)
+
+================================================================
+B. dataprovider_base.php
+================================================================
+abstract class dataprovider_base
+
+СВОЙСТВА
+  main        : \main
+  facade      : dataprovider     (обратная ссылка на visuo-фасад)
+  localname   : string = 'visuo_damoony'    — имя БД
+
+МЕТОДЫ
+  __construct( dataprovider $facade )
+  query($sql, $params) : \db_query_interface
+      $main->db->open(localname)
+      $main->db->query($sql, $params)
+      → объект с методами row() / result() / affected() / insert_id()
+
+КОНВЕНЦИЯ
+  Плейсхолдеры в SQL: %s / %d — подставляются параметрами.
+  Каждый метод-аксессор делает query(...)->row() / ->result().
+
+================================================================
+C. dataprovider_user.php
+================================================================
+ТАБЛИЦЫ: users, roles, user_roles, sessions, login_attempts
+
+AUTH
+  by_login($login) : array       (users)
+  by_id($id) : array
+  exists($login) : bool
+  create($login, $hash, $email, $display_name = '') : int
+  touch_login($id) : void
+
+ROLES
+  roles($user_id) : array
+  has_role($user_id, $code) : bool
+  assign_role($user_id, $code) : void
+
+SESSIONS
+  session_create($uid, $token, $ip, $ua, $ttl = 30d) : int
+  session_find($token) : array
+  session_drop($token) : void
+  session_cleanup() : int
+
+PROFILE
+  update_timezone($uid, $tz) : void
+  update_lang($uid, $lang) : void
+  update_password_hash($uid, $hash) : void
+  profile_full($uid) : array
+
+LOGIN ATTEMPTS
+  record_login_attempt($login, $ip, $success) : void
+  check_bruteforce($login, $ip, $max=5, $min=15) : bool
+  login_attempts_cleanup($days=1) : int
+
+================================================================
+D. dataprovider_doc.php
+================================================================
+ТАБЛИЦЫ: doc_sections, doc_articles, doc_versions
+
+SECTIONS
+  section_by_slug / section_by_id
+  sections_tree(bool $only_published = true)
+  sections_children($parent_id)
+
+ARTICLES
+  article_by_slug / article_by_id
+  articles_by_section($section_id, $only_published = true)
+  articles_recent($limit = 10)
+  article_create(array) : int
+  article_update($id, array) : void
+  article_publish($id) : void
+
+VERSIONS
+  versions($article_id) : array
+  version_create($article_id, array) : int
+  version_by_id($version_id) : array
+
+SEARCH
+  search($query, $limit = 20) — FULLTEXT MATCH/AGAINST
+      (требует FULLTEXT-индекса на title, content_md)
+
+================================================================
+E. dataprovider_news.php
+================================================================
+ТАБЛИЦА: news
+WHITELIST WRITABLE (const) — только эти поля разрешены к записи:
+  slug, title, excerpt, content_md, content_html, status,
+  author_id, lang, published_at
+
+READ
+  recent($limit = 10, $lang = 'ru-ru')
+  by_slug($slug, $lang = 'ru-ru')
+  by_id($id)
+  slug_exists($slug, $lang, $exclude_id = 0)
+
+WRITE
+  create(array) : int   (filter_writable)
+  update($id, array)    (filter_writable)
+  publish($id)          — status='published', published_at=NOW()
+  archive($id)          — status='archived'
+  delete($id)
+
+ЗАМЕЧАНИЯ
+- filter_writable() отсекает всё, чего нет в WHITELIST.
+- Публикация не устанавливает автора автоматически.
+
+================================================================
+F. dataprovider_files.php
+================================================================
+ТАБЛИЦЫ: files, file_downloads
+
+READ
+  all_active()
+  by_slug($slug) / by_id($id)
+
+WRITE
+  create(array) : int
+  update_filesize($id, $filesize)
+  set_status($id, $status)   — только active | hidden
+  delete($id)
+
+DOWNLOADS
+  increment_downloads($file_id, ?$user_id, $ip)
+      → INSERT в file_downloads + UPDATE files.downloads+1
+  downloads_stats($file_id, $days = 30)
+  downloads_total($file_id) : int
+
+================================================================
+G. dataprovider_stats.php
+================================================================
+ТАБЛИЦА: doc_views
+
+  view_log($article_id, ?$user_id, $ip, $ua) : int
+      (ua обрезается до 255 символов)
+  views_count($article_id) : int
+  views_total() : int
+  views_recent($days = 7) : int
+  top_articles($limit = 10, $days = 30) : array
+      JOIN doc_articles / doc_views
+
+================================================================
+H. dataprovider_audit.php
+================================================================
+ТАБЛИЦА: audit_log
+
+  log($user_id, $action, $entity_type='', $entity_id=null,
+      $payload = [], $ip='') : int
+      payload → json_encode
+  recent($limit = 50) : array   (с JOIN users для login)
+  by_entity($type, $id, $limit = 100)
+  by_user($uid, $limit = 100)
+
+================================================================
+ЗАМЕЧАНИЯ ОБЩИЕ
+================================================================
+1. Все методы открывают БД через query() — без кэша открытия.
+   db->open() должен быть идемпотентным.
+2. query-параметры передаются массивом; SQL-шаблоны используют
+   %s / %d. Экранирование — на стороне db.
+3. Единая БД для всех: 'visuo_damoony'.
+4. dataprovider_doc::search() требует FULLTEXT-индекса, иначе SQL-ошибка.
+
+================================================================
+СВЯЗАННЫЕ
+  prev → 09_dataprovider.txt        (фасад домена)
+  prev → 22_visuo_user.txt          (visuo\user использует dp->user)
+  next → 26_alliasscheme.txt

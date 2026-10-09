@@ -1,55 +1,133 @@
-ALPHA 0.0 — карта домена damoony.ru
-===================================
+================================================================
+00_OVERVIEW — Alpha 0.0 — карта домена damoony.ru
+================================================================
+Обновлено: после рефакторинга filler'ов + удаления subalgoritm.
+================================================================
 
-Слои (снизу вверх):
+СЛОИ (снизу вверх)
+================================================================
 
-  1. main (www/main.php)
-     - main_settings  (конфиг site.config)
-     - library        (url, link, language, user)
-     - visuorelease   (рендер, meta, visuotag-контекст)
+1. main (www/main.php)
+   main_settings  — config/site.config, render.config, lang.config, db.secure
+   main_path      — URL
+   library        — url, link, language, user
+   visuorelease   — рендер, meta, visuotag-контекст
+   visuostruct / visuolog
+   db / user / language / messages / ...
 
-  2. domain (domain.php)
-     - domaininfo     (имя домена, история)
-     - подключает <domain>/allias.php, alliaslocal.php,
-       alliasglobal.php, alliasscheme.php, dataprovider.php
+2. domain (domain.php)
+   domaininfo     — имя домена + история
+   подключает:
+     <domain>/allias.php
+     <domain>/alliaslocal.php
+     <domain>/alliasglobal.php
+     <domain>/alliasscheme.php
+     <domain>/dataprovider.php
+   domainglobal   — пустышка (см. 04)
 
-  3. allias (allias.php)
-     - alliasinfo     (имя аллиаса, история)
-     - по имени аллиаса подключает <allias>/include.php
+3. allias (allias.php)
+   alliasinfo
+   подключает <allias>/include.php
 
-  4. alliaslocal (alliaslocal.php)
-     - local-блоки: top, bottom, ...   → <alliaslocal>/<name>.php
+4. alliaslocal (alliaslocal.php)
+   top, bottom (left/right/center — закомментированы)
 
-  5. alliasglobal (alliasglobal.php)
-     - глобальные блоки: policy, top, left, center, right, bottom, debug
-     - скрипты: headers, head  (не-визуальные, вызываются из main::release)
-     - меню: alliasglobal_menu / alliasglobal_menu_row
-     - база блока: alliasblock
-     - filler'ы: <block>/<block>_<allias>[.data].php + трейт
+5. alliasglobal (alliasglobal.php)
+   Блоки: top, left, center, right, bottom, policy, debug
+   Скрипты: headers, head  (не-визуальные)
+   Меню: alliasglobal_menu, alliasglobal_menu_row
+   База блока: alliasblock
+   База скрипта: alliasglobalscript
+   Трейт filler'а: alliasglobal_filler_trait
 
-  6. alliasscheme (alliasscheme.php)
-     - схемы аллиасов: login, error, min, www, visuo
-     - load()/reload() по имени схемы
+6. alliasscheme (alliasscheme.php)
+   Схемы: login, error, min, www, visuo
+   Каждая — «движок» body + meta + слоты dt_*
+   load() / reload()
 
-  7. dataprovider (dataprovider.php + <allias>/dataprovider/)
-     - фасад домена, держит фасады аллиасов
-     - $main->dataprovider->current → текущий аллиас
-     - $main->dataprovider-><allias> → явный доступ
+7. dataprovider (dataprovider.php + <allias>/dataprovider/)
+   Фасад домена → фасады аллиасов → базы данных.
 
-Поток:
-  main → domain → allias → alliasglobal (+ alliasscheme)
-                          + alliaslocal
-                          + dataprovider (по запросу)
+8. algoritm (allias/<a>/algoritm/*)
+   Фреймворк роутинга URL → классы страниц.
+   algoritm_ (база), algoritmdata_ (пакет параметров).
+   visuo/algoritm/algoritm.php — корневой алгоритм аллиаса.
+   algoritm_lang_* — страницы.
 
-Конвенции:
-  - <name>.php        — тонкий класс
-  - <name>.data.php   — данные (include из класса)
-  - <name>_<allias>.php       — filler аллиаса
-  - <name>_<allias>.data.php  — данные filler'а
-  - namespace damoony\<domain>
-  - пути через __DIR__ . DS . ...
+9. user (allias/visuo/user.php и т.п.)
+   Замена базового $main->user на allias-специфичную версию.
+   Работает через dataprovider_user.
 
-См. также:
-  - 02_allias.txt        — состав аллиасов
-  - 03_alliasglobal.txt  — состав глобальных блоков
-  - 99_fillers.txt       — конвенция filler'ов
+ПОТОК
+================================================================
+  index.php
+    → constants.php + included.php
+    → main.php (main_settings + main)
+    → main->main() = path → init → logic → savedata → release
+      init    : подсистемы, language, logic_ver, user->authorized
+      logic   : domain → domainglobal → dataprovider →
+                allias → alliaslocal → alliasglobal → alliasscheme →
+                algoritm(algoritm->clear/start/debug)
+      release : scripts->run() → render->release()
+
+КОНВЕНЦИИ ФАЙЛОВ
+================================================================
+  <name>.php              — тонкий класс
+  <name>.data.php         — данные (include из класса)
+  <name>_<allias>.php     — filler аллиаса (тонкий)
+  <name>_<allias>.data.php — данные filler'а
+  _template_block.php     — эталон блока
+  _template_script.php    — эталон скрипта
+  include.php             — точка входа аллиаса
+  algoritm/<page>.php     — страничный алгоритм
+
+FILLER'Ы (alliasglobal)
+================================================================
+Включаются через main_settings->fillers:
+  fillers[<domain>][<allias>][<block>] = true
+Если true — ищется <block>/<block>_<allias>.php + data.
+Если false/нет — работает <block>.data.php.
+
+Реализованные filler'ы: top/left/center/right/bottom/policy/debug
+для allias visuo и www.
+
+ДОКУМЕНТАЦИЯ (prodoc/alpha/)
+================================================================
+  00_overview.txt           ← этот файл (карта)
+  01_index.txt              www/index.php
+  02_bootstrap.txt          constants.php + included.php
+  03_main.txt               main.php + main_settings + main_path
+  04_domain.txt             domain.php + domainglobal.php
+  05_allias.txt             allias.php + alliasinfo
+  06_alliasglobal.txt       alliasglobal.php
+  07_alliasscheme.txt       alliasscheme.php
+  08_alliaslocal.txt        alliaslocal.php
+  09_dataprovider.txt       dataprovider.php (фасад домена)
+  10_alliasblock.txt        alliasblock.php
+  11_scripts_trait.txt      alliasglobalscript.php + filler_trait
+  12_menu.txt               menu.php + menu_row.php
+  13_templates.txt          _template_block + _template_script
+  14_scripts.txt            script/headers.php + script/head.php
+  15_blocks_top_left.txt    блоки top, left
+  16_blocks_center_right.txt блоки center, right
+  17_blocks_bottom_policy_debug.txt блоки bottom, policy, debug
+  18_visuo_include.txt      visuo/include.php
+  19_algoritm_base.txt      algoritm_ + algoritmdata_
+  20_visuo_algoritm.txt     visuo/algoritm/* (корень + auth + error + шаблон)
+  21_visuo_helpers.txt      visuo/helpers.php
+  22_visuo_user.txt         visuo/user.php
+  23_visuo_lang.txt         visuo/algoritm/lang/* (13 страниц)
+  25_visuo_dataprovider.txt visuo/dataprovider/* (8 файлов)
+  26_alliasscheme.txt       alliasscheme/* (5 схем)
+
+СЛЕДУЮЩИЕ ШАГИ
+================================================================
+  - миграция остальных filler'ов (bottom_login, bottom_football, ...)
+  - prodoc: 27_www_algoritm.txt, 28_login_algoritm.txt
+  - правка движка visuo: visuoelement.php:201, table.php:210-213
+  - тесты на боевом
+
+УДАЛЕНО
+================================================================
+  allias/{login,visuo,www}/subalgoritm/
+    — неиспользуемый ранний прототип (см. коммит efecc21)
