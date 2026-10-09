@@ -7,7 +7,6 @@ use \algoritm_;
 use \algoritmdata_;
 use \visuotag;
 use \visuorelease;
-use \visuoelement;
 
 class algoritm_auth
 	extends algoritm_ {

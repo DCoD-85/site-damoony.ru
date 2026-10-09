@@ -6,7 +6,6 @@ use \main;
 use \algoritm_;
 use \algoritmdata_;
 use \visuotag;
-use \visuoelement;
 
 class algoritm_error
 	extends algoritm_ {
