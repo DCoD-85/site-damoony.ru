@@ -1,0 +1,349 @@
+================================================================
+38_VISUOTAG — sources/visuo/sources/visuotag.php
+Ядро HTML-билдинга. Дерево тегов с цепочками, слотами, хуками.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/visuo/visuo.php (шаг 4)
+РОЛЬ: универсальный построитель HTML-дерева. Цепочки вызовов,
+      attrs, data-*, хуки для visuostruct / visuoelement / visuoel,
+      debug-дерево, финальный release.
+
+ВАЖНО
+  visuotag — база для ВСЕГО HTML в проекте. visuoelement(s),
+  visuoel, visuometa, visuorelease — все строят через него.
+  visuoelements — legacy, visuoel — текущий API.
+
+================================================================
+1. СВОЙСТВА
+================================================================
+  visuorelease : ?visuorelease      — контекст рендера (log, meta)
+  visuotag     : ?visuotag          — родитель (или null у root)
+  tagname      : string             — 'div' | 'span' | ... | 'root'
+  tag_closed   : bool = true        — <tag>...</tag> или <tag />
+  root         : bool = false       — это корневой узел?
+  attrs        : visuoattrs         — все атрибуты
+  elements     : array              — [ visuotag | string , ... ]
+
+  Хуки (private):
+    visuostruct      : ?visuostruct   — структура
+    visuostruct_name : ?string        — имя структуры
+    visuoelement     : ?visuoelement  — элемент (legacy)
+    visuoel          : ?visuoel       — элемент (текущий API)
+
+================================================================
+2. КОНСТРУКТОР
+================================================================
+__construct(
+  ?visuorelease $visuorelease = null,
+  ?visuotag     $visuotag     = null,
+  string        $tagname      = '',
+  bool          $tag_closed   = true
+)
+  visuotag === null → это root, tagname='root', root=true
+  иначе — обычный узел с заданным tagname
+  attrs = new visuoattrs($this)
+
+  visuorelease(?visuorelease) — сеттер
+
+================================================================
+3. СОЗДАНИЕ ТЕГОВ — tag()
+================================================================
+tag($tagname, $tag_closed=true, $id='', $style='', $class='',
+    ?visuostruct $visuostruct=null, ?visuoelement $visuoelement=null,
+    null|bool|string|visuotag $parent=null,
+    bool $return=true, bool $return_parent=false) : visuotag
+
+  Логика:
+    1. Лог в visuolog (если есть).
+    2. Резолв $parent:
+         - string → this->parent($name)
+         - visuotag → он сам
+         - null/false → this
+    3. new visuotag($visuorelease, $this, $tagname, $tag_closed)
+    4. Автоприсвоение id/class/style.
+    5. newtag->visuostruct / visuoelement (если переданы).
+    6. $target->elements[] = $newtag
+    7. return $return ? $newtag : $target
+
+  $return_parent — параметр есть, но НЕ используется.
+
+  ПАТТЕРН ЦЕПОЧКИ
+    $vt->tag('div')->tag('span')->content('x')->parent()->parent()
+    Каждый tag() возвращает созданный узел ($return=true, default).
+    parent() возвращает родителя.
+
+================================================================
+4. ХУКИ-СЛОТЫ (struct / element / el / meta)
+================================================================
+
+structv($name, ?visuostruct $struct=null) : visuotag
+  Создаёт узел <struct class="cl_struct">, кладёт name + структуру.
+  Возвращает новый узел (не $this).
+
+element($name, ?visuoelement $el=null, bool $init=false) : visuotag
+  Создаёт <element class="cl_element">, привязывает visuoelement
+  (legacy). Возвращает $this.
+
+el(?visuoel $el=null, bool $init=false) : visuotag
+  Создаёт <el class="cl_el">, привязывает visuoel (текущий API).
+  Возвращает $this.
+
+meta(visuometa $meta) : visuotag
+  append($meta->as_tag())
+
+struct_set($name, visuostruct $struct) : visuotag
+  Ищет по дереву struct с именем $name, привязывает $struct.
+  Возвращает $this.
+
+findstruct($name, &$return=[], &$vt=null) : void
+  Рекурсивный поиск. Найденные узлы пишет в $return, последний — в $vt.
+  Узлы без visuostruct_name — рекурсия; с именем — сверка.
+  Ранний continue: если узел ИМЕЕТ имя, вглубь не идёт.
+
+================================================================
+5. ДЕРЕВО — манипуляции
+================================================================
+clear() : $this
+  elements = []
+
+insert($vt_start, $vt_end) : $this
+  Хитрый: свои elements переносит в $vt_end->elements,
+  а children $vt_start — в себя.
+  Используется для вставки блока перед/после.
+
+prepend(visuotag $vt) : $this
+  root vt → его children помещаются В НАЧАЛО elements.
+
+append(visuotag $vt, bool $root=true) : $this
+  root vt → его children помещаются В КОНЕЦ elements.
+
+before($vt) / after($vt) — TODO, пусты.
+
+rebind_children()  — private: переустанавливает visuotag-родителя
+  у всех детей-узлов (после array_merge).
+
+ВАЖНО
+  append/prepend «разворачивают» корневой узел — берут его
+  children, а не сам узел. Это ломает иерархию:
+    $a = new visuotag(); $a->tag('div');
+    $b->append($a);      // div станет ребёнком $b напрямую
+  сам $a в дерево не попадает.
+
+================================================================
+6. АТРИБУТЫ — прокси к visuoattrs
+================================================================
+attrs()                                 → visuoattrs
+attrs_add($name, $value, $add_empty=false)
+attrs_remove($name)
+attrs_class_add($value) / attrs_class_remove($value)
+attrs_style_add($value) / attrs_style_remove($value)
+attrs_actions_add($action, $value) / attrs_actions_remove($action)
+data()                                  → visuoattrsdata
+data_add($name, $value, bool $data_tojson=true)
+data_remove($name)
+
+Все возвращают $this, кроме attrs() и data().
+
+Shortcuts:
+  id($value)      → attrs_add('id', $value)
+  content($html)  → elements[] = $html  (может быть HTML-строкой)
+  next()          → elements[0] ?? $this
+
+================================================================
+7. НАВИГАЦИЯ — parent()
+================================================================
+parent(string $tagname='', int $eq=0) : visuotag
+  Идёт вверх по visuotag-ссылкам.
+  Если $tagname === '' — просто N-й предок ($eq).
+  Если задан — ищет предка с этим tagname, $eq — какой по счёту.
+  Останавливается на root.
+
+  Если не найден — возвращает $this (себя).
+  ⚠ Не null — ошибку не заметишь.
+
+Хелперы:
+  root()  → parent('root')
+  html()  → parent('html')
+  head()  → parent('head')
+  title() → parent('title')
+  body()  → parent('body')
+  div($eq=0)  → parent('div', $eq)
+  span($eq=0) → parent('span', $eq)
+
+================================================================
+8. ПОИСК — find()
+================================================================
+find(?tagname=null, ?visuotag=null, int $eq=0, int $fec=0,
+     int $cicle=0, ?class=null, ?id=null) : ?visuotag
+
+  Рекурсивный (DFS).
+  Матч:
+    - tagname===null && class — сверка по классу
+    - tagname===null && id    — сверка по id
+    - tagname задан           — сверка tagname + (class если задан)
+  Возвращает первый матч или null.
+
+  ⚠ $eq и $fec НЕ используются — нельзя найти 2-й/3-й матч.
+  ⚠ $visuotag как параметр — accumulator, странный API.
+
+  Внутри attrs()->class()->get($class) сравнивается с $class
+  (то есть get возвращает сам класс, если он есть).
+
+  Псевдонимы:
+    _html() → root()->find('html')
+    _body() → root()->find('body')
+    tree()  → TODO (пусто)
+
+================================================================
+9. RELEASE — рендер в HTML
+================================================================
+release(int $cicle=0) : string
+  root     = $this->root
+  tag      = $this->tagname
+  closed   = $this->tag_closed
+  attrs    = $this->attrs()->release()
+
+  если closed:
+    foreach elements: $v->release() (рекурсия) или строка как есть
+    если НЕ root И visuoelement===null И visuoel===null:
+      html = '<tag attrs>children</tag>'
+    Иначе — БЕЗ ОБЁРТКИ (root или спец-узлы)
+  иначе:
+    html = '<tag attrs />'
+
+  ⚠ Странно: узлы visuoelement/visuoel НЕ оборачиваются —
+  это заглушки, содержимое уже вставлено prepare()-ом.
+
+final() : string
+  root()->release()
+
+================================================================
+10. PREPARE — подготовка перед release
+================================================================
+prepare(int $count=0) : void
+  По типу узла вызывает:
+    visuostruct  → prepare_visuostruct()
+    visuoelement → prepare_visuoelement()
+    visuoel      → prepare_visuoel()
+  Затем рекурсия по всем детям.
+  ⚠ Если $el — не объект (строка), вызывается prepare_visuotag()
+  (пустышка) — но она вызывается у $this, не у $el. Похоже на баг.
+
+prepare_visuotag()    — пусто
+prepare_visuostruct() — пусто (заглушка)
+
+prepare_visuoelement()
+  if visuoelement->init == false:
+    visuoelement->init()
+    if visuoelement->visuotag_start !== null:
+      visuoelement->release($this)
+
+prepare_visuoel()
+  if ! visuoel->init: visuoel->init()
+  if visuoel->vt_start !== null:
+    vt_start->visuotag = $this
+    elements[] = vt_start
+
+  То есть visuoel «дорисовывается» в дерево на этапе prepare.
+
+================================================================
+11. DEBUG-ДЕРЕВО — releasetree()
+================================================================
+releasetree(bool $tree=true, int $count=0) : string
+  Возвращает HTML-строку с полным описанием узла и потомков.
+  Формат:
+    div.debugtree_row
+      [ tagname ] [ root ] [ visuotag(parent) ]
+      [ classname ] [ attrs ] [ class ] [ style ]
+      [ actions ] [ data ] [ visuostruct ] [ visuoelement ]
+
+  Строки (content) → div.debugtree_row_content.
+  struct-узлы с именем — отдельная строка.
+  Отступ — str_repeat('... ', count).
+
+  Используется в debug-панели.
+
+================================================================
+12. КЛЮЧЕВЫЕ ПАТТЕРНЫ ИСПОЛЬЗОВАНИЯ
+================================================================
+
+A. Цепочка тегов:
+     $vt = new visuotag();
+     $vt->tag('div', class:'box')
+        ->tag('h1')->content('Hi')->parent()
+        ->tag('p')->content('Text');
+
+B. С обёрткой в родителя:
+     $vt->tag('ul', return:false)
+          ->tag('li')->content('1')->parent()
+          ->tag('li')->content('2');
+
+C. Вставка визуального элемента:
+     $vt->el($visuoel);
+     // в release/prepare он разворачивается в vt_start
+
+D. Навигация:
+     $vt->tag('a')->content('x')->parent('div')->attrs_class_add('cta');
+
+E. Поиск:
+     $node = $vt->root()->find(tagname:'body');
+
+================================================================
+13. ЗАМЕЧАНИЯ / БАГИ
+================================================================
+1. parent() возвращает $this если не находит — нельзя отличить
+   «нашли себя» от «не нашли ничего». Вернуть null было бы яснее.
+
+2. find() игнорирует $eq и $fec — «второй div» найти нельзя.
+
+3. append/prepend «разворачивают» root переданного vt —
+   сам узел-контейнер теряется, добавляются только его дети.
+   Это не всегда то, что ожидается.
+
+4. release() НЕ оборачивает узлы visuoelement/visuoel — потому что
+   prepare_*() уже вставил их содержимое. Но если prepare не был
+   вызван (например, форсированный release без prepare) — вернётся
+   пустой узел или содержимое без обёртки.
+
+5. prepare(): для не-объектов вызывается $this->prepare_visuotag()
+   (пустышка на $this, а не на $el). Мёртвая ветка.
+
+6. $return_parent в tag() не используется.
+
+7. tree() — пусто, только TODO.
+
+8. attrs() возвращает visuoattrs, но не attrs_release — то есть
+   для полного HTML нужен attrs()->release(). Это делает release().
+
+9. Никакой защиты от циклов (visuotag != null всегда, но
+   теоретически можно собрать цикл через ручную установку
+   ->visuotag). Сейчас код не даёт такого сделать.
+
+10. Логирование в visuolog — на каждый tag()/find()/release().
+    При больших страницах лог разрастается. При отключённом
+    GL_LOG видимо не пишется (надо смотреть visuolog).
+
+================================================================
+14. СВЯЗАННЫЕ
+================================================================
+  visuoattrs         — attrs (class/style/actions/data)
+  visuoattrsdata     — data-* (см. отдельно)
+  visuometa          — meta через meta()/visuometa::as_tag
+  visuostruct        — структура (хук structv/findstruct)
+  visuoelement       — legacy элементы (хук element)
+  visuoel            — текущий API элементов (хук el)
+  visuorelease       — контекст, final()
+  visuolog           — лог (см. 11.visuolog)
+  visuopage          — обёртка над visuotag для страницы
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ С prodoc
+  prev → 37_visuo_wrapper.txt
+  next → 39_visuoattrs.txt      (visuoattrs + 4 файла)
+  next → 40_visuodata.txt       (visuodata)
+  next → 41_visuometa.txt
+  next → 42_visuoelement.txt    (legacy)
+  next → 43_visuoel.txt         (текущий API)
+  next → 44_visuorelease.txt
+  next → 45_visuostruct.txt

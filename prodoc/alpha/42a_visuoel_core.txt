@@ -1,0 +1,370 @@
+================================================================
+42A_VISUOEL_CORE — visuoel.php + visuoels.php
+Текущий API UI-элементов visuo: корневой класс + загрузчик.
+================================================================
+
+ВАЖНО
+  visuoelement(s) — legacy. Не используется в новом коде.
+  visuoel(s)      — текущий API.
+  Они сосуществуют в sources/visuo/, но новые алгоритмы
+  (visuo/algoritm/lang/*) пишут через visuoel.
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/visuo/visuo.php (шаг 15–16)
+
+================================================================
+A. visuoels.php — загрузчик API
+================================================================
+РОЛЬ
+  Один файл, который подключает всё дерево visuoel в правильном
+  порядке. В sources/visuo/visuo.php подключается ПОСЛЕ
+  visuoel.php.
+
+ПОРЯДОК INCLUDE
+----------------------------------------------------------------
+  # 1. Обязательные зависимости
+    visuoattrs/visuoattrsclass.php
+    visuoattrs/visuoattrsstyle.php
+    visuoattrs/visuoattrsactions.php
+    visuoattrs/visuoattrsdata.php
+    visuoattrs.php
+    visuotag.php
+    visuoel.php
+
+  # 2. Базовые абстракции
+    visuoel/visuoel_group.php
+    visuoel/visuoel_group_element.php
+
+  # 3. Блок
+    visuoel/visuoel_block__element.php
+    visuoel/visuoel_block/visuoel_block_text.php
+    visuoel/visuoel_block/visuoel_block_html.php
+    visuoel/visuoel_block.php
+
+  # 4. Сообщения
+    visuoel/visuoel_message__element.php
+    visuoel/visuoel_message/visuoel_message_info.php
+                                 _success.php
+                                 _warning.php
+                                 _error.php
+    visuoel/visuoel_message.php
+
+  # 5. Форма
+    visuoel/visuoel_form/visuoel_form_fieldset.php
+    visuoel/visuoel_form/visuoel_form_form.php
+    visuoel/visuoel_form.php
+
+  # 6. Табы
+    visuoel/visuoel_tabs/visuoel_tabs_page.php
+    visuoel/visuoel_tabs.php
+
+  # 7. Инпуты (корень + 15 подтипов)
+    visuoel/visuoel_input__element.php
+    visuoel/visuoel_input/visuoel_input_text.php
+                                _hidden.php
+                                _password.php
+                                _submit.php
+                                _reset.php
+                                _button.php
+                                _email.php
+                                _file.php
+                                _textarea.php
+                                _select.php
+                                _checkbox.php
+                                _radio.php
+                                _checkbox_group.php
+                                _radio_group.php
+    visuoel/visuoel_input.php
+
+  # 8. Поля (обёртка над input + label + hint)
+    visuoel/visuoel_field__element.php
+    visuoel/visuoel_field__button.php
+    visuoel/visuoel_field/visuoel_field_block.php
+                                _text.php
+                                _password.php
+                                _email.php
+                                _file.php
+                                _textarea.php
+                                _select.php
+                                _checkbox.php
+                                _radio.php
+                                _checkbox_group.php
+                                _radio_group.php
+                                _submit.php
+                                _reset.php
+                                _button.php
+    visuoel/visuoel_field.php
+
+  # 9. Кнопки
+    visuoel/visuoel_button__element.php
+    visuoel/visuoel_button/visuoel_button_submit.php
+                                _reset.php
+                                _button.php
+    visuoel/visuoel_button.php
+
+  # 10. Таблицы
+    visuoel/visuoel_table/visuoel_table_section.php
+                                _row.php
+                                _cell.php
+    visuoel/visuoel_table.php
+
+ЗАМЕЧАНИЯ
+- Зависимость «visuotag + visuoattrs» — обязательна до visuoel.
+- Порядок внутри групп: сначала элементы (subclass), потом корень
+  группы. Это позволяет корню ссылаться на подклассы при фабрике.
+- Файлы-абстракции `*__element.php` идут ПЕРЕД своими подтипами.
+
+================================================================
+B. visuoel.php — корневой класс API
+================================================================
+РОЛЬ
+  База и корень дерева UI-элементов. Все конкретные элементы
+  (form, input, field, table, block, message, tabs, button, group)
+  наследуют visuoel.
+  Корень — прозрачный (без обёртки); обёртку рисует группа/элемент.
+
+СВОЙСТВА (refs и state)
+  parent          : ?visuoel
+  visuoel         : ?visuoel        — корень дерева (self на root)
+  init            : bool = false    — флаг инициализации
+  singleton       : bool = true     — режим фабрик (переиспользовать узлы)
+  __data          : ?visuoel__data  — данные узла
+  vt_start        : ?visuotag       — верх поддерева (attach point)
+  vt_end          : ?visuotag       — слот: дети пришиваются сюда
+  elements        : array           — [ visuoel | visuotag, ... ]
+
+  Ссылки на фабрики (создаются лениво):
+    visuoel_group, visuoel_form, visuoel_tabs, visuoel_input,
+    visuoel_field, visuoel_button, visuoel_block, visuoel_message,
+    visuoel_table
+
+CONFIG (для override)
+  protected string $tag       = 'div'
+  protected string $css_class = 'visuoel'
+
+================================================================
+ЖИЗНЕННЫЙ ЦИКЛ
+================================================================
+
+__construct(?visuoel $parent = null, ?visuoel__data $__data = null)
+  $parent, $visuoel = parent?->visuoel ?? $this
+  $__data = $__data ?? $this->make_default_data()
+
+make_default_data() : visuoel__data
+  Хук для подклассов — свой тип __data.
+  База возвращает new visuoel__data($this).
+
+build() : void
+  Хук для подклассов — собственный скелет.
+  База:
+    $vt = new visuotag();
+    vt_start = vt_end = $vt;   ← прозрачный корень
+
+init() : void
+  Идемпотентно (init=true при первом вызове).
+  1. build()
+  2. foreach elements:
+       visuoel  → el->init(); vt_end->append(el->vt_start)
+       visuotag → el->prepare(); vt_end->append(el)
+  Порядок инициализации: сначала дети, потом... нет, на самом деле
+  дети в elements, а init сам родитель уже вызван.
+
+ПРИНЦИП vt_start / vt_end
+  vt_start — верхняя точка узла в дереве. Её родитель пришивает
+             к своему vt_end.
+  vt_end   — точка, куда пришиваются дети данного узла.
+  Для простого элемента vt_start === vt_end (один узел).
+  Для составного (input с label) vt_start — обёртка, vt_end —
+  контейнер, куда кладётся сам <input>.
+
+================================================================
+ФАБРИКИ (lazy)
+================================================================
+Все фабрики однотипны:
+  form()    → visuoel_form
+  tabs()    → visuoel_tabs
+  input()   → visuoel_input
+  field()   → visuoel_field
+  button()  → visuoel_button
+  block()   → visuoel_block
+  message() → visuoel_message
+  table()   → visuoel_table
+
+Логика каждой:
+  if (singleton && <свойство> !== null) return <свойство>;
+  $el = new visuoel_<type>($this, $__data);
+  if (visuoel_group === null) visuoel_group = $el;
+  <свойство> = $el;
+  elements[] = $el;
+  return $el;
+
+  То есть каждая фабрика:
+    - создаёт элемент,
+    - если групповая ссылка ещё не установлена — фиксирует этот
+      элемент как групповой (первый созданный становится визуоel_group).
+    - возвращает созданный элемент.
+
+СИНГЛТОН
+  singleton=true (default) → повторные вызовы возвращают тот же
+                             элемент.
+  singleton=false          → каждый вызов создаёт новый.
+
+  Переключение делается через `$el->singleton = false` перед фабрикой.
+  Все фабрики также доступны через visuoel::data()? Нет — только
+  через прямое свойство.
+
+================================================================
+ДОБАВЛЕНИЕ / УДАЛЕНИЕ ДЕТЕЙ
+================================================================
+
+add(visuoel|visuotag $el) : $this
+  Если $el — visuoel и у него уже другой parent:
+     old_parent->remove($el)
+  $el->parent = $this
+  elements[] = $el
+
+remove(visuoel|visuotag $el) : bool
+  Поиск по строгому ===. Найден:
+    если visuoel → child->parent = null
+    unset + array_values
+    return true
+  Иначе false.
+
+remove_class(string $class) : int
+  Удаляет всех детей, которые instanceof $class.
+  Возвращает количество удалённых.
+
+clear() : $this
+  parent = null у всех visuoel-детей, elements = [].
+
+================================================================
+ГЕТТЕРЫ
+================================================================
+data()        : ?visuoel__data
+css_class()   : string
+tag()         : string
+is_root()     : bool    — parent === null
+
+get_input_text__data() / _hidden__data / _password__data / _submit__data
+  Прокси на visuoel_input->get_<type>__data().
+  Четыре shortcut'а — под частые случаи.
+
+================================================================
+RELEASE / SHOW
+================================================================
+release() : string
+  if !init → init()
+  if vt_start === null → ''
+  return vt_start->release()
+
+show() : string
+  Алиас release().
+
+================================================================
+C. visuoel__data — базовый data-объект
+================================================================
+СВОЙСТВА
+  node : visuoel
+
+МЕТОДЫ-ПРОКСИ
+  add($el)                  → node->add($el),       return $this
+  remove($el)               → node->remove($el)
+  remove_class($class)      → node->remove_class($class)
+  clear()                   → node->clear(),        return $this
+
+РОЛЬ
+  Базовый класс «данных» visuoel. Подклассы добавляют свои поля
+  (например, visuoel_input_text__data хранит value, placeholder...).
+  Позволяет разделить:
+    - конфиг/значения (__data),
+    - сам узел/логику (visuoel).
+  Фабрики принимают $__data как аргумент — можно передать готовый
+  конфиг.
+
+================================================================
+ОБЩИЙ ПАТТЕРН
+================================================================
+
+A. Создание дерева
+   $el = new visuoel();           // корень, прозрачный
+   $el->block()->data()->set(...);
+   $el->message()->info()->data()->set('OK');
+   // при release: init → build → дети → release
+
+B. Form + fields
+   $form = $el->form()->form();   // visuoel_form::form()
+   $form->field()->text()->data()->set('login');
+   $form->field()->password()->data()->set('pass');
+   $form->field()->submit()->data()->text('Sign in');
+
+C. Singleton
+   $el->block()->html()->data()->set('x');
+   $el->block()->text()->data()->set('y');
+   // Второй вызов block() вернёт тот же объект (singleton).
+   // Чтобы создать второй блок:
+   $el->singleton = false;        // (или локально)
+
+D. Вставка в HTML-дерево
+   $center = $main->alliasglobal->center;
+   $center->visuotag()->el($el);
+   // visuotag::el() создаёт <el class="cl_el"> + привязывает visuoel.
+   // На prepare() содержимое vt_start вставляется в дерево.
+
+================================================================
+ЗАМЕЧАНИЯ / БАГИ
+================================================================
+1. singleton — глобальный флаг на узле. Переключается ВРУЧНУЮ;
+   при переключении в false фабрика создаёт новый элемент, но
+   ссылка на старый сохраняется в свойстве (visuoel_form и т.д.),
+   так что следующий вызов с singleton=true вернёт ПОСЛЕДНИЙ,
+   а не первый. Неожиданно.
+
+2. visuoel_group — «первый созданный элемент становится групповым».
+   Не совсем ясна семантика. Возможно, для случаев, когда есть
+   один основной контейнер в узле.
+
+3. remove_class($class) использует instanceof — работает только
+   для class-имён. Если передать несуществующий класс — 0 удалённых,
+   без ошибки.
+
+4. init() вызывает $el->prepare() для visuotag-детей (см. 38_visuotag).
+   Это обязательная фаза для узлов-хуков (visuoelement / visuoel
+   внутри visuotag). Порядок важен.
+
+5. vt_start у простого элемента = vt_end = один узел. Для
+   составных (input+label) — разные. Это внутренний контракт
+   подклассов.
+
+6. Геттеры get_input_*__data() — прокси в visuoel_input. Работают
+   только если visuoel_input уже создан. Иначе null.
+
+7. Нет метода, который бы вернул «все дочерние visuoel» или
+   «все visuotag» отдельно. Только elements как единый массив.
+
+8. __data в конструкторе — можно передать готовый объект. Но
+   make_default_data() вызывается через `??` — то есть только
+   если $__data === null. Если передали, свой data не создаётся.
+   Это позволяет подклассам работать с предустановленным конфигом.
+
+================================================================
+СВЯЗАННЫЕ
+================================================================
+  visuoel_group          — базовая группа (см. 42b)
+  visuoel_group_element  — базовый элемент группы (см. 42b)
+  visuoel_block          — блок (см. 42c)
+  visuoel_message        — сообщения (см. 42c)
+  visuoel_input          — вход (см. 42d)
+  visuoel_button         — кнопки (см. 42d)
+  visuoel_field          — поля (см. 42e)
+  visuoel_form           — формы (см. 42f)
+  visuoel_table          — таблицы (см. 42f)
+  visuoel_tabs           — табы (см. 42f)
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ С prodoc
+  prev → 41_visuolink_log_settings.txt
+  next → 42b_visuoel_base.txt   (group + group_element + 6 __element)
+  next → 42c_visuoel_block_message.txt
+  next → 42d_visuoel_input_button.txt
+  next → 42e_visuoel_field.txt
+  next → 42f_visuoel_form_table_tabs.txt

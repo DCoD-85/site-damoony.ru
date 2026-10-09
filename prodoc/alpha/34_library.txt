@@ -1,0 +1,243 @@
+================================================================
+34_LIBRARY — sources/library.php + library/*
+Библиотека утилит: URL, ссылки, файлы, изображения, валидация.
+================================================================
+
+namespace: (глобальный)
+ПОДКЛЮЧАЕТСЯ ИЗ: sources/include.php
+РОЛЬ: контейнер library + 7 подмодулей.
+
+================================================================
+A. library.php — class library
+================================================================
+СВОЙСТВА
+  main
+  gen, dir, url, link, vars, file, image
+
+__construct( main )
+  include_once library/<name>.php × 7
+  new library_<name>($this) через class_exists
+  url->init()    ← единственный, кто инициализируется сразу
+
+АКСЕССОРЫ
+  gen() / dir() / url() / link() / vars() / file() / image()
+
+ИСПОЛЬЗОВАНИЕ
+  $main->library->link()->href(...)
+  $main->library->url->static_domain
+  $main->library->vars->check(...)
+  $main->library->image->image_resize(...)
+
+ЗАМЕЧАНИЯ
+- url->init() строит static_domain/allias/base/vars из main_path.
+- Порядок include фиксирован, но new независимы (кроме url).
+
+================================================================
+B. library_url — url.php
+================================================================
+Парсинг и хранение текущего URL.
+
+СВОЙСТВА (заполняются init)
+  static_domain : array  — домены без поддомена (reversed)
+  static_allias : array  — поддомены + домен
+  static_base   : array  — сегменты пути
+  static_vars   : array  — GET-параметры
+
+МЕТОДЫ
+  init()                    — из main_path заполнить 4 массива
+  url($str=null)   : array  — путь в виде сегментов
+  urlfull($str=null) : string  — только путь (без протокола/хоста)
+  vars($str=null)  : array  — GET-параметры из URL
+  vars_correct(&$return, $vars)  — парсит 'a=1&b=2'
+  domain($revert=true, $path=null) : array
+      Если $revert=true — переворачивает домен:
+        'login.damoony.ru' → ['damoony.ru', 'login']
+  get_return($var, $without=[], $varname='', &$return=[])
+      Рекурсивно разворачивает массив в плоский key → value.
+      Используется в link::href для сборки query.
+
+РЕГУЛЯРКА URL (единая для 3 методов):
+  '~^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?~i'
+  группа [4] = host, [5] = path, [7] = query, [9] = fragment
+
+ЗАМЕЧАНИЯ
+- static_domain / static_allias — самые используемые массивы:
+    static_domain[0] = 'ru' или 'damoony.ru'
+    static_allias[0] = 'damoony.ru' (после reverse)
+    static_allias[1] = поддомен (visuo/login/www)
+- url() возвращает explode('/') без ведущего '/'.
+- vars_correct() пропускает пустые пары и пустые ключи.
+
+================================================================
+C. library_link — link.php
+================================================================
+Сборка URL для ссылок.
+
+СВОЙСТВА
+  connect_type = 'https://'
+
+ГЛАВНЫЙ МЕТОД
+  href($allias_address = true, $base_address = true, $base_vars = [],
+       $anchor = '', $use_all_adress_data = true, $host = true)
+
+ПАРАМЕТРЫ
+  $allias_address : bool|array
+      true  — текущий поддомен (из static_domain)
+      array — кастомный ['www','login'] → 'www.login.damoony.ru'
+      false — без домена (только путь)
+  $base_address : bool|string|array
+      true  — из текущего URL
+      false — '/'
+      string/array — явные сегменты пути
+  $base_vars : array — параметры запроса
+      true  — оставить, если есть в $_GET
+      false — удалить, если есть
+      string/int — заменить
+  $use_all_adress_data : bool
+      true  — наследовать $_GET
+      false — только явные $base_vars
+  $anchor : string — '#...'
+  $host : bool — добавлять ли протокол+хост
+
+АЛГОРИТМ
+  1. base_address → часть пути (строка с ведущими /).
+  2. Мерж $_GET + $base_vars → $data['new_string'].
+     Логика true/false — по наличию в $_GET.
+  3. Если use_all_adress_data=true — дотянуть $_GET.
+  4. Сборка query '?k=v&...'.
+  5. Anchor.
+  6. Домен: allias_address → 'visuo.damoony.ru'.
+  7. Префикс connect_type (если host=true).
+
+ЗАМЕЧАНИЯ
+- Ключевой метод для всего сайта. Используется везде.
+- $connect_type по умолчанию 'https://'; main_settings::set('connect_type', 'http://')
+  может перезаписать → http в dev.
+- Порядок сегментов URL: /<lang>/<page>/<slug>/.
+
+================================================================
+D. library_dir — dir.php
+================================================================
+Сканер директорий.
+
+  get($dir=DSA, $included=false, $dirs=true, $files=true,
+      &$dir_result=[])
+      opendir → readdir → skip . и ..
+      Для каждого: если dirs/files — добавить в результат
+      Если $included && is_dir — рекурсия
+      Возвращает [path => basename, ...]
+
+ЗАМЕЧАНИЯ
+- Итеративный через opendir, рекурсия ручная.
+- По умолчанию $dir=DSA ('/') — рискованно: сканирует корень ФС.
+  Использовать явно.
+
+================================================================
+E. library_file — file.php
+================================================================
+Тонкие обёртки:
+  isfile($path)   → is_file
+  read($path)     → file_get_contents
+  write($path,$d) → file_put_contents
+
+ЗАМЕЧАНИЯ
+- Просто прокси. Можно было бы и без класса.
+
+================================================================
+F. library_gen — gen.php
+================================================================
+  id() : string
+      Возвращает 'id' . rand(111111111, 999999999).
+      Складывает в $this->id[].
+  about() : string
+      '<div>This is module ...</div>'
+
+ЗАМЕЧАНИЯ
+- Заготовка. rand — не безопасный источник; для ID лучше
+  random_bytes/uniqid.
+- about() — отладочный вывод.
+
+================================================================
+G. library_image — image.php
+================================================================
+Ресайз изображений (GD).
+
+  image_resize($path, $nPath, $nFilename, $nWidth=0, $nType='',
+               $quality=100, $nWidthImportant=false,
+               $widthToHeight=false, $alpha=false, $rotate=[])
+      Возвращает ['error'=>bool, 'message'=>string,
+                  'filepath'=>string, 'filename'=>string]
+
+АЛГОРИТМ
+  1. is_file + getimagesize → формат (jpeg/png/gif).
+  2. imagecreatefrom<format>.
+  3. Авто-rotate: $rotate['maxwidth']=градусы, если портрет
+     и maxwidth → imagerotate.
+  4. Целевые размеры:
+     - widthToHeight=true → квадрат по меньшей стороне
+     - nWidthImportant=true → точная ширина
+     - иначе → исходный размер
+  5. imagecreatetruecolor + imagecopyresampled.
+  6. Прозрачность для png при $alpha=true.
+  7. Сохранение: image<jpeg|png|gif> в $nPath . $nFilename . $ext.
+     Качество PNG переводится из 0-100 в 0-9.
+
+ЗАМЕЧАНИЯ
+- $nType задаёт формат; '' — оставить исходный.
+- Возвращает массив, не кидает исключения.
+- GD обязателен.
+
+================================================================
+H. library_vars — vars.php
+================================================================
+Валидация значений.
+
+  check($var, $type, $len_min=0, $len_max=-1, $ereg='',
+        $null=false, $values=[], $default=NULL)
+      Возвращает тип ('string'|'integer'|...) если ОК,
+      $default или NULL — если не ОК.
+
+      Логика:
+        1. Если gettype($var) !== $type → NULL.
+        2. Для string:
+             - mb_strlen в [len_min, len_max] если len_min < len_max
+             - mb_ereg_match($ereg, $var) если $ereg !== ''
+             - in_array($var, $values, true) если $values непусто
+        3. Для int/double:
+             - диапазон [len_min, len_max] если len_min < len_max
+        4. Для boolean/null — пропускает.
+
+  error($message)
+      $main->messages->add('error',
+        'Заполните поля правильно: ' . $message,
+        'Заполните поле правильно: <b>' . $message . '</b>')
+
+ЗАМЕЧАНИЯ
+- Параметр $len_max=-1 означает «без ограничения».
+- $null=true + $default=false → default = NULL.
+- Массив $values — whitelist для строк.
+- error() пишет через messages-стек.
+
+================================================================
+СВОДКА
+================================================================
+  library        — контейнер (thin)
+  library_url    — разбор текущего URL, static_* массивы
+  library_link   — сборка href с merge $_GET
+  library_dir    — скан директорий
+  library_file   — file-обёртки
+  library_image  — ресайз GD
+  library_vars   — валидация
+  library_gen    — генератор id (заготовка)
+
+КЛЮЧЕВЫЕ ДЛЯ АРХИТЕКТУРЫ
+  - url + link  →  вся адресация сайта
+  - vars        →  валидация форм/POST
+  - image       →  медиа-обработка
+
+----------------------------------------------------------------
+СВЯЗАННЫЕ
+----------------------------------------------------------------
+  prev → 33_simple_services.txt
+  next → 35_render_mod_system.txt
+  next → 36_gmod.txt
