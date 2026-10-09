@@ -2,36 +2,6 @@
 
 namespace damoony;
 
-# alliasglobal_menu — базовый класс меню.
-#
-# Один класс — много именованных списков внутри.
-# Списки: 'projects' , 'login' , 'languages' , 'nav' , 'subnav' , …
-#
-# HTML-разметка единая. Дифференциация блоков — через CSS-префикс
-# от menu_name ('top', 'left', 'right', 'bottom'):
-#
-#   <div class="menu menu_top" data-list="projects">
-#     <div class="menu_list">
-#       <span class="menulink link_link">…</span>
-#       <span class="menulink_between">|</span>
-#       …
-#     </div>
-#   </div>
-#
-# Программист имеет доступ:
-#   $menu->new( 'projects' )->link( … )
-#   $menu->link( 'projects' , '…' , '…' )
-#   $menu->text( 'projects' , '…' )
-#   $menu->between( 'projects' )
-#   $menu->all( )        — все списки
-#   $menu->get( 'projects' )
-#   $menu->has( 'projects' )
-#   $menu->count( 'projects' )
-#   $menu->clear( 'projects' )  — очистить список
-#   $menu->clear( )             — очистить всё
-#   $menu->remove( 'projects' , 2 )
-#   $menu->as_tag( 'projects' )
-
 class alliasglobal_menu {
 	# --- refs ---
 	public null|alliasglobal $alliasglobal = null;
@@ -40,7 +10,7 @@ class alliasglobal_menu {
 	# --- state ---
 	public string $menu_name = '';
 	public string $separator = '|';
-	public array  $lists     = [ ];   # [ 'projects' => alliasglobal_menu_row[] , … ]
+	public array  $lists     = [ ];
 
 	# --- methods ---
 	public function __construct (
@@ -76,6 +46,12 @@ class alliasglobal_menu {
 		return $row;
 	}
 
+	public function head ( string $name , string $text ) : alliasglobal_menu_row {
+		$row = $this->new( $name );
+		$row->head( $text );
+		return $row;
+	}
+	
 	public function text (
 		string $name ,
 		string $text ,
@@ -90,6 +66,12 @@ class alliasglobal_menu {
 	public function between ( string $name , string $separator = '|' ) : alliasglobal_menu_row {
 		$row = $this->new( $name );
 		$row->between( $separator );
+		return $row;
+	}
+
+	public function vt ( string $name , \visuotag $vt ) : alliasglobal_menu_row {
+		$row = $this->new( $name );
+		$row->vt( $vt );
 		return $row;
 	}
 
@@ -114,6 +96,8 @@ class alliasglobal_menu {
 	}
 
 	# --- release ---
+
+	# плоский набор menulink + menulink_between
 	public function as_tag ( string $name ) : \visuotag {
 		$vt = new \visuotag( );
 
@@ -122,24 +106,35 @@ class alliasglobal_menu {
 		$rows = $this->lists[ $name ];
 		if ( empty( $rows ) ) return $vt;
 
-		# wrapper: <div class="{name}">
-		$vt = $vt->tag( 'div' , class : $name );
-
-		# background: <div class="{name}_fon menulink_fon">
-		$vt->tag( 'div' , class : $name . '_fon menulink_fon' );
-
-		# content: <div class="{name}_unfon">
-		$vt = $vt->tag( 'div' , class : $name . '_unfon' );
-
 		$count = count( $rows );
 		$i     = 0;
+
 		foreach ( $rows as $row ) {
 			$i++;
 			$vt->append( $row->as_tag( ) );
-			if ( $i < $count && $this->separator !== '' && $row->type !== 'between' ) {
+
+			if ( $i < $count && $this->separator !== '' && $row->type !== 'between' && $row->type !== 'vt' ) {
 				$vt->tag( 'span' , class : 'menulink_between' )->content( $this->separator );
 			}
 		}
+
+		return $vt->root( );
+	}
+
+	# плоский набор — алиас
+	public function as_link ( string $name ) : \visuotag {
+		return $this->as_tag( $name );
+	}
+
+	# обёрнутый список menulist menulist_{name}
+	public function as_list ( string $name ) : \visuotag {
+		$inner = $this->as_tag( $name );
+
+		if ( $inner->elements === [ ] ) return $inner;
+
+		$vt = new \visuotag( );
+		$vt->tag( 'div' , class : 'menulist menulist_' . $name )
+			->append( $inner );
 
 		return $vt->root( );
 	}

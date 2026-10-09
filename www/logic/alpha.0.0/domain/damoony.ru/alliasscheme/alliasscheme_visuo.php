@@ -24,12 +24,23 @@ class alliasscheme_visuo {
 	}
 
 	public function meta ( ) {
-		$main = $this->main;
-		$skin = $main->main_settings->skin( 'skin' );
+		$main   = $this->main;
+		$skin   = $main->main_settings->skin( 'skin' );
 		$allias = $main->main_settings->skin( 'allias' );
 
-		$media  = DSA . 'media' . DSA . 'visuo.damoony.ru' . DSA;
-		$shared = DSA . 'media' . DSA . 'shared' . DSA;
+		$media = DSA . 'media' . DSA . 'damoony.ru' . DSA;
+
+		# --- общие ---
+		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
+		$js_lib   = $media . 'scripts' . DSA . 'lib' . DSA;
+		$js_eng   = $media . 'scripts' . DSA . 'engine' . DSA;
+
+		# --- папка аллиаса (с точкой на конце) ---
+		$all_dir  = $media . 'skin' . DSA . $skin . DSA . $allias . '.' . DSA;
+		$all_css  = $all_dir . 'css' . DSA;
+
+		# --- папка движка visuoel (всегда visuo.) ---
+		$engine_dir = $media . 'skin' . DSA . $skin . DSA . 'visuo' . DSA;
 
 		$meta = $this->visuorelease->meta( );
 		$meta->clear( );
@@ -37,45 +48,67 @@ class alliasscheme_visuo {
 		# --- favicon ---
 		$meta->link( )->favicon( $media . 'favicon.ico#' . $allias );
 
-		# --- скиновые css ---
-		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
+		# ============================================================
+		#   ОБЩИЕ CSS СКИНА
+		# ============================================================
 		$meta->link( )->css( $skin_css . 'main.css' );
 		$meta->link( )->css( $skin_css . 'vardump.css' );
 		$meta->link( )->css( $skin_css . 'messages.css' );
 		$meta->link( )->css( $skin_css . 'popup.css' );
+		$meta->link( )->css( $skin_css . 'dt.css' );
 		$meta->link( )->css( $skin_css . 'top.css' );
 		$meta->link( )->css( $skin_css . 'left.css' );
 		$meta->link( )->css( $skin_css . 'center.css' );
 		$meta->link( )->css( $skin_css . 'right.css' );
 		$meta->link( )->css( $skin_css . 'bottom.css' );
-		$meta->link( )->css( $skin_css . $allias . DSA . 'dt.css' );
+		$meta->link( )->css( $skin_css . 'policy.css' );
+		$meta->link( )->css( $skin_css . 'debug.css' );
 
-		# --- css движка (visuoel) ---
-		$engine_css = $media . 'skin' . DSA . $skin . DSA . 'visuo' . DSA . 'visuoel' . DSA;
-		$meta->link( )->css( $engine_css . 'visuo-elements-input.css' );
-		$meta->link( )->css( $engine_css . 'visuo-elements-form.css' );
-		$meta->link( )->css( $engine_css . 'visuo-elements-table.css' );
-		$meta->link( )->css( $engine_css . 'visuo-elements-tabs.css' );
-		$meta->link( )->css( $engine_css . 'visuo-elements-field.css' );
-		$meta->link( )->css( $engine_css . 'visuo-elements-buttons.css' );
-		$meta->link( )->css( $engine_css . 'visuo-elements-block.css' );
+		# ============================================================
+		#   CSS ДВИЖКА VISUOEL
+		# ============================================================
+		$meta->link( )->css( $engine_dir . 'visuo-elements-input.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-form.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-table.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-tabs.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-field.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-buttons.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-block.css' );
 
-		# --- js lib (vendor) ---
-		$meta->link( )->js( $media . 'scripts' . DSA . 'lib' . DSA . 'jquery-1.8.3.min.js' );
+		# ============================================================
+		#   CSS АЛЛИАСА — только если соответствующий filler включён
+		# ============================================================
+		$ag = $main->alliasglobal;
+		if ( $ag !== null ) {
+			$blocks = [ 'top' , 'left' , 'center' , 'right' , 'bottom' , 'policy' ];
+			foreach ( $blocks as $name ) {
+				$block = $ag->{$name} ?? null;
+				if ( $block === null ) continue;
 
-		# --- js движка ---
-		$js_engine = $media . 'scripts' . DSA . 'engine' . DSA;
-		$meta->link( )->js( $js_engine . 'messages.js' );
-		$meta->link( )->js( $js_engine . 'engine_confidence.js' );
-		$meta->link( )->js( $js_engine . 'engine_prepare.js' );
-		$meta->link( )->js( $js_engine . 'engine_popup.js' );
-		$meta->link( )->js( $js_engine . 'engine_load.js' );
-		$meta->link( )->js( $js_engine . 'engine_page.js' );
-		$meta->link( )->js( $js_engine . 'engine_visuotablebox.js' );
-		$meta->link( )->js( $js_engine . 'engine.js' );
-		$meta->link( )->js( $js_engine . 'engine_ready.js' );
+				$filler = $block->filler;
+				if ( $filler === null || ! $filler->enabled ) continue;
 
-		# --- cdn ---
+				$meta->link( )->css( $all_css . $name . '.css' );
+			}
+		}
+
+		# ============================================================
+		#   JS — общие (lib + engine)
+		# ============================================================
+		$meta->link( )->js( $js_lib . 'jquery-1.8.3.min.js' );
+		$meta->link( )->js( $js_eng . 'messages.js' );
+		$meta->link( )->js( $js_eng . 'engine_confidence.js' );
+		$meta->link( )->js( $js_eng . 'engine_prepare.js' );
+		$meta->link( )->js( $js_eng . 'engine_popup.js' );
+		$meta->link( )->js( $js_eng . 'engine_load.js' );
+		$meta->link( )->js( $js_eng . 'engine_page.js' );
+		$meta->link( )->js( $js_eng . 'engine_visuotablebox.js' );
+		$meta->link( )->js( $js_eng . 'engine.js' );
+		$meta->link( )->js( $js_eng . 'engine_ready.js' );
+
+		# ============================================================
+		#   CDN
+		# ============================================================
 		$meta->link( )->js( 'https://cdn.plyr.io/3.8.4/plyr.js' );
 		$meta->link( )->css( 'https://cdn.plyr.io/3.8.4/plyr.css' );
 	}

@@ -3,35 +3,23 @@
 namespace damoony;
 
 class alliasglobal_left_login {
-	# --- refs ---
+
 	public \main $main;
 	public alliasglobal_left $left;
 
-	# --- methods ---
+	public bool $enabled = true;
+
 	public function __construct ( alliasglobal_left $left ) {
 		$this->main = $left->main;
 		$this->left = $left;
-		$this->data( );
 	}
 
 	public function data ( ) : void {
-		$lib  = $this->main->library;
-		$url  = $lib->url( );
-		$link = $lib->link( );
+		$this->left->wrapper_set( 'div' , [ 'class' => 'left' ] );
 
-		$url_base = $url->static_base;
+		$vt = new \visuotag( );
+		$vt->tag( 'div' , class : 'test-block' )->content( 'left/left_login - блок' );
 
-		$this->left->menu->link(
-			'nav' ,
-			'Форма авторизации' ,
-			$link->href( false , [ $url_base[ 0 ] , '' ] , use_all_adress_data : false ) ,
-			( $url_base[ 1 ] ?? '' ) === ''
-		);
-		$this->left->menu->link(
-			'nav' ,
-			'Вспомнить пароль' ,
-			$link->href( false , [ $url_base[ 0 ] , 'rememberpassword' ] , use_all_adress_data : false ) ,
-			( $url_base[ 1 ] ?? '' ) === 'rememberpassword'
-		);
+		$this->left->section_add( 'test' , $vt->root( ) );
 	}
 }

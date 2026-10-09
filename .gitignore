@@ -20,3 +20,9 @@ secure/*
 
 # Auto-generated language file
 language/save.txt.inc
+audit-*.txt
+config-usage.txt
+const-usage.txt
+data-tree.txt
+media-files.txt
+media-tree.txt

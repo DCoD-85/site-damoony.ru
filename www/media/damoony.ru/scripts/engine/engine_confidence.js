@@ -7,12 +7,12 @@ engine_confidence = {
 	} ,
 	showconfidence : function( obj ) {
 		let o = $( obj );
-		o.parents( '.bottom_body' ).addClass( 'show' );
+		o.parents( '.policy_body' ).addClass( 'show' );
 		return false;
 	} ,
 	hide : function ( obj ) {
 		let o = $( obj );
-		o.parents( '.bottom_agreement' ).addClass( 'hide' );
+		o.parents( '.policy_agreement' ).addClass( 'hide' );
 		return false;
 	} , 
 	show : function ( obj ) {

@@ -52,6 +52,8 @@
 
 .toplogo_links .projects_unfon { display : flex ; padding : 10px ; }
 .toplogo_links .login_unfon { display : flex ; padding : 10px ; }
+html.logged .toplogo_links .login_unfon { display : flex ; padding : 0px 10px ; }
+.toplogo_links .auth_unfon { display : flex ; padding : 10px ; }
 .toplogo_links .skins_unfon { display : flex ; padding : 10px ; }
 .toplogo_links .languages_unfon { display : flex ; padding : 10px ; }
 .toplogo_links .pagelogo { margin : 10px 0px 0px 0px ; height : 200px ; border-radius : 10px ; background : url( 'https://www.damoony2.ru/pagelogo' ) center right no-repeat ; }
@@ -77,6 +79,7 @@
 .toplogo .toplogo_links .toplogo_links_top_skins .box:hover .title { display : block ; }
 .toplogo .toplogo_links .toplogo_links_top_languages .box { white-space : nowrap ; padding-left : 10px ; }
 .toplogo .toplogo_links .toplogo_links_top_login ,
+.toplogo .toplogo_links .toplogo_links_top_auth ,
 .toplogo .toplogo_links .toplogo_links_top_skins ,
 .toplogo .toplogo_links .toplogo_links_top_languages { font-size : 16px ; }
 
@@ -180,3 +183,58 @@
 .topmenu div.menu span.span_popup .border .head_links a { display : block ; padding : 10px ; color : #CCC ; text-decoration : none ; } 
 .topmenu div.menu span.span_popup .border .head_links a:hover { text-decoration : underline ; }
 */
+
+
+/* ============================================================
+   ИКОНКИ в menulink (topbar_auth для авторизованного)
+   ============================================================ */
+
+.dt_top .menulink_icon .span_text a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 39px;
+	height: 39px;
+	padding: 0;
+	border-bottom: none;
+	border-radius: 4px;
+	background: rgba(255,255,255,0.06);
+	transition: background 0.15s, color 0.15s;
+	color: #cbd5e0;
+	font-size: 20px;
+	line-height: 1;
+}
+
+.dt_top .menulink_icon .span_text a:hover {
+	background: rgba(99,179,237,0.2);
+	color: #ffffff;
+}
+
+/* --- конкретные иконки через unicode-глифы --- */
+.dt_top .menulink_icon_messages .span_text a::before { content: "\2709"; }  /* ✉ */
+.dt_top .menulink_icon_tasks    .span_text a::before { content: "\2713"; }  /* ✓ */
+.dt_top .menulink_icon_news     .span_text a::before { content: "\2691"; }  /* ⚑ */
+.dt_top .menulink_icon_friends  .span_text a::before { content: "\263B"; }  /* ☻ */
+.dt_top .menulink_icon_profile  .span_text a::before { content: "\263A"; }  /* ☺ */
+.dt_top .menulink_icon_logout   .span_text a::before { content: "\23FB"; }  /* ⏻ */
+
+/* разделитель между auth-иконками — убираем */
+html.logged .dt_top .toplogo_links_top_login .menulink_between {
+	width : 1px ; margin : 0px ; padding : 0px ; background : #369 ; 
+}
+
+html.logged .dt_top .toplogo_links_top_login .menulink_icon {
+	margin-left: 0px;
+	background-color: #369;
+	border-radius : 0px ;
+}
+html.logged .dt_top .toplogo_links_top_login .menulink_icon:first-child {
+	border-radius : 3px 0px 0px 3px ;
+}
+html.logged .dt_top .toplogo_links_top_login .menulink_icon:last-child {
+	border-radius : 0px 3px 3px 0px ;
+}
+
+.dt_top .toplogo_links_top_login .menulink_icon:hover span a {
+	border : none ;
+}

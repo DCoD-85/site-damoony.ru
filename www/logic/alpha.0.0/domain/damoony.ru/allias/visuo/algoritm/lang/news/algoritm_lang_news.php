@@ -69,6 +69,7 @@ class algoritm_lang_news
 		}
 
 		$main->alliasglobal->center->visuotag( )->el( $ve );
+		
 		return true;
 	}
 }

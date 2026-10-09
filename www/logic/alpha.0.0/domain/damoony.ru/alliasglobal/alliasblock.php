@@ -9,21 +9,25 @@ abstract class alliasblock {
 	public \visuorelease $visuorelease;
 
 	# --- state ---
-	public \visuotag $visuotag;
 	public string $alliasglobal_name = '';
 	public string $allias_accepted   = '';
-	public bool   $settings_on       = false;
 
-	# --- asmenu ---
-	# false → рисуется произвольный HTML блока (scheme/data/release)
-	# true  → рисуется результат alliasglobal_menu (все списки)
-	public bool $settings_asmenu = false;
+	# --- switchers ---
+	public bool $enabled        = true;
+	public bool $filler_enabled = true;
 
-	# --- menu ---
+	# --- filler ---
+	public null|object $filler = null;
+
+	# --- content ---
 	public null|alliasglobal_menu $menu = null;
+	public string $wrapper_tag   = '';
+	public array  $wrapper_attrs = [ ];
+	public array  $sections      = [ ];
+	public bool   $dirty         = false;
 
-	# --- override ---
-	public null|\visuotag $override_visuotag = null;
+	# --- output ---
+	public \visuotag $visuotag;
 
 	# --- methods ---
 	public function __construct ( alliasglobal $alliasglobal ) {
@@ -42,89 +46,161 @@ abstract class alliasblock {
 	}
 
 	public function algoritm ( ) : void {
-		# override — программист подсунул готовый visuotag
-		if ( $this->override_visuotag !== null ) {
-			$this->visuotag->clear( )->append( $this->override_visuotag );
-			return;
-		}
+		if ( $this->enabled === false ) return;
 
-		# data() всегда наполняет меню, независимо от режима
 		$this->data( );
-
-		# asmenu === true → только меню
-		if ( $this->settings_asmenu === true ) {
-			$this->menu_release( );
-			return;
-		}
-
-		# обычный режим → схема + релиз
-		$this->scheme( );
-		$this->release( );
+		$this->assemble( );
 	}
 
-	# --- abstract ---
-	abstract protected function scheme  ( ) : void;
-	abstract protected function data    ( ) : void;
-	abstract protected function release ( ) : void;
+	protected function data ( ) : void {
+		if ( $this->try_filler( ) ) return;
+		$this->default_data( );
+	}
 
-	# --- menu-only release ---
-	# По умолчанию выкладывает все именованные списки меню подряд.
-	# Блок может переопределить, если в asmenu-режиме нужно что-то иное.
-	protected function menu_release ( ) : void {
-		if ( $this->menu === null ) return;
+	protected function default_data ( ) : void { }
 
-		foreach ( array_keys( $this->menu->lists ) as $name ) {
-			$this->visuotag->append( $this->menu->as_tag( $name ) );
+	protected function try_filler ( ) : bool {
+		if ( $this->filler_enabled === false ) return false;
+
+		$domain = $this->main->main_settings->domain_accepted( false );
+		$accept = $this->main->main_settings->allias_accepted( );
+		if ( is_null( $accept ) ) return false;
+
+		$rc  = new \ReflectionClass( $this );
+		$dir = dirname( $rc->getFileName( ) );
+
+		$path  = $dir . DS . $this->alliasglobal_name . '_' . $accept . '.php';
+		$class = '\\' . $domain . '\\alliasglobal_' . $this->alliasglobal_name . '_' . $accept;
+
+		if ( ! is_file( $path ) ) return false;
+		if ( ! include_once $path ) return false;
+		if ( ! class_exists( $class ) ) return false;
+
+		$filler = new $class( $this );
+		$this->filler = $filler;
+
+		if ( property_exists( $filler , 'enabled' ) && $filler->enabled === false ) return false;
+		if ( method_exists( $filler , 'data' ) ) $filler->data( );
+
+		return true;
+	}
+
+	# --- assemble: собирает дерево с нуля каждый раз ---
+	protected function assemble ( ) : void {
+		$root = new \visuotag( $this->visuorelease );
+
+		$parent = $root;
+
+		if ( $this->wrapper_tag !== '' ) {
+			$wrapper = $root->tag( $this->wrapper_tag );
+
+			foreach ( $this->wrapper_attrs as $key => $val ) {
+				$wrapper->attrs_add( $key , (string) $val );
+			}
+
+			$parent = $wrapper;
 		}
+
+		foreach ( $this->sections as $vt ) {
+			$parent->append( $vt );
+		}
+
+		$this->visuotag = $root;
+		$this->dirty    = false;
+	}
+
+	# --- sections API ---
+	public function section_add ( string $name , \visuotag $vt ) : static {
+		$this->sections[ $name ] = $vt;
+		$this->dirty = true;
+		return $this;
+	}
+
+	public function section_get ( string $name ) : null|\visuotag {
+		return $this->sections[ $name ] ?? null;
+	}
+
+	public function section_has ( string $name ) : bool {
+		return isset( $this->sections[ $name ] );
+	}
+
+	public function section_remove ( string $name ) : static {
+		unset( $this->sections[ $name ] );
+		$this->dirty = true;
+		return $this;
+	}
+
+	public function section_names ( ) : array {
+		return array_keys( $this->sections );
+	}
+
+	public function sections_clear ( ) : static {
+		$this->sections = [ ];
+		$this->dirty = true;
+		return $this;
+	}
+
+	# --- wrapper API ---
+	public function wrapper_set ( string $tag , array $attrs = [ ] ) : static {
+		$this->wrapper_tag   = $tag;
+		$this->wrapper_attrs = $attrs;
+		$this->dirty = true;
+		return $this;
+	}
+
+	public function wrapper_clear ( ) : static {
+		$this->wrapper_tag   = '';
+		$this->wrapper_attrs = [ ];
+		$this->dirty = true;
+		return $this;
 	}
 
 	# --- switchers ---
-
-	# Переключить режим отображения и перестроить.
-	public function asmenu ( bool $asmenu ) : void {
-		$this->settings_asmenu = $asmenu;
-		$this->rebuild( );
+	public function show ( ) : static {
+		$this->enabled = true;
+		return $this;
 	}
 
-	# Быстрая перерисовка без пересбора данных:
-	# поле меняется → reload() → scheme+release отдадут новое значение.
-	public function reload ( ) : void {
-		$this->visuotag->clear( );
-
-		if ( $this->override_visuotag !== null ) {
-			$this->visuotag->append( $this->override_visuotag );
-			return;
-		}
-
-		if ( $this->settings_asmenu === true ) {
-			$this->menu_release( );
-			return;
-		}
-
-		$this->scheme( );
-		$this->release( );
+	public function hide ( ) : static {
+		$this->enabled = false;
+		return $this;
 	}
 
-	# Полная пересборка: сброс меню + override + вызов algoritm().
+	public function set_enabled ( bool $enabled = true ) : static {
+		$this->enabled = $enabled;
+		return $this;
+	}
+
+	public function set_filler_enabled ( bool $enabled = true ) : static {
+		$this->filler_enabled = $enabled;
+		return $this;
+	}
+
+	# --- rebuild ---
 	public function rebuild ( ) : void {
 		$this->menu?->clear( );
-		$this->override_visuotag = null;
-		$this->visuotag->clear( );
+		$this->filler = null;
+		$this->wrapper_tag = '';
+		$this->wrapper_attrs = [ ];
+		$this->sections = [ ];
+		$this->visuotag = new \visuotag( $this->visuorelease );
 		$this->algoritm( );
 	}
 
-	# Полная замена содержимого блока.
-	public function override ( \visuotag $vt ) : void {
-		$this->override_visuotag = $vt;
-		$this->reload( );
-	}
-
-	# --- accessors ---
+	# --- accessors (с ленивой пересборкой) ---
 	public function as_tag ( ) : \visuotag {
+		if ( $this->enabled === false ) {
+			return ( new \visuotag( $this->visuorelease ) )->root( );
+		}
+		if ( $this->dirty ) $this->assemble( );
 		return $this->visuotag->root( );
 	}
 
 	public function visuotag ( ) : \visuotag {
+		if ( $this->enabled === false ) {
+			return new \visuotag( $this->visuorelease );
+		}
+		if ( $this->dirty ) $this->assemble( );
 		return $this->visuotag;
 	}
 }

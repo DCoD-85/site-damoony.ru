@@ -36,10 +36,15 @@ TOP_LOGIN_SETTINGS
 TOP_LOGIN_LOGOUT
 	Выход
 TOP_PROJECTS_DAMOONY_COMMENT
+	<a href="%s">Damoony<span>Титульная страница</span></a>
 	<a href="%s">Login</a>
 	<a href="%s">Football<span>Футбольный менеджер, возьми команду и приведи её к успеху!</span></a>
 	<a href="%s">Visuo<span>Инструмент разработки</span></a>
 	<a href="%s">Oxydog<span>Фонд благотворительной помощи <b>Оксаны и Искры</b></span></a>
+TOP_PROJECTS_DOMAIN_COMMENT
+	<a href="https://www.damoony.ru">DAMὸὸNY</a>
+	<a href="https://www.idoam.ru">IDOAM</a>
+	<a href="https://www.asptour.ru">ASPTOUR</a>
 TOP_LOGIN_PROFILE_COMMENT
 	
 TOP_LOGIN_SETTINGS_COMMENT

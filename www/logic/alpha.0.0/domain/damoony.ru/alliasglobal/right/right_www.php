@@ -3,29 +3,23 @@
 namespace damoony;
 
 class alliasglobal_right_www {
-	# --- refs ---
+
 	public \main $main;
 	public alliasglobal_right $right;
 
-	# --- methods ---
+	public bool $enabled = true;
+
 	public function __construct ( alliasglobal_right $right ) {
 		$this->main  = $right->main;
 		$this->right = $right;
-		$this->data( );
 	}
 
 	public function data ( ) : void {
-		$lib  = $this->main->library;
-		$url  = $lib->url( );
-		$link = $lib->link( );
+		$this->right->wrapper_set( 'div' , [ 'class' => 'right' ] );
 
-		$url_base = $url->static_base;
-		
-		$this->right->menu->link(
-			'nav' ,
-			'Статистика' ,
-			$link->href( false , [ $url_base[ 0 ] , 'overview' ] , use_all_adress_data : false ) ,
-			( $url_base[ 1 ] ?? '' ) === 'overview'
-		);
+		$vt = new \visuotag( );
+		$vt->tag( 'div' , class : 'test-block' )->content( 'right/right_www - блок' );
+
+		$this->right->section_add( 'test' , $vt->root( ) );
 	}
 }

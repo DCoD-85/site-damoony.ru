@@ -223,6 +223,7 @@ class main_settings {
 	public array $domains_available = [ ];
 	public array $alliases_real = [ ];
 	public array $alliases_available = [ ];
+	
 
 	# render engine
 	public array $render_engine = [ 'default' => 'algoritm' ];

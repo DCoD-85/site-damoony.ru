@@ -1,0 +1,85 @@
+/* ============================================================
+   TOP — корневой контейнер
+   ============================================================ */
+.menulist { }
+
+.menulist .menuhead { display : block ; margin : 10px ; font-weight : bolder ; }
+.menulist .menutext { display : block ; margin : 10px ; }
+.menulist .menulink_between { font-weight : 100 ; padding : 0 5px ; color : #CCC ; }
+.menulist .menulink { display : grid ; position : relative ; }
+.menulist .menulink.menulink_popup { display : grid ;  justify-items : center ; position : relative ; }
+.menulist .menulink.link_text { }
+.menulist .menulink.link_link { }
+.menulist .menulink.link_popup { }
+
+.menulist .menulink { color : #666 ; }
+.menulist .menulink a { color : #999 ; border-bottom : dashed #999 1px ; }
+.menulist .menulink.selected a { color : #369 ; border-bottom : solid #369 1px ; }
+.menulist .menulink a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.menulist .menulink.selected a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.menulist .menulink .menucomment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.menulist .menulink:hover .menucomment { display : block ; }
+.menulist .menulink .menucomment .menucomment_narrow { height : 10px ; background : url( '../images/narrow_top.png' ) center no-repeat ; }
+.menulist .menulink .menucomment .menucomment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+.dt_left .menulist { margin : 10px 0px ; }
+.dt_left .menulist a { border : none ; }
+.dt_left .menulist a:hover { border : none ; }
+
+.dt_top .top { }
+.dt_top .top .tophead {
+	display: grid;
+	grid-template-columns: 300px 1fr auto auto;
+	align-items: start;
+	margin: 0 auto;
+	padding : 0px ;
+	width: 100%;
+}
+
+.dt_top .top .tophead .topheaddomain .menulist { padding : 10px ; display : flex ; justify-content : flex-end ; }
+.dt_top .top .tophead .topheadauth .menulist ,
+.dt_top .top .tophead .topheadskin .menulist ,
+.dt_top .top .tophead .topheadlang .menulist { display : flex ; padding : 10px ; }
+
+.dt_top .top .tophead .topheaddomain .menulist .menucomment { }
+.dt_top .top .tophead .topheaddomain .menulist .menucomment a { display : block ; font-size : 20px ; padding : 5px ; color : #FFF ; border-bottom : dashed #999 1px ; }
+.dt_top .top .tophead .topheaddomain .menulist .menucomment a span { font-size : 12px ; }
+.dt_top .top .tophead .topheaddomain .menulist .menucomment a:hover { color : #DDD ; }
+.dt_top .top .tophead .topheaddomain .menulist .menucomment a:hover span { color : #AAA ; text-decoration : underline ; }
+.dt_top .top .tophead .topheaddomain .menulist .menucomment a:last-child { border : none ; }
+
+.dt_top .top .tophead .topheaddomain .menulist .menucomment a span { display : block ; font-size : 14px ; padding-top : 5px ; line-height : 1.0 ; color: #CCC; }
+
+.dt_top .top .toppro {
+	display: grid;
+	grid-template-columns: 300px auto;
+	align-items: center;
+	text-align : right ;
+	margin: 0 auto;
+	padding : 0px ;
+	width: 100%;
+}
+
+.dt_top .top .toppro .topproname { display : block ; font-size : 54px ; font-weight : 600 ; padding : 10px ; color : #369 ; }
+.dt_top .top .toppro .topproname span { display : block ; font-size : 16px ; font-weight : 300 ; padding-left : 50px ; text-align : center ; }
+
+.dt_top .top .toppro .topprologo { display : flex ; flex-direction : column ; }
+.dt_top .top .toppro .topprologo .topprologopro { height : 150px ; }
+.dt_top .top .toppro .topprologo .toppronav .menulist { display : flex ; justify-content : flex-end ; padding : 10px ; }
+
+
+.toplogo .toplogo_links .between { margin : 0 5px ; font-weight : 100 ; color : #CCC ; }
+.toplogo .toplogo_links .toplogo_links_top { display : flex ;  }
+.toplogo .toplogo_links .toplogo_links_top_login { width : 100% ; text-align : left ; }
+.toplogo .toplogo_links .toplogo_links_top_skins { }
+.toplogo .toplogo_links .toplogo_links_top_skins .box { white-space : nowrap ; margin : -20px 0 -10px 0 ; }
+.toplogo .toplogo_links .toplogo_links_top_skins .box .title { display : none ; margin-top : 10px ; padding-top : 10px ; text-align : center ; border-top : dashed #DDD 1px ; }
+.toplogo .toplogo_links .toplogo_links_top_skins .box .data { padding : 20px 10px 10px 10px ; background : #EEE ;}
+.toplogo .toplogo_links .toplogo_links_top_skins .box:hover .data { margin-bottom : -15px ; border-top : solid #CCC 5px ; }
+.toplogo .toplogo_links .toplogo_links_top_skins .box:hover .title { display : block ; }
+.toplogo .toplogo_links .toplogo_links_top_languages .box { white-space : nowrap ; padding-left : 10px ; }
+.toplogo .toplogo_links .toplogo_links_top_login ,
+.toplogo .toplogo_links .toplogo_links_top_auth ,
+.toplogo .toplogo_links .toplogo_links_top_skins ,
+.toplogo .toplogo_links .toplogo_links_top_languages { font-size : 16px ; }

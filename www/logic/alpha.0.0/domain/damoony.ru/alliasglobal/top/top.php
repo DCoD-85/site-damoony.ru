@@ -3,133 +3,246 @@
 namespace damoony;
 
 class alliasglobal_top extends alliasblock {
-	# --- state ---
 	public string $alliasglobal_name = 'top';
-	public bool   $settings_asmenu   = false;
 
 	# --- custom ---
 	public string $top_sitename  = 'DAMὸὸNY<span>На страже вашей стабильности</span>';
 	public string $top_siteabout = '&nbsp;';
 
-	# --- methods ---
-	protected function scheme ( ) : void {
-		$this->visuotag
-			->tag( 'div' , class : 'toplogo' )
-			->tag( 'div' , class : 'toplogo_logo' , return : false )
-			->tag( 'div' , class : 'toplogo_title' )
-				->tag( 'div' , class : 'siteprojects' , return : false )
-				->tag( 'div' , class : 'sitename' , return : false )
-				->tag( 'div' , class : 'siteabout' , return : false )
-			->parent( )
-			->tag( 'div' , class : 'toplogo_links' )
-				->tag( 'div' , class : 'toplogo_links_top' )
-					->tag( 'div' , class : 'toplogo_links_top_login' , return : false )
-					->tag( 'div' , class : 'toplogo_links_top_skins' , return : false )
-					->tag( 'div' , class : 'toplogo_links_top_languages' , return : false )
-				->parent( )
-				->tag( 'div' , class : 'toplogo_links_pagelogo' )
-				->parent( )
-				->tag( 'div' , class : 'toplogo_links_navigate' )
-			->parent( 2 )
-			->tag( 'div' , class : 'topsubmenu' )
-				->tag( 'div' , class : 'topsubmenu_title' );
-	}
-	
-	protected function data ( ) : void {
-		$main  = $this->main;
-		$lang  = $main->language;
-		$lib   = $main->library;
-		$url   = $lib->url( );
-		$link  = $lib->link( );
+	# --- data ---
+	protected function default_data ( ) : void {
+		$this->fill_projects( );
+		$this->fill_login( );
+		$this->fill_skins( );
+		$this->fill_languages( );
+		$this->fill_navigate( );
 
-		$url_domain = $url->static_domain;
+		$this->wrapper_set( 'div' , [ 'class' => 'top' ] );
+
+		$this->section_add( 'tophead' , $this->make_tophead( ) );
+		$this->section_add( 'toppro'  , $this->make_toppro( ) );
+		$this->section_add( 'toplinks', $this->make_toplinks( ) );
+	}
+
+	# ===============================================================
+	#   СТРУКТУРА
+	# ===============================================================
+
+	private function make_tophead ( ) : \visuotag {
+		$menu = $this->menu;
+
+		$vt   = new \visuotag( );
+		$head = $vt->tag( 'div' , class : 'tophead' );
+
+		$head->tag( 'div' , class : 'topheaddomain' )->append( $menu->as_list( 'projects' ) );
+		$head->tag( 'div' , class : 'topheadauth'   )->append( $menu->as_list( 'login' ) );
+		$head->tag( 'div' , class : 'topheadskin'   )->append( $menu->as_list( 'skins' ) );
+		$head->tag( 'div' , class : 'topheadlang'   )->append( $menu->as_list( 'languages' ) );
+
+		return $vt->root( );
+	}
+
+	private function make_toppro ( ) : \visuotag {
+		$menu = $this->menu;
+		$main = $this->main;
+		$lib  = $main->library;
+		$link = $lib->link( );
+		$url  = $lib->url( );
+
+		$vt  = new \visuotag( );
+		$pro = $vt->tag( 'div' , class : 'toppro' );
+
+		# --- название ---
+		$pro->tag( 'div' , class : 'topproname' )
+			# ->tag( 'a' )
+				# ->attrs_add( 'href' , $link->href( [ $url->static_allias[ 0 ] ] , [ ] ) )
+				# ->attrs_add( 'href' , $link->href( [ $url->static_allias[ 0 ] ] , [ ] ) )
+				->content( $this->top_sitename );
+
+		# --- лого + навигация ---
+		$logo = $pro->tag( 'div' , class : 'topprologo' );
+
+		$logo->tag( 'div' , class : 'topprologopro' );
+
+		$logo->tag( 'div' , class : 'toppronav' )
+			->append( $menu->as_list( 'navigate' ) );
+
+		return $vt->root( );
+	}
+
+	private function make_toplinks ( ) : \visuotag {
+		$menu = $this->menu;
+
+		$vt = new \visuotag( );
+		$vt->tag( 'div' , class : 'toplinks' )
+			->append( $menu->as_list( 'links' ) );
+
+		return $vt->root( );
+	}
+
+	# ===============================================================
+	#   НАПОЛНЕНИЕ МЕНЮ
+	# ===============================================================
+
+	private function fill_projects ( ) : void {
+		$main = $this->main;
+		$lang = $main->language;
+		$lib  = $main->library;
+		$url  = $lib->url( );
+		$link = $lib->link( );
+
 		$url_allias = $url->static_allias;
 		$url_base   = $url->static_base;
-		$url_vars   = $url->static_vars;
 
-		# ---- projects ----
-		$top_projects_current  = $url_allias[ 1 ] ?? '';
-		$top_projects_damoony  = $lang->get( 'TOP_PROJECTS_DAMOONY' , [ ] , 'Damoony' );
-		$top_projects_asptour  = $lang->get( 'TOP_PROJECTS_ASPTOUR' , [ ] , 'Asptour' );
-		$top_projects_current_comment = $lang->get( 'TOP_PROJECTS_CURRENT_COMMENT' , [ ] , '' );
-		$top_projects_damoony_comment = $lang->get( 'TOP_PROJECTS_DAMOONY_COMMENT' , [ ] , '' );
-		$top_projects_asptour_comment = '';
+		$cur_proj = $url->static_allias[ 1 ] ?? '';
+		$damoony  = $lang->get( 'TOP_PROJECTS_DAMOONY' , [ ] , 'Damoony' );
 
-		$this->menu->link( 'projects' , $top_projects_current , $link->href( false , [ $url_base[ 0 ] , 'main' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'main' , false , $top_projects_current_comment );
-		$this->menu->link( 'projects' , $top_projects_damoony , $link->href( false , [ $url_base[ 0 ] , 'news' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'news' , false , $top_projects_damoony_comment );
-		$this->menu->link( 'projects' , $top_projects_asptour , $link->href( false , [ $url_base[ 0 ] , 'profile' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'reports' , false , $top_projects_asptour_comment );
+		$cur_com  = $lang->get( 'TOP_PROJECTS_DAMOONY_COMMENT' , [
+			$link->href( [ 'www'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'login'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'football' , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'visuo'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'oxydog'   , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+		] , '' );
 
-		# ---- skins ----
-		$title_skins_light = $lang->get( 'TOP_SKINS_LIGHT' , [ ] , 'Светлый' );
-		$title_skins_dark  = $lang->get( 'TOP_SKINS_DARK' , [ ] , 'Темный' );
+		$dam_com  = $lang->get( 'TOP_PROJECTS_DOMAIN_COMMENT' , [
+			$link->href( [ 'www'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'www'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'www'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'oxydog' , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+		] , '' );
 
-		$this->menu->link( 'skins' , $title_skins_light , $link->href( $url_domain , $url_base , [ 'skin'=>'default' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'news' , true );
-		$this->menu->link( 'skins' , $title_skins_dark  , $link->href( $url_domain , $url_base , [ 'skin'=>'dark' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'reports' , true );
+		# --- ссылки некликабельны, работают только popup-комментарии ---
+		$this->menu->link( 'projects' , $cur_proj , 'javascript:void(0)' , ( $url_base[ 1 ] ?? '' ) === 'main' , false , $cur_com );
+		$this->menu->link( 'projects' , $damoony  , 'javascript:void(0)' , ( $url_base[ 1 ] ?? '' ) === 'news' , false , $dam_com );
+	}
 
-		# ---- login ----
-		$top_login_profile    = $lang->get( 'TOP_LOGIN_PROFILE' , [ $main->user->profile->data[ 'login' ] ?? '' ] , '%s' );
-		$top_login_settings   = $lang->get( 'TOP_LOGIN_SETTINGS' , [ ] , 'Настройки' );
-		$top_login_logout     = $lang->get( 'TOP_LOGIN_LOGOUT' , [ ] , 'Выход' );
-		$top_login_login      = $lang->get( 'TOP_LOGIN_LOGIN' , [ ] , 'Авторизация' );
-		$top_login_registration = $lang->get( 'TOP_LOGIN_REGISTRATION' , [ ] , 'Регистрация' );
+	private function fill_login ( ) : void {
+		$main = $this->main;
+		$lang = $main->language;
+		$lib  = $main->library;
+		$url  = $lib->url( );
+		$link = $lib->link( );
 
-		if ( ( $url_allias[ 2 ] ?? '' ) !== 'login' ) {
-			if ( $main->user->is_guest( ) === false ) {
-				$this->menu->link( 'login' , $top_login_profile  , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , [ 'profile' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'profile' );
-				$this->menu->link( 'login' , $top_login_settings , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , [ 'settings' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'settings' );
-				$this->menu->link( 'login' , $top_login_logout   , $link->href( [ 'login' , $url_allias[ 0 ] ] , [ 'logout' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'logout' );
-			} else {
-				$this->menu->link( 'login' , $top_login_login        , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , [ 'login' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'news' , false , '' , true , true );
-				$this->menu->link( 'login' , $top_login_registration , $link->href( [ 'login' , $url_allias[ 0 ] ] , [ 'remember' ] , use_all_adress_data : false ) , ( $url_base[ 1 ] ?? '' ) === 'reports' , false , '' , true , true );
-			}
+		$url_allias = $url->static_allias;
+		$url_base   = $url->static_base;
+
+		# --- гость ---
+		if ( $main->user->is_guest( ) === true ) {
+			$login = $lang->get( 'TOP_LOGIN_LOGIN'        , [ ] , 'Авторизация' );
+			$reg   = $lang->get( 'TOP_LOGIN_REGISTRATION' , [ ] , 'Регистрация' );
+			$help  = $lang->get( 'TOP_LOGIN_HELP'         , [ ] , 'Помощь'      );
+
+			$this->menu->link( 'login' , $login ,
+				$link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , [ 'login' ] , use_all_adress_data : false ) ,
+				false , false , '' , true , false );
+
+			$this->menu->link( 'login' , $reg ,
+				$link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , [ 'registration' ] , use_all_adress_data : false ) ,
+				false , false , '' , true , false );
+
+			$this->menu->link( 'login' , $help ,
+				$link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , [ $url_base[ 0 ] , 'help' ] , use_all_adress_data : false ) ,
+				false , false , '' , true , false );
+
+			return;
 		}
 
-		# ---- languages ----
+		# --- авторизованный: иконки ---
+		$items = [
+			[ 'messages'      , 'Сообщения' , 'TOP_MENU_MESSAGES' ] ,
+			[ 'tasks'         , 'Задачи'    , 'TOP_MENU_TASKS'    ] ,
+			[ 'notifications' , 'Новости'   , 'TOP_MENU_NEWS'     ] ,
+			[ 'friends'       , 'Друзья'    , 'TOP_MENU_FRIENDS'  ] ,
+			[ 'profile'       , 'Профиль'   , 'TOP_MENU_PROFILE'  ] ,
+			[ 'logout'        , 'Выход'     , 'TOP_MENU_LOGOUT'   ] ,
+		];
+
+		foreach ( $items as $it ) {
+			[ $slug , $default , $key ] = $it;
+
+			$title = $lang->get( $key , [ ] , $default );
+
+			$row = $this->menu->link(
+				'login' ,
+				$title ,
+				$link->href( false , [ $url_base[ 0 ] , $slug ] , use_all_adress_data : false )
+			);
+
+			$row->icon( $slug );
+		}
+	}
+
+	private function fill_skins ( ) : void {
+		$main = $this->main;
+		$lang = $main->language;
+		$lib  = $main->library;
+		$url  = $lib->url( );
+		$link = $lib->link( );
+
+		$url_domain = $url->static_domain;
+		$url_base   = $url->static_base;
+
+		$light = $lang->get( 'TOP_SKINS_LIGHT' , [ ] , 'Светлый' );
+		$dark  = $lang->get( 'TOP_SKINS_DARK' , [ ] , 'Темный' );
+
+		$current = $_COOKIE[ 'skin' ] ?? 'default';
+
+		$this->menu->link( 'skins' , $light , $link->href( $url_domain , $url_base , [ 'skin'=>'default' ] , use_all_adress_data : false ) , $current === 'default' );
+		$this->menu->link( 'skins' , $dark  , $link->href( $url_domain , $url_base , [ 'skin'=>'dark' ] , use_all_adress_data : false ) , $current === 'dark' );
+	}
+
+	private function fill_languages ( ) : void {
+		$main = $this->main;
+		$lang = $main->language;
+		$lib  = $main->library;
+		$url  = $lib->url( );
+		$link = $lib->link( );
+
+		$url_allias = $url->static_allias;
+		$url_base   = $url->static_base;
+
 		$url_ru = $url_base; $url_ru[ 0 ] = 'ru-ru';
 		$url_en = $url_base; $url_en[ 0 ] = 'en-en';
 		$url_ch = $url_base; $url_ch[ 0 ] = 'ch-ch';
 
-		$title_languages_rus   = $lang->get( 'TOP_LANGUAGES_RUS' , [ ] , 'Русский' );
-		$title_languages_eng   = $lang->get( 'TOP_LANGUAGES_ENG' , [ ] , 'Английский' );
-		$title_languages_china = $lang->get( 'TOP_LANGUAGES_CHINA' , [ ] , 'Китайский' );
+		$rus = $lang->get( 'TOP_LANGUAGES_RUS' , [ ] , 'Русский' );
+		$eng = $lang->get( 'TOP_LANGUAGES_ENG' , [ ] , 'Английский' );
+		$chi = $lang->get( 'TOP_LANGUAGES_CHINA' , [ ] , 'Китайский' );
 
-		$this->menu->link( 'languages' , $title_languages_rus   , $link->href( [ $url_allias[ 1 ] ?: null , $url_allias[ 0 ] ] , $url_ru , use_all_adress_data : false ) , $url_base[ 0 ] === 'ru-ru' );
-		$this->menu->link( 'languages' , $title_languages_eng   , $link->href( [ $url_allias[ 1 ] ?: null , $url_allias[ 0 ] ] , $url_en , use_all_adress_data : false ) , $url_base[ 0 ] === 'en-en' );
-		$this->menu->link( 'languages' , $title_languages_china , $link->href( [ $url_allias[ 1 ] ?: null , $url_allias[ 0 ] ] , $url_ch , use_all_adress_data : false ) , $url_base[ 0 ] === 'ch-ch' );
+		$current = $url_base[ 0 ] ?? 'ru-ru';
+
+		$this->menu->link( 'languages' , $rus , $link->href( [ $url_allias[ 1 ] ?: null , $url_allias[ 0 ] ] , $url_ru , use_all_adress_data : false ) , $current === 'ru-ru' );
+		$this->menu->link( 'languages' , $eng , $link->href( [ $url_allias[ 1 ] ?: null , $url_allias[ 0 ] ] , $url_en , use_all_adress_data : false ) , $current === 'en-en' );
+		$this->menu->link( 'languages' , $chi , $link->href( [ $url_allias[ 1 ] ?: null , $url_allias[ 0 ] ] , $url_ch , use_all_adress_data : false ) , $current === 'ch-ch' );
 	}
 
-	protected function release ( ) : void {
-		$root = $this->visuotag->root( );
+	private function fill_navigate ( ) : void {
+		$main = $this->main;
+		$lang = $main->language;
+		$lib  = $main->library;
+		$url  = $lib->url( );
+		$link = $lib->link( );
 
-		# --- siteprojects / login / skins / languages / navigate / subnavigate ---
-		$slot = $root->find( class : 'siteprojects' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'projects' ) );
+		$url_base     = $url->static_base;
+		$current_page = (string) ( $url_base[ 1 ] ?? '' );
 
-		$slot = $root->find( class : 'toplogo_links_top_login' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'login' ) );
+		$items = [
+			[ 'MENU_HOME'      , 'index'     , 'Главная'      ] ,
+			[ 'MENU_DOCS'      , 'docs'      , 'Документация' ] ,
+			[ 'MENU_NEWS'      , 'news'      , 'Новости'      ] ,
+			[ 'MENU_DOWNLOADS' , 'downloads' , 'Загрузки'     ] ,
+		];
 
-		$slot = $root->find( class : 'toplogo_links_top_skins' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'skins' ) );
+		foreach ( $items as $it ) {
+			[ $key , $slug , $default ] = $it;
 
-		$slot = $root->find( class : 'toplogo_links_top_languages' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'languages' ) );
-
-		$slot = $root->find( class : 'toplogo_links_navigate' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'navigate' ) );
-
-		$slot = $root->find( class : 'topsubmenu_title' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'subnavigate' ) );
-
-		# --- sitename / siteabout ---
-		$slot = $root->find( class : 'sitename' );
-		if ( $slot !== null ) {
-			$slot->tag( 'a' )->attrs_add( 'href' , $this->main->library->link( )->href( [ $this->main->library->url( )->static_allias[ 0 ] ] , [ ] ) )->content( $this->top_sitename );
+			$this->menu->link(
+				'navigate' ,
+				$lang->get( $key , [ ] , $default ) ,
+				$link->href( false , [ $url_base[ 0 ] , $slug ] , use_all_adress_data : false ) ,
+				$current_page === $slug
+			);
 		}
-
-		$slot = $root->find( class : 'siteabout' );
-		if ( $slot !== null ) $slot->content( $this->top_siteabout );
-
-		$slot = $root->find( class : 'toplogo_links_pagelogo' );
-		if ( $slot !== null ) $slot->tag( 'div' , class : 'pagelogo' )->content( '&nbsp;' );
 	}
 }
