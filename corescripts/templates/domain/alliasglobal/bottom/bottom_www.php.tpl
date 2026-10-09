@@ -1,0 +1,21 @@
+<?PHP
+
+namespace <domain_ns>;
+
+class alliasglobal_bottom_www {
+
+	use alliasglobal_filler_trait;
+
+	public \main $main;
+	public alliasglobal_bottom $bottom;
+
+	public function __construct ( alliasglobal_bottom $bottom ) {
+		$this->main   = $bottom->main;
+		$this->bottom = $bottom;
+	}
+
+	public function data ( ) : void {
+		$file = __DIR__ . DS . 'bottom_www.data.php';
+		if ( is_file( $file ) ) include $file;
+	}
+}

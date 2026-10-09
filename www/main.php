@@ -120,7 +120,6 @@ class main {
 
 		# allias
 		$this->allias = new ($static_domain.'\\allias')( $this );
-		$this->alliaslocal = new ($static_domain.'\\alliaslocal')( $this );
 		$this->alliasglobal = new ($static_domain.'\\alliasglobal')( $this );
 		$this->alliasscheme = new ($static_domain.'\\alliasscheme')( $this );
 		
