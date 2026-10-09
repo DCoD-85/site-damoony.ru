@@ -1,0 +1,102 @@
+================================================================
+15_BLOCKS — top + left
+================================================================
+
+================================================================
+A. Блок top
+================================================================
+ФАЙЛЫ
+  top.php            — класс alliasglobal_top : alliasblock
+  top.data.php       — данные
+  top_visuo.php      — filler-класс
+  top_visuo.data.php — данные filler'а
+  top_www.php        — filler (без data, тонкий?)
+  top_www.data.php   — (если есть)
+
+top.php
+  СВОЙСТВА (custom):
+    top_sitename : string = 'DAMὸὸNY<span>…</span>'
+    top_siteabout: string = '&nbsp;'
+
+  default_data()   → include top.data.php
+
+  Приватные методы:
+    make_tophead()  — div.tophead с menu->as_list
+                        (projects, login, skins, languages)
+    make_toppro()   — div.toppro: name + logo + nav
+    make_toplinks() — div.toplinks c menu->as_list('links')
+
+    fill_projects()  — заполняет menu 'projects'
+    fill_login()     — menu 'login' (гость / авторизован)
+    fill_skins()     — menu 'skins'
+    fill_languages() — menu 'languages'
+    fill_navigate()  — menu 'navigate'
+
+top.data.php
+  $this->fill_projects()
+  $this->fill_login()
+  $this->fill_skins()
+  $this->fill_languages()
+  $this->fill_navigate()
+  $this->wrapper_set('div', ['class'=>'top'])
+  $this->section_add('tophead',  make_tophead())
+  $this->section_add('toppro',   make_toppro())
+  $this->section_add('toplinks', make_toplinks())
+
+top_visuo.php
+  use alliasglobal_filler_trait
+  $this->main, $this->top
+  data() → include top_visuo.data.php
+
+top_visuo.data.php
+  Заглушка: wrapper_set + test-block.
+
+ЗАМЕЧАНИЯ
+  - В top.php приватные make_* / fill_* вызываются из top.data.php
+    через include. Пока include идёт из default_data() —
+    область видимости позволяет обращаться к private.
+  - fill_login() использует icon-подход в menu_row.
+  - fill_projects() генерирует комментарии с URL через lang->get
+    с 5-ю ссылками-аргументами.
+
+================================================================
+B. Блок left
+================================================================
+ФАЙЛЫ
+  left.php / left.data.php
+  left_visuo.php / left_visuo.data.php
+  left_www.php / left_www.data.php
+
+left.php
+  default_data() → include left.data.php
+  Больше ничего. Тонкий.
+
+left.data.php
+  wrapper_set('div', ['class'=>'left'])
+  (пустое содержимое по умолчанию)
+
+left_visuo.php
+  use alliasglobal_filler_trait
+  Живой filler.
+  data() → include left_visuo.data.php
+  Приватные хелперы:
+    fill_index()        — статистика через dataprovider->current
+                          (doc.sections_tree, doc.articles_by_section,
+                           news.recent, files.all_active)
+    fill_docs()         — дерево документации + статьи
+    fill_news()         — два списка: newslist + newsactions
+    fill_downloads()    — список файлов
+    fill_login()        — форма авторизации + восстановление
+    fill_registration() — форма регистрации + активация
+
+left_visuo.data.php
+  wrapper_set('div', ['class'=>'left'])
+  switch ($current_page):
+    index/docs/news/downloads/login/registration → fill_*
+
+ЗАМЕЧАНИЯ
+  - left_visuo опирается на $main->dataprovider->current — если null,
+    вернёт пустой контент, но не падает.
+  - fill_* приватные → вызываются из data-файла,
+    который include'ится из метода data() класса — private ОК.
+  - separator='' отключает '|' между пунктами.

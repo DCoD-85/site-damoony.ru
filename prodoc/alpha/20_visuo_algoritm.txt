@@ -1,0 +1,181 @@
+================================================================
+20_VISUO_ALGORITM — visuo/algoritm/*
+Корневой алгоритм visuo + служебные (auth, error) + шаблон.
+================================================================
+
+ФАЙЛЫ
+  algoritm/algoritm.php          — корневой алгоритм visuo
+  algoritm/algoritm_auth.php     — заглушка auth
+  algoritm/algoritm_error.php    — 404-страница
+  algoritm/algoritm_pageshablon.php — ШАБЛОН страничного алгоритма
+                                      (namespace damoony\www — но
+                                       используется как эталон)
+
+================================================================
+A. algoritm.php
+================================================================
+namespace: damoony\visuo
+class algoritm extends \algoritm_
+
+ОСОБЕННОСТЬ: расширяет базовый, задавая пути visuo.
+
+ПУТИ / КЛАССЫ
+  $available  = ['index', '([a-z]{2}-[a-z]{2})|lang', 'tests']
+  $basepath   = __DIR__ . DS
+  $baseclass  = 'algoritm'
+  $errorpath  = __DIR__ . DS
+  $errorclass = 'algoritm_error'
+  $authpath   = __DIR__ . DS
+  $authclass  = 'algoritm_auth'
+
+$available — что можно встретить в URL:
+  - 'index'                          → /index/
+  - '([a-z]{2}-[a-z]{2})|lang'       → /ru-ru/ → args[lang] = 'ru-ru'
+  - 'tests'                          → /tests/
+
+__construct( main , array $args = [] )
+    Переопределён (не super):
+      $this->main = $main
+      $this->args = $args
+      $this->algoritmdata = new \algoritmdata_()
+      $this->boot_user()
+
+boot_user()
+    if !(main->user instanceof visuo\user):
+      main->user = new visuo\user(main)
+    main->user->boot()
+    — идемпотентно. Дублирует подмену из include.php.
+
+start( )
+    main->alliasscheme->load('visuo')
+    logic()
+    release()
+    main->alliasscheme->reload()
+    — полный цикл: схема → логика → рендер → схема.
+
+logic( )
+    CORS-заголовки на основе HTTP_REFERER.
+    Если referer пусто — Access-Control-Allow-Origin: '*'.
+    Иначе — origin = referer без последнего символа
+    (обрезает '/' — но так получится 'https://host' — ок).
+
+release( )
+    algoritmdata->set(['([a-z]{2}-[a-z]{2})|lang'], false, true, true)
+    release_($this)
+    — регистрирует только lang-сегмент как единственный «страничный».
+
+default( )
+    ПУСТО. Роутинг идёт напрямую в release() → release_() → include_ext().
+
+ЗАМЕЧАНИЯ
+  - $available: 'index' и 'tests' — но URL '/index/' подхватится
+    только если что-то вернёт basepath с 'index'.
+  - '([a-z]{2}-[a-z]{2})|lang' — regex, args['lang'] = значение.
+  - Логика CORS — обрезание последнего символа referer хрупко.
+    Referer обычно без '/' на конце → срежется реальный символ.
+
+================================================================
+B. algoritm_auth.php
+================================================================
+namespace: damoony\visuo
+class algoritm_auth extends algoritm_
+
+РОЛЬ: заглушка для страниц под auth.
+Сейчас default() просто выводит сообщение в center.
+
+algoritm()  — пусто
+release()   → default()
+default()
+    $center = main->alliasglobal->center
+    scheme->load('error')
+    $vt = div «Вы должны быть зарегистрированы…»
+    $center->visuotag()->append($vt)
+
+ЗАМЕЧАНИЯ
+  - Грузит схему 'error', но контент пишет в center.
+  - Нет редиректа на форму логина — просто сообщение.
+  - Заменит .user->is_guest() отказ.
+
+================================================================
+C. algoritm_error.php
+================================================================
+namespace: damoony\visuo
+class algoritm_error extends algoritm_
+
+РОЛЬ: 404-страница.
+
+algoritm()  — пусто
+release()   → default()
+default()
+    scheme->load('error')
+    $vt = div.error
+           div.error_head  → '404'
+           div.error_title → 'Page not found<hr>Страница не найдена'
+    $center->visuotag()->append($vt)
+
+ЗАМЕЧАНИЯ
+  - Жёстко «404» — не параметр.
+  - Не учитывает реальную причину (нет класса / не разрешён URL).
+
+================================================================
+D. algoritm_pageshablon.php — ЭТАЛОН
+================================================================
+namespace: damoony\www    ← но используется как шаблон для visuo тоже
+
+РОЛЬ: шаблон страничного алгоритма.
+
+Использование:
+  1. Копируешь в allias/<allias>/algoritm/lang/<name>/algoritm_lang_<name>.php
+  2. Переименовываешь класс
+  3. Регистрируешь {name} в $available родителя
+     (allias/<allias>/algoritm/lang/algoritm_lang.php)
+
+URL: /{lang}/{name}/
+
+НАСТРОЙКИ (переопределяются)
+  $available = ['']            — какие URL обрабатывает
+  $auth      = false           — только авторизованным
+  $search    = true            — разбирать URL через regex
+  $default   = true            — вызвать default() если URL совпал
+
+МЕТОДЫ
+  release()
+    algoritmdata->set($available, $auth, $search, $default)
+    release_($this)
+
+  default()
+    user->is_guest() ? default_guest() : default_logged()
+
+  default_guest()  — контент для гостя, пишет в center
+  default_logged() — контент для авторизованного
+
+ФОРМАТ $available — см. подсказки в файле:
+  ''                 → /{lang}/
+  'edit'             → /{lang}/edit/
+  '([0-9]+)|id'      → /{lang}/123/  → args['id'] = '123'
+  '([a-z]+)|slug'    → /{lang}/hello/ → args['slug'] = 'hello'
+
+ЗАМЕЧАНИЯ
+  - Оба default_guest/logged возвращают true — это ожидается
+    include_ext().
+  - Хелперы (link, url, center) достаются стандартно.
+
+================================================================
+ПОТОК ВЫЗОВА VISUO
+================================================================
+  main::logic()
+    new \damoony\visuo\algoritm($main)
+      boot_user()          — подмена user + boot
+    algoritm->clear()
+    algoritm->start()
+      alliasscheme->load('visuo')
+      logic()              — CORS
+      release()            — роутинг по URL
+        algoritmdata->set([lang-regex], false, true, true)
+        release_()
+          include_ext()
+            url_base_pos = 3  (alliasglobal_top_visuo → 3)
+            url_base[3] = 'index' | 'ru-ru' | 'tests' | ''
+            → include algoritm_<segment>.php
+            → new + algoritm() + release()
+      alliasscheme->reload()

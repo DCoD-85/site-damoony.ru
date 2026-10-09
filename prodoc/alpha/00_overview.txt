@@ -1,0 +1,55 @@
+ALPHA 0.0 — карта домена damoony.ru
+===================================
+
+Слои (снизу вверх):
+
+  1. main (www/main.php)
+     - main_settings  (конфиг site.config)
+     - library        (url, link, language, user)
+     - visuorelease   (рендер, meta, visuotag-контекст)
+
+  2. domain (domain.php)
+     - domaininfo     (имя домена, история)
+     - подключает <domain>/allias.php, alliaslocal.php,
+       alliasglobal.php, alliasscheme.php, dataprovider.php
+
+  3. allias (allias.php)
+     - alliasinfo     (имя аллиаса, история)
+     - по имени аллиаса подключает <allias>/include.php
+
+  4. alliaslocal (alliaslocal.php)
+     - local-блоки: top, bottom, ...   → <alliaslocal>/<name>.php
+
+  5. alliasglobal (alliasglobal.php)
+     - глобальные блоки: policy, top, left, center, right, bottom, debug
+     - скрипты: headers, head  (не-визуальные, вызываются из main::release)
+     - меню: alliasglobal_menu / alliasglobal_menu_row
+     - база блока: alliasblock
+     - filler'ы: <block>/<block>_<allias>[.data].php + трейт
+
+  6. alliasscheme (alliasscheme.php)
+     - схемы аллиасов: login, error, min, www, visuo
+     - load()/reload() по имени схемы
+
+  7. dataprovider (dataprovider.php + <allias>/dataprovider/)
+     - фасад домена, держит фасады аллиасов
+     - $main->dataprovider->current → текущий аллиас
+     - $main->dataprovider-><allias> → явный доступ
+
+Поток:
+  main → domain → allias → alliasglobal (+ alliasscheme)
+                          + alliaslocal
+                          + dataprovider (по запросу)
+
+Конвенции:
+  - <name>.php        — тонкий класс
+  - <name>.data.php   — данные (include из класса)
+  - <name>_<allias>.php       — filler аллиаса
+  - <name>_<allias>.data.php  — данные filler'а
+  - namespace damoony\<domain>
+  - пути через __DIR__ . DS . ...
+
+См. также:
+  - 02_allias.txt        — состав аллиасов
+  - 03_alliasglobal.txt  — состав глобальных блоков
+  - 99_fillers.txt       — конвенция filler'ов

@@ -1,0 +1,97 @@
+================================================================
+12_MENU — menu.php + menu_row.php
+Двухуровневая система меню alliasglobal.
+================================================================
+
+================================================================
+A. alliasglobal_menu (menu.php)
+================================================================
+namespace: damoony
+
+РОЛЬ:
+  Контейнер «списков» пунктов меню. Блок наполняет его
+  через ->link()/->head()/->text()/->between()/->vt(),
+  затем вызывает ->as_tag($list)/->as_list($list) для рендера.
+
+СВОЙСТВА
+  alliasglobal : ?alliasglobal
+  main         : ?main
+  menu_name    : string           — обычно = alliasglobal_name блока
+  separator    : string = '|'     — разделитель между пунктами
+  lists        : array            — lists[list_name][] = alliasglobal_menu_row
+
+FILLERS
+  new($name)                         → создаёт row, кладёт в lists[$name]
+  link($name, $text, $href, ...)     → row->link(...)
+  head($name, $text)                 → row->head(...)
+  text($name, $text, $comment, $popup)
+  between($name, $separator)
+  vt($name, $vt)
+
+INSPECTION
+  all() / get($name) / has($name) / count($name) / names()
+
+EDIT
+  clear($name = '')  — если $name пусто, чистит всё
+  remove($name, $index)
+
+RELEASE
+  as_tag($name)  — плоский набор:
+      foreach row: append row->as_tag()
+      между rows (кроме between/vt) → span.menulink_between
+  as_link($name) — алиас as_tag
+  as_list($name) — обёртка div.menulist.menulist_<name>
+      если внутри пусто — возвращает пустой visuotag
+  as_tag_all()   — все списки
+
+ЗАМЕЧАНИЯ
+  - separator применяется в as_tag(), но НЕ применяется в as_list()
+    (as_list вызывает as_tag внутри — так что ок).
+  - «between»-row имеет свой separator, но логика as_tag смотрит
+    на row->type и не добавляет общий separator после between/vt.
+
+================================================================
+B. alliasglobal_menu_row (menu_row.php)
+================================================================
+namespace: damoony
+
+РОЛЬ:
+  Один пункт меню. Тип определяет способ рендера.
+
+СВОЙСТВА
+  type        : 'link' | 'text' | 'head' | 'between' | 'vt'
+  text        : string
+  href        : string
+  selected    : bool
+  notajax     : bool
+  comment     : string   — текст popup-подсказки
+  popup       : bool     — разрешён ли popup
+  targetblank : bool     — target=_blank
+  separator   : string
+  icon        : string
+  vt          : ?visuotag
+
+FILLERS (все возвращают $this)
+  link($text, $href, $selected=false, $notajax=false, $comment='', $popup=true, $targetblank=false)
+  text($text)
+  head($text)
+  between($separator='|')
+  vt($vt)
+  icon($icon)
+
+RELEASE — as_tag() : visuotag
+  - vt  → возвращает vt как есть
+  - between → span.menubetween
+  - head    → span.menuhead
+  - text    → span.menutext
+  - link    → span.menulink [ + selected | + menulink_popup | + menulink_icon_<icon> ]
+                a[href][target=_blank][data-notajax]
+                content = text (или title + пустой, если icon)
+                если comment+popup → span.menucomment
+                  div.menucomment_narrow
+                  div.menucomment_text
+
+ЗАМЕЧАНИЯ
+  - $has_popup объявлен, но не используется — мёртвая переменная.
+  - htmlspecialchars для text/head — есть.
+  - href/comment НЕ экранируются — доверяем источнику.

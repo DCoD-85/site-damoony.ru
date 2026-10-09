@@ -1,0 +1,56 @@
+================================================================
+08_ALLIASLOCAL — alliaslocal.php
+Локальные блоки аллиаса (в отличие от глобальных из alliasglobal).
+================================================================
+
+ПОДКЛЮЧАЕТСЯ ИЗ: main::logic()  → new \damoony\alliaslocal($main)
+РОЛЬ:            Локальные top/bottom (left/center/right — заготовки).
+                 Всего блоков меньше, чем в alliasglobal — локальные
+                 вещи вроде «хлебных крошек», локального меню и т.п.
+
+================================================================
+СВОЙСТВА
+================================================================
+  main   : main
+  top    : ?alliaslocal_top    = null
+  left   : ?alliaslocal_left   = null
+  center : ?alliaslocal_center = null
+  right  : ?alliaslocal_right  = null
+  bottom : ?alliaslocal_bottom = null
+
+================================================================
+МЕТОДЫ
+================================================================
+
+__construct( main )
+    autoload()
+
+autoload( bool $init = true )
+    Закомментированные include — старая структура (auth/blocklist/
+    headers/scheme/menu), сейчас переехали в alliasglobal.
+
+    Активные include (через warning_file — мягкий):
+      alliaslocal/top.php
+      alliaslocal/bottom.php
+    Закомментированы: left, right.
+
+    if $init → init()
+
+init( )
+    Если класс существует — new, иначе null:
+      top    = class_exists('alliaslocal_top')    ? new : null
+      bottom = class_exists('alliaslocal_bottom') ? new : null
+
+    left / center / right — закомментированы.
+
+ЗАМЕЧАНИЯ
+- Использует warning_file() (в index.php — пустышка), а не error_file.
+  То есть отсутствие top.php/bottom.php пройдёт молча, свойство = null.
+- Проверка class_exists перед new — грамотная страховка
+  (в отличие от alliasglobal, где new безусловный).
+- center отсутствует в свойствах — только left/right/top/bottom.
+  Если планируется center, надо добавить.
+
+================================================================
+СВЯЗАННЫЕ
+  alliaslocal/top.php, bottom.php  — реализация (разобрать отдельно)

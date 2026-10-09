@@ -4,10 +4,10 @@ namespace damoony;
 
 class alliasglobal_bottom_visuo {
 
+	use alliasglobal_filler_trait;
+
 	public \main $main;
 	public alliasglobal_bottom $bottom;
-
-	public bool $enabled = true;
 
 	public function __construct ( alliasglobal_bottom $bottom ) {
 		$this->main   = $bottom->main;
@@ -15,11 +15,7 @@ class alliasglobal_bottom_visuo {
 	}
 
 	public function data ( ) : void {
-		$this->bottom->wrapper_set( 'div' , [ 'class' => 'bottom' ] );
-
-		$vt = new \visuotag( );
-		$vt->tag( 'div' , class : 'test-block' )->content( 'bottom/bottom_visuo - блок' );
-
-		$this->bottom->section_add( 'test' , $vt->root( ) );
+		$file = __DIR__ . DS . 'bottom_visuo.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 }

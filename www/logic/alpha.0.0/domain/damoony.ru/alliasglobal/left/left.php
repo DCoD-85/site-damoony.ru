@@ -6,6 +6,7 @@ class alliasglobal_left extends alliasblock {
 	public string $alliasglobal_name = 'left';
 
 	protected function default_data ( ) : void {
-		$this->wrapper_set( 'div' , [ 'class' => 'left' ] );
+		$file = __DIR__ . DS . 'left.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 }

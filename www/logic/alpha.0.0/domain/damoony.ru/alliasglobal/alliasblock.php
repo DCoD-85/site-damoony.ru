@@ -62,25 +62,38 @@ abstract class alliasblock {
 	protected function try_filler ( ) : bool {
 		if ( $this->filler_enabled === false ) return false;
 
-		$domain = $this->main->main_settings->domain_accepted( false );
-		$accept = $this->main->main_settings->allias_accepted( );
-		if ( is_null( $accept ) ) return false;
+		# --- контекст ---
+		$domain    = $this->main->main_settings->domain_real_name ?? '';   # 'damoony.ru' — для конфига
+		$domain_ns = $this->main->main_settings->domain_accepted( false ); # 'damoony'    — для namespace
+		$allias    = $this->main->main_settings->allias_real_name ?? '';   # 'visuo'
 
+		if ( $domain === '' || $allias === '' || $domain_ns === null ) return false;
+
+		# --- проверка конфига ---
+		$fillers = $this->main->main_settings->fillers;
+		if ( empty( $fillers[ $domain ][ $allias ][ $this->alliasglobal_name ] ) ) return false;
+
+		# --- путь и класс ---
 		$rc  = new \ReflectionClass( $this );
 		$dir = dirname( $rc->getFileName( ) );
 
-		$path  = $dir . DS . $this->alliasglobal_name . '_' . $accept . '.php';
-		$class = '\\' . $domain . '\\alliasglobal_' . $this->alliasglobal_name . '_' . $accept;
+		$path  = $dir . DS . $this->alliasglobal_name . '_' . $allias . '.php';
+		$class = '\\' . $domain_ns . '\\alliasglobal_' . $this->alliasglobal_name . '_' . $allias;
 
-		if ( ! is_file( $path ) ) return false;
-		if ( ! include_once $path ) return false;
-		if ( ! class_exists( $class ) ) return false;
+		# --- переиспользование ---
+		if ( $this->filler === null ) {
+			if ( ! is_file( $path ) ) return false;
+			if ( ! include_once $path ) return false;
+			if ( ! class_exists( $class ) ) return false;
 
-		$filler = new $class( $this );
-		$this->filler = $filler;
+			$this->filler = new $class( $this );
+		}
 
-		if ( property_exists( $filler , 'enabled' ) && $filler->enabled === false ) return false;
-		if ( method_exists( $filler , 'data' ) ) $filler->data( );
+		# --- runtime-выключатель ---
+		if ( method_exists( $this->filler , 'is_enabled' ) && ! $this->filler->is_enabled( ) ) return false;
+
+		# --- применяем ---
+		if ( method_exists( $this->filler , 'data' ) ) $this->filler->data( );
 
 		return true;
 	}
@@ -179,11 +192,11 @@ abstract class alliasblock {
 	# --- rebuild ---
 	public function rebuild ( ) : void {
 		$this->menu?->clear( );
-		$this->filler = null;
-		$this->wrapper_tag = '';
+		# $this->filler = null;      ← НЕ сбрасываем — сохраняем решение runtime
+		$this->wrapper_tag   = '';
 		$this->wrapper_attrs = [ ];
-		$this->sections = [ ];
-		$this->visuotag = new \visuotag( $this->visuorelease );
+		$this->sections      = [ ];
+		$this->visuotag      = new \visuotag( $this->visuorelease );
 		$this->algoritm( );
 	}
 

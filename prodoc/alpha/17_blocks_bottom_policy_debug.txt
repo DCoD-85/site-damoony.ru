@@ -1,0 +1,100 @@
+================================================================
+17_BLOCKS — bottom + policy + debug
+================================================================
+
+================================================================
+A. bottom
+================================================================
+ФАЙЛЫ
+  bottom.php / bottom.data.php
+  bottom_visuo.php / bottom_visuo.data.php
+  bottom_www.php / bottom_www.data.php
+
+bottom.php
+  default_data() → include bottom.data.php
+  Приватный make_bottomnav() — большая сборка:
+    $domains = [
+      'damoony'     => info{show,domain,link} + projects{news,visuo,development,humanai},
+      'damoonygame' => info{domain,link}      + projects{football,village,totalspace},
+      'asptour'     => info{domain,link}      + projects{Прогулки,Отзывы,Контакты},
+    ]
+    Строит 3 VT (по домену) + VT «Ссылки» + VT «Версии сайта» + VT «Документы»
+    Объединяет в 6 div.bottom_nav_panel.
+
+bottom.data.php
+  wrapper_set('div', ['class'=>'bottom'])
+  section_add('bottomnav', make_bottomnav())
+
+bottom_visuo / bottom_www
+  Тонкие filler'ы с трейтом + data-заглушки (test-block).
+
+ЗАМЕЧАНИЯ
+  - В make_bottomnav() параметры $lang, $url_domain, $url_vars — объявлены,
+    но не используются.
+  - $domains['damoony']['info']['show'] = true — читается, но не применяется.
+  - Ключи 'Прогулки'/'Отзывы'/'Контакты' — русские ключи массива.
+  - Ссылки во всех panel открываются в target=_blank.
+
+================================================================
+B. policy
+================================================================
+ФАЙЛЫ
+  policy.php / policy.data.php
+  policy_visuo.php / policy_visuo.data.php
+  policy_www.php / policy_www.data.php
+
+policy.php
+  СВОЙСТВА (custom):
+    cookie_name  = 'policy_agreement'
+    privacy_href = '/privacy'
+    privacy_text = 'Политика конфиденциальности'
+
+  default_data() → include policy.data.php
+
+  Методы:
+    should_show()           — если cookie === 'accept' → false
+    make_shortagreement()   — ссылка на политику
+    make_agreement()        — popup с фоном + body + close + form
+    make_confidence_form()  — visuoelement-форма (checkbox'ы + submit + cancel)
+                              строит через visuoelement_table_table__data
+    make_confidence_text()  — длинный HTML: 9 разделов соглашения
+
+policy.data.php
+  section_add('policy_shortagreement', make_shortagreement())
+  if should_show() → section_add('policy_agreement', make_agreement())
+
+policy_visuo / policy_www
+  Тонкие filler'ы + data-заглушки (test-block).
+
+ЗАМЕЧАНИЯ
+  1. make_confidence_form() — источник PHP Warnings:
+       - visuoelement_input_submit__data::$el_type (не задан)
+       - table.php: undefined array key 0/1 в add_tbody/add_tfoot
+     Форма рендерится, но с warning'ами. Лечится в движке visuo.
+  2. Форма шлёт POST на link->href(['www', allias0], [base0, 'policy', 'agreement']).
+  3. Приватные make_* вызываются из policy.data.php —
+     тот же контракт include'а.
+
+================================================================
+C. debug
+================================================================
+ФАЙЛЫ
+  debug.php / debug.data.php
+  debug_visuo.php / debug_visuo.data.php
+  debug_www.php / debug_www.data.php
+
+debug.php
+  default_data() → include debug.data.php
+
+debug.data.php
+  wrapper_set('div', ['class'=>'debug'])
+  (пустой)
+
+debug_visuo / debug_www
+  Тонкие filler'ы + data-заглушки (test-block).
+
+ЗАМЕЧАНИЯ
+  - Пока пустышка. Идея: наполнять через алгоритм аллиаса
+    (domaininfo->astag() / alliasinfo->astag() / fillers / timings).
+  - Регистрация: свойство + autoload + init в alliasglobal.php
+    + в site.config по аллиасам.

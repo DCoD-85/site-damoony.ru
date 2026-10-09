@@ -9,19 +9,10 @@ class alliasglobal_top extends alliasblock {
 	public string $top_sitename  = 'DAMὸὸNY<span>На страже вашей стабильности</span>';
 	public string $top_siteabout = '&nbsp;';
 
-	# --- data ---
+	# --- data: только подключение ---
 	protected function default_data ( ) : void {
-		$this->fill_projects( );
-		$this->fill_login( );
-		$this->fill_skins( );
-		$this->fill_languages( );
-		$this->fill_navigate( );
-
-		$this->wrapper_set( 'div' , [ 'class' => 'top' ] );
-
-		$this->section_add( 'tophead' , $this->make_tophead( ) );
-		$this->section_add( 'toppro'  , $this->make_toppro( ) );
-		$this->section_add( 'toplinks', $this->make_toplinks( ) );
+		$file = __DIR__ . DS . 'top.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 
 	# ===============================================================
@@ -52,14 +43,9 @@ class alliasglobal_top extends alliasblock {
 		$vt  = new \visuotag( );
 		$pro = $vt->tag( 'div' , class : 'toppro' );
 
-		# --- название ---
 		$pro->tag( 'div' , class : 'topproname' )
-			# ->tag( 'a' )
-				# ->attrs_add( 'href' , $link->href( [ $url->static_allias[ 0 ] ] , [ ] ) )
-				# ->attrs_add( 'href' , $link->href( [ $url->static_allias[ 0 ] ] , [ ] ) )
-				->content( $this->top_sitename );
+			->content( $this->top_sitename );
 
-		# --- лого + навигация ---
 		$logo = $pro->tag( 'div' , class : 'topprologo' );
 
 		$logo->tag( 'div' , class : 'topprologopro' );
@@ -98,7 +84,7 @@ class alliasglobal_top extends alliasblock {
 		$damoony  = $lang->get( 'TOP_PROJECTS_DAMOONY' , [ ] , 'Damoony' );
 
 		$cur_com  = $lang->get( 'TOP_PROJECTS_DAMOONY_COMMENT' , [
-			$link->href( [ 'www'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
+			$link->href( [ 'www'      , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
 			$link->href( [ 'login'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
 			$link->href( [ 'football' , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
 			$link->href( [ 'visuo'    , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
@@ -112,7 +98,6 @@ class alliasglobal_top extends alliasblock {
 			$link->href( [ 'oxydog' , $url_allias[ 0 ] ] , [ $url_base[ 0 ] ] , use_all_adress_data : false ) ,
 		] , '' );
 
-		# --- ссылки некликабельны, работают только popup-комментарии ---
 		$this->menu->link( 'projects' , $cur_proj , 'javascript:void(0)' , ( $url_base[ 1 ] ?? '' ) === 'main' , false , $cur_com );
 		$this->menu->link( 'projects' , $damoony  , 'javascript:void(0)' , ( $url_base[ 1 ] ?? '' ) === 'news' , false , $dam_com );
 	}
@@ -127,7 +112,6 @@ class alliasglobal_top extends alliasblock {
 		$url_allias = $url->static_allias;
 		$url_base   = $url->static_base;
 
-		# --- гость ---
 		if ( $main->user->is_guest( ) === true ) {
 			$login = $lang->get( 'TOP_LOGIN_LOGIN'        , [ ] , 'Авторизация' );
 			$reg   = $lang->get( 'TOP_LOGIN_REGISTRATION' , [ ] , 'Регистрация' );
@@ -148,7 +132,6 @@ class alliasglobal_top extends alliasblock {
 			return;
 		}
 
-		# --- авторизованный: иконки ---
 		$items = [
 			[ 'messages'      , 'Сообщения' , 'TOP_MENU_MESSAGES' ] ,
 			[ 'tasks'         , 'Задачи'    , 'TOP_MENU_TASKS'    ] ,
@@ -184,12 +167,12 @@ class alliasglobal_top extends alliasblock {
 		$url_base   = $url->static_base;
 
 		$light = $lang->get( 'TOP_SKINS_LIGHT' , [ ] , 'Светлый' );
-		$dark  = $lang->get( 'TOP_SKINS_DARK' , [ ] , 'Темный' );
+		$dark  = $lang->get( 'TOP_SKINS_DARK'  , [ ] , 'Темный'  );
 
 		$current = $_COOKIE[ 'skin' ] ?? 'default';
 
 		$this->menu->link( 'skins' , $light , $link->href( $url_domain , $url_base , [ 'skin'=>'default' ] , use_all_adress_data : false ) , $current === 'default' );
-		$this->menu->link( 'skins' , $dark  , $link->href( $url_domain , $url_base , [ 'skin'=>'dark' ] , use_all_adress_data : false ) , $current === 'dark' );
+		$this->menu->link( 'skins' , $dark  , $link->href( $url_domain , $url_base , [ 'skin'=>'dark'    ] , use_all_adress_data : false ) , $current === 'dark' );
 	}
 
 	private function fill_languages ( ) : void {
@@ -206,9 +189,9 @@ class alliasglobal_top extends alliasblock {
 		$url_en = $url_base; $url_en[ 0 ] = 'en-en';
 		$url_ch = $url_base; $url_ch[ 0 ] = 'ch-ch';
 
-		$rus = $lang->get( 'TOP_LANGUAGES_RUS' , [ ] , 'Русский' );
-		$eng = $lang->get( 'TOP_LANGUAGES_ENG' , [ ] , 'Английский' );
-		$chi = $lang->get( 'TOP_LANGUAGES_CHINA' , [ ] , 'Китайский' );
+		$rus = $lang->get( 'TOP_LANGUAGES_RUS'   , [ ] , 'Русский'    );
+		$eng = $lang->get( 'TOP_LANGUAGES_ENG'   , [ ] , 'Английский' );
+		$chi = $lang->get( 'TOP_LANGUAGES_CHINA' , [ ] , 'Китайский'  );
 
 		$current = $url_base[ 0 ] ?? 'ru-ru';
 

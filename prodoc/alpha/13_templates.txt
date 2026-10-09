@@ -1,0 +1,42 @@
+================================================================
+13_TEMPLATES — _template_block.php + _template_script.php
+Эталоны для копирования.
+================================================================
+
+ВАЖНО:
+  Оба файла — образцы. При копировании:
+    1. Переименовать класс: alliasglobal__template → alliasglobal_<name>
+    2. Сменить $alliasglobal_name / $script_name
+    3. Зарегистрировать в alliasglobal.php:
+         autoload():  include_once …
+         init():      $this-><name> = new …
+
+================================================================
+A. _template_block.php
+================================================================
+ЗАЯВЛЕННЫЕ МЕТОДЫ (по шапке файла):
+  scheme()  — построить каркас, слоты
+  data()    — наполнить данные / меню, подключить filler
+  release() — вставить данные в слоты
+
+НО:
+  Текущий alliasblock НЕ вызывает scheme()/release().
+  Он вызывает только data() + assemble().
+  → _template_block устарел относительно alliasblock.
+
+ВЫВОД:
+  Либо alliasblock доработать (вызвать scheme+release),
+  либо _template_block привести к текущему API
+  (default_data + assemble). Сейчас — рассинхрон.
+
+================================================================
+B. _template_script.php
+================================================================
+Соответствует текущему alliasglobalscript.
+  - init() — hook
+  - run()  — применение, защита $run_done
+Регистрация через alliasglobal.php (autoload + init + $scripts).
+
+ЗАМЕЧАНИЯ
+  - template_script актуален.
+  - template_block требует обновления.

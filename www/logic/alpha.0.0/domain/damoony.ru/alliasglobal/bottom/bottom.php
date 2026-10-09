@@ -5,10 +5,9 @@ namespace damoony;
 class alliasglobal_bottom extends alliasblock {
 	public string $alliasglobal_name = 'bottom';
 
-	# --- data ---
 	protected function default_data ( ) : void {
-		$this->wrapper_set( 'div' , [ 'class' => 'bottom' ] );
-		$this->section_add( 'bottomnav' , $this->make_bottomnav( ) );
+		$file = __DIR__ . DS . 'bottom.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 
 	# ===============================================================
@@ -27,9 +26,6 @@ class alliasglobal_bottom extends alliasblock {
 		$url_base   = $url->static_base;
 		$url_vars   = $url->static_vars;
 
-		# ---------------------------------------------------------
-		#   Конфиг доменов
-		# ---------------------------------------------------------
 		$domains = [
 			'damoony' => [
 				'info' => [
@@ -108,9 +104,6 @@ class alliasglobal_bottom extends alliasblock {
 			] ,
 		];
 
-		# ---------------------------------------------------------
-		#   Панели доменов
-		# ---------------------------------------------------------
 		$vt_domain = [ ];
 		foreach ( $domains as $domain_key => $domain ) {
 			$vt = new \visuotag( );
@@ -132,9 +125,6 @@ class alliasglobal_bottom extends alliasblock {
 			$vt_domain[ $domain_key ] = $vt->root( );
 		}
 
-		# ---------------------------------------------------------
-		#   Панель: версии сайта
-		# ---------------------------------------------------------
 		$vt_info = new \visuotag( );
 		$vt_info = $vt_info->tag( 'div' , class : 'bottom_nav_info' );
 
@@ -151,9 +141,6 @@ class alliasglobal_bottom extends alliasblock {
 			->attrs_add( 'href' , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , $url_base , [ 'version' => 'app' ] ) )
 			->content( 'Приложение' );
 
-		# ---------------------------------------------------------
-		#   Панель: документы
-		# ---------------------------------------------------------
 		$vt_policy = new \visuotag( );
 		$vt_policy = $vt_policy->tag( 'div' , class : 'bottom_nav_policy' );
 
@@ -170,9 +157,6 @@ class alliasglobal_bottom extends alliasblock {
 			->attrs_add( 'href' , $link->href( [ 'www' , $url_allias[ 0 ] ] , [ 'documents' , 'prilozhenie' ] ) )
 			->content( 'Приложение №1, к пользовательскому соглашению' );
 
-		# ---------------------------------------------------------
-		#   Панель: ссылки
-		# ---------------------------------------------------------
 		$vt_links = new \visuotag( );
 		$vt_links = $vt_links->tag( 'div' , class : 'bottom_nav_policy' );
 
@@ -185,9 +169,6 @@ class alliasglobal_bottom extends alliasblock {
 		$other_links->tag( 'a' )->attrs_add( 'href' , $link->href( [ 'www' , $url_allias[ 0 ] ] , [ 'faq'     ] ) )->content( 'Вопрос-Ответ'   );
 		$other_links->tag( 'a' )->attrs_add( 'href' , $link->href( [ 'www' , $url_allias[ 0 ] ] , [ 'tech'    ] ) )->content( 'Тех-Поддержка'  );
 
-		# ---------------------------------------------------------
-		#   Сборка: 6 панелей
-		# ---------------------------------------------------------
 		$vt = new \visuotag( );
 
 		$vt->tag( 'div' , class : 'bottom_nav_panel' )->append( $vt_domain[ 'damoony'     ] );

@@ -1,0 +1,83 @@
+================================================================
+06_ALLIASGLOBAL — alliasglobal.php
+Контейнер глобальных блоков + не-визуальных скриптов.
+================================================================
+
+ПОДКЛЮЧАЕТСЯ ИЗ: main::logic()  → new \damoony\alliasglobal($main)
+РОЛЬ:            Держит все глобальные блоки (top/left/center/right/
+                 bottom/policy/debug) и скрипты (headers/head).
+                 Владелец меню, alliasblock, трейта.
+
+================================================================
+СВОЙСТВА
+================================================================
+  main : main
+
+  Блоки (typed):
+    top, left, center, right, bottom, policy, debug
+    — все alliasglobal_<name>
+
+  Скрипты:
+    headers : alliasglobal_script_headers
+    head    : alliasglobal_script_head
+    scripts : array  — коллекция для итерации (ключи 'headers', 'head')
+
+================================================================
+МЕТОДЫ
+================================================================
+
+__construct( main )
+    autoload()
+
+autoload( bool $init = true )
+    Порядок include (важен!):
+      # 0. trait
+        alliasglobal/alliasglobal_filler_trait.php
+
+      # 1. base
+        menu_row.php
+        menu.php
+        alliasblock.php
+        alliasglobalscript.php
+
+      # 2. blocks
+        top/top.php
+        left/left.php
+        center/center.php
+        right/right.php
+        bottom/bottom.php
+        policy/policy.php
+        debug/debug.php
+
+      # 3. scripts
+        script/headers.php
+        script/head.php
+
+      if $init → init()
+
+init( )
+    Скрипты создаются ПЕРВЫМИ (могут редиректить):
+      headers               = new alliasglobal_script_headers($this)
+      scripts['headers']    = headers
+      head                  = new alliasglobal_script_head($this)
+      scripts['head']       = head
+
+    Затем блоки (каждый — new alliasglobal_<name>($this)):
+      top, left, center, right, bottom, policy, debug
+
+script( string $name ) : ?alliasglobalscript
+    Динамический доступ: $this->scripts[$name] ?? null.
+
+ЗАМЕЧАНИЯ
+- Порядок include фиксирован. Скрипты создаются в init() ПОСЛЕ
+  включения всех файлов — но это лишь new. Хорошо, что headers идёт
+  первым: если он делает header('Location: ...'), остальные блоки
+  уже не нужны.
+- debug в контейнере есть, но в site.config заполняется отдельно.
+- Если добавишь блок: 3 правки — свойство, include в autoload(),
+  new в init().
+
+================================================================
+СМ. ТАКЖЕ
+  99_fillers.txt  — конвенция filler'ов
+  _template_block.php / _template_script.php — эталоны

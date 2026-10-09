@@ -12,13 +12,8 @@ class alliasglobal_policy extends alliasblock {
 
 	# --- data ---
 	protected function default_data ( ) : void {
-		# короткая информация — всегда
-		$this->section_add( 'policy_shortagreement' , $this->make_shortagreement( ) );
-
-		# popup — если показывать нужно
-		if ( $this->should_show( ) ) {
-			$this->section_add( 'policy_agreement' , $this->make_agreement( ) );
-		}
+		$file = __DIR__ . DS . 'policy.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 
 	# ===============================================================
@@ -31,7 +26,7 @@ class alliasglobal_policy extends alliasblock {
 	}
 
 	# ===============================================================
-	#   КОРОТКАЯ ИНФОРМАЦИЯ (всегда)
+	#   КОРОТКАЯ ИНФОРМАЦИЯ
 	# ===============================================================
 
 	private function make_shortagreement ( ) : \visuotag {
@@ -87,7 +82,6 @@ class alliasglobal_policy extends alliasblock {
 
 		$vt_confidence = $this->make_confidence_text( );
 
-		# --- чекбоксы ---
 		$ve_input_checkbox = new \visuoelement( $this->visuorelease );
 		$ve_input_checkbox->input( )->checkbox( $d1 = new \visuoelement_input_checkbox__data( ) );
 		$d1->set( 'form[read]' , label : '' , label_comment : '' , text : 'Я внимительно прочитал условия соглашения' );
@@ -100,7 +94,6 @@ class alliasglobal_policy extends alliasblock {
 		$ve_input_checkbox_confirm->input( )->checkbox( $d3 = new \visuoelement_input_checkbox__data( ) );
 		$d3->set( 'form[accept]' , label : '' , label_comment : '' , text : 'Я соглашаюсь с условиями пользовательского соглашения' );
 
-		# --- submit / cancel ---
 		$ve_input_submit = new \visuoelement( $this->visuorelease );
 		$ve_input_submit->input( )->submit( $ds = new \visuoelement_input_submit__data( ) );
 		$ds->set( 'form[submit]' , 'Принять' );
@@ -109,7 +102,6 @@ class alliasglobal_policy extends alliasblock {
 		$ve_input_cancel->input( )->button( $dc = new \visuoelement_input_button__data( ) );
 		$dc->set( 'form[cancel]' , 'Отказаться' );
 
-		# --- таблица ---
 		$ve_table = new \visuoelement( $this->visuorelease );
 		$ve_table->table( )->table( $dt = new \visuoelement_table_table__data( ) );
 		$dt->add_tbody( [ $vt_confidence ] , colspan : [ 2 ] );
@@ -117,7 +109,6 @@ class alliasglobal_policy extends alliasblock {
 		$dt->add_tfoot( [ [ $ve_input_checkbox_pd ]      , [ ] ] , colelsinline : [ false , true ] );
 		$dt->add_tfoot( [ [ $ve_input_checkbox_confirm ] , [ $ve_input_submit ] ] , colelsinline : [ false , true ] );
 
-		# --- форма ---
 		$ve_form = new \visuoelement( $this->visuorelease );
 		$ve_form->form( )->form( $df = new \visuoelement_form_form__data( ) );
 		$df->set(

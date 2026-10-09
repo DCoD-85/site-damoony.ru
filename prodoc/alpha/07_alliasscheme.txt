@@ -1,0 +1,67 @@
+================================================================
+07_ALLIASSCHEME — alliasscheme.php
+Схемы аллиасов: login, error, min, www, visuo.
+================================================================
+
+ПОДКЛЮЧАЕТСЯ ИЗ: main::logic()  → new \damoony\alliasscheme($main)
+РОЛЬ:            Хранит 5 схем — «под-движков» рендера аллиаса.
+                 load($name) / reload() переключают активную схему.
+
+================================================================
+СВОЙСТВА
+================================================================
+  main       : main
+  schemename : string        — имя активной схемы
+  autoload   : bool          — флаг (см. ЗАМЕЧАНИЯ)
+  login      : ?alliasscheme_login
+  error      : ?alliasscheme_error
+  min        : ?alliasscheme_min
+  www        : ?alliasscheme_www
+  visuo      : ?alliasscheme_visuo
+
+================================================================
+МЕТОДЫ
+================================================================
+
+__construct( main )
+    autoload()   — с дефолтами (autoload=true, init=true)
+
+autoload( bool $autoload = true , bool $init = true )
+    ЭТА ФУНКЦИЯ — ЗАПУТАННАЯ.
+
+    Тело:
+      $this->autoload = $init;     ← в свойство $autoload кладётся $init!
+      if $autoload → include 5 файлов схем
+      if $init     → init()
+
+    Итого:
+      - свойство $autoload получает значение $init — логическая ошибка.
+      - параметр $init работает и как «сделать include», и как
+        «сделать init».
+    Смысл был, видимо: autoload=true → только include; init=true → new.
+    Но записано неверно.
+
+init( )
+    new alliasscheme_login($this)
+    new alliasscheme_error($this)
+    new alliasscheme_min($this)
+    new alliasscheme_www($this)      ← помечен комментарием «oxydog»
+    new alliasscheme_visuo($this)
+
+load( string $schemename )
+    $this->schemename = $schemename
+    $this->{$schemename}->load()     — вызов load() у конкретной схемы.
+
+reload( )
+    $schemename = $this->schemename
+    $this->{$schemename}->reload()
+
+ЗАМЕЧАНИЯ
+- Все 5 схем должны иметь методы load() и reload(). Если у какой-то
+  нет — будет fatal. Проверить при разборе alliasscheme/*.php.
+- autoload() — переписать (баг с $this->autoload = $init).
+- Поле $autoload не читается нигде в этом файле — мёртвое.
+
+================================================================
+СВЯЗАННЫЕ
+  alliasscheme/*.php  — 5 файлов схем (разобрать отдельно)

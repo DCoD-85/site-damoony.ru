@@ -1,0 +1,140 @@
+================================================================
+22_VISUO_USER — allias/visuo/user.php
+Расширение базового user для visuo.
+================================================================
+
+namespace: damoony\visuo
+class user extends \user
+
+РОЛЬ:
+  Работает с visuo_damoony.users / .sessions через dataprovider_user.
+  Хранит текущего пользователя, роли, права.
+
+ПОДМЕНА
+  Из include.php + алгоритм->boot_user():
+    если main->user не visuo\user → new visuo\user(main)
+    main->user->boot()
+
+СВОЙСТВА
+  dp      : ?dataprovider_user
+  current : ?array                 — строка users (после boot)
+  roles   : array                  — список ролей пользователя
+  role    : string                 — приоритетная роль (admin/editor/reader)
+  booted  : bool                   — флаг идемпотентности
+
+МЕТОДЫ
+----------------------------------------------------------------
+
+__construct( main )
+    parent::__construct()
+    $this->profile->data = ['login'=>'']    — заглушка
+
+boot( ) : void
+    Идемпотентно (booted).
+    1. Если dp === null:
+         dp = dataprovider->current->user  (если current instanceof dataprovider)
+    2. Если dp === null → booted = true; return
+    3. token = $_COOKIE['visuo_sid']
+       Если пусто → booted = true; return
+    4. sess = dp->session_find(token)
+       Если пусто → clear_cookie, booted=true, return
+    5. u = dp->profile_full(sess.user_id)
+       Если пусто → clear_cookie, booted=true, return
+    6. current = u; profile->data = u
+       roles = dp->roles(u.id)
+       role  = pick_role(roles)
+       booted = true
+
+pick_role( array $roles ) : string
+    Приоритет: admin > editor > reader.
+    Возвращает первый найденный или ''.
+
+API
+----------------------------------------------------------------
+is_guest()  → boot(); current === null
+is_auth()   → !is_guest()
+id()        → current.id ?? 0
+login()     → current.login ?? ''
+data()      → boot(); current ?? []
+role()      → role
+tz()        → profile->data.timezone (валидный, иначе Europe/Moscow)
+lang()      → profile->data.lang ?? 'ru-ru'
+has_role( $code )
+    foreach roles: r.code === $code → true
+
+can( string $action ) : bool
+    PERMISSIONS[role] содержит:
+      - точное совпадение
+      - префикс '.*' → str_starts_with(action, prefix.'.')
+
+AUTHORIZE
+----------------------------------------------------------------
+authorize( login , password , remember = false ) : bool
+    1. dp === null → false
+    2. check_bruteforce(login, ip) → иначе false
+    3. by_login(login) → нет → record_login_attempt(false) → false
+    4. password_verify(...) → нет → record_login_attempt(false) → false
+    5. status !== 'active' → record_login_attempt(false) → false
+    6. Создать session:
+         token = bin2hex(random_bytes(32))
+         ttl = remember ? 30d : 1d
+         session_create(user_id, token, ip, ua, ttl)
+         record_login_attempt(true)
+         touch_login(user_id)
+    7. set_cookie(token, remember ? time()+ttl : 0)
+    8. booted = false; boot(); return true
+
+REGISTER
+----------------------------------------------------------------
+register( array $data ) : array
+    Возвращает ['error'=>string|null, 'user_id'=>int].
+    Валидация:
+      login: /^[a-zA-Z0-9_]{3,32}$/
+      email: filter_var FILTER_VALIDATE_EMAIL
+      password: >= 8
+      password === password_confirm
+      !dp->exists(login)
+    create() → assign_role(id, 'reader').
+
+LOGOUT
+----------------------------------------------------------------
+logout( )
+    Если dp и есть cookie visuo_sid → session_drop(token)
+    clear_cookie(); current=null; profile->data=['login'=>'']; roles=[]; role=''
+
+PROFILE
+----------------------------------------------------------------
+update_timezone( $tz ) : bool
+    Только авторизованный + валидный tz.
+    dp->update_timezone(id, tz); profile->data.timezone = tz
+
+update_lang( $lang ) : bool
+    Авторизованный + один из ru-ru/en-en/ch-ch.
+    dp->update_lang(id, lang); profile->data.lang = lang
+
+COOKIE (private)
+----------------------------------------------------------------
+set_cookie( token , expires )
+    setcookie('visuo_sid', token, [
+      expires, path=/, httponly=true, samesite=Lax,
+      secure = ($_SERVER['HTTPS']==='on')
+    ])
+    Если headers_sent() → return
+
+clear_cookie( )
+    set_cookie('', time()-3600)
+
+PERMISSIONS (const)
+----------------------------------------------------------------
+admin  : user.*, doc.*, news.*, file.*, settings.*
+editor : doc.create, doc.edit, news.create, news.edit
+reader : doc.view, news.view
+
+ЗАМЕЧАНИЯ
+- data() в коде имеет кривой отступ (не баг).
+- boot() безопасен: если dp/токен/юзер не найдены — гость.
+- После register() пользователь НЕ авторизуется автоматически — только
+  assign_role(reader). Логин — отдельным шагом.
+- set_cookie ставит secure только на HTTPS, samesite=Lax.
+- touch_login не в транзакции с session_create — если упадёт,
+  сессия уже создана, время last_login не обновлено.

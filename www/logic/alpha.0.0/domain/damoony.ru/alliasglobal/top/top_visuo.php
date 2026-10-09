@@ -4,10 +4,10 @@ namespace damoony;
 
 class alliasglobal_top_visuo {
 
+	use alliasglobal_filler_trait;
+
 	public \main $main;
 	public alliasglobal_top $top;
-
-	public bool $enabled = false;
 
 	public function __construct ( alliasglobal_top $top ) {
 		$this->main = $top->main;
@@ -15,11 +15,7 @@ class alliasglobal_top_visuo {
 	}
 
 	public function data ( ) : void {
-		$this->top->wrapper_set( 'div' , [ 'class' => 'top' ] );
-
-		$vt = new \visuotag( );
-		$vt->tag( 'div' , class : 'test-block' )->content( 'top/top_visuo - блок' );
-
-		$this->top->section_add( 'test' , $vt->root( ) );
+		$file = __DIR__ . DS . 'top_visuo.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 }

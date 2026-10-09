@@ -4,10 +4,10 @@ namespace damoony;
 
 class alliasglobal_left_visuo {
 
+	use alliasglobal_filler_trait;
+
 	public \main $main;
 	public alliasglobal_left $left;
-
-	public bool $enabled = true;
 
 	public function __construct ( alliasglobal_left $left ) {
 		$this->main = $left->main;
@@ -15,28 +15,13 @@ class alliasglobal_left_visuo {
 	}
 
 	public function data ( ) : void {
-		# wrapper задаётся здесь — default_data при активном filler'е не вызывается
-		$this->left->wrapper_set( 'div' , [ 'class' => 'left' ] );
-
-		$main = $this->main;
-		$lib  = $main->library;
-		$url  = $lib->url( );
-
-		$url_base     = $url->static_base;
-		$current_page = (string) ( $url_base[ 1 ] ?? '' );
-
-		$menu = $this->left->menu;
-		$menu->separator = '';
-
-		switch ( $current_page ) {
-			case 'index'        : $this->fill_index( $menu );        break;
-			case 'docs'         : $this->fill_docs( $menu );         break;
-			case 'news'         : $this->fill_news( $menu );         break;
-			case 'downloads'    : $this->fill_downloads( $menu );    break;
-			case 'login'        : $this->fill_login( $menu );        break;
-			case 'registration' : $this->fill_registration( $menu ); break;
-		}
+		$file = __DIR__ . DS . 'left_visuo.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
+
+	# ===============================================================
+	#   Хелперы (приватные) — вызываются из left_visuo.data.php
+	# ===============================================================
 
 	# ===============================================================
 	#   index — статистика

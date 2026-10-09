@@ -4,10 +4,10 @@ namespace damoony;
 
 class alliasglobal_right_www {
 
+	use alliasglobal_filler_trait;
+
 	public \main $main;
 	public alliasglobal_right $right;
-
-	public bool $enabled = true;
 
 	public function __construct ( alliasglobal_right $right ) {
 		$this->main  = $right->main;
@@ -15,11 +15,7 @@ class alliasglobal_right_www {
 	}
 
 	public function data ( ) : void {
-		$this->right->wrapper_set( 'div' , [ 'class' => 'right' ] );
-
-		$vt = new \visuotag( );
-		$vt->tag( 'div' , class : 'test-block' )->content( 'right/right_www - блок' );
-
-		$this->right->section_add( 'test' , $vt->root( ) );
+		$file = __DIR__ . DS . 'right_www.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 }

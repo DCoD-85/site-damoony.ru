@@ -4,10 +4,10 @@ namespace damoony;
 
 class alliasglobal_center_www {
 
+	use alliasglobal_filler_trait;
+
 	public \main $main;
 	public alliasglobal_center $center;
-
-	public bool $enabled = true;
 
 	public function __construct ( alliasglobal_center $center ) {
 		$this->main   = $center->main;
@@ -15,11 +15,7 @@ class alliasglobal_center_www {
 	}
 
 	public function data ( ) : void {
-		$this->center->wrapper_set( 'div' , [ 'class' => 'center' ] );
-
-		$vt = new \visuotag( );
-		$vt->tag( 'div' , class : 'test-block' )->content( 'center/center_www - блок' );
-
-		$this->center->section_add( 'test' , $vt->root( ) );
+		$file = __DIR__ . DS . 'center_www.data.php';
+		if ( is_file( $file ) ) include $file;
 	}
 }
