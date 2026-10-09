@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony;
+namespace damoony_ru;
 
 abstract class alliasblock {
 	# --- refs ---

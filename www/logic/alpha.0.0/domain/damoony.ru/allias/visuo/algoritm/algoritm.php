@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony\visuo;
+namespace damoony_ru\visuo;
 
 class algoritm
 	extends \algoritm_ {
@@ -30,8 +30,8 @@ class algoritm
 	private function boot_user ( ) : void {
 		$main = $this->main;
 
-		if ( ! ( $main->user instanceof \damoony\visuo\user ) ) {
-			$main->user = new \damoony\visuo\user( $main );
+		if ( ! ( $main->user instanceof \damoony_ru\visuo\user ) ) {
+			$main->user = new \damoony_ru\visuo\user( $main );
 		}
 		$main->user->boot( );
 	}

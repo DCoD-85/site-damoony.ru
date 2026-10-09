@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony\www;
+namespace damoony_ru\www;
 
 abstract class dataprovider_base {
 	# --- refs ---

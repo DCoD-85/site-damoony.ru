@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony;
+namespace damoony_ru;
 
 # Фасад домена.
 # Держит фасады всех аллиасов, у которых есть dataprovider.
@@ -15,9 +15,9 @@ class dataprovider {
 	public \main $main;
 
 	# --- allias providers ---
-	public null|\damoony\www\dataprovider   $www   = null;
-	public null|\damoony\login\dataprovider $login = null;
-	public null|\damoony\visuo\dataprovider $visuo = null;
+	public null|\damoony_ru\www\dataprovider   $www   = null;
+	public null|\damoony_ru\login\dataprovider $login = null;
+	public null|\damoony_ru\visuo\dataprovider $visuo = null;
 
 	# --- current ---
 	public mixed $current = null;
@@ -42,7 +42,7 @@ class dataprovider {
 
 			( include_once $file ) or error_file( $file , __FILE__ , __LINE__ );
 
-			$class = '\\damoony\\' . $allias_name . '\\dataprovider';
+			$class = '\\damoony_ru\\' . $allias_name . '\\dataprovider';
 			if ( ! class_exists( $class ) ) continue;
 
 			$this->{$allias_name} = new $class( $this->main );

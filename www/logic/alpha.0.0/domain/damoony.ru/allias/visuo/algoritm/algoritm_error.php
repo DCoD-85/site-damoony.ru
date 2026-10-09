@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony\visuo;
+namespace damoony_ru\visuo;
 
 use \main;
 use \algoritm_;

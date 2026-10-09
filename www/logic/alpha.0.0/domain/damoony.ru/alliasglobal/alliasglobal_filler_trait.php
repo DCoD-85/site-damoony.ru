@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony;
+namespace damoony_ru;
 
 # =============================================================
 #   alliasglobal_filler_trait — базовый API filler'а

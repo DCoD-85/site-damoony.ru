@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony\www;
+namespace damoony_ru\www;
 
 class algoritm
 	extends \algoritm_ {

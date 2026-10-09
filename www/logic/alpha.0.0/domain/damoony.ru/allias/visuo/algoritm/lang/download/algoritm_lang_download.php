@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony\visuo;
+namespace damoony_ru\visuo;
 
 # Промежуточный уровень: /ru-ru/download/{slug}/
 # Передаёт управление в download/page/algoritm_lang_download_page.php.

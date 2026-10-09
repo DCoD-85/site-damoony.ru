@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony;
+namespace damoony_ru;
 
 class alliasglobal_bottom extends alliasblock {
 	public string $alliasglobal_name = 'bottom';

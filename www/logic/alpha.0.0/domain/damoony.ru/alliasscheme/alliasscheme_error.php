@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony;
+namespace damoony_ru;
 
 class alliasscheme_error {
 	# vars
@@ -45,13 +45,13 @@ class alliasscheme_error {
 		$meta->link( )->css( $skin_css . 'vardump.css' );
 		$meta->link( )->css( $skin_css . 'messages.css' );
 		$meta->link( )->css( $skin_css . 'popup.css' );
-		$meta->link( )->css( $skin_css . 'error.css' );
+		$meta->link( )->css( $skin_css . 'dt.css' );
 		$meta->link( )->css( $skin_css . 'top.css' );
 		$meta->link( )->css( $skin_css . 'left.css' );
 		$meta->link( )->css( $skin_css . 'center.css' );
 		$meta->link( )->css( $skin_css . 'right.css' );
 		$meta->link( )->css( $skin_css . 'bottom.css' );
-		$meta->link( )->css( $skin_css . 'dt.css' );
+		$meta->link( )->css( $skin_css . 'policy.css' );
 		$meta->link( )->css( $skin_css . 'debug.css' );
 
 		# --- CSS visuoel ---

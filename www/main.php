@@ -4,7 +4,6 @@
 # created : 10.09.2025
 # author : default
 
-use damoony\{www,login};
 
 class main {
 	# vars
@@ -35,11 +34,11 @@ class main {
 	
 	# allias
 		# allias
-	public null|\damoony\allias $allias = null;
-	public null|\damoony\alliasglobal $alliasglobal = null;
-	public null|\damoony\alliaslocal $alliaslocal = null;
-	public null|\damoony\alliasscheme $alliasscheme = null;
-	public null|\damoony\dataprovider $dataprovider = null;
+	public null|\damoony_ru\allias $allias = null;
+	public null|\damoony_ru\alliasglobal $alliasglobal = null;
+	public null|\damoony_ru\alliaslocal $alliaslocal = null;
+	public null|\damoony_ru\alliasscheme $alliasscheme = null;
+	public null|\damoony_ru\dataprovider $dataprovider = null;
 
 	
 	public \algoritm_ $algoritm_;
@@ -222,6 +221,7 @@ class main_settings {
 	public array $domains_available = [ ];
 	public array $alliases_real = [ ];
 	public array $alliases_available = [ ];
+	public array $domains_namespace = [ ];
 	public array $fillers = [ ];
 
 	# render engine
@@ -309,7 +309,11 @@ class main_settings {
 	
 	public function domain_accepted ( bool $full = true ) {
 		$return = $this->domains_available[ $this->domain_real_name ] ? $this->domain_real_name : null;
-		if( $full == false && ! is_null( $return ) ) $return = mb_ereg_replace( '\.ru' , '' , $return ); 
+		if ( $full == false && ! is_null( $return ) ) {
+			$ns = $this->domains_namespace[ $this->domain_real_name ] ?? null;
+			if ( $ns !== null && $ns !== '' ) return $ns;
+			$return = mb_ereg_replace( '\.ru' , '' , $return );
+		}
 		return $return;
 	}
 	public function allias_accepted ( ) {

@@ -90,7 +90,8 @@ class algoritm_ {
 	public function is_post ()    : bool { return ! empty( $_POST ); }
 
 	public function is_default () : bool {
-		$pos = count( explode( '_' , get_class( $this ) ) ) - 1;
+		$class_short = substr( strrchr( get_class( $this ) , '\\' ) , 1 );
+		$pos = count( explode( '_' , $class_short ) ) - 1;
 		$url_base = $this->main->library->url->static_base;
 		return ( $url_base[ $pos ] ?? '' ) === '';
 	}
@@ -163,7 +164,8 @@ class algoritm_ {
 		$in_array = false;
 		$args = [ ];
 
-		$url_base_pos = count( explode( '_' , get_class( $object ) ) ) - 1;
+		$class_short = substr( strrchr( get_class( $object ) , '\\' ) , 1 );
+		$url_base_pos = count( explode( '_' , $class_short ) ) - 1;
 		$url_base_real = $url_base;
 
 		if ( ! isset( $url_base_real[ $url_base_pos ] ) ) $url_base_real[ $url_base_pos ] = '';

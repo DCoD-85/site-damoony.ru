@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------
 #   include.php — visuo
 #   Вызывается из allias::__construct (движок).
-#   $this — объект \damoony\allias.
+#   $this — объект \damoony_ru\allias.
 #   Задача: константы, каркас, подмена $main->user.
 # ---------------------------------------------------------------
 
@@ -22,10 +22,10 @@ if ( ! defined( 'VISUO_MEDIA_IMG' ) ) {
 ( include_once $path = __DIR__ . DS . 'user.php'    ) or error_file( $path , __FILE__ , __LINE__ );
 
 # --- подмена $main->user на visuo-версию ---
-if ( isset( $this ) && $this instanceof \damoony\allias ) {
+if ( isset( $this ) && $this instanceof \damoony_ru\allias ) {
 	$main = $this->main;
-	if ( $main instanceof \main && ! ( $main->user instanceof \damoony\visuo\user ) ) {
-		$main->user = new \damoony\visuo\user( $main );
+	if ( $main instanceof \main && ! ( $main->user instanceof \damoony_ru\visuo\user ) ) {
+		$main->user = new \damoony_ru\visuo\user( $main );
 		$main->user->boot( );
 	}
 }

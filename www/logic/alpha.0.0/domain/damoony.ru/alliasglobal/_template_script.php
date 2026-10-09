@@ -32,7 +32,7 @@
 #
 # ==============================================================
 
-namespace damoony;
+namespace damoony_ru;
 
 class alliasglobal__template extends alliasglobalscript {
 	# --- state ---

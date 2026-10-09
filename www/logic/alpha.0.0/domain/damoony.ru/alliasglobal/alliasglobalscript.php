@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony;
+namespace damoony_ru;
 
 # alliasglobalscript — база для не-визуальных скриптов alliasglobal.
 #

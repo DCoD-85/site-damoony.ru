@@ -26,7 +26,7 @@
 #
 # ==============================================================
 
-namespace damoony;
+namespace damoony_ru;
 
 class alliasglobal__template extends alliasblock {
 	# --- state ---
