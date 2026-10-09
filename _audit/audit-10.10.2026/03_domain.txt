@@ -1,0 +1,57 @@
+================================================================
+03_DOMAIN — домен damoony.ru (все подпапки)
+================================================================
+
+ROOT (www/logic/alpha.0.0/domain/damoony.ru/)
+  allias.php              класс allias + alliasinfo
+  alliaslocal.php         top/bottom
+  alliasglobal.php        контейнер блоков + скриптов
+  alliasscheme.php        контейнер схем
+  dataprovider.php        фасад домена
+  (alliasglobal_filler_trait.php — переехал в alliasglobal/)
+
+ALLIAS/ (по аллиасам)
+  login/                  include.php + algoritm/* + subalgoritm/* УДАЛЁН
+  visuo/                  include.php + user.php + helpers.php +
+                          algoritm/* + dataprovider/* + migrations/*
+  www/                    include.php + algoritm/*
+
+  Все остальные аллиасы (install, football, development, oxydog,
+  _shablon) — только в alliases_real, в alliases_available нет.
+
+ALLIASGLOBAL/ (общие блоки)
+  alliasblock.php         база блока
+  alliasglobalscript.php  база скрипта
+  alliasglobal_filler_trait.php
+  menu.php / menu_row.php
+  _template_block.php / _template_script.php
+  top/ left/ center/ right/ bottom/ policy/ debug/
+    <name>.php + <name>.data.php + <name>_<allias>.php + .data.php
+
+ALLIASSCHEME/
+  alliasscheme_login.php
+  alliasscheme_error.php
+  alliasscheme_min.php
+  alliasscheme_www.php
+  alliasscheme_visuo.php
+
+DATAPROVIDER (для visuo)
+  allias/visuo/dataprovider/
+    dataprovider.php          фасад аллиаса
+    dataprovider_base.php     abstract
+    dataprovider_user.php     users/roles/sessions/login_attempts
+    dataprovider_doc.php      doc_sections/doc_articles/doc_versions
+    dataprovider_news.php     news
+    dataprovider_files.php    files/file_downloads
+    dataprovider_stats.php    doc_views
+    dataprovider_audit.php    audit_log
+
+MIGRATIONS (visuo)
+  001_create_news.sql
+  002_create_files.sql
+  003_create_file_downloads.sql
+  004_alter_users_timezone_lang.sql
+  005_seed_files.sql
+  006_seed_news.sql
+  007_create_login_attempts.sql
+  apply_all.sql

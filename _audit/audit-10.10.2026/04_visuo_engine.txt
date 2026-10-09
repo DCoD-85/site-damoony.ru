@@ -1,0 +1,52 @@
+================================================================
+04_VISUO_ENGINE — движок visuo
+================================================================
+
+ЗАГРУЗЧИК
+  sources/visuo.php                 мостик
+  sources/visuo/visuo.php           подключает 19 файлов
+
+ЯДРО HTML
+  visuotag.php       дерево тегов, цепочки, хуки, release
+  visuoattrs.php     контейнер атрибутов
+    visuoattrs/visuoattrsclass.php    class="..."
+    visuoattrs/visuoattrsstyle.php    style="..."
+    visuoattrs/visuoattrsactions.php  onclick/onmouseover/...
+    visuoattrs/visuoattrsdata.php     data-* с json
+
+META / LINK
+  visuometa.php      <title> + список link/script
+  visuolink.php      фабрика link/css/js/favicon
+                     (+ 3 подкласса)
+
+ЛОГ И НАСТРОЙКИ
+  visuolog.php              лог для debug-панели
+  visuorelease_settings.php language и пр.
+
+НОВЫЙ API (visuoel)
+  visuoel.php        корневой класс
+  visuoels.php       загрузчик 40+ подтипов
+  visuoel/
+    visuoel_group.php               база групп
+    visuoel_group_element.php       база элементов
+    visuoel_block{,__element}.php + block/{text,html}
+    visuoel_message{,__element}.php + message/{info,success,warning,error}
+    visuoel_input{,__element}.php + input/15 подтипов
+    visuoel_button{,__element}.php + button/{submit,reset,button}
+    visuoel_field{,__element,__button}.php + field/13 подтипов
+    visuoel_form.php + form/{form,fieldset}
+    visuoel_tabs.php + tabs/page
+    visuoel_table.php + table/{section,row,cell}
+
+СТРУКТУРА ОТВЕТА
+  visuostruct.php + visuostruct/{html,ajax,min}.php
+  visuopage.php           применение override слотов
+
+РЕЛИЗ
+  visuorelease.php        финальный рендер, debug-панель
+  visuorender.php         visuotag + meta → HTML-строка
+
+УДАЛЕНО 2026-10-10
+  visuoelement.php         legacy-API (заменён visuoel)
+  visuoelements/           реализации legacy
+  visuodata.php            data-контейнер legacy
