@@ -214,7 +214,6 @@ class main_settings {
 	public string $allias_real_name;
 	private string $language;
 	private string $render;
-	public bool $visuoelement_render_classic = true;
 	private string $logic = 'alpha.0.0';
 	private string $skin;
 	private null|string $skin_allias = 'www';

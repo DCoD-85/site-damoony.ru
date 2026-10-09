@@ -18,13 +18,10 @@ $visuosources = __DIR__ . DS . 'sources' . DS;
 ( include_once $file = $visuosources . 'visuoattrs' . DS . 'visuoattrsactions.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuoattrs' . DS . 'visuoattrsdata.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuometa.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuodata.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
-( include_once $file = $visuosources . 'visuoelement.php' ) or error_file( $file , __FILE__ , __LINE__ );
-( include_once $file = $visuosources . 'visuoelements.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuostruct.php' ) or error_file( $file , __FILE__ , __LINE__ );
 
-# new: visuoel (base + group + element) — строится параллельно visuoelement
+# visuoel: base + group + element
 ( include_once $file = $visuosources . 'visuoel.php' ) or error_file( $file , __FILE__ , __LINE__ );
 ( include_once $file = $visuosources . 'visuoels.php' ) or error_file( $file , __FILE__ , __LINE__ );
 

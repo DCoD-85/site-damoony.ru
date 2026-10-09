@@ -6,7 +6,7 @@ class algoritm_tests
 	extends \algoritm_ {
 	
 	# --- page settings ---
-	public array $available = [ '' , 'index' , 'basic' , 'roles' , 'helpers' , 'inherits' , 'error' , 'visuoelement' ];
+	public array $available = [ '' , 'index' , 'basic' , 'roles' , 'helpers' , 'inherits' , 'error' ];
 	public bool  $auth      = false;
 	public bool  $search    = true;
 	public bool  $default   = true;
@@ -38,7 +38,6 @@ class algoritm_tests
 			'helpers'      => 'Helpers' ,
 			'inherits'     => 'Inherits' ,
 			'error'        => 'Error' ,
-			'visuoelement' => 'Visuoelement' ,
 		];
 		
 		$vt = new \visuotag( );

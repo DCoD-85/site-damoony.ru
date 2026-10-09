@@ -20,7 +20,6 @@ class visuotag {
 		# --- hooks ---
 	private null|visuostruct  $visuostruct      = null;
 	private null|string       $visuostruct_name = null;
-	private null|visuoelement $visuoelement     = null;
 	private null|visuoel      $visuoel          = null;
 
 	### methods
@@ -48,7 +47,6 @@ class visuotag {
 	                      string               $style         = '' ,
 	                      string               $class         = '' ,
 	                      null|visuostruct     $visuostruct   = null ,
-	                      null|visuoelement    $visuoelement  = null ,
 	                      null|bool|string|visuotag $parent     = null ,
 	                      bool                 $return        = true ,
 	                      bool                 $return_parent = false ) : visuotag {
@@ -74,7 +72,6 @@ class visuotag {
 		if ( $style !== '' ) $newtag->attrs_style_add( $style );
 
 		$newtag->visuostruct  = $visuostruct;
-		$newtag->visuoelement = $visuoelement;
 
 		$target->elements[ ] = $newtag;
 
@@ -92,19 +89,6 @@ class visuotag {
 		$newtag->visuostruct_name = $visuostruct_name;
 		$newtag->visuostruct      = $visuostruct;
 		return $newtag;
-	}
-
-	# Создать узел-заглушку для элемента (visuoelement).
-	# Возвращает $this — цепочка продолжается на текущем узле.
-	public function element ( string $visuoelement_name , null|visuoelement $visuoelement = null , bool $init = false ) : visuotag {
-		$newtag = $this->tag( 'element' , true , class: 'cl_element' );
-
-		$visuoelement = $visuoelement ?: new visuoelement( $this->visuorelease , null );
-		$visuoelement->name = $visuoelement_name;
-		if ( $init === true ) $visuoelement->init( );
-		$newtag->visuoelement = $visuoelement;
-
-		return $this;
 	}
 	# Создать узел-заглушку для visuoel (новый UI-движок).
 	# Возвращает $this — цепочка продолжается на текущем узле.
@@ -417,9 +401,8 @@ class visuotag {
 
 			# wrap:
 			# - root — не оборачивается
-			# - visuoelement-узлы — не оборачиваются здесь (их подготавливает prepare_visuoelement)
 			# - всё остальное — оборачивается в <tag ...>...</tag>
-			if ( $root === false && $this->visuoelement === null && $this->visuoel === null ) {
+			if ( $root === false && $this->visuoel === null ) {
 				$html = '<' . $tagname . $html_attrs . '>' . $html . '</' . $tagname . '>';
 			}
 		} else {
@@ -443,8 +426,6 @@ class visuotag {
 		# hook by node type
 		if ( $this->visuostruct !== null ) {
 			$this->prepare_visuostruct( );
-		} elseif ( $this->visuoelement !== null ) {
-			$this->prepare_visuoelement( );
 		} elseif ( $this->visuoel !== null ) {
 			$this->prepare_visuoel( );
 		}
@@ -459,20 +440,11 @@ class visuotag {
 		}
 	}
 
-	# prepare [ ... visuotag | visuostruct | visuoelement ]
+	# prepare [ ... visuotag | visuostruct | visuoel ]
 	private function prepare_visuotag ( ) : void {
 	}
 
 	private function prepare_visuostruct ( ) : void {
-	}
-
-	private function prepare_visuoelement ( ) : void {
-		if ( $this->visuoelement->init == false ) {
-			$this->visuoelement->init( );
-			if ( $this->visuoelement->visuotag_start !== null ) {
-				$this->visuoelement->release( $this );
-			}
-		}
 	}
 
 	private function prepare_visuoel ( ) : void {
@@ -519,7 +491,6 @@ class visuotag {
 		$html .= '[ actions: ' . $html_actions . ' ]';
 		$html .= '[ data: ' . $html_data . ' ]';
 		$html .= '[ visuostruct: ' . (int)( $this->visuostruct ? true : false ) . ' ]';
-		$html .= '[ visuoelement: ' . (int)( $this->visuoelement ? true : false ) . ' ]';
 		$html .= '</div>';
 
 		foreach ( $elements as $v ) {
