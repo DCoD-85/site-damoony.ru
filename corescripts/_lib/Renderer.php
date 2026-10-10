@@ -31,6 +31,16 @@ class Renderer {
 			foreach ( $r->errors as $e ) {
 				Cli::err( $e );
 			}
+		} elseif ( ! $r->ok && ! empty( $r->steps ) ) {
+			# ошибка не в errors, а в шагах — показать последний неудачный
+			Cli::out( '' );
+			foreach ( array_reverse( $r->steps ) as $s ) {
+				if ( ! $s[ 'ok' ] ) {
+					$msg = $s[ 'msg' ] !== '' ? ' — ' . $s[ 'msg' ] : '';
+					Cli::err( $s[ 'name' ] . $msg );
+					break;
+				}
+			}
 		}
 
 		Cli::out( '' );
