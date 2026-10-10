@@ -1,0 +1,29 @@
+.bottom {
+	display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    color: #000;
+    line-height: 1.5em;
+}
+.bottom_nav_project { }
+.bottom_nav_project .title { }
+.bottom_nav_project .links { }
+.bottom_nav_project a { display : block ; color : #369 ; }
+.bottom_nav_project a:hover { display : block ; color : #666 ; }
+
+.bottom_nav_info { }
+.bottom_nav_info .title { }
+.bottom_nav_info .links { }
+.bottom_nav_info a { display : block ; color : #369 ; }
+.bottom_nav_info a:hover { display : block ; color : #666 ; }
+
+.bottom_nav_policy { }
+.bottom_nav_policy .title { }
+.bottom_nav_policy .links { }
+.bottom_nav_policy a { display : block ; color : #369 ; }
+.bottom_nav_policy a:hover { display : block ; color : #666 ; }
+
+.bottom_box { display : flex ; justify-content : space-between ; padding-bottom : 50px ; border-top : dashed #EEE 1px ; }
+.bottom_box div { padding : 10px ; color : #999 ; }
+.bottom_box a { color : #999 ; }
+.bottom_box a:hover { color : #333 ; }

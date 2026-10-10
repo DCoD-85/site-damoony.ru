@@ -1,0 +1,57 @@
+/*
+	about : ;
+	author : ;
+	date : ;
+ */
+ 
+.dt { padding : 10px ; }
+.dt_top { position : relative ; }
+.dt_middle { position : relative ; display : grid ; grid-template-columns : 300px auto 200px ; border : solid #CCC ; border-width : 1px 0px ; }
+.dt_left { position : relative ; padding : 0px ; }
+.dt_center { position : relative ; padding : 0px ; border : solid #CCC ; border-width : 0px 1px 0px 0px ; }
+.dt_right { position : relative ; padding : 0px ; }
+.dt_bottom { position : relative ; padding : 0px ; }
+.dt_debug { position : relative ; padding : 0px ; }
+
+
+.dt_left .menuleft { margin : 10px 0px ; padding : 10px ; background : ; border-radius : 5px ; }
+.dt_left .menuleft .menulink_between { display : none ; }
+.dt_left .menuleft .menulink { position : relative ; }
+.dt_left .menuleft .menulink.link_text { }
+.dt_left .menuleft .menulink.link_link { }
+.dt_left .menuleft .menulink.link_popup { }
+
+.dt_left .menuleft .menulink .span_text { display : block ; color : #666 ; }
+.dt_left .menuleft .menulink .span_text a { display : block ; padding : 5px ; color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_left .menuleft .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_left .menuleft .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_left .menuleft .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_left .menuleft .menulink:last-child .span_text a { border-bottom : none ; }
+.dt_left .menuleft .menulink:last-child .span_text a:hover { border-bottom : none ; }
+
+.dt_left .menuleft .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_left .menuleft .menulink:hover .span_comment { display : block ; }
+.dt_left .menuleft .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_left .menuleft .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+
+.dt_right .menuright { margin : 10px 0px ; padding : 10px ; background : #EEE ; border-radius : 5px ; }
+.dt_right .menuright .menulink_between { display : none ; }
+.dt_right .menuright .menulink { position : relative ; }
+.dt_right .menuright .menulink.link_text { }
+.dt_right .menuright .menulink.link_link { }
+.dt_right .menuright .menulink.link_popup { }
+
+.dt_right .menuright .menulink .span_text { display : block ; color : #666 ; }
+.dt_right .menuright .menulink .span_text a { display : block ; padding : 5px ; color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_right .menuright .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_right .menuright .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menuright .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menuright .menulink:last-child .span_text a { border-bottom : none ; }
+.dt_right .menuright .menulink:last-child .span_text a:hover { border-bottom : none ; }
+
+.dt_right .menuright .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_right .menuright .menulink:hover .span_comment { display : block ; }
+.dt_right .menuright .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_right .menuright .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }

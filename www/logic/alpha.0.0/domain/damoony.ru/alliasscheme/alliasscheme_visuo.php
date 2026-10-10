@@ -32,8 +32,8 @@ class alliasscheme_visuo {
 
 		# --- общие ---
 		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
-		$js_lib   = $media . 'scripts' . DSA . 'lib' . DSA;
-		$js_eng   = $media . 'scripts' . DSA . 'engine' . DSA;
+		$js_lib   = DSA . 'media' . DSA . 'shared' . DSA . 'scripts' . DSA . 'lib' . DSA;
+		$js_eng   = DSA . 'media' . DSA . 'shared' . DSA . 'scripts' . DSA . 'engine' . DSA;
 
 		# --- папка аллиаса (с точкой на конце) ---
 		$all_dir  = $media . 'skin' . DSA . $skin . DSA . $allias . '.' . DSA;

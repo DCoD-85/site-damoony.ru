@@ -1,0 +1,70 @@
+/*
+
+*/
+
+/*
+.bottom_ { position : relative ; max-height : 200px ; }
+
+.bottom_fon { position : absolute ; top : 100% ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 100 ; background : #333 ; color : #FFF ; opacity : 0.8 ; max-height : 200px ; }
+.bottom_click { font-size : 36px ; font-weight : 900 ; position : absolute ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 101 ; padding : 30px 150px ; display : flex ; justify-content : center ; align-items : center ; text-align : center ; color : #FFF ; max-height : 200px ; }
+
+.bottom_confidence { max-height : 300px ; overflow : auto ; }
+.bottom_confidence h1 { font-size : 40px ; }
+.bottom_confidence h2 { font-size : 26px ; margin : 20px 0px ; }
+.bottom_confidence p { font-size : 20px ; margin : 10px 0px ; text-indent : 20px ; }
+*/
+
+.dt_right .nav { }
+.dt_right .nav .nav_unfon{ display : block ; }
+
+.dt_right .menulink_between { display : none ; font-weight : 100 ; margin : 10px 0px ; padding : 0 0px ; color : #CCC ; }
+.dt_right .menulink { display : block ; }
+.dt_right .menulink.link_text { }
+.dt_right .menulink.link_link { }
+.dt_right .menulink.link_popup { }
+
+.dt_right .menulink a { display : block ; margin : 10px ; padding : 0px ; }
+.dt_right .menulink .span_text { color : #666 ; }
+.dt_right .menulink .span_text a { color : #999 ; border-bottom : dashed #999 1px ; }
+.dt_right .menulink.selected .span_text a { color : #369 ; border-bottom : solid #369 1px ; }
+.dt_right .menulink .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menulink.selected .span_text a:hover { color : #369 ; border-bottom : dashed #369 1px ; }
+.dt_right .menulink .span_comment { display : none ; position : absolute ; z-index : 5 ; top : 100% ; padding : 10px ; text-align : left ; }
+.dt_right .menulink:hover .span_comment { display : block ; }
+.dt_right .menulink .span_comment .span_comment_narrow { height : 10px ; background : url( '/media/release/default/images/narrow_top.png' ) center no-repeat ; }
+.dt_right .menulink .span_comment .span_comment_text { font-size : 16px ; padding : 10px ; min-width : 150px ; max-width : 200px ; background : #666 ; color : #FFF ; border-radius : 5px ; }
+
+
+.dt_right .menulink.link_text .span_text { display : block ; margin-top : 10px ; padding : 10px ; background : #CCC ; color : #666 ; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.menuright { }
+.menuright .link a { display : block ; }
+.menuright a { display : block ; padding : 10px ; }
+
+.dt_right .right_menu { padding : 20px 5px 5px 5px ; }
+.dt_right .right_menu .menu_title { display : none ; font-size : 22px ; padding : 10px ; border-bottom : solid #CCC 3px ; }
+.dt_right .right_menu .link { display : block ; margin : 10px ; padding : 0px ; }
+.dt_right .right_menu .link a { color : #369 ; text-decoration : none ; border-bottom : dotted #999 1px ; }
+.dt_right .right_menu .link a:hover { color : #000 ; border-bottom : solid #666 1px ; }
+
+/*
+.dt_right .right_menu { padding : 0px ; }
+.dt_right .right_menu .menu_title { display : none ; }
+.dt_right .right_menu .link { display : block ; margin : 0px ; padding : 0px ; }
+.dt_right .right_menu .link a { display : block ; margin : 10px 0 0 10px ; padding : 10px ; background : #CCC ; color : #369 ; text-decoration : none ; }
+.dt_right .right_menu .link a:hover { background : #CCC ; color : #000 ; }
+*/

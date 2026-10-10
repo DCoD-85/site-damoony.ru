@@ -58,4 +58,26 @@ class Fs {
 		sort( $out );
 		return $out;
 	}
+	
+	public static function copy_recursive ( string $src , string $dst ) : void {
+		if ( ! is_dir( $src ) ) {
+			self::mkdir( dirname( $dst ) );
+			@copy( $src , $dst );
+			return;
+		}
+		self::mkdir( $dst );
+		$it = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $src , FilesystemIterator::SKIP_DOTS ) ,
+			RecursiveIteratorIterator::SELF_FIRST
+		);
+		foreach ( $it as $f ) {
+			$rel = substr( $f->getPathname( ) , strlen( $src ) + 1 );
+			$out = $dst . '/' . $rel;
+			if ( $f->isDir( ) ) {
+				self::mkdir( $out );
+			} else {
+				@copy( $f->getPathname( ) , $out );
+			}
+		}
+	}
 }

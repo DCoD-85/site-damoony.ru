@@ -28,12 +28,13 @@ class alliasscheme_default {
 		$skin   = $main->main_settings->skin( 'skin' );
 		$allias = $main->main_settings->skin( 'allias' );
 
-		$media = DSA . 'media' . DSA . '<domain>' . DSA;
+		$media  = DSA . 'media' . DSA . '<domain>' . DSA;
+		$shared = DSA . 'media' . DSA . 'shared' . DSA;
 
 		# --- общие ---
 		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
-		$js_lib   = $media . 'scripts' . DSA . 'lib' . DSA;
-		$js_eng   = $media . 'scripts' . DSA . 'engine' . DSA;
+		$js_lib   = $shared . 'scripts' . DSA . 'lib' . DSA;
+		$js_eng   = $shared . 'scripts' . DSA . 'engine' . DSA;
 
 		# --- папка аллиаса (с точкой на конце) ---
 		$all_dir  = $media . 'skin' . DSA . $skin . DSA . $allias . '.' . DSA;

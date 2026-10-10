@@ -28,11 +28,12 @@ class alliasscheme_error {
 		$allias = $main->main_settings->skin( 'allias' );
 
 		$media = DSA . 'media' . DSA . 'damoony.ru' . DSA;
-
+		$shared = DSA . 'media' . DSA . 'shared' . DSA;
+		
 		$skin_css   = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
 		$engine_dir = $media . 'skin' . DSA . $skin . DSA . 'visuo' . DSA;
-		$js_lib     = $media . 'scripts' . DSA . 'lib' . DSA;
-		$js_eng     = $media . 'scripts' . DSA . 'engine' . DSA;
+		$js_lib     = $shared . 'scripts' . DSA . 'lib' . DSA;
+		$js_eng     = $shared . 'scripts' . DSA . 'engine' . DSA;
 
 		$meta = $this->visuorelease->meta( );
 		$meta->clear( );

@@ -1,0 +1,41 @@
+
+
+.visuotable { width : 100% ; }
+.visuotable .ttype { }
+.visuotable .ttype .row { display : flex ; }
+.visuotable .ttype .row .col { vertical-align : top ; }
+.visuotable .ttype .row .col .col-inside { padding : 0px ; }
+.visuotable .ttype .row .col.colelsinline .col-inside .col_block { display : flex ; }
+
+
+.visuotable .thead .row .col { }
+.visuotable .thead .row .col .field-content { font-weight : bold ; }
+.visuotable .thead .row .col .col-inside { }
+.visuotable .thead .row.header .col .col-inside { font-weight : 600 ; }
+
+.visuotable .tbody .row .col .col-inside { }
+
+
+.visuotable .tbody .row { }
+.visuotable .tbody .row .col { background : #EEE ; border-bottom : solid #DDD 1px ; }
+.visuotable .tbody .row .col .col-inside { }
+.visuotable .tbody .row:first-child .col:first-child { border-top-left-radius : 5px ; }
+.visuotable .tbody .row:first-child .col:last-child { border-top-right-radius : 5px ; }
+.visuotable .tbody .row:first-child .col:only-child { border-radius : 5px 5px 0 0 ; }
+.visuotable .tbody .row:last-child .col:first-child { border-bottom-left-radius : 5px ; }
+.visuotable .tbody .row:last-child .col:last-child { border-bottom-right-radius : 5px ; }
+.visuotable .tbody .row:last-child .col:only-child { border-radius : 0 0 5px 5px ; }
+.visuotable .tbody .row:last-child .col { border : none ; }
+.visuotable .tbody .row:only-child .col:first-child { border-radius : 5px 0px 0px 5px ; }
+.visuotable .tbody .row:only-child .col:last-child { border-radius : 0px 5px 5px 0px ; }
+.visuotable .tbody .row:only-child .col:only-child { border-radius :5px ; }
+
+.visuotable .tfoot .row { }
+.visuotable .tfoot .row .col { }
+.visuotable .tfoot .row .col .col-inside { padding-top : 20px ; }
+
+.ttype .table_block .div-inside { padding : 15px ; }
+.ttype.thead .table_block .div-inside { font-weight : 400 ; margin-bottom : 10px ; padding : 15px ; border-bottom : solid #CCC 1px ; }
+.ttype.thead .table_block:hover .div-inside { background : #CCC ; border-radius : 3px ; }
+.ttype.tbody .table_block .div-inside { padding : 15px ; color : #666 ; }
+.ttype.t .table_block .div-inside { font-weight : 900 ; padding : 10px ; }

@@ -1,0 +1,60 @@
+
+#tB_messages { position : fixed ; z-index : 10000 ; bottom : 0px ; left : 0px ; white-space : word-wrap ; width : 360px ; overflow : auto ; }
+#tB_messages .message { margin : 5px ; font-size : 15px ; font-weight : 300 ; line-height : 1.0em ; min-width : 350px ; max-width : 350px ; overflow : auto ; box-shadow: 1px 1px 3px rgba(0,0,0,0.5) ; border-radius : 3px ; }
+#tB_messages .message .container {
+	margin : 0px ;
+	padding : 0px ;
+	display : grid ;
+	grid-template-columns : auto 56px ;
+ }
+#tB_messages .message .container { background : #FFF ; }
+#tB_messages .message .container .divInside { margin : 0px ; padding : 0 0px ; max-height : 150px ; overflow : auto ; word-break : break-word ; }
+#tB_messages .message.fullwindow .container { position : fixed ; top : 0px ; left : 0px ; right : 0px ; bottom : 0px ; z-index : 1000000 ; }
+#tB_messages .message.fullwindow .container .divInside { margin : 0px 0 ; padding : 0px 10px ; max-height : none ; }
+#tB_messages .message .container .divInside .time { display : block ; font-weight : 300 ; margin : 0px 0 ; padding : 10px ; background : #DDD ; color : #F99 ; border-radius : 3px 0px ; }
+#tB_messages .message .container .divInside .messagebody { display : block ; font-weight : 300 ; margin : 0px 0 ; padding : 5px ; }
+#tB_messages .message .container .divInside .messagebody .textbox { margin : 0px 0 ; padding : 5px ; }
+#tB_messages .message .container .divInside .messagebody .elbox { margin : 10px 0 ; }
+#tB_messages .message .container .divInside .messagebody ul { }
+#tB_messages .message .container .divInside .messagebody ul li { }
+
+#tB_messages .message .container .buttons { }
+#tB_messages .message .container .buttons:hover { }
+#tB_messages .message .container .button { display : grid ; align-items: center ; justify-content : center ; margin : 10px 10px 10px 10px ; width : 36px ; height : 35px ; }
+#tB_messages .message .container .button img { }
+#tB_messages .message .container .button:hover { cursor : pointer ; background : #DDD ; }
+#tB_messages .message .container .button:hover img { }
+
+/* success */
+#tB_messages .message_success { }
+#tB_messages .message_success .container { background : #693 ; color : #000 ; }
+#tB_messages .message_success .container .divInside .time { color : #FFF ; background : #360 ; }
+#tB_messages .message_success .container .divInside .debug { display : block ; font-weight : 200 ; padding : 0px ; color : #F99 ; }
+#tB_messages .message_success .container a { color : #FFF ; border-bottom : dashed #FFF 1px ; }
+#tB_messages .message_success .container a:hover { color : #DDD ; border-bottom : solid #DDD 1px ; }
+#tB_messages .message_success .container .button:hover { background : #471 ; }
+
+/* Warning */
+#tB_messages .message_warning { }
+#tB_messages .message_warning .container { background : #C90 ; color : #000 ; }
+#tB_messages .message_warning .container .divInside .time { color : #000 ; background : #C33 ; }
+#tB_messages .message_warning .container a { color : #FFF ; border-bottom : dashed #FFF 1px ; }
+#tB_messages .message_warning .container a:hover { color : #FFF ; border-bottom : solid #FFF 1px ; }
+#tB_messages .message_warning .container .button:hover { background : #A70 ; }
+
+/* error */
+#tB_messages .message_error { }
+#tB_messages .message_error .container { background : #F33 ; color : #EEE ; }
+#tB_messages .message_error .container .divInside .time { color : #000 ; background : #C33 ; }
+#tB_messages .message_error .container .divInside .debug { display : block ; font-weight : 300 ; color : #CCC ; }
+#tB_messages .message_error .container a { color : #FF0 ; border-bottom : dashed #FF0 1px ; }
+#tB_messages .message_error .container a:hover { color : #FF0 ; border-bottom : solid #FF0 1px ; }
+#tB_messages .message_error .container .button:hover { background : #F00 ; }
+
+/* Console */
+#tB_messages .message_console { }
+#tB_messages .message_console .container { background : #EEE ; color : #333 ; }
+#tB_messages .message_console .container .divInside .time { color : #000 ; }
+#tB_messages .message_console .container a { color : #000 ; border-bottom : dashed #000 1px ; }
+#tB_messages .message_console .container a:hover { color : #666 ; border-bottom : solid #666 1px ; }
+#tB_messages .message_console .container .button:hover { }

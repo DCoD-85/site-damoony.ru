@@ -1,0 +1,22 @@
+.policy_shortagreement { padding : 10px ; }
+
+.policy_agreement { }
+.policy_agreement.hide { display : none ; }
+.policy_body { position : fixed ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 2 ; overflow : auto ; }
+
+.policy_body.hidden { }
+.policy_fon { position : fixed ; top : 0 ; left : 0 ; right : 0 ; bottom : 0 ; z-index : 1 ; background : #333 ; color : #FFF ; opacity : 0.9 ; }
+
+.policy_click { font-size : 36px ; font-weight : 900 ; padding : 0px 150px ; height : 100% ; display : flex ; justify-content : center ; align-items : center ; text-align : center ; color : #FFF ; }
+.policy_body.show .policy_click { display : none ; }
+
+.policy_confidence_close { display : none ; }
+.policy_body.show .policy_confidence_close { font-size : 36px ; font-weight : 900 ; margin : 50px 150px ; display : flex ; justify-content : center ; align-items : center ; text-align : center ; color : #FFF ; }
+.policy_body.show .policy_confidence_close:hover { color : #CF0 ; }
+
+.policy_confidence { display : none ; }
+.policy_confidence.onpage  { display : block ; }
+.policy_body.show .policy_confidence { display : block ; margin : 50px 100px ; padding : 20px ; background : #FFF ; border-radius : 5px ; }
+.policy_confidence h1 { font-size : 52px ; }
+.policy_confidence h2 { font-size : 26px ; margin : 20px 0px ; }
+.policy_confidence p { font-size : 20px ; margin : 10px 0px ; text-indent : 20px ; }

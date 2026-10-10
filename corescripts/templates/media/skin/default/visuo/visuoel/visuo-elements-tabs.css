@@ -1,0 +1,58 @@
+/* =========================================================
+   tabs
+   ========================================================= */
+
+.tabs {
+	margin : 0 0 20px 0 ;
+}
+
+/* --- заголовки --- */
+
+.tabs .hhead {
+	display : flex ;
+	flex-wrap : wrap ;
+	gap : 2px ;
+	border-bottom : solid #369 2px ;
+	margin : 0 ;
+	padding : 0 ;
+}
+
+.tab_title {
+	display : inline-block ;
+	padding : 10px 18px ;
+	background : #EEE ;
+	color : #666 ;
+	font-weight : 500 ;
+	font-size : 14px ;
+	line-height : 1.2 ;
+	cursor : pointer ;
+	border-radius : 3px 3px 0 0 ;
+	user-select : none ;
+	transition : background 0.15s , color 0.15s ;
+}
+
+.tab_title:hover {
+	background : #DDD ;
+	color : #333 ;
+}
+
+.tab_title.selected {
+	background : #369 ;
+	color : #FFF ;
+}
+
+/* --- содержимое --- */
+
+.tabs .bbody {
+	padding : 15px 0 ;
+}
+
+.tab_page {
+	display : none ;
+	padding : 10px ;
+	background : #FFF ;
+}
+
+.tab_page.selected {
+	display : block ;
+}

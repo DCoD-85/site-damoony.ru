@@ -85,6 +85,21 @@ class DomainNew {
 
 		$r->step( 'Создано файлов' , true , (string) count( $r->created ) );
 		$ctx?->step( 'Создано файлов' , true , (string) count( $r->created ) );
+		
+		# 4.5. создать папку media/<domain>/ из шаблона
+		$media_path = PROJECT_ROOT . '/www/media/' . $domain;
+		$media_src  = CS_TPL . '/media';
+
+		if ( ! is_dir( $media_path ) ) {
+			if ( is_dir( $media_src ) ) {
+				Fs::copy_recursive( $media_src , $media_path );
+				$r->step( 'Создана папка media из шаблона' , true , Fs::rel( $media_path ) );
+				$ctx?->step( 'Создана папка media' , true , Fs::rel( $media_path ) );
+			} else {
+				Fs::mkdir( $media_path );
+				$r->warn( "Шаблон media не найден ({$media_src}) — папка создана пустой" );
+			}
+		}
 
 		# 5. lint
 		$lint_errors = 0;
