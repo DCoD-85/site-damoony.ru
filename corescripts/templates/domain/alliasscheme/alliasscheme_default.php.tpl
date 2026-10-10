@@ -2,7 +2,7 @@
 
 namespace <domain_ns>;
 
-class alliasscheme_visuo {
+class alliasscheme_default {
 	# vars
 	public null|\main $main = null;
 	public null|alliasscheme $alliasscheme = null;

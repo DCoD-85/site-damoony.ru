@@ -29,9 +29,16 @@ $command = $argv[ 1 ] ?? 'help';
 $args    = array_slice( $argv , 2 );
 
 $map = [
-	'help'       => null ,
-	'domain:new' => 'DomainNew.php' ,
-	'allias:new' => 'AlliasNew.php' ,
+	'help'           => null ,
+	'domain:new'     => 'DomainNew.php' ,
+	'domain:list'    => 'DomainList.php' ,
+	'domain:remove'  => 'DomainRemove.php' ,
+	'allias:new'     => 'AlliasNew.php' ,
+	'allias:list'    => 'AlliasList.php' ,
+	'allias:remove'  => 'AlliasRemove.php' ,
+	'page:new'       => 'PageNew.php' ,
+	'block:new'      => 'BlockNew.php' ,
+	'filler:new'     => 'FillerNew.php' ,
 ];
 
 if ( $command === 'help' || ! array_key_exists( $command , $map ) ) {
@@ -66,8 +73,15 @@ $ctx = new Context( function ( string $name , bool $ok , string $msg ) {
 
 # --- класс команды ---
 $class_map = [
-	'domain:new' => 'DomainNew' ,
-	'allias:new' => 'AlliasNew' ,
+	'domain:new'     => 'DomainNew' ,
+	'domain:list'    => 'DomainList' ,
+	'domain:remove'  => 'DomainRemove' ,
+	'allias:new'     => 'AlliasNew' ,
+	'allias:list'    => 'AlliasList' ,
+	'allias:remove'  => 'AlliasRemove' ,
+	'page:new'       => 'PageNew' ,
+	'block:new'      => 'BlockNew' ,
+	'filler:new'     => 'FillerNew' ,
 ];
 $class = $class_map[ $command ];
 

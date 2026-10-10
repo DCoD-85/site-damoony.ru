@@ -22,7 +22,7 @@ class algoritm
 	public function start ( ) {
 		$main = $this->main;
 		$scheme = $main->alliasscheme;
-		$scheme->load( 'www' );
+		$scheme->load( 'default' );
 		$this->logic( );
 		$this->release( );
 		$scheme->reload( );

@@ -29,12 +29,10 @@ class main {
 	public null|domain $domain = null;
 	
 	# allias
-		# allias
-	public null|\damoony_ru\allias $allias = null;
-	public null|\damoony_ru\alliasglobal $alliasglobal = null;
-	public null|\damoony_ru\alliaslocal $alliaslocal = null;
-	public null|\damoony_ru\alliasscheme $alliasscheme = null;
-	public null|\damoony_ru\dataprovider $dataprovider = null;
+	public null|object $allias = null;
+	public null|object $alliasglobal = null;
+	public null|object $alliasscheme = null;
+	public null|object $dataprovider = null;
 
 	
 	public \algoritm_ $algoritm_;
