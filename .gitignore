@@ -27,3 +27,8 @@ data-tree.txt
 media-files.txt
 media-tree.txt
 backupdomain/
+
+# Media доменов — генерируется через domain:new
+www/media/*/
+!www/media/shared/
+!www/media/damoony.ru/
