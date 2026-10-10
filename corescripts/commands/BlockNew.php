@@ -131,38 +131,31 @@ class BlockNew {
 		# Уже есть?
 		if ( strpos( $content , '$' . $name ) !== false ) return null;
 
-		# 1. property — в блок "--- blocks ---"
-		$content = preg_replace(
-			'/(# --- blocks ---\s*\n)(\s*)(public\s+alliasglobal_[a-z_]+)\s+\$([a-z_]+)\s*;/s' ,
-			'$1$2$3 $$$4;$2public alliasglobal_' . $name . ' $' . $name . ';' ,
-			$content ,
-			1
-		);
-
-		# Проще: искать последний "public alliasglobal_<что-то> $<что-то>;" в блоке
-		# и вставить новое после него
-
-		if ( preg_match_all( '/(public\s+alliasglobal_[a-z_]+\s+\$[a-z_]+\s*;)/' , $content , $m , PREG_OFFSET_CAPTURE ) ) {
-			$last = end( $m[ 1 ] );
-			$pos = $last[ 1 ] + strlen( $last[ 0 ] );
-			$content = substr( $content , 0 , $pos ) . "\n\tpublic alliasglobal_" . $name . " $" . $name . ";" . substr( $content , $pos );
+		# 1. property — после последнего "public alliasglobal_* $*;"
+		if ( preg_match_all( '/public\s+alliasglobal_[a-z_]+\s+\$[a-z_]+\s*;/' , $content , $m , PREG_OFFSET_CAPTURE ) ) {
+			$last = end( $m[ 0 ] );
+			$pos  = $last[ 1 ] + strlen( $last[ 0 ] );
+			$content = substr( $content , 0 , $pos )
+			         . "\n\tpublic alliasglobal_" . $name . " $" . $name . ";"
+			         . substr( $content , $pos );
 		}
 
 		# 2. include в autoload
-		$include_pattern = '/\( include_once \$path = \'alliasglobal\' \. DS \. \'([a-z_]+)\' \. DS \. \'([a-z_]+)\.php\' \) or error_file\( \$path , __FILE__ , __LINE__ \);/';
-		if ( preg_match_all( $include_pattern , $content , $m , PREG_OFFSET_CAPTURE ) ) {
+		if ( preg_match_all( "/\( include_once \\\$path = 'alliasglobal' \. DS \. '[a-z_]+' \. DS \. '[a-z_]+\.php' \) or error_file\( \\\$path , __FILE__ , __LINE__ \);/" , $content , $m , PREG_OFFSET_CAPTURE ) ) {
 			$last = end( $m[ 0 ] );
-			$pos = $last[ 1 ] + strlen( $last[ 0 ] );
-			$new_line = "\n\t\t( include_once \$path = 'alliasglobal' . DS . '" . $name . "' . DS . '" . $name . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );";
-			$content = substr( $content , 0 , $pos ) . $new_line . substr( $content , $pos );
+			$pos  = $last[ 1 ] + strlen( $last[ 0 ] );
+			$content = substr( $content , 0 , $pos )
+			         . "\n\t\t( include_once \$path = 'alliasglobal' . DS . '" . $name . "' . DS . '" . $name . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );"
+			         . substr( $content , $pos );
 		}
 
 		# 3. new в init
-		if ( preg_match_all( '/(\$this->[a-z_]+\s*=\s*new\s+alliasglobal_[a-z_]+\s*\(\s*\$this\s*\)\s*;)/' , $content , $m , PREG_OFFSET_CAPTURE ) ) {
-			$last = end( $m[ 1 ] );
-			$pos = $last[ 1 ] + strlen( $last[ 0 ] );
-			$new_line = "\n\t\t\$this->" . $name . " = new alliasglobal_" . $name . "( \$this );";
-			$content = substr( $content , 0 , $pos ) . $new_line . substr( $content , $pos );
+		if ( preg_match_all( '/\$this->[a-z_]+\s*=\s*new\s+alliasglobal_[a-z_]+\s*\(\s*\$this\s*\)\s*;/' , $content , $m , PREG_OFFSET_CAPTURE ) ) {
+			$last = end( $m[ 0 ] );
+			$pos  = $last[ 1 ] + strlen( $last[ 0 ] );
+			$content = substr( $content , 0 , $pos )
+			         . "\n\t\t\$this->" . $name . " = new alliasglobal_" . $name . "( \$this );"
+			         . substr( $content , $pos );
 		}
 
 		return $content;

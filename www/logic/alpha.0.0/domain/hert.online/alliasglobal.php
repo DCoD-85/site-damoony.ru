@@ -19,6 +19,7 @@ class alliasglobal {
 	# --- scripts (свойства) ---
 	public alliasglobal_script_headers $headers;
 	public alliasglobal_script_head $head;
+	public alliasglobal_sidebar $sidebar;
 
 	# --- scripts (collection for iteration) ---
 	public array $scripts = [ ];
@@ -50,6 +51,7 @@ class alliasglobal {
 
 		# 3. scripts
 		( include_once $path = 'alliasglobal' . DS . 'script' . DS . 'headers.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = 'alliasglobal' . DS . 'sidebar' . DS . 'sidebar.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = 'alliasglobal' . DS . 'script' . DS . 'head.php'    ) or error_file( $path , __FILE__ , __LINE__ );
 
 		if ( $init === true ) $this->init( );
@@ -71,6 +73,7 @@ class alliasglobal {
 		$this->bottom = new alliasglobal_bottom( $this );
 		$this->policy = new alliasglobal_policy( $this );
 		$this->debug = new alliasglobal_debug( $this );
+		$this->sidebar = new alliasglobal_sidebar( $this );
 	}
 
 	# --- accessor (dynamic lookup by name) ---
