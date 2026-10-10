@@ -20,17 +20,13 @@ class main {
 	public core $core;
 	public db $db;
 	public null|library $library = null;
-	public system $system;
 	public language $language;
 	public messages $messages;
-	# visuo
-	public gmod  $gmod;
 	public mod  $mod;
 	public null|visuopage $visuopage = null;
 
 	# domain
 	public null|domain $domain = null;
-	public null|domainglobal $domainglobal = null;
 	
 	# allias
 		# allias
@@ -86,7 +82,6 @@ class main {
 		$this->library = new library( $this );
 		$this->language = new language( $this );
 		$this->messages = new messages( $this );
-		$this->gmod = new gmod( $this );
 		$this->mod = new mod( $this );
 		$this->main_settings->init( );
 		$this->main_settings->set( 'connect_type' , 'http://' );
@@ -96,7 +91,6 @@ class main {
 		$logic_ver = $this->main_settings->get( 'logic' );
 		( include_once $path = __DIR__ . DS . 'logic' . DS . $logic_ver . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
-		$this->gmod->init( );
 		$this->blacklist->init( );
 		
 		$db = $this->db->db( );
@@ -113,7 +107,6 @@ class main {
 		
 		# domain
 		$this->domain = new domain( $this );
-		$this->domainglobal = new domainglobal( $this );
 		
 		# dataprovider — фасад домена
 		$this->dataprovider = new ($static_domain.'\\dataprovider')( $this );

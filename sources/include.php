@@ -19,11 +19,9 @@ $sources_modules = [
 	'core' ,
 	'db' ,
 	'library' ,
-	'system' ,
 	'language' ,
 	'messages' ,
 	'visuo' ,
-	'gmod' ,
 	'mod' ,
 ];
 
