@@ -22,6 +22,9 @@ Options -Indexes
 # --- однократные скрипты (прямой доступ, минуя роутер) ---
 # RewriteRule ^install-visuo-test\.php$ - [L]
 
+# --- admin: отдельный роутер, не через index.php ---
+RewriteRule ^admin(/|$) - [L]
+
 RewriteCond %{REQUEST_FILENAME} ^(.*)tests(.*)$
 RewriteRule ^(.*)$ tests?%{QUERY_STRING} [NC]
 

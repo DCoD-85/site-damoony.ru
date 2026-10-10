@@ -39,6 +39,7 @@ $map = [
 	'page:new'       => 'PageNew.php' ,
 	'block:new'      => 'BlockNew.php' ,
 	'filler:new'     => 'FillerNew.php' ,
+	'admin:passwd'   => 'AdminPasswd.php' ,
 ];
 
 if ( $command === 'help' || ! array_key_exists( $command , $map ) ) {
@@ -82,6 +83,7 @@ $class_map = [
 	'page:new'       => 'PageNew' ,
 	'block:new'      => 'BlockNew' ,
 	'filler:new'     => 'FillerNew' ,
+	'admin:passwd'   => 'AdminPasswd' ,
 ];
 $class = $class_map[ $command ];
 

@@ -1,0 +1,132 @@
+<?PHP
+
+# ============================================================
+#   www/admin/index.php — точка входа админки
+#   Изолирована от main.php / visuo. Подключает только
+#   corescripts для доступа к commands и _lib.
+# ============================================================
+
+session_name( 'admin_sid' );
+
+session_set_cookie_params( [
+	'lifetime' => 0 ,
+	'path'     => '/' ,
+	'domain'   => '' ,
+	'secure'   => ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) ,
+	'httponly' => true ,
+	'samesite' => 'Lax' ,
+] );
+
+session_start( );
+
+define( 'ADMIN_ROOT'   , __DIR__ );
+define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
+
+$cs = PROJECT_ROOT . '/corescripts';
+
+define( 'CS_ROOT' , $cs );
+define( 'CS_LIB'  , $cs . '/_lib' );
+define( 'CS_CMD'  , $cs . '/commands' );
+define( 'CS_TPL'  , $cs . '/templates' );
+
+# corescripts _lib
+require_once CS_LIB . '/Fs.php';
+require_once CS_LIB . '/Config.php';
+require_once CS_LIB . '/Template.php';
+require_once CS_LIB . '/Validate.php';
+require_once CS_LIB . '/Result.php';
+require_once CS_LIB . '/Context.php';
+
+# admin _lib
+require_once ADMIN_ROOT . '/_lib/Auth.php';
+require_once ADMIN_ROOT . '/_lib/View.php';
+require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
+
+$auth = new Auth( );
+
+$p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
+
+# --- login / logout ---
+if ( $p === 'login' ) {
+	$error = null;
+	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+		$login = (string) ( $_POST[ 'login' ]    ?? '' );
+		$pass  = (string) ( $_POST[ 'password' ] ?? '' );
+		if ( $auth->login( $login , $pass ) ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+		$error = 'Неверный логин или пароль';
+	}
+	View::render( 'login' , [ 'error' => $error ] );
+	exit;
+}
+
+if ( $p === 'logout' ) {
+	$auth->logout( );
+	header( 'Location: ?p=login' );
+	exit;
+}
+
+# --- защита ---
+if ( ! $auth->check( ) ) {
+	header( 'Location: ?p=login' );
+	exit;
+}
+
+# --- dispatch ---
+switch ( $p ) {
+
+	case 'dashboard' :
+		$cfg     = new Config( PROJECT_ROOT . '/config/site.config' );
+		$domains = (array) $cfg->get( 'domains_real' );
+		$rows    = [ ];
+		foreach ( $domains as $d => $real ) {
+			$alliases = [ ];
+			foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $d ] , [ ] ) as $a => $t ) {
+				if ( $a === '' ) continue;
+				$alliases[ ] = $a;
+			}
+			$rows[ ] = [
+				'domain'   => $d ,
+				'ns'       => $cfg->getKeys( [ 'domains_namespace' , $d ] ) ?? '—' ,
+				'avail'    => ! empty( $cfg->getKeys( [ 'domains_available' , $d ] ) ) ,
+				'fs'       => is_dir( PROJECT_ROOT . '/www/logic/alpha.0.0/domain/' . $d ) ,
+				'alliases' => $alliases ,
+			];
+		}
+		View::render( 'dashboard' , [ 'domains' => $rows ] );
+		break;
+
+	case 'domain:new' :
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			require_once CS_CMD . '/DomainNew.php';
+			$result = DomainNew::run( [
+				'name'     => $_POST[ 'domain' ] ?? '' ,
+				'register' => ! empty( $_POST[ 'register' ] ) ,
+			] );
+			View::render( 'result' , [ 'result' => $result , 'title' => 'Создание домена' ] );
+		} else {
+			View::render( 'domain_new' , [ ] );
+		}
+		break;
+
+	case 'allias:new' :
+		$domains = array_keys( (array) ( new Config( PROJECT_ROOT . '/config/site.config' ) )->get( 'domains_real' ) );
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			require_once CS_CMD . '/AlliasNew.php';
+			$result = AlliasNew::run( [
+				'name'     => $_POST[ 'name' ]   ?? '' ,
+				'domain'   => $_POST[ 'domain' ] ?? '' ,
+				'register' => ! empty( $_POST[ 'register' ] ) ,
+			] );
+			View::render( 'result' , [ 'result' => $result , 'title' => 'Создание аллиаса' ] );
+		} else {
+			View::render( 'allias_new' , [ 'domains' => $domains ] );
+		}
+		break;
+
+	default :
+		http_response_code( 404 );
+		echo '<h1>404</h1><p>Страница не найдена: ' . htmlspecialchars( $p ) . '</p>';
+}
