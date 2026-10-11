@@ -23,8 +23,12 @@
 					<td><?= $d[ 'fs' ]    ? '✓' : '✗' ?></td>
 					<td><?= htmlspecialchars( implode( ', ' , $d[ 'alliases' ] ) ) ?></td>
 					<td>
-						<a href="?p=domain:edit&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-							class="btn-edit">Редактировать</a>
+						<td>
+							<a href="?p=domain:edit&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
+								class="btn-edit">Редактировать</a>
+							<a href="?p=allias:list&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
+								class="btn-edit">Аллиасы</a>
+						</td>
 					</td>
 				</tr>
 			<?php endforeach ?>

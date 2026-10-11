@@ -35,7 +35,8 @@ abstract class alliasblock {
 		$this->main            = $alliasglobal->main;
 		$this->visuorelease    = $this->main->visuorelease;
 		$this->visuotag        = new \visuotag( $this->visuorelease );
-		$this->allias_accepted = $this->main->main_settings->allias_accepted( );
+		$accepted = $this->main->main_settings->allias_accepted( );
+		$this->allias_accepted = is_string( $accepted ) ? $accepted : '';
 		$this->menu            = new alliasglobal_menu( $alliasglobal , $this->alliasglobal_name );
 
 		$this->init( );

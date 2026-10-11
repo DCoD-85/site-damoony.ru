@@ -24,7 +24,11 @@ class allias {
 		
 		$allias_accepted = $this->main->main_settings->allias_accepted( );
 		$this->alliasinfo->set( 'name' , $allias_accepted );
-		( $allias_accepted ) or error( true , true , __FILE__ , __LINE__ );
+
+		if ( ! is_string( $allias_accepted ) || $allias_accepted === '' ) {
+			http_response_code( 404 );
+			die( 'Not Found' );
+		}
 		
 		( include_once $path = __DIR__ . DS . 'allias' . DS . $allias_accepted . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 	}

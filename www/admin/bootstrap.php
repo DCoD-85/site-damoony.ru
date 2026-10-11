@@ -201,6 +201,85 @@ switch ( $p ) {
 		] );
 		break;
 	
+	case 'allias:toggle' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		$name   = (string) ( $_GET[ 'name' ]   ?? '' );
+		$value  = (string) ( $_GET[ 'value' ]  ?? '' );  # '1' | '0'
+
+		if ( $domain === '' || $name === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$flag = ( $value === '0' ) ? false : true;
+		$cfg->setKeys( [ 'alliases_available' , $domain , $name ] , $flag );
+		$cfg->save( );
+
+		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
+		exit;
+	
+	case 'allias:list' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+
+		if ( $domain === '' ) {
+			View::render( 'result' , [
+				'result' => new Result( ) ,
+				'title'  => 'Домен не указан' ,
+			] );
+			break;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			View::render( 'result' , [
+				'result' => new Result( ) ,
+				'title'  => "Домен не найден: {$domain}" ,
+			] );
+			break;
+		}
+
+		$logic     = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
+		$alliases  = (array)  $cfg->getKeys( [ 'alliases_real'      , $domain ] , [ ] );
+		$available = (array)  $cfg->getKeys( [ 'alliases_available' , $domain ] , [ ] );
+		$fillers   = (array)  $cfg->getKeys( [ 'fillers'            , $domain ] , [ ] );
+
+		$rows = [ ];
+		foreach ( $alliases as $alias => $target ) {
+			if ( $alias === '' ) continue;
+
+			$fs_path = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $alias;
+			$f       = (array) ( $fillers[ $alias ] ?? [ ] );
+
+			$enabled = 0;
+			foreach ( $f as $v ) if ( $v ) $enabled++;
+
+			$rows[ ] = [
+				'name'            => $alias ,
+				'avail'           => ! empty( $available[ $alias ] ) ,
+				'fs'              => is_dir( $fs_path ) ,
+				'fillers_enabled' => $enabled ,
+				'fillers_total'   => count( $f ) ,
+			];
+		}
+
+		View::render( 'allias_list' , [
+			'domain' => $domain ,
+			'rows'   => $rows ,
+		] );
+		break;
+	
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 

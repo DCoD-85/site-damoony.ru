@@ -90,6 +90,24 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 	font-size: 13px;
 }
 .btn-edit:hover { text-decoration: underline; }
+.btn-danger {
+	color: #a11;
+	text-decoration: none;
+	font-size: 13px;
+	margin-left: 8px;
+}
+.btn-danger:hover { text-decoration: underline; }
+.btn-toggle {
+	text-decoration: none;
+	font-size: 13px;
+	margin-right: 8px;
+	font-weight: 600;
+}
+.btn-toggle-on  { color: #1a7a3b; }
+.btn-toggle-on:hover  { text-decoration: underline; }
+.btn-toggle-off { color: #999; }
+.btn-toggle-off:hover { color: #555; text-decoration: underline; }
+
 
 .login-box {
 	max-width: 360px;

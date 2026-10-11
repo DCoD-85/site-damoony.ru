@@ -100,6 +100,12 @@ class main {
 		$url = $main->library->url( );
 		$static_domain = $main->main_settings->domain_accepted( false );
 		$static_allias = $main->main_settings->allias_accepted( );
+
+		# --- домен или аллиас выключен/не найден → 404 ---
+		if ( empty( $static_domain ) || empty( $static_allias ) ) {
+			http_response_code( 404 );
+			die( 'Not Found' );
+		}
 		
 		# domain
 		$this->domain = new domain( $this );
