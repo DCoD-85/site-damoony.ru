@@ -196,3 +196,28 @@ ROADMAP — 7 СЕССИЙ
 - боты не находят /admin/, брутфорс невозможен
 - сессия admin_sid — изолирована от PHPSESSID сайта
 - пароль — password_hash (bcrypt), login — hash_equals
+
+--- Технические работы (позже) ----------------------------------
+Состояние «технические работы» на уровнях:
+  - CMS (весь движок)
+  - домен
+  - аллиас
+
+Логика:
+  site.config → "maintenance": {
+      "global": false,              // весь CMS
+      "domains": { "hert.online": true },
+      "alliases": { "damoony.ru": { "visuo": true } }
+  }
+
+Поведение: при true — сайт отдаёт страницу «Технические работы»
+(503, Retry-After), админка доступна.
+
+Реализация:
+  - main_settings::maintenance(\$domain, \$allias) : bool
+  - www/index.php: проверка до main->main() → отдать maintenance-страницу
+  - Админка: тумблеры в domain_edit и allias_list
+  - Исключение: IP из admin.ips — видят сайт как обычно
+
+Приоритет: низкий (не блокирует наполнение)
+Этап: после Сессий 1–7 админки
