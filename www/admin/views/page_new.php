@@ -4,6 +4,13 @@
 	Домен: <code><?= htmlspecialchars( $domain , ENT_QUOTES ) ?></code>
 </p>
 
+<?php if ( ! empty( $parent ) ) : ?>
+	<p class="hint">
+		Родитель: <code><?= htmlspecialchars( $parent ) ?></code>
+		&nbsp;·&nbsp; файл: <code><?= htmlspecialchars( str_replace( '/' , '_' , $parent ) ) ?>_<span>имя</span></code>
+	</p>
+<?php endif ?>
+
 <form method="post" action="?p=page:new&domain=<?= urlencode( $domain ) ?>" class="form">
 
 	<label>Аллиас
@@ -24,4 +31,9 @@
 
 	<button type="submit">Создать</button>
 	<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">Отмена</a>
+	
+	<?php if ( ! empty( $parent ) ) : ?>
+		<input type="hidden" name="parent" value="<?= htmlspecialchars( $parent , ENT_QUOTES ) ?>">
+	<?php endif ?>
+
 </form>

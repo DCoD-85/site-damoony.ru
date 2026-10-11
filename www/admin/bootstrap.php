@@ -451,11 +451,13 @@ switch ( $p ) {
 
 			$allias = (string) ( $_POST[ 'allias' ] ?? '' );
 			$name   = trim( (string) ( $_POST[ 'name' ] ?? '' ) );
+			$parent = trim( (string) ( $_POST[ 'parent' ] ?? '' ) , '/' );
 
 			require_once CS_CMD . '/PageNew.php';
 
 			$result = PageNew::run( [
 				'name'   => $name ,
+				'parent' => $parent ,
 				'domain' => $domain ,
 				'allias' => $allias ,
 			] );
@@ -471,6 +473,7 @@ switch ( $p ) {
 		View::render( 'page_new' , [
 			'domain'   => $domain ,
 			'allias'   => $allias ,
+			'parent'   => (string) ( $_GET[ 'parent' ] ?? '' ) ,
 			'alliases' => $alliases ,
 		] );
 		break;
