@@ -35,8 +35,8 @@
 								title="Включить">○ выкл</a>
 						<?php endif ?>
 
-						<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $r[ 'name' ] ) ?>"
-							class="btn-edit">+ Страница</a>
+						<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $r[ 'name' ] ) ?>"
+							class="btn-edit">Страницы</a>
 						<a href="?p=filler:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $r[ 'name' ] ) ?>"
 							class="btn-edit">+ Filler</a>
 						<a href="?p=allias:remove&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $r[ 'name' ] ) ?>"

@@ -387,6 +387,94 @@ switch ( $p ) {
 		] );
 		break;
 	
+	case 'pages:tree' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
+
+		if ( $domain === '' || $allias === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		require_once ADMIN_ROOT . '/_lib/Scan.php';
+
+		$logic    = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
+		$lang_dir = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm/lang';
+
+		$tree = is_dir( $lang_dir ) ? Scan::pageTree( $lang_dir ) : [ ];
+
+		View::render( 'pages_tree' , [
+			'domain' => $domain ,
+			'allias' => $allias ,
+			'logic'  => $logic ,
+			'tree'   => $tree ,
+			'has_dir' => is_dir( $lang_dir ) ,
+		] );
+		break;
+	
+	case 'page:new' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
+
+		if ( $domain === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		# список аллиасов домена
+		$alliases = [ ];
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
+			if ( $a === '' ) continue;
+			$alliases[ ] = $a;
+		}
+
+		# --- POST ---
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+			$allias = (string) ( $_POST[ 'allias' ] ?? '' );
+			$name   = trim( (string) ( $_POST[ 'name' ] ?? '' ) );
+
+			require_once CS_CMD . '/PageNew.php';
+
+			$result = PageNew::run( [
+				'name'   => $name ,
+				'domain' => $domain ,
+				'allias' => $allias ,
+			] );
+
+			View::render( 'result' , [
+				'result' => $result ,
+				'title'  => "Создание страницы: {$domain} / {$allias} / {$name}" ,
+			] );
+			break;
+		}
+
+		# --- GET ---
+		View::render( 'page_new' , [
+			'domain'   => $domain ,
+			'allias'   => $allias ,
+			'alliases' => $alliases ,
+		] );
+		break;
+	
 	case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
