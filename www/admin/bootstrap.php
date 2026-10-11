@@ -320,6 +320,73 @@ switch ( $p ) {
 		] );
 		break;
 	
+		case 'allias:remove' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		$name   = (string) ( $_GET[ 'name' ]   ?? '' );
+
+		if ( $domain === '' || $name === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg = new Config( PROJECT_ROOT . '/config/site.config' );
+
+		$real = $cfg->getKeys( [ 'domains_real'    , $domain ] );
+		$al   = $cfg->getKeys( [ 'alliases_real'   , $domain , $name ] );
+
+		if ( $real === null || $al === null ) {
+			header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
+			exit;
+		}
+
+		# --- POST ---
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+			$confirm_checked = ! empty( $_POST[ 'confirm_checked' ] );
+			$confirm_name    = trim( (string) ( $_POST[ 'confirm_name' ] ?? '' ) );
+
+			$errors = [ ];
+
+			if ( ! $confirm_checked ) {
+				$errors[ ] = 'Подтвердите, что понимаете необратимость';
+			}
+			if ( $confirm_name !== $name ) {
+				$errors[ ] = 'Имя аллиаса введено неверно';
+			}
+
+			if ( empty( $errors ) ) {
+				require_once CS_CMD . '/AlliasRemove.php';
+
+				$result = AlliasRemove::run( [
+					'name'   => $name ,
+					'domain' => $domain ,
+					'force'  => true ,
+				] );
+
+				View::render( 'result' , [
+					'result' => $result ,
+					'title'  => "Удаление аллиаса: {$domain} / {$name}" ,
+				] );
+				break;
+			}
+
+			View::render( 'allias_remove' , [
+				'domain' => $domain ,
+				'name'   => $name ,
+				'errors' => $errors ,
+			] );
+			break;
+		}
+
+		# --- GET ---
+		View::render( 'allias_remove' , [
+			'domain' => $domain ,
+			'name'   => $name ,
+			'errors' => [ ] ,
+		] );
+		break;
+	
 	case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
