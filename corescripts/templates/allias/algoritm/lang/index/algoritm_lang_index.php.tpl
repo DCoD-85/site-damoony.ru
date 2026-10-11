@@ -24,7 +24,7 @@ class algoritm_lang_index
 		$lang = $main->language;
 
 		$main->alliasglobal->head->title(
-			$lang->get( 'WWW_TITLE' , [ ] , 'www' ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
+			$lang->get( 'WWW_TITLE' , [ ] , $main->main_settings->title( ) ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
 		);
 
 		$center = $main->alliasglobal->center;
@@ -63,7 +63,7 @@ class algoritm_lang_index
 		$form->add( $btn );
 
 		$vt = new \visuotag( );
-		$vt->tag( 'h1' )->content( 'Эталонный аллиас www' );
+		$vt->tag( 'h1' )->content( 'Эталонный аллиас <name>' );
 		$vt->tag( 'p' )->content( 'Одна страница — lang/index. Форма ниже — пример работы с visuoel.' );
 		$vt->el( $ve );
 

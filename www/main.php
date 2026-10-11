@@ -36,9 +36,7 @@ class main {
 
 	
 	public \algoritm_ $algoritm_;
-	# public null|\damoony\www\algoritm|\damoony\login\algoritm $algoritm = null;
 	public \algoritm_ $algoritm;
-	# public subalgoritm $subalgoritm;
 	
 	# visuo
 	public null|visuorelease $visuorelease = null;
@@ -207,11 +205,13 @@ class main_settings {
 	private string $skin;
 	private null|string $skin_allias = 'www';
 	private string $connect_type = '';
+	public string $title = 'Site';
 	public array $domains_real = [ ];
 	public array $domains_available = [ ];
 	public array $alliases_real = [ ];
 	public array $alliases_available = [ ];
 	public array $domains_namespace = [ ];
+	public array $domains_titles = [ ];
 	public array $fillers = [ ];
 
 	# render engine
@@ -253,8 +253,6 @@ class main_settings {
 		$this->allias_real_name = $this->alliases_real[ $this->domain_real_name ][ $url_allias[ 1 ] ?? '' ];
 
 		$this->skin_allias = $this->allias_real_name;
-
-		$v = new visuotag( );
 	}
 	/**
 	 * Загружает внешнюю конфигурацию из JSON файла и динамически обновляет свойства класса.
@@ -264,7 +262,6 @@ class main_settings {
 	 */
 	public function loadExternalConfig( string $configPath ) {
 		if( ! file_exists( $configPath ) ){
-			// Если файл не найден, можно залогировать ошибку или просто выйти
 			return;
 		}
 
@@ -272,12 +269,10 @@ class main_settings {
 		$configData = json_decode( $jsonContent , true );
 
 		if( json_last_error( ) !== JSON_ERROR_NONE || ! is_array( $configData ) ) {
-			// Если JSON невалиден, выходим, чтобы не повредить текущие настройки
 			return;
 		}
 
 		foreach( $configData as $property=>$value ){
-			// Проверяем, существует ли такое свойство в текущем классе
 			if ( property_exists( $this , $property ) ){
 				$this->$property = $value;
 			}
@@ -336,6 +331,15 @@ class main_settings {
 	public function skin ( string $option ) {
 		if( $option == 'skin' ) return $this->skin;
 		if( $option == 'allias' ) return $this->skin_allias;
+	}
+
+	# --- доменный title (с fallback на общий) ---
+	public function title ( ) : string {
+		$domain = $this->domain_real_name ?? '';
+		if ( $domain !== '' && ! empty( $this->domains_titles[ $domain ] ) ) {
+			return $this->domains_titles[ $domain ];
+		}
+		return $this->title !== '' ? $this->title : 'Site';
 	}
 }
 

@@ -24,7 +24,7 @@ class algoritm_lang_index
 		$lang = $main->language;
 
 		$main->alliasglobal->head->title(
-			$lang->get( 'WWW_TITLE' , [ ] , 'www' ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
+			$lang->get( 'WWW_TITLE' , [ ] , $main->main_settings->title( ) ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
 		);
 
 		$center = $main->alliasglobal->center;
