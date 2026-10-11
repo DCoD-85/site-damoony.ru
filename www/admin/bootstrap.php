@@ -252,6 +252,74 @@ switch ( $p ) {
 		header( 'Location: ?p=dashboard' );
 		exit;
 	
+		case 'domain:remove' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+
+		if ( $domain === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		# --- POST ---
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+			$confirm_name    = trim( (string) ( $_POST[ 'confirm_name' ]    ?? '' ) );
+			$confirm_checked = ! empty( $_POST[ 'confirm_checked' ] );
+
+			$errors = [ ];
+
+			if ( ! $confirm_checked ) {
+				$errors[ ] = 'Подтвердите, что понимаете необратимость';
+			}
+			if ( $confirm_name !== $domain ) {
+				$errors[ ] = 'Имя домена введено неверно';
+			}
+
+			if ( empty( $errors ) ) {
+				require_once CS_CMD . '/DomainRemove.php';
+
+				$result = DomainRemove::run( [
+					'name'  => $domain ,
+					'force' => true ,
+				] );
+
+				View::render( 'result' , [
+					'result' => $result ,
+					'title'  => 'Удаление домена: ' . $domain ,
+				] );
+				break;
+			}
+
+			View::render( 'domain_remove' , [
+				'domain' => $domain ,
+				'errors' => $errors ,
+			] );
+			break;
+		}
+
+		# --- GET ---
+		$alliases = [ ];
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
+			if ( $a === '' ) continue;
+			$alliases[ ] = $a;
+		}
+
+		View::render( 'domain_remove' , [
+			'domain'   => $domain ,
+			'errors'   => [ ] ,
+			'alliases' => $alliases ,
+		] );
+		break;
+	
 	case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );

@@ -107,6 +107,16 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 .btn-toggle-on:hover  { text-decoration: underline; }
 .btn-toggle-off { color: #999; }
 .btn-toggle-off:hover { color: #555; text-decoration: underline; }
+.btn-danger-solid {
+	padding: 9px 18px;
+	background: #c33;
+	color: #fff;
+	border: 0;
+	border-radius: 4px;
+	cursor: pointer;
+	font: inherit;
+}
+.btn-danger-solid:hover { background: #a11; }
 
 
 .login-box {
