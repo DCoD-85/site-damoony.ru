@@ -300,14 +300,19 @@ class main_settings {
 	}
 	
 	public function domain_accepted ( bool $full = true ) {
-		$return = $this->domains_available[ $this->domain_real_name ] ? $this->domain_real_name : null;
-		if ( $full == false && ! is_null( $return ) ) {
+		# домен вообще не в списке доступных → null
+		if ( empty( $this->domains_available[ $this->domain_real_name ] ) ) {
+			return null;
+		}
+		$return = $this->domain_real_name;
+		if ( $full == false ) {
 			$ns = $this->domains_namespace[ $this->domain_real_name ] ?? null;
 			if ( $ns !== null && $ns !== '' ) return $ns;
 			$return = mb_ereg_replace( '\.ru' , '' , $return );
 		}
 		return $return;
 	}
+	
 	public function allias_accepted ( ) {
 		return $this->alliases_available[ $this->domain_real_name ][ $this->allias_real_name ] ? $this->allias_real_name : null;
 	}

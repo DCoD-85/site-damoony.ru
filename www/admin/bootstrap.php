@@ -227,6 +227,31 @@ switch ( $p ) {
 		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
 		exit;
 	
+	case 'domain:toggle' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		$value  = (string) ( $_GET[ 'value' ]  ?? '' );
+
+		if ( $domain === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$flag = ( $value === '0' ) ? false : true;
+		$cfg->setKeys( [ 'domains_available' , $domain ] , $flag );
+		$cfg->save( );
+
+		header( 'Location: ?p=dashboard' );
+		exit;
+	
 	case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
