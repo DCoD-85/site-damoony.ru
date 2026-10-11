@@ -125,7 +125,52 @@ switch ( $p ) {
 			View::render( 'allias_new' , [ 'domains' => $domains ] );
 		}
 		break;
+	
+	case 'settings' :
+		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
+		# SettingsSet падает на неизвестном ключе → фильтруем $_POST
+		$allowed = [ 'logic' , 'connect_type' ];
+
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			require_once CS_CMD . '/SettingsSet.php';
+
+			$params = [ ];
+			foreach ( $allowed as $k ) {
+				if ( array_key_exists( $k , $_POST ) ) {
+					$params[ $k ] = $_POST[ $k ];
+				}
+			}
+
+			$result = SettingsSet::run( $params );
+
+			if ( $result->ok ) {
+				header( 'Location: ?p=settings&saved=1' );
+				exit;
+			}
+
+			View::render( 'result' , [
+				'result' => $result ,
+				'title'  => 'Настройки — ошибка' ,
+			] );
+			break;
+		}
+
+		# GET
+		$cfg = new Config( PROJECT_ROOT . '/config/site.config' );
+
+		View::render( 'settings' , [
+			'title'        => 'Настройки' ,
+			'saved'        => ! empty( $_GET[ 'saved' ] ) ,
+			'current'      => [
+				'logic'        => (string) ( $cfg->get( 'logic' )        ?? '' ) ,
+				'connect_type' => (string) ( $cfg->get( 'connect_type' ) ?? 'https://' ) ,
+			] ,
+			'logics'       => Scan::logics( ) ,
+			'connectTypes' => Scan::connectTypes( ) ,
+		] );
+		break;
+	
 	default :
 		http_response_code( 404 );
 		echo '<h1>404</h1><p>Страница не найдена: ' . htmlspecialchars( $p ) . '</p>';

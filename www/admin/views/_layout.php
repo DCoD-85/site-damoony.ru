@@ -13,9 +13,7 @@
 	<div class="admin-logo">SimplCMS / admin</div>
 	<?php if ( ! empty( $_SESSION[ 'admin_ok' ] ) ) : ?>
 		<nav class="admin-nav">
-			<a href="?p=dashboard">Домены</a>
-			<a href="?p=domain:new">+ Домен</a>
-			<a href="?p=allias:new">+ Аллиас</a>
+			<a href="?p=settings">Настройки</a>
 		</nav>
 		<div class="admin-user">
 			<?= htmlspecialchars( $_SESSION[ 'admin_login' ] ?? '' ) ?>

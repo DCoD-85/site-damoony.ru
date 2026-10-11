@@ -108,6 +108,11 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 	border-radius: 4px; margin-bottom: 12px;
 }
 
+.ok-msg {
+	background: #e3f7e8; color: #1a7a3b; padding: 8px 12px;
+	border-radius: 4px; margin-bottom: 12px;
+}
+
 .result { background: #fff; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
 .result.ok  h2 { color: #1a7a3b; }
 .result.err h2 { color: #a11; }
