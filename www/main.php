@@ -212,6 +212,7 @@ class main_settings {
 	public array $alliases_available = [ ];
 	public array $domains_namespace = [ ];
 	public array $domains_titles = [ ];
+	public array $domains_skins = [ ];
 	public array $fillers = [ ];
 
 	# render engine
@@ -329,8 +330,14 @@ class main_settings {
 	}
 	
 	public function skin ( string $option ) {
-		if( $option == 'skin' ) return $this->skin;
-		if( $option == 'allias' ) return $this->skin_allias;
+		if ( $option === 'skin' ) {
+			$domain = $this->domain_real_name ?? '';
+			if ( $domain !== '' && ! empty( $this->domains_skins[ $domain ] ) ) {
+				return $this->domains_skins[ $domain ];
+			}
+			return $this->skin;
+		}
+		if ( $option === 'allias' ) return $this->skin_allias;
 	}
 
 	# --- доменный title (с fallback на общий) ---

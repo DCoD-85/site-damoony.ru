@@ -11,6 +11,7 @@
 				<th>Активен</th>
 				<th>Файлы</th>
 				<th>Аллиасы</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -21,6 +22,10 @@
 					<td><?= $d[ 'avail' ] ? '✓' : '✗' ?></td>
 					<td><?= $d[ 'fs' ]    ? '✓' : '✗' ?></td>
 					<td><?= htmlspecialchars( implode( ', ' , $d[ 'alliases' ] ) ) ?></td>
+					<td>
+						<a href="?p=domain:edit&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
+							class="btn-edit">Редактировать</a>
+					</td>
 				</tr>
 			<?php endforeach ?>
 		</tbody>

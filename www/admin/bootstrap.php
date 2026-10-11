@@ -126,6 +126,81 @@ switch ( $p ) {
 		}
 		break;
 	
+	case 'domain:edit' :
+
+		require_once ADMIN_ROOT . '/_lib/Scan.php';
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+
+		$cfg_path = PROJECT_ROOT . '/config/site.config';
+		$cfg      = new Config( $cfg_path );
+
+		# --- валидация домена ---
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+		if ( $real === null ) {
+			View::render( 'result' , [
+				'result' => new Result( ) ,
+				'title'  => 'Домен не найден' ,
+			] );
+			break;
+		}
+
+		# --- POST ---
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+			$title = trim( (string) ( $_POST[ 'title' ] ?? '' ) );
+			$skin  = trim( (string) ( $_POST[ 'skin' ]  ?? '' ) );
+
+			$errors = [ ];
+
+			if ( $title === '' ) {
+				$errors[ ] = 'Title не может быть пустым';
+			}
+
+			# skin: проверяем, что папка www/media/<domain>/skin/<skin> существует
+			$skin_dir = PROJECT_ROOT . '/www/media/' . $domain . '/skin/' . $skin;
+			if ( $skin !== '' && ! is_dir( $skin_dir ) ) {
+				$errors[ ] = "Тема '{$skin}' не найдена в media/{$domain}/skin/";
+			}
+
+			if ( empty( $errors ) ) {
+				try {
+					$cfg->setKeys( [ 'domains_titles' , $domain ] , $title );
+					if ( $skin !== '' ) {
+						$cfg->setKeys( [ 'domains_skins' , $domain ] , $skin );
+					}
+					$cfg->save( );
+					header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' );
+					exit;
+				} catch ( Throwable $e ) {
+					$errors[ ] = 'Не сохранить: ' . $e->getMessage( );
+				}
+			}
+
+			# ошибки — показать форму заново с введённым
+			View::render( 'domain_edit' , [
+				'domain'  => $domain ,
+				'saved'   => false ,
+				'errors'  => $errors ,
+				'current' => [ 'title' => $title , 'skin' => $skin ] ,
+				'skins'   => Scan::skinsFor( $domain ) ,
+			] );
+			break;
+		}
+
+		# --- GET ---
+		$title = (string) ( $cfg->getKeys( [ 'domains_titles' , $domain ] ) ?? $cfg->get( 'title' , '' ) );
+		$skin  = (string) ( $cfg->getKeys( [ 'domains_skins'  , $domain ] ) ?? $cfg->get( 'skin'  , 'default' ) );
+
+		View::render( 'domain_edit' , [
+			'domain'  => $domain ,
+			'saved'   => ! empty( $_GET[ 'saved' ] ) ,
+			'errors'  => [ ] ,
+			'current' => [ 'title' => $title , 'skin' => $skin ] ,
+			'skins' => Scan::skinsFor( $domain ) ,
+		] );
+		break;
+	
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 

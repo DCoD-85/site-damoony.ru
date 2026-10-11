@@ -11,6 +11,11 @@ class Scan {
 	public static function skins ( ) : array {
 		return self::listDirs( PROJECT_ROOT . '/www/media/damoony.ru/skin' );
 	}
+	
+	# www/media/<domain>/skin/* — только папки
+	public static function skinsFor ( string $domain ) : array {
+		return self::listDirs( PROJECT_ROOT . '/www/media/' . $domain . '/skin' );
+	}
 
 	# www/logic/* — только папки, где есть include.php
 	public static function logics ( ) : array {
@@ -41,4 +46,5 @@ class Scan {
 		sort( $out );
 		return $out;
 	}
+	
 }
