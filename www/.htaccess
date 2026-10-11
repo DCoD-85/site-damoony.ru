@@ -19,12 +19,6 @@ DirectoryIndex index.php index.htm index.html
 
 Options -Indexes
 
-# --- однократные скрипты (прямой доступ, минуя роутер) ---
-# RewriteRule ^install-visuo-test\.php$ - [L]
-
-# --- admin: отдельный роутер, не через index.php ---
-RewriteRule ^admin(/|$) - [L]
-
 RewriteCond %{REQUEST_FILENAME} ^(.*)tests(.*)$
 RewriteRule ^(.*)$ tests?%{QUERY_STRING} [NC]
 
@@ -34,5 +28,6 @@ RewriteCond %{REQUEST_FILENAME} !-l [OR]
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d [OR]
 RewriteCond %{REQUEST_FILENAME} -l [OR]
-RewriteCond %{REQUEST_FILENAME} !^.*(ico|xml|txt)$
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$ - [L]
 RewriteRule ^(.*)$ index.php?%{QUERY_STRING} [L]
