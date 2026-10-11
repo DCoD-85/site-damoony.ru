@@ -40,7 +40,7 @@ class visuoel_input_checkbox_group extends visuoel_input__element {
 			$inp->attrs_add( 'type'  , 'checkbox' );
 			$inp->attrs_add( 'name'  , $name );
 			$inp->attrs_add( 'value' , (string) $value );
-			$inp->attrs_add( 'id'    , 'field_' . rtrim( $d->name , '[]' ) . '_' . $value );
+			$inp->attrs_add( 'id'    , 'field_' . preg_replace( '/\[\]$/' , '' , $d->name ) . '_' . $value );
 			if ( in_array( (string) $value , $selected , true ) ) {
 				$inp->attrs_add( 'checked' , 'checked' );
 			}

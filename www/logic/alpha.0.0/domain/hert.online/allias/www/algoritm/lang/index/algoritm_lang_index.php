@@ -63,7 +63,7 @@ class algoritm_lang_index
 		$form->add( $btn );
 
 		$vt = new \visuotag( );
-		$vt->tag( 'h1' )->content( 'Эталонный аллиас www' );
+		$vt->tag( 'h1' )->content( 'Эталонный аллиас ' . $main->main_settings->title( ) );
 		$vt->tag( 'p' )->content( 'Одна страница — lang/index. Форма ниже — пример работы с visuoel.' );
 		$vt->el( $ve );
 
