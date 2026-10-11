@@ -32,3 +32,6 @@ backupdomain/
 www/media/*/
 !www/media/shared/
 !www/media/damoony.ru/
+
+# Language доменов: авто-дефолты не коммитим
+language/domains/*/save.txt.inc
