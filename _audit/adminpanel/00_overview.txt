@@ -1,0 +1,198 @@
+================================================================
+ADMIN PANEL — аудит + roadmap
+Дата: 2026-10-11
+================================================================
+
+ТЕКУЩЕЕ СОСТОЯНИЕ
+================================================================
+
+Точка входа:  www/index.php → (IP в whitelist) → www/admin/bootstrap.php
+Доступ:       только 127.0.0.1, ::1 + site.config.admin.ips
+              (SSH-туннель или локальная машина)
+Сессия:       admin_sid (не пересекается с PHPSESSID сайта)
+
+ФАЙЛЫ
+----------------------------------------------------------------
+www/admin/
+  bootstrap.php              ← точка входа
+  _lib/
+    Auth.php                 — login/logout/session
+    View.php                 — View::render($view, $data) → layout
+    WebRenderer.php          — Result → HTML (для POST-ответов)
+  views/
+    _layout.php              — каркас (header, nav, content)
+    login.php
+    dashboard.php            — список домен
+    domain_new.php
+    allias_new.php
+    result.php               — показ Result после POST
+  assets/
+    admin.css
+
+РЕАЛИЗОВАНО
+----------------------------------------------------------------
+?p=login              вход (пароль из site.config.admin)
+?p=logout             выход
+?p=dashboard          таблица домен (ns, avail, fs, alliases)
+?p=domain:new         форма + POST → DomainNew::run()
+?p=allias:new         форма + POST → AlliasNew::run()
+
+ДИСПЕТЧЕР
+----------------------------------------------------------------
+switch ( $p ) {
+    case 'dashboard' : ...
+    case 'domain:new': ...
+    case 'allias:new': ...
+    default : http_response_code(404); echo '404';
+}
+
+КОНВЕНЦИИ
+----------------------------------------------------------------
+- View::render($view, $data) — рендер layout + view
+- WebRenderer::html($result) — рендер corescripts Result
+- Команды corescripts/commands/* возвращают Result:
+    public bool   $ok
+    public array  $steps     // [['name'=>'','ok'=>bool,'msg'=>''], ...]
+    public array  $created   // созданные файлы (абсолютные пути)
+    public array  $errors
+    public array  $warnings
+- Config (corescripts/_lib/Config.php):
+    ->get($path), ->getKeys($keys)
+    ->setKeys($keys, $value), ->save()
+- CSS-классы: .form, .table, .error-msg, .ok-msg, .result
+
+
+ROADMAP — 7 СЕССИЙ
+================================================================
+
+--- Сессия 1. ?p=settings ----------------------------------------
+Что:   просмотр + редактирование title/skin/logic/connect_type
+Файлы: bootstrap.php (case 'settings')
+       views/settings.php (новый)
+       views/_layout.php (пункт меню «Настройки»)
+       assets/admin.css (.ok-msg)
+Референс: corescripts/commands/SettingsSet.php
+Что делает:
+  GET  → форма с dropdown (скан www/media/damoony.ru/skin/*,
+         www/logic/*)
+  POST → валидация + Config::setKeys() + Config::save()
+  успех → редирект ?p=settings&saved=1
+
+--- Сессия 2. ?p=allias:list&domain=X ---------------------------
+Что:   список аллиасов домена + filler-статус
+Файлы: bootstrap.php (case 'allias:list')
+       views/allias_list.php (новый)
+Референс: corescripts/commands/AlliasList.php
+Что делает:
+  Таблица: allias, avail, fs, fillers(N/M)
+  Кнопки: удалить, создать страницу, создать filler
+
+--- Сессия 3. ?p=domain:remove&domain=X --------------------------
+Что:   удаление домена с двойным подтверждением
+Файлы: bootstrap.php (case 'domain:remove')
+       views/domain_remove.php (новый)
+Референс: corescripts/commands/DomainRemove.php
+Что делает:
+  GET  → форма: показываем что удалится, checkbox «понимаю»,
+         поле «введите домен для подтверждения»
+  POST → DomainRemove::run(['name'=>$domain,'force'=>true])
+  → View::render('result')
+
+--- Сессия 4. ?p=allias:remove&domain=X&name=Y -------------------
+Аналог сессии 3 для аллиаса.
+Референс: corescripts/commands/AlliasRemove.php
+
+--- Сессия 5. ?p=page:new&domain=X&allias=Y ----------------------
+Что:   создание страницы в аллиасе
+Файлы: bootstrap.php (case 'page:new')
+       views/page_new.php
+Референс: corescripts/commands/PageNew.php
+Что делает:
+  Форма: dropdown домен + аллиас + поле имя страницы
+  POST → PageNew::run(['name'=>...,'domain'=>...,'allias'=>...])
+
+--- Сессия 6. ?p=block:new + ?p=filler:new -----------------------
+Аналог сессии 5.
+Референс: BlockNew.php, FillerNew.php
+(Блок: bootstrap.php доп. патчит alliasglobal.php — результат показывать
+ через WebRenderer.)
+
+--- Сессия 7. Polish ---------------------------------------------
+- Breadcrumbs
+- Иконки/подписи (удалить — красный, создать — синий)
+- Меню вынести в _nav.php
+- Подсветка активного пункта
+
+
+ШАБЛОНЫ ДЛЯ НОВЫХ СЕССИЙ
+================================================================
+
+Добавление case в bootstrap.php:
+
+    case 'settings':
+        if ( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
+            require_once CS_CMD . '/SettingsSet.php';
+            $result = SettingsSet::run( $_POST + ['register' => true] );
+            View::render( 'result' , [
+                'result' => $result ,
+                'title'  => 'Настройки'
+            ] );
+        } else {
+            View::render( 'settings' , [
+                'current' => [...] ,
+                'skins'   => scan_skins( ) ,
+                'logics'  => scan_logics( ) ,
+            ] );
+        }
+        break;
+
+Новый view (шаблон):
+
+    <h1>Название</h1>
+
+    <?php if ( ! empty( $saved ) ) : ?>
+        <div class="ok-msg">✓ Сохранено</div>
+    <?php endif ?>
+
+    <?php if ( ! empty( $errors ) ) : ?>
+        <div class="error-msg">
+            <?php foreach ( $errors as $e ) : ?>
+                <div>✘ <?= htmlspecialchars( $e ) ?></div>
+            <?php endforeach ?>
+        </div>
+    <?php endif ?>
+
+    <form method="post" action="?p=..." class="form">
+        <label>Поле
+            <input type="text" name="field" value="...">
+        </label>
+        <button type="submit">Сохранить</button>
+        <a href="?p=dashboard" class="btn-cancel">Отмена</a>
+    </form>
+
+
+ПРОВЕРКА КАЖДОЙ СЕССИИ
+================================================================
+1. php -l по изменённым файлам
+2. Открыть ?p=<страница> в браузере (IP = 127.0.0.1)
+3. Happy-path (валидный ввод → успех)
+4. Error-path (невалидный ввод → ошибка видна)
+5. Коммит: feat(admin): <страница>
+
+
+ЧТО НЕ ТРОГАТЬ
+================================================================
+- Auth.php, _layout.php, admin.css — стабильны
+  (только мелкие дополнения: .ok-msg, пункт меню)
+- bootstrap.php — только добавлять case, не переписывать
+- Роутинг /admin/ в www/index.php — стабилен
+
+
+БЕЗОПАСНОСТЬ
+================================================================
+- admin доступен только при IP в whitelist:
+    127.0.0.1, ::1 + site.config.admin.ips
+- снаружи → настоящая 404 движка (не отличить от /random/)
+- боты не находят /admin/, брутфорс невозможен
+- сессия admin_sid — изолирована от PHPSESSID сайта
+- пароль — password_hash (bcrypt), login — hash_equals
