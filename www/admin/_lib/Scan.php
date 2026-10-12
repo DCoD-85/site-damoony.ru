@@ -77,15 +77,20 @@ class Scan {
 
 	# парсит $available = [ '', 'regex|slug', ... ] из файла
 	private static function parseAvailable ( string $file ) : array {
-		$c = @file_get_contents( $file );
-		if ( $c === false ) return [ ];
+		# файл может быть .php — ищем .data.json рядом
+		$json = preg_replace( '/\.php$/' , '.data.json' , $file );
 
-		if ( ! preg_match( '/public\s+array\s+\$available\s*=\s*\[([^\]]*)\]/s' , $c , $m ) ) {
-			return [ ];
-		}
+		if ( ! is_file( $json ) ) return [ ];
 
-		preg_match_all( "/'((?:[^'\\\\]|\\\\.)*)'/" , $m[ 1 ] , $mm );
-		return array_map( fn( $s ) => str_replace( "\\'" , "'" , $s ) , $mm[ 1 ] );
+		$raw = @file_get_contents( $json );
+		if ( $raw === false ) return [ ];
+
+		$data = @json_decode( $raw , true );
+		if ( ! is_array( $data ) ) return [ ];
+
+		$avail = $data[ 'default' ][ 'available' ] ?? [ ];
+
+		return is_array( $avail ) ? $avail : [ ];
 	}
 
 	# --- helper ---

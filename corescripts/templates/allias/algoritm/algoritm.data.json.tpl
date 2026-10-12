@@ -1,0 +1,8 @@
+{
+    "default": {
+        "available": [ "" , "([a-z]{2}-[a-z]{2})|lang" ],
+        "auth":      false,
+        "search":    true,
+        "default":   true
+    }
+}

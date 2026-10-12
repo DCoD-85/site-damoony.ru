@@ -11,6 +11,7 @@ class algoritm_lang_<name>
 	public bool  $default   = true;
 
 	public function release ( ) {
+		$this->load_vars( );
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
 		$this->release_( $this );
 	}
@@ -23,7 +24,7 @@ class algoritm_lang_<name>
 		$lang = $main->language;
 
 		$main->alliasglobal->head->title(
-			$lang->get( '<UPPER>_TITLE' , [ ] , '<name>' ) . ' — ' . $lang->get( 'VISUO_TITLE' , [ ] , '<domain>' )
+			$lang->get( '<UPPER>_TITLE' , [ ] , $main->main_settings->title( ) ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
 		);
 
 		$vt = new \visuotag( );

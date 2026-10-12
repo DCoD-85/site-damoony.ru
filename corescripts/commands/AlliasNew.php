@@ -86,6 +86,26 @@ class AlliasNew {
 			Fs::write( $out , $content );
 			$r->file( $out );
 		}
+		
+		# algoritm.data.json
+		$tpl_json = CS_TPL . '/allias/algoritm/algoritm.data.json.tpl';
+		if ( is_file( $tpl_json ) ) {
+			$out = $allias_path . '/algoritm/algoritm.data.json';
+			if ( ! Fs::exists( $out ) ) {
+				Fs::write( $out , file_get_contents( $tpl_json ) );
+				$r->file( $out );
+			}
+		}
+
+		# algoritm_lang.data.json
+		$tpl_lang_json = CS_TPL . '/allias/algoritm/lang/algoritm_lang.data.json.tpl';
+		if ( is_file( $tpl_lang_json ) ) {
+			$out = $allias_path . '/algoritm/lang/algoritm_lang.data.json';
+			if ( ! Fs::exists( $out ) ) {
+				Fs::write( $out , file_get_contents( $tpl_lang_json ) );
+				$r->file( $out );
+			}
+		}
 
 		$r->step( 'Структура аллиаса' , true , count( $files ) . ' файлов' );
 		$ctx?->step( 'Структура аллиаса' , true , count( $files ) . ' файлов' );

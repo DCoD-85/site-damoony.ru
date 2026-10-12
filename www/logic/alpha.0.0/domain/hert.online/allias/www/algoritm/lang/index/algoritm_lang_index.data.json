@@ -1,0 +1,8 @@
+{
+    "default": {
+		"available": [ "" , "test" ],
+		"auth":      false,
+		"search":    true,
+		"default":   true
+	}
+}

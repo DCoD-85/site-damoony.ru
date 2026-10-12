@@ -13,12 +13,6 @@ class algoritm
 	public string $authpath  = __DIR__ . DS;
 	public string $authclass = 'algoritm_auth';
 
-	public function __construct ( \main $main , array $args = [ ] ) {
-		$this->main = $main;
-		$this->args = $args;
-		$this->algoritmdata = new \algoritmdata_( );
-	}
-
 	public function start ( ) {
 		$main = $this->main;
 		$scheme = $main->alliasscheme;
@@ -29,7 +23,12 @@ class algoritm
 	}
 
 	public function release ( ) {
-		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' ] , false , true , true );
+		$this->algoritmdata->set(
+			$this->available ?? [ '' ] ,
+			$this->auth      ?? false ,
+			$this->search    ?? true ,
+			$this->default   ?? false
+		);
 		$this->release_( $this );
 	}
 

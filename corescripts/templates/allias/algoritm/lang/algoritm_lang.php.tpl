@@ -5,9 +5,14 @@ namespace <domain_ns>\<name>;
 class algoritm_lang
 	extends \algoritm_ {
 
-	public array $available = [ '' , 'index' ];
+	public array $available = [ '' ];
+	public bool  $auth      = false;
+	public bool  $search    = true;
+	public bool  $default   = true;
 
 	public function release ( ) {
+		$this->load_vars( );
+
 		$default = ( $this->main->library->url->static_base[ 1 ] ?? '' ) === '';
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
 		$this->release_( $this );

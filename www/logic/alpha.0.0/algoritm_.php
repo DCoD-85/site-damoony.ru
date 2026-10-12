@@ -35,8 +35,13 @@ class algoritm_ {
 	public function __construct ( main $main , array $args = [ ] ) {
 		$this->main = $main;
 		$this->args = $args;
-		$this->algoritm = $main->algoritm;
+
+		if ( isset( $main->algoritm ) ) {
+			$this->algoritm = $main->algoritm;
+		}
+
 		$this->algoritmdata = new algoritmdata_( );
+		$this->load_data( );
 	}
 
 	public function args ( array $args ) {
@@ -71,12 +76,48 @@ class algoritm_ {
 			header( 'Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Accept, X-PINGOTHER, Content-Type' );
 		}
 	}
+
+		protected function load_vars ( ) : void {
+		$rc   = new \ReflectionClass( $this );
+		$file = dirname( $rc->getFileName( ) ) . DIRECTORY_SEPARATOR
+		      . $rc->getShortName( ) . '.vars.php';
+
+		if ( is_file( $file ) ) {
+			include $file;
+		}
+	}
+
 	# ===============================================================
 	#   RELEASE FRAMEWORK
 	# ===============================================================
 	public function release () {
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
 		$this->release_( $this );
+	}
+
+	protected function load_data ( ) : void {
+		$rc    = new \ReflectionClass( $this );
+		$dir   = dirname( $rc->getFileName( ) );
+		$short = $rc->getShortName( );
+
+		$file = $dir . DIRECTORY_SEPARATOR . $short . '.data.json';
+		if ( ! is_file( $file ) ) return;
+
+		$raw = @file_get_contents( $file );
+		if ( $raw === false ) return;
+
+		$data = @json_decode( $raw , true );
+		if ( ! is_array( $data ) ) return;
+
+		# пока только default
+		$vars = $data[ 'default' ] ?? [ ];
+
+		foreach ( $vars as $k => $v ) {
+			if ( $v === null ) continue;
+			if ( property_exists( $this , $k ) ) {
+				$this->{$k} = $v;
+			}
+		}
 	}
 
 	# ===============================================================
@@ -197,7 +238,7 @@ class algoritm_ {
 		$class = $this->main->algoritm->baseclass;
 		$path = $this->main->algoritm->basepath . $class . '.php';
 		$class = '\\' . $static_domain . '\\' . $static_allias . '\\' . $class;
-		
+
 		$this->on_route( $class , $path );
 
 		if( $in_array && include_once $path ){

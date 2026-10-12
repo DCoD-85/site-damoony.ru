@@ -4,7 +4,8 @@ class PageNew {
 
 	public static function plan ( array $params ) : array {
 		return [
-			'name'   => $params[ 'name' ] ?? '' ,
+			'name'   => $params[ 'name' ]   ?? '' ,
+			'parent' => $params[ 'parent' ] ?? '' ,
 			'domain' => $params[ 'domain' ] ?? 'damoony.ru' ,
 			'allias' => $params[ 'allias' ] ?? 'www' ,
 		];
@@ -20,7 +21,6 @@ class PageNew {
 			return $r;
 		}
 		$r->step( 'Валидация имени' , true , $name );
-		$ctx?->step( 'Валидация имени' , true , $name );
 
 		# 2. домен / аллиас
 		$domain = (string) ( $params[ 'domain' ] ?? 'damoony.ru' );
@@ -41,71 +41,91 @@ class PageNew {
 			return $r;
 		}
 		$r->step( 'Домен / аллиас' , true , "{$domain} / {$allias}" );
-		$ctx?->step( 'Домен / аллиас' , true , "{$domain} / {$allias}" );
 
-		# 3. namespace домена
+		# 3. parent (новое)
+		$parent = trim( (string) ( $params[ 'parent' ] ?? '' ) , '/' );
+		if ( $parent !== '' ) {
+			if ( ! preg_match( '#^[a-z][a-z0-9_]*(/[a-z][a-z0-9_]*)*$#' , $parent ) ) {
+				$r->error( "Некорректный путь родителя: {$parent}" );
+				return $r;
+			}
+		}
+
+		# 4. namespace домена
 		$ns = self::get_domain_ns( $domain );
 		if ( $ns === null ) {
-			$r->error( "Не найден domains_namespace для {$domain} в site.config" );
+			$r->error( "Не найден domains_namespace для {$domain}" );
 			return $r;
 		}
 		$r->step( 'Namespace' , true , $ns );
-		$ctx?->step( 'Namespace' , true , $ns );
 
-		# 4. путь страницы
-		$lang_dir = $allias_path . '/algoritm/lang';
-		$page_dir = $lang_dir . '/' . $name;
-		$page_file = $page_dir . '/algoritm_lang_' . $name . '.php';
-		$lang_file = $lang_dir . '/algoritm_lang.php';
+		# 5. пути
+		$lang_dir    = $allias_path . '/algoritm/lang';
+		$parent_dir  = $parent === '' ? $lang_dir : $lang_dir . '/' . $parent;
+		$parent_ns   = $parent === '' ? ''        : str_replace( '/' , '_' , $parent );
+		$full_ns     = $parent_ns === '' ? $name  : $parent_ns . '_' . $name;
 
-		if ( ! is_dir( $lang_dir ) ) {
-			$r->error( "Не найден каталог lang: {$lang_dir}" );
+		$page_dir    = $parent_dir . '/' . $name;
+		$page_file   = $page_dir . '/algoritm_lang_' . $full_ns . '.php';
+		$parent_file = $parent === ''
+			? $lang_dir . '/algoritm_lang.php'
+			: $parent_dir . '/algoritm_lang_' . $parent_ns . '.php';
+
+		if ( ! is_dir( $parent_dir ) ) {
+			$r->error( "Родительский каталог не найден: " . Fs::rel( $parent_dir ) );
+			return $r;
+		}
+		if ( ! is_file( $parent_file ) ) {
+			$r->error( "Родительский алгоритм не найден: " . Fs::rel( $parent_file ) );
 			return $r;
 		}
 		if ( Fs::exists( $page_file ) ) {
-			$r->error( "Страница уже существует: {$page_file}" );
+			$r->error( "Страница уже существует: " . Fs::rel( $page_file ) );
 			return $r;
 		}
 
-		# 5. создать файл страницы
-		$tpl = CS_TPL . '/page/page.php.tpl';
-		if ( ! is_file( $tpl ) ) {
-			$r->error( "Шаблон не найден: {$tpl}" );
+		# 6. создать .php + .data.json
+		$tpl_php  = CS_TPL . '/page/page.php.tpl';
+		$tpl_json = CS_TPL . '/page/page.data.json.tpl';
+
+		if ( ! is_file( $tpl_php ) || ! is_file( $tpl_json ) ) {
+			$r->error( 'Шаблоны не найдены в corescripts/templates/page/' );
 			return $r;
 		}
 
-		$vars = [
-			'name'      => $name ,
-			'UPPER'     => strtoupper( $name ) ,
+		$vars_render = [
+			'name'      => $full_ns ,
+			'UPPER'     => strtoupper( $full_ns ) ,
 			'domain'    => $domain ,
 			'domain_ns' => $ns ,
 			'allias'    => $allias ,
 		];
 
-		$content = self::render( file_get_contents( $tpl ) , $vars );
-		Fs::write( $page_file , $content );
+		Fs::write( $page_file , self::render( file_get_contents( $tpl_php ) , $vars_render ) );
 		$r->file( $page_file );
-		$r->step( 'Создан файл страницы' , true , Fs::rel( $page_file ) );
-		$ctx?->step( 'Создан файл страницы' , true , Fs::rel( $page_file ) );
+		$r->step( 'Создан файл' , true , Fs::rel( $page_file ) );
 
-		# 6. добавить в $available
-		if ( ! is_file( $lang_file ) ) {
-			$r->warn( "Не найден {$lang_file} — $available не обновлён" );
+		$json_file = $page_dir . '/algoritm_lang_' . $full_ns . '.data.json';
+		Fs::write( $json_file , file_get_contents( $tpl_json ) );
+		$r->file( $json_file );
+		$r->step( 'Создан json' , true , Fs::rel( $json_file ) );
+
+		# 7. patch $available — в родительский .data.json
+		$parent_json = preg_replace( '/\.php$/' , '.data.json' , $parent_file );
+
+		if ( ! is_file( $parent_json ) ) {
+			$r->warn( 'Родительский .data.json не найден: ' . Fs::rel( $parent_json ) );
 		} else {
-			$lang_content = file_get_contents( $lang_file );
-			$new_content  = self::patch_available( $lang_content , $name );
-
-			if ( $new_content === null ) {
-				$r->warn( "'{$name}' уже в \$available или не найден \$available" );
+			$patched = self::patch_available_json( $parent_json , $name );
+			if ( $patched ) {
+				$r->file( $parent_json );
+				$r->step( 'Обновлён $available' , true , Fs::rel( $parent_json ) );
 			} else {
-				file_put_contents( $lang_file , $new_content );
-				$r->file( $lang_file );
-				$r->step( 'Обновлён $available' , true , $name );
-				$ctx?->step( 'Обновлён $available' , true , $name );
+				$r->warn( "'{$name}' уже в \$available" );
 			}
 		}
 
-		# 7. lint
+		# 8. lint
 		$lint_errors = 0;
 		foreach ( $r->created as $full ) {
 			if ( substr( $full , -4 ) !== '.php' ) continue;
@@ -116,7 +136,6 @@ class PageNew {
 		}
 		if ( $lint_errors === 0 ) {
 			$r->step( 'Синтаксис PHP' , true , 'все файлы OK' );
-			$ctx?->step( 'Синтаксис PHP' , true , 'все файлы OK' );
 		}
 
 		return $r;
@@ -135,26 +154,29 @@ class PageNew {
 	private static function get_domain_ns ( string $domain ) : ?string {
 		try {
 			$cfg = new Config( PROJECT_ROOT . '/config/site.config' );
-		} catch ( Throwable $e ) {
-			return null;
-		}
+		} catch ( Throwable $e ) { return null; }
 		$ns = $cfg->getKeys( [ 'domains_namespace' , $domain ] );
 		return is_string( $ns ) && $ns !== '' ? $ns : null;
 	}
 
-	private static function patch_available ( string $content , string $name ) : ?string {
-		if ( strpos( $content , "'{$name}'" ) !== false ) return null;
+	private static function patch_available_json ( string $file , string $name ) : bool {
+		$raw = @file_get_contents( $file );
+		if ( $raw === false ) return false;
 
-		$patched = preg_replace_callback(
-			'/(public\s+array\s+\$available\s*=\s*\[)([^\]]*)(\])/s' ,
-			function ( $m ) use ( $name ) {
-				$inner = rtrim( $m[ 2 ] , " \t\n\r," );
-				return $m[ 1 ] . $inner . " , '{$name}'" . $m[ 3 ];
-			} ,
-			$content ,
-			1
-		);
+		$data = @json_decode( $raw , true );
+		if ( ! is_array( $data ) ) return false;
 
-		return $patched === $content ? null : $patched;
+		if ( ! isset( $data[ 'default' ][ 'available' ] ) ) return false;
+		if ( ! is_array( $data[ 'default' ][ 'available' ] ) ) return false;
+
+		if ( in_array( $name , $data[ 'default' ][ 'available' ] , true ) ) return false;
+
+		$data[ 'default' ][ 'available' ][ ] = $name;
+
+		$out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		$out = preg_replace_callback( '/^( +)/m' , fn( $m ) => str_repeat( "\t" , (int) ( strlen( $m[ 1 ] ) / 4 ) ) , $out );
+
+		file_put_contents( $file , $out );
+		return true;
 	}
 }
