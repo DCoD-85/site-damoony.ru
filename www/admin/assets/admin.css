@@ -224,28 +224,36 @@ button.btn-toggle {
 button.btn-toggle:hover { text-decoration: underline; }
 
 /* --- флаги страницы (auth/search/default) --- */
-.tree-flags { display: inline-flex; gap: 4px; }
-
-.tree-flags .inline { display: inline; }
+.tree-flags { display: flex; gap: 4px; align-items: center; }
+.tree-flags form { display: contents; }
 
 button.flag {
 	font-size: 11px;
-	padding: 1px 6px;
-	border: 1px solid transparent;
+	padding: 2px 8px;
+	border: 1px solid #ccc;
 	border-radius: 3px;
 	cursor: pointer;
-	font-family: ui-monospace, Consolas, monospace;
-	background: none;
-}
-button.flag-on {
-	background: #e6f0ff;
-	color: #2a63d6;
-	border-color: #b8cdfa;
-}
-button.flag-off {
 	background: #f0f0f2;
 	color: #aaa;
-	border-color: #e0e0e4;
+	font-family: ui-monospace, Consolas, monospace;
 }
+button.flag-on  { background: #2a63d6; color: #fff; border-color: #2a63d6; }
+button.flag-off { background: #f0f0f2; color: #aaa; border-color: #e0e0e4; }
 button.flag:hover { border-color: #2a63d6; }
 button.flag-off:hover { color: #666; border-color: #bbb; }
+
+
+/* двухколоночная раскладка: слева название+подстраница, справа флаги */
+.tree-row { align-items: flex-start; }
+
+.tree-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.tree-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tree-sub { font-size: 12px; }
+.btn-sub {
+	color: #888;
+	text-decoration: none;
+	font-size: 12px;
+}
+.btn-sub:hover { color: #2a63d6; text-decoration: underline; }
+
+.tree-flags { margin-left: auto; }

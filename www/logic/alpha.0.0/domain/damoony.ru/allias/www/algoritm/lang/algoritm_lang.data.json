@@ -9,7 +9,8 @@
 			"redirect",
 			"profile",
 			"agreement",
-			"registration"
+			"registration",
+			"d1"
 		],
 		"auth": false,
 		"search": true,

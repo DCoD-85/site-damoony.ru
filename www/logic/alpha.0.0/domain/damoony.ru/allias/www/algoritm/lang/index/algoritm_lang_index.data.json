@@ -1,7 +1,8 @@
 {
 	"default": {
 		"available": [
-			""
+			"",
+			"dd"
 		],
 		"auth": false,
 		"search": true,
