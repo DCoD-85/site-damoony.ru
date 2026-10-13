@@ -60,16 +60,17 @@ class PageNew {
 		$r->step( 'Namespace' , true , $ns );
 
 		# 5. пути
-		$lang_dir    = $allias_path . '/algoritm/lang';
-		$parent_dir  = $parent === '' ? $lang_dir : $lang_dir . '/' . $parent;
-		$parent_ns   = $parent === '' ? ''        : str_replace( '/' , '_' , $parent );
-		$full_ns     = $parent_ns === '' ? $name  : $parent_ns . '_' . $name;
+		$base        = $allias_path . '/algoritm';
+		$parent_dir  = $parent === '' ? $base : $base . '/' . $parent;
+		$parent_ns   = $parent === '' ? ''    : str_replace( '/' , '_' , $parent );
+		$full_ns     = $parent_ns === '' ? $name : $parent_ns . '_' . $name;
 
 		$page_dir    = $parent_dir . '/' . $name;
-		$page_file   = $page_dir . '/algoritm_lang_' . $full_ns . '.php';
+		$base_name   = 'algoritm_' . $full_ns;
+		$page_file   = $page_dir . '/' . $base_name . '.php';
 		$parent_file = $parent === ''
-			? $lang_dir . '/algoritm_lang.php'
-			: $parent_dir . '/algoritm_lang_' . $parent_ns . '.php';
+			? $base . '/algoritm.php'
+			: $parent_dir . '/algoritm_' . $parent_ns . '.php';
 
 		if ( ! is_dir( $parent_dir ) ) {
 			$r->error( "Родительский каталог не найден: " . Fs::rel( $parent_dir ) );
@@ -101,12 +102,15 @@ class PageNew {
 			'allias'    => $allias ,
 		];
 
+		$base_name = 'algoritm_' . $full_ns;
+
 		Fs::write( $page_file , self::render( file_get_contents( $tpl_php ) , $vars_render ) );
 		$r->file( $page_file );
 		$r->step( 'Создан файл' , true , Fs::rel( $page_file ) );
 
-		$json_file = $page_dir . '/algoritm_lang_' . $full_ns . '.data.json';
+		$json_file = $page_dir . '/' . $base_name . '.data.json';
 		Fs::write( $json_file , file_get_contents( $tpl_json ) );
+		
 		$r->file( $json_file );
 		$r->step( 'Создан json' , true , Fs::rel( $json_file ) );
 

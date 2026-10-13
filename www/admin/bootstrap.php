@@ -408,16 +408,133 @@ switch ( $p ) {
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
 		$logic    = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
-		$lang_dir = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm/lang';
-
-		$tree = is_dir( $lang_dir ) ? Scan::pageTree( $lang_dir ) : [ ];
-
+		$base = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
+		$tree = is_dir( $base ) ? Scan::pageTree( $base ) : [ ];
+		
 		View::render( 'pages_tree' , [
-			'domain' => $domain ,
-			'allias' => $allias ,
-			'logic'  => $logic ,
-			'tree'   => $tree ,
-			'has_dir' => is_dir( $lang_dir ) ,
+			'domain'  => $domain ,
+			'allias'  => $allias ,
+			'logic'   => $logic ,
+			'tree'    => $tree ,
+			'has_dir' => is_dir( $base ) ,
+		] );
+		break;
+	
+	case 'page:edit' :
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
+		$path   = trim( (string) ( $_GET[ 'path' ]   ?? '' ) , '/' );
+
+		if ( $domain === '' || $allias === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$logic = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
+		$base  = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
+
+		# --- вычисляем файлы: path относительно algoritm/ ---
+		$cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
+		$sub_dir   = $path === '' ? $base : $base . '/' . $path;
+		$php_file  = $sub_dir . '/' . $cls_short . '.php';
+		$json_file = $sub_dir . '/' . $cls_short . '.data.json';
+
+		if ( ! is_file( $php_file ) ) {
+			View::render( 'result' , [
+				'result' => new Result( ) ,
+				'title'  => "Страница не найдена: {$path}" ,
+			] );
+			break;
+		}
+
+		# --- POST ---
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+			$available_raw = (string) ( $_POST[ 'available' ] ?? '' );
+			$auth          = ! empty( $_POST[ 'auth' ] );
+			$search        = ! empty( $_POST[ 'search' ] );
+			$default       = ! empty( $_POST[ 'default' ] );
+
+			# разбить на строки + trim + дедупликация
+			$lines     = preg_split( '/\r\n|\n|\r/' , $available_raw );
+			$available = [ ];
+			$seen      = [ ];
+
+			foreach ( $lines as $line ) {
+				$line = trim( $line );
+
+				# ключ для дедупликации: тип + значение
+				# (чтобы 'test' и 'TEST' не путались — но у нас пока строки)
+				if ( isset( $seen[ $line ] ) ) continue;
+				$seen[ $line ] = true;
+
+				$available[ ] = $line;
+			}
+
+			# убрать только trailing пустые (артефакт textarea)
+			while ( ! empty( $available ) && end( $available ) === '' ) {
+				array_pop( $available );
+			}
+
+			# если после чистки вообще ничего нет — оставить ['']
+			if ( empty( $available ) ) {
+				$available = [ '' ];
+			}
+
+			$data = [
+				'default' => [
+					'available' => $available ,
+					'auth'      => $auth ,
+					'search'    => $search ,
+					'default'   => $default ,
+				] ,
+			];
+
+			$out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+			$out = preg_replace_callback( '/^( +)/m' , fn( $m ) => str_repeat( "\t" , (int) ( strlen( $m[ 1 ] ) / 4 ) ) , $out );
+
+			file_put_contents( $json_file , $out );
+
+			header( 'Location: ?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) . '&saved=1' );
+			exit;
+		}
+
+		# --- GET ---
+		$current = [
+			'available' => [ ] ,
+			'auth'      => false ,
+			'search'    => true ,
+			'default'   => false ,
+		];
+
+		if ( is_file( $json_file ) ) {
+			$json = @json_decode( @file_get_contents( $json_file ) , true );
+			if ( is_array( $json ) && isset( $json[ 'default' ] ) && is_array( $json[ 'default' ] ) ) {
+				$d = $json[ 'default' ];
+				$current[ 'available' ] = isset( $d[ 'available' ] ) && is_array( $d[ 'available' ] ) ? $d[ 'available' ] : [ ];
+				$current[ 'auth' ]      = ! empty( $d[ 'auth' ] );
+				$current[ 'search' ]    = ! isset( $d[ 'search' ] ) || ! empty( $d[ 'search' ] );
+				$current[ 'default' ]   = ! empty( $d[ 'default' ] );
+			}
+		}
+
+		View::render( 'page_edit' , [
+			'domain'    => $domain ,
+			'allias'    => $allias ,
+			'path'      => $path ,
+			'cls_short' => $cls_short ,
+			'json_file' => $json_file ,
+			'current'   => $current ,
+			'saved'     => ! empty( $_GET[ 'saved' ] ) ,
 		] );
 		break;
 	

@@ -1,8 +1,12 @@
 {
-    "default": {
-		"available": [ "" , "index" ],
-		"auth":      false,
-		"search":    true,
-		"default":   true
+	"default": {
+		"available": [
+			"",
+			"index",
+			"index2"
+		],
+		"auth": true,
+		"search": true,
+		"default": true
 	}
 }

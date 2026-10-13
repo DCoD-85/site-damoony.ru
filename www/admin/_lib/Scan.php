@@ -34,41 +34,65 @@ class Scan {
 		return [ 'http://' , 'https://' ];
 	}
 
-		# --- дерево страниц аллиаса ---
+	# --- дерево страниц аллиаса ---
+	# $base — абсолютный путь к algoritm/
+	# Корень — algoritm.php, дети — подпапки algoritm/<name>/
 
-	# $base — абсолютный путь к algoritm/lang/
-	# Возвращает массив узлов: [ name, path, has_file, available[], children[] ]
 	public static function pageTree ( string $base ) : array {
 		if ( ! is_dir( $base ) ) return [ ];
 
-		$out = [ ];
+		$root_file = $base . '/algoritm.php';
+		if ( ! is_file( $root_file ) ) return [ ];
+
+		$root = [
+			'name'      => 'algoritm' ,
+			'path'      => '' ,
+			'class'     => 'algoritm' ,
+			'has_file'  => true ,
+			'available' => self::parseAvailable( $root_file ) ,
+			'children'  => [ ] ,
+		];
+
 		foreach ( scandir( $base ) as $name ) {
 			if ( $name === '.' || $name === '..' ) continue;
+			if ( $name === 'algoritm_auth.php' )       continue;
+			if ( $name === 'algoritm_error.php' )      continue;
+			if ( $name === 'algoritm_pageshablon.php' ) continue;
+
 			$dir = $base . '/' . $name;
 			if ( ! is_dir( $dir ) ) continue;
-			$out[ ] = self::pageNode( $name , $dir , $name , '' );
+
+			$root[ 'children' ][ ] = self::pageNode( $name , $dir , $name );
 		}
-		usort( $out , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
-		return $out;
+
+		usort( $root[ 'children' ] , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
+
+		return [ $root ];
 	}
 
-	private static function pageNode ( string $name , string $dir , string $path , string $prefix ) : array {
-		$full_ns = $prefix === '' ? $name : $prefix . '_' . $name;
-		$file    = $dir . '/algoritm_lang_' . $full_ns . '.php';
-		$has     = is_file( $file );
+	private static function pageNode ( string $name , string $dir , string $path ) : array {
+		$cls  = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
+		$file = $dir . '/' . $cls . '.php';
+		$has  = is_file( $file );
 
 		$children = [ ];
 		foreach ( scandir( $dir ) as $sub ) {
 			if ( $sub === '.' || $sub === '..' ) continue;
+			if ( $sub === 'algoritm_auth.php' )       continue;
+			if ( $sub === 'algoritm_error.php' )      continue;
+			if ( $sub === 'algoritm_pageshablon.php' ) continue;
+
 			$sub_dir = $dir . '/' . $sub;
 			if ( ! is_dir( $sub_dir ) ) continue;
-			$children[ ] = self::pageNode( $sub , $sub_dir , $path . '/' . $sub , $full_ns );
+
+			$children[ ] = self::pageNode( $sub , $sub_dir , $path . '/' . $sub );
 		}
 		usort( $children , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
 
 		return [
 			'name'      => $name ,
 			'path'      => $path ,
+			'class'     => $cls ,
 			'has_file'  => $has ,
 			'available' => $has ? self::parseAvailable( $file ) : [ ] ,
 			'children'  => $children ,

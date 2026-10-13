@@ -153,6 +153,14 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 }
 
 .tree-actions { margin-left: auto; }
+.tree-name {
+	font-weight: 600;
+	font-family: ui-monospace, Consolas, monospace;
+	color: #2a63d6;
+	text-decoration: none;
+}
+.tree-name:hover { text-decoration: underline; }
+.tree-cls { font-size: 11px; color: #999; margin-left: 6px; }
 
 .login-box {
 	max-width: 360px;
@@ -191,3 +199,15 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 .files li { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #555; }
 .warnings li { color: #a86b00; }
 .errors li   { color: #a11; }
+
+.form textarea {
+	display: block;
+	width: 100%;
+	margin-top: 4px;
+	padding: 8px 10px;
+	border: 1px solid #c9cdd6;
+	border-radius: 4px;
+	font: inherit;
+	font-family: ui-monospace, Consolas, monospace;
+	font-size: 13px;
+}

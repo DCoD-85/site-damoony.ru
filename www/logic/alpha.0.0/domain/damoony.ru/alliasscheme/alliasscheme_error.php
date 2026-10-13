@@ -43,6 +43,7 @@ class alliasscheme_error {
 
 		# --- CSS скина ---
 		$meta->link( )->css( $skin_css . 'main.css' );
+		$meta->link( )->css( $skin_css . 'error.css' );
 		$meta->link( )->css( $skin_css . 'vardump.css' );
 		$meta->link( )->css( $skin_css . 'messages.css' );
 		$meta->link( )->css( $skin_css . 'popup.css' );

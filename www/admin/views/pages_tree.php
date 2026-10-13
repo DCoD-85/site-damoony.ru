@@ -4,7 +4,9 @@ if ( ! function_exists( 'render_page_node' ) ) {
 		?>
 		<li class="tree-item">
 			<div class="tree-row">
-				<span class="tree-name"><?= htmlspecialchars( $node[ 'name' ] ) ?></span>
+				<a class="tree-name" href="?p=page:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $node[ 'path' ] ) ?>">
+					<?= htmlspecialchars( $node[ 'name' ] ) ?>
+				</a>
 
 				<?php if ( $node[ 'has_file' ] ) : ?>
 					<span class="tree-badge tree-badge-page">страница</span>
@@ -12,6 +14,7 @@ if ( ! function_exists( 'render_page_node' ) ) {
 					<span class="tree-badge tree-badge-orphan">без файла</span>
 				<?php endif ?>
 
+				<code class="tree-cls"><?= htmlspecialchars( $node[ 'class' ] ) ?></code>
 				<?php if ( ! empty( $node[ 'available' ] ) ) : ?>
 					<span class="tree-avail">
 						<?php foreach ( $node[ 'available' ] as $a ) : ?>
