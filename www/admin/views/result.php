@@ -2,4 +2,8 @@
 
 <?= WebRenderer::html( $result ) ?>
 
-<p><a href="?p=dashboard">← К списку домен</a></p>
+<p>
+	<a href="<?= htmlspecialchars( $back_url ?? '?p=dashboard' , ENT_QUOTES ) ?>">
+		← <?= htmlspecialchars( $back_label ?? 'К списку домен' ) ?>
+	</a>
+</p>

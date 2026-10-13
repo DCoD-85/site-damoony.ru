@@ -37,7 +37,7 @@ require_once CS_LIB . '/Validate.php';
 require_once CS_LIB . '/Result.php';
 require_once CS_LIB . '/Context.php';
 
-# admin _lib# admin _lib
+# admin _lib
 require_once ADMIN_ROOT . '/_lib/Auth.php';
 require_once ADMIN_ROOT . '/_lib/View.php';
 require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
@@ -112,7 +112,12 @@ switch ( $p ) {
 				'name'     => $_POST[ 'domain' ] ?? '' ,
 				'register' => ! empty( $_POST[ 'register' ] ) ,
 			] );
-			View::render( 'result' , [ 'result' => $result , 'title' => 'Создание домена' ] );
+			View::render( 'result' , [
+				'result'     => $result ,
+				'title'      => 'Создание домена' ,
+				'back_url'   => '?p=dashboard' ,
+				'back_label' => 'К списку домен' ,
+			] );
 		} else {
 			View::render( 'domain_new' , [ ] );
 		}
@@ -122,17 +127,23 @@ switch ( $p ) {
 		$domains = array_keys( (array) ( new Config( PROJECT_ROOT . '/config/site.config' ) )->get( 'domains_real' ) );
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/AlliasNew.php';
+			$post_domain = (string) ( $_POST[ 'domain' ] ?? '' );
 			$result = AlliasNew::run( [
 				'name'     => $_POST[ 'name' ]   ?? '' ,
-				'domain'   => $_POST[ 'domain' ] ?? '' ,
+				'domain'   => $post_domain ,
 				'register' => ! empty( $_POST[ 'register' ] ) ,
 			] );
-			View::render( 'result' , [ 'result' => $result , 'title' => 'Создание аллиаса' ] );
+			View::render( 'result' , [
+				'result'     => $result ,
+				'title'      => 'Создание аллиаса' ,
+				'back_url'   => '?p=allias:list&domain=' . urlencode( $post_domain ) ,
+				'back_label' => 'К аллиасам' ,
+			] );
 		} else {
 			View::render( 'allias_new' , [ 'domains' => $domains ] );
 		}
 		break;
-	
+
 	case 'domain:edit' :
 
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
@@ -146,8 +157,10 @@ switch ( $p ) {
 		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 		if ( $real === null ) {
 			View::render( 'result' , [
-				'result' => new Result( ) ,
-				'title'  => 'Домен не найден' ,
+				'result'     => new Result( ) ,
+				'title'      => 'Домен не найден' ,
+				'back_url'   => '?p=dashboard' ,
+				'back_label' => 'К списку домен' ,
 			] );
 			break;
 		}
@@ -204,10 +217,10 @@ switch ( $p ) {
 			'saved'   => ! empty( $_GET[ 'saved' ] ) ,
 			'errors'  => [ ] ,
 			'current' => [ 'title' => $title , 'skin' => $skin ] ,
-			'skins' => Scan::skinsFor( $domain ) ,
+			'skins'   => Scan::skinsFor( $domain ) ,
 		] );
 		break;
-	
+
 	case 'allias:toggle' :
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
@@ -238,7 +251,7 @@ switch ( $p ) {
 
 		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
 		exit;
-	
+
 	case 'domain:toggle' :
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
@@ -268,7 +281,7 @@ switch ( $p ) {
 
 		header( 'Location: ?p=dashboard' );
 		exit;
-	
+
 	case 'domain:remove' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -310,15 +323,24 @@ switch ( $p ) {
 				] );
 
 				View::render( 'result' , [
-					'result' => $result ,
-					'title'  => 'Удаление домена: ' . $domain ,
+					'result'     => $result ,
+					'title'      => 'Удаление домена: ' . $domain ,
+					'back_url'   => '?p=dashboard' ,
+					'back_label' => 'К списку домен' ,
 				] );
 				break;
 			}
 
+			$alliases = [ ];
+			foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
+				if ( $a === '' ) continue;
+				$alliases[ ] = $a;
+			}
+
 			View::render( 'domain_remove' , [
-				'domain' => $domain ,
-				'errors' => $errors ,
+				'domain'   => $domain ,
+				'errors'   => $errors ,
+				'alliases' => $alliases ,
 			] );
 			break;
 		}
@@ -336,7 +358,7 @@ switch ( $p ) {
 			'alliases' => $alliases ,
 		] );
 		break;
-	
+
 	case 'allias:remove' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -382,8 +404,10 @@ switch ( $p ) {
 				] );
 
 				View::render( 'result' , [
-					'result' => $result ,
-					'title'  => "Удаление аллиаса: {$domain} / {$name}" ,
+					'result'     => $result ,
+					'title'      => "Удаление аллиаса: {$domain} / {$name}" ,
+					'back_url'   => '?p=allias:list&domain=' . urlencode( $domain ) ,
+					'back_label' => 'К аллиасам' ,
 				] );
 				break;
 			}
@@ -403,7 +427,7 @@ switch ( $p ) {
 			'errors' => [ ] ,
 		] );
 		break;
-	
+
 	case 'pages:tree' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -427,7 +451,7 @@ switch ( $p ) {
 		$logic    = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
 		$base = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
 		$tree = is_dir( $base ) ? Scan::pageTree( $base ) : [ ];
-		
+
 		View::render( 'pages_tree' , [
 			'domain'  => $domain ,
 			'allias'  => $allias ,
@@ -436,7 +460,7 @@ switch ( $p ) {
 			'has_dir' => is_dir( $base ) ,
 		] );
 		break;
-	
+
 	case 'page:edit' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -467,8 +491,10 @@ switch ( $p ) {
 
 		if ( ! is_file( $php_file ) ) {
 			View::render( 'result' , [
-				'result' => new Result( ) ,
-				'title'  => "Страница не найдена: {$path}" ,
+				'result'     => new Result( ) ,
+				'title'      => "Страница не найдена: {$path}" ,
+				'back_url'   => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) ,
+				'back_label' => 'К страницам' ,
 			] );
 			break;
 		}
@@ -489,8 +515,6 @@ switch ( $p ) {
 			foreach ( $lines as $line ) {
 				$line = trim( $line );
 
-				# ключ для дедупликации: тип + значение
-				# (чтобы 'test' и 'TEST' не путались — но у нас пока строки)
 				if ( isset( $seen[ $line ] ) ) continue;
 				$seen[ $line ] = true;
 
@@ -554,7 +578,7 @@ switch ( $p ) {
 			'saved'     => ! empty( $_GET[ 'saved' ] ) ,
 		] );
 		break;
-	
+
 	case 'page:new' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -597,8 +621,10 @@ switch ( $p ) {
 			] );
 
 			View::render( 'result' , [
-				'result' => $result ,
-				'title'  => "Создание страницы: {$domain} / {$allias} / {$name}" ,
+				'result'     => $result ,
+				'title'      => "Создание страницы: {$domain} / {$allias} / {$name}" ,
+				'back_url'   => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) ,
+				'back_label' => 'К страницам' ,
 			] );
 			break;
 		}
@@ -611,15 +637,17 @@ switch ( $p ) {
 			'alliases' => $alliases ,
 		] );
 		break;
-	
+
 	case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 
 		if ( $domain === '' ) {
 			View::render( 'result' , [
-				'result' => new Result( ) ,
-				'title'  => 'Домен не указан' ,
+				'result'     => new Result( ) ,
+				'title'      => 'Домен не указан' ,
+				'back_url'   => '?p=dashboard' ,
+				'back_label' => 'К списку домен' ,
 			] );
 			break;
 		}
@@ -629,8 +657,10 @@ switch ( $p ) {
 
 		if ( $real === null ) {
 			View::render( 'result' , [
-				'result' => new Result( ) ,
-				'title'  => "Домен не найден: {$domain}" ,
+				'result'     => new Result( ) ,
+				'title'      => "Домен не найден: {$domain}" ,
+				'back_url'   => '?p=dashboard' ,
+				'back_label' => 'К списку домен' ,
 			] );
 			break;
 		}
@@ -664,7 +694,7 @@ switch ( $p ) {
 			'rows'   => $rows ,
 		] );
 		break;
-	
+
 	case 'page:toggle' :
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
@@ -742,7 +772,7 @@ switch ( $p ) {
 
 		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
 		exit;
-	
+
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
@@ -767,8 +797,10 @@ switch ( $p ) {
 			}
 
 			View::render( 'result' , [
-				'result' => $result ,
-				'title'  => 'Настройки — ошибка' ,
+				'result'     => $result ,
+				'title'      => 'Настройки — ошибка' ,
+				'back_url'   => '?p=settings' ,
+				'back_label' => 'К настройкам' ,
 			] );
 			break;
 		}
@@ -787,7 +819,7 @@ switch ( $p ) {
 			'connectTypes' => Scan::connectTypes( ) ,
 		] );
 		break;
-	
+
 	default :
 		http_response_code( 404 );
 		echo '<h1>404</h1><p>Страница не найдена: ' . htmlspecialchars( $p ) . '</p>';
