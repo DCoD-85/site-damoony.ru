@@ -12,6 +12,7 @@
 <?php endif ?>
 
 <form method="post" action="?p=page:new&domain=<?= urlencode( $domain ) ?>" class="form">
+	<?= Csrf::field( ) ?>
 
 	<label>Аллиас
 		<select name="allias" required>
@@ -31,7 +32,7 @@
 
 	<button type="submit">Создать</button>
 	<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">Отмена</a>
-	
+
 	<?php if ( ! empty( $parent ) ) : ?>
 		<input type="hidden" name="parent" value="<?= htmlspecialchars( $parent , ENT_QUOTES ) ?>">
 	<?php endif ?>

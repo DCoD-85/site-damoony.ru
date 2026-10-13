@@ -19,6 +19,7 @@
 <?php endif ?>
 
 <form method="post" action="?p=allias:remove&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $name ) ?>" class="form">
+	<?= Csrf::field( ) ?>
 
 	<label class="checkbox">
 		<input type="checkbox" name="confirm_checked" value="1">

@@ -1,0 +1,18 @@
+{
+	"default": {
+		"available": [
+			"",
+			"index",
+			"form",
+			"login",
+			"logout",
+			"redirect",
+			"profile",
+			"agreement",
+			"registration"
+		],
+		"auth": false,
+		"search": true,
+		"default": false
+	}
+}

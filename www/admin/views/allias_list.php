@@ -25,15 +25,17 @@
 					<td><?= $r[ 'fs' ]    ? '✓' : '✗' ?></td>
 					<td><?= (int) $r[ 'fillers_enabled' ] ?> / <?= (int) $r[ 'fillers_total' ] ?></td>
 					<td>
-						<?php if ( $r[ 'avail' ] ) : ?>
-							<a href="?p=allias:toggle&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $r[ 'name' ] ) ?>&value=0"
-								class="btn-toggle btn-toggle-on"
-								title="Выключить">● вкл</a>
-						<?php else : ?>
-							<a href="?p=allias:toggle&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $r[ 'name' ] ) ?>&value=1"
-								class="btn-toggle btn-toggle-off"
-								title="Включить">○ выкл</a>
-						<?php endif ?>
+						<form method="post" action="?p=allias:toggle" class="inline">
+							<?= Csrf::field( ) ?>
+							<input type="hidden" name="domain" value="<?= htmlspecialchars( $domain , ENT_QUOTES ) ?>">
+							<input type="hidden" name="name"   value="<?= htmlspecialchars( $r[ 'name' ] , ENT_QUOTES ) ?>">
+							<input type="hidden" name="value"  value="<?= $r[ 'avail' ] ? '0' : '1' ?>">
+							<button type="submit"
+								class="btn-toggle <?= $r[ 'avail' ] ? 'btn-toggle-on' : 'btn-toggle-off' ?>"
+								title="<?= $r[ 'avail' ] ? 'Выключить' : 'Включить' ?>">
+								<?= $r[ 'avail' ] ? '● вкл' : '○ выкл' ?>
+							</button>
+						</form>
 
 						<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $r[ 'name' ] ) ?>"
 							class="btn-edit">Страницы</a>

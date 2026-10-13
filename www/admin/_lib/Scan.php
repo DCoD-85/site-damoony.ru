@@ -49,7 +49,7 @@ class Scan {
 			'path'      => '' ,
 			'class'     => 'algoritm' ,
 			'has_file'  => true ,
-			'available' => self::parseAvailable( $root_file ) ,
+			'meta'      => self::parseMeta( $root_file ) ,
 			'children'  => [ ] ,
 		];
 
@@ -94,27 +94,39 @@ class Scan {
 			'path'      => $path ,
 			'class'     => $cls ,
 			'has_file'  => $has ,
-			'available' => $has ? self::parseAvailable( $file ) : [ ] ,
+			'meta'      => $has ? self::parseMeta( $file ) : [
+				'available' => [ ] , 'auth' => false , 'search' => true , 'default' => false ,
+			] ,
 			'children'  => $children ,
 		];
 	}
 
 	# парсит $available = [ '', 'regex|slug', ... ] из файла
-	private static function parseAvailable ( string $file ) : array {
-		# файл может быть .php — ищем .data.json рядом
-		$json = preg_replace( '/\.php$/' , '.data.json' , $file );
+		# парсит метаданные страницы: available + auth + search + default
+	private static function parseMeta ( string $file ) : array {
+		$default = [
+			'available' => [ ] ,
+			'auth'      => false ,
+			'search'    => true ,
+			'default'   => false ,
+		];
 
-		if ( ! is_file( $json ) ) return [ ];
+		$json = preg_replace( '/\.php$/' , '.data.json' , $file );
+		if ( ! is_file( $json ) ) return $default;
 
 		$raw = @file_get_contents( $json );
-		if ( $raw === false ) return [ ];
+		if ( $raw === false ) return $default;
 
 		$data = @json_decode( $raw , true );
-		if ( ! is_array( $data ) ) return [ ];
+		if ( ! is_array( $data ) || ! isset( $data[ 'default' ] ) ) return $default;
 
-		$avail = $data[ 'default' ][ 'available' ] ?? [ ];
-
-		return is_array( $avail ) ? $avail : [ ];
+		$d = $data[ 'default' ];
+		return [
+			'available' => is_array( $d[ 'available' ] ?? null ) ? $d[ 'available' ] : [ ] ,
+			'auth'      => ! empty( $d[ 'auth' ] ) ,
+			'search'    => ! isset( $d[ 'search' ] ) || ! empty( $d[ 'search' ] ) ,
+			'default'   => ! empty( $d[ 'default' ] ) ,
+		];
 	}
 
 	# --- helper ---

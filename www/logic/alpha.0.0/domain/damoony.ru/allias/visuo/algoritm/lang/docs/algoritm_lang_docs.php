@@ -4,12 +4,6 @@ namespace damoony_ru\visuo;
 
 class algoritm_lang_docs
 	extends \algoritm_ {
-
-	public array $available = [ '' , '([a-z0-9-]+)|page' ];
-	public bool  $auth      = false;
-	public bool  $search    = true;
-	public bool  $default   = true;
-
 	# ---------------------------------------------------------------
 	public function release ( ) {
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );

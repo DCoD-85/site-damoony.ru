@@ -1,6 +1,7 @@
 <h1>Создать аллиас</h1>
 
 <form method="post" action="?p=allias:new" class="form">
+	<?= Csrf::field( ) ?>
 	<label>Имя аллиаса
 		<input type="text" name="name" placeholder="oxydog" required pattern="[a-z][a-z0-9_]*">
 	</label>

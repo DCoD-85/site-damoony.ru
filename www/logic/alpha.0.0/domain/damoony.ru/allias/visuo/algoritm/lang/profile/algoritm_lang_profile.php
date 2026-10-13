@@ -5,11 +5,6 @@ namespace damoony_ru\visuo;
 class algoritm_lang_profile
 	extends \algoritm_ {
 
-	public array $available = [ 'profile' ];
-	public bool  $auth      = true;
-	public bool  $search    = false;
-	public bool  $default   = true;
-
 	public array $timezone_options = [ ];
 	public array $lang_options     = [ ];
 

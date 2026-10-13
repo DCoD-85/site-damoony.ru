@@ -1,6 +1,7 @@
 <?php
 if ( ! function_exists( 'render_page_node' ) ) {
 	function render_page_node ( array $node , string $domain , string $allias ) : void {
+		$meta = $node[ 'meta' ] ?? [ 'available' => [] , 'auth' => false , 'search' => true , 'default' => false ];
 		?>
 		<li class="tree-item">
 			<div class="tree-row">
@@ -15,10 +16,31 @@ if ( ! function_exists( 'render_page_node' ) ) {
 				<?php endif ?>
 
 				<code class="tree-cls"><?= htmlspecialchars( $node[ 'class' ] ) ?></code>
-				<?php if ( ! empty( $node[ 'available' ] ) ) : ?>
+
+				<?php if ( ! empty( $meta[ 'available' ] ) ) : ?>
 					<span class="tree-avail">
-						<?php foreach ( $node[ 'available' ] as $a ) : ?>
+						<?php foreach ( $meta[ 'available' ] as $a ) : ?>
 							<code><?= htmlspecialchars( $a === '' ? '/' : $a ) ?></code>
+						<?php endforeach ?>
+					</span>
+				<?php endif ?>
+
+				<?php if ( $node[ 'has_file' ] ) : ?>
+					<span class="tree-flags">
+						<?php foreach ( [ 'auth' => 'auth' , 'search' => 'search' , 'default' => 'default' ] as $key => $label ) : ?>
+							<form method="post" action="?p=page:toggle" class="inline">
+								<?= Csrf::field( ) ?>
+								<input type="hidden" name="domain" value="<?= htmlspecialchars( $domain , ENT_QUOTES ) ?>">
+								<input type="hidden" name="allias" value="<?= htmlspecialchars( $allias , ENT_QUOTES ) ?>">
+								<input type="hidden" name="path"   value="<?= htmlspecialchars( $node[ 'path' ] , ENT_QUOTES ) ?>">
+								<input type="hidden" name="key"    value="<?= $key ?>">
+								<input type="hidden" name="value"  value="<?= ! empty( $meta[ $key ] ) ? '0' : '1' ?>">
+								<button type="submit"
+									class="flag <?= ! empty( $meta[ $key ] ) ? 'flag-on' : 'flag-off' ?>"
+									title="<?= ! empty( $meta[ $key ] ) ? 'Включено — клик чтобы выключить' : 'Выключено — клик чтобы включить' ?>">
+									<?= $label ?>
+								</button>
+							</form>
 						<?php endforeach ?>
 					</span>
 				<?php endif ?>
@@ -45,7 +67,7 @@ if ( ! function_exists( 'render_page_node' ) ) {
 <p class="hint">
 	<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>">← К аллиасам</a>
 	&nbsp;·&nbsp;
-	<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>">+ Корневая страница</a>
+	<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>">+ Страница</a>
 </p>
 
 <?php if ( ! $has_dir ) : ?>

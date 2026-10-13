@@ -4,12 +4,6 @@ namespace damoony_ru\www;
 
 class algoritm_lang_index
 	extends \algoritm_ {
-
-	public array $available = [ '' ];
-	public bool  $auth      = false;
-	public bool  $search    = true;
-	public bool  $default   = true;
-
 	public function release ( ) {
 		$default = $this->is_default( );
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );

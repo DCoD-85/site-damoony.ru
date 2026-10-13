@@ -5,11 +5,6 @@ namespace damoony_ru\visuo;
 class algoritm_lang_docs_page
 	extends \algoritm_ {
 
-	public array $available = [ '' ];
-	public bool  $auth      = false;
-	public bool  $search    = true;
-	public bool  $default   = true;
-
 	# ---------------------------------------------------------------
 	public function release ( ) {
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );

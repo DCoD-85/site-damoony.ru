@@ -7,6 +7,7 @@
 <?php endif ?>
 
 <form method="post" action="?p=settings" class="form">
+	<?= Csrf::field( ) ?>
 
 	<label>Движок (logic)
 		<select name="logic">

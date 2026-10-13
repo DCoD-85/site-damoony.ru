@@ -1,6 +1,7 @@
 <h1>Создать домен</h1>
 
 <form method="post" action="?p=domain:new" class="form">
+	<?= Csrf::field( ) ?>
 	<label>Домен
 		<input type="text" name="domain" placeholder="example.com" required pattern="[a-z0-9.\-]+">
 	</label>

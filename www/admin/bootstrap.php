@@ -37,10 +37,11 @@ require_once CS_LIB . '/Validate.php';
 require_once CS_LIB . '/Result.php';
 require_once CS_LIB . '/Context.php';
 
-# admin _lib
+# admin _lib# admin _lib
 require_once ADMIN_ROOT . '/_lib/Auth.php';
 require_once ADMIN_ROOT . '/_lib/View.php';
 require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
+require_once ADMIN_ROOT . '/_lib/Csrf.php';
 
 $auth = new Auth( );
 
@@ -72,6 +73,12 @@ if ( $p === 'logout' ) {
 if ( ! $auth->check( ) ) {
 	header( 'Location: ?p=login' );
 	exit;
+}
+
+# --- CSRF guard для всех POST (кроме login) ---
+if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' && ! Csrf::check( ) ) {
+	http_response_code( 403 );
+	exit( 'CSRF token invalid' );
 }
 
 # --- dispatch ---
@@ -203,9 +210,14 @@ switch ( $p ) {
 	
 	case 'allias:toggle' :
 
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
-		$name   = (string) ( $_GET[ 'name' ]   ?? '' );
-		$value  = (string) ( $_GET[ 'value' ]  ?? '' );  # '1' | '0'
+		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
+			http_response_code( 405 );
+			exit( 'Method not allowed' );
+		}
+
+		$domain = (string) ( $_POST[ 'domain' ] ?? '' );
+		$name   = (string) ( $_POST[ 'name' ]   ?? '' );
+		$value  = (string) ( $_POST[ 'value' ]  ?? '' );
 
 		if ( $domain === '' || $name === '' ) {
 			header( 'Location: ?p=dashboard' );
@@ -229,8 +241,13 @@ switch ( $p ) {
 	
 	case 'domain:toggle' :
 
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
-		$value  = (string) ( $_GET[ 'value' ]  ?? '' );
+		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
+			http_response_code( 405 );
+			exit( 'Method not allowed' );
+		}
+
+		$domain = (string) ( $_POST[ 'domain' ] ?? '' );
+		$value  = (string) ( $_POST[ 'value' ]  ?? '' );
 
 		if ( $domain === '' ) {
 			header( 'Location: ?p=dashboard' );
@@ -252,7 +269,7 @@ switch ( $p ) {
 		header( 'Location: ?p=dashboard' );
 		exit;
 	
-		case 'domain:remove' :
+	case 'domain:remove' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 
@@ -320,7 +337,7 @@ switch ( $p ) {
 		] );
 		break;
 	
-		case 'allias:remove' :
+	case 'allias:remove' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		$name   = (string) ( $_GET[ 'name' ]   ?? '' );
@@ -647,6 +664,84 @@ switch ( $p ) {
 			'rows'   => $rows ,
 		] );
 		break;
+	
+	case 'page:toggle' :
+
+		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
+			http_response_code( 405 );
+			exit( 'Method not allowed' );
+		}
+
+		$domain = (string) ( $_POST[ 'domain' ] ?? '' );
+		$allias = (string) ( $_POST[ 'allias' ] ?? '' );
+		$path   = trim( (string) ( $_POST[ 'path' ] ?? '' ) , '/' );
+		$key    = (string) ( $_POST[ 'key' ]    ?? '' );
+		$value  = (string) ( $_POST[ 'value' ]  ?? '' );
+
+		if ( $domain === '' || $allias === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		if ( ! in_array( $key , [ 'auth' , 'search' , 'default' ] , true ) ) {
+			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+			exit;
+		}
+
+		# защита от path traversal
+		if ( $path !== '' && ! preg_match( '#^[a-z][a-z0-9_/]*$#i' , $path ) ) {
+			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+			exit;
+		}
+		if ( str_contains( $path , '..' ) ) {
+			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$logic     = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
+		$base      = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
+		$cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
+		$sub_dir   = $path === '' ? $base : $base . '/' . $path;
+		$php_file  = $sub_dir . '/' . $cls_short . '.php';
+		$json_file = $sub_dir . '/' . $cls_short . '.data.json';
+
+		if ( ! is_file( $php_file ) ) {
+			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+			exit;
+		}
+
+		# читаем текущий .data.json (или дефолт)
+		$data = [ 'default' => [
+			'available' => [ '' ] ,
+			'auth'      => false ,
+			'search'    => true ,
+			'default'   => false ,
+		] ];
+
+		if ( is_file( $json_file ) ) {
+			$raw = @file_get_contents( $json_file );
+			$cur = @json_decode( $raw , true );
+			if ( is_array( $cur ) && isset( $cur[ 'default' ] ) && is_array( $cur[ 'default' ] ) ) {
+				$data[ 'default' ] = array_merge( $data[ 'default' ] , $cur[ 'default' ] );
+			}
+		}
+
+		$data[ 'default' ][ $key ] = ( $value === '0' ) ? false : true;
+
+		$out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		$out = preg_replace_callback( '/^( +)/m' , fn( $m ) => str_repeat( "\t" , (int) ( strlen( $m[ 1 ] ) / 4 ) ) , $out );
+		file_put_contents( $json_file , $out );
+
+		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+		exit;
 	
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';

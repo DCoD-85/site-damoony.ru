@@ -1,0 +1,10 @@
+{
+	"default": {
+		"available": [
+			"logout"
+		],
+		"auth": false,
+		"search": false,
+		"default": true
+	}
+}

@@ -20,27 +20,26 @@
 					<td><b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b></td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
 					<td>
-						<?php if ( $d[ 'avail' ] ) : ?>
-							<a href="?p=domain:toggle&domain=<?= urlencode( $d[ 'domain' ] ) ?>&value=0"
-								class="btn-toggle btn-toggle-on"
-								title="Выключить">● вкл</a>
-						<?php else : ?>
-							<a href="?p=domain:toggle&domain=<?= urlencode( $d[ 'domain' ] ) ?>&value=1"
-								class="btn-toggle btn-toggle-off"
-								title="Включить">○ выкл</a>
-						<?php endif ?>
-							<a href="?p=domain:remove&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-								class="btn-danger">Удалить</a>
+						<form method="post" action="?p=domain:toggle" class="inline">
+							<?= Csrf::field( ) ?>
+							<input type="hidden" name="domain" value="<?= htmlspecialchars( $d[ 'domain' ] , ENT_QUOTES ) ?>">
+							<input type="hidden" name="value"  value="<?= $d[ 'avail' ] ? '0' : '1' ?>">
+							<button type="submit"
+								class="btn-toggle <?= $d[ 'avail' ] ? 'btn-toggle-on' : 'btn-toggle-off' ?>"
+								title="<?= $d[ 'avail' ] ? 'Выключить' : 'Включить' ?>">
+								<?= $d[ 'avail' ] ? '● вкл' : '○ выкл' ?>
+							</button>
+						</form>
+						<a href="?p=domain:remove&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
+							class="btn-danger">Удалить</a>
 					</td>
 					<td><?= $d[ 'fs' ]    ? '✓' : '✗' ?></td>
 					<td><?= htmlspecialchars( implode( ', ' , $d[ 'alliases' ] ) ) ?></td>
 					<td>
-						<td>
-							<a href="?p=domain:edit&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-								class="btn-edit">Редактировать</a>
-							<a href="?p=allias:list&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-								class="btn-edit">Аллиасы</a>
-						</td>
+						<a href="?p=domain:edit&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
+							class="btn-edit">Редактировать</a>
+						<a href="?p=allias:list&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
+							class="btn-edit">Аллиасы</a>
 					</td>
 				</tr>
 			<?php endforeach ?>

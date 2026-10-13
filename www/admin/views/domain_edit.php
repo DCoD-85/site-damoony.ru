@@ -13,6 +13,7 @@
 <?php endif ?>
 
 <form method="post" action="?p=domain:edit&domain=<?= urlencode( $domain ) ?>" class="form">
+	<?= Csrf::field( ) ?>
 
 	<label>Заголовок (title)
 		<input type="text" name="title" maxlength="100" required

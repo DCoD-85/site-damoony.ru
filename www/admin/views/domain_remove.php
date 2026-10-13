@@ -24,6 +24,7 @@
 <?php endif ?>
 
 <form method="post" action="?p=domain:remove&domain=<?= urlencode( $domain ) ?>" class="form">
+	<?= Csrf::field( ) ?>
 
 	<label class="checkbox">
 		<input type="checkbox" name="confirm_checked" value="1">

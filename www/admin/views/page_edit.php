@@ -24,6 +24,7 @@
 <?php endif ?>
 
 <form method="post" action="?p=page:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $path ) ?>" class="form">
+	<?= Csrf::field( ) ?>
 
 	<label>Правила URL (<code>available</code>) — по одному на строку
 		<textarea name="available" rows="8" style="width:100%;font-family:ui-monospace,Consolas,monospace;"><?= "\n" . htmlspecialchars( implode( "\n" , $current[ 'available' ] ) , ENT_QUOTES ) ?></textarea>

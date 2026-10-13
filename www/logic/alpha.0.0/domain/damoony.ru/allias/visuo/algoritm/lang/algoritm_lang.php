@@ -5,14 +5,6 @@ namespace damoony_ru\visuo;
 class algoritm_lang
 	extends \algoritm_ {
 
-	public array $available = [
-		'' , 'index' ,
-		'docs' ,
-		'news' ,
-		'downloads' , 'download' ,
-		'login' , 'logout' , 'registration' , 'profile' ,
-	];
-
 	public function release ( ) {
 		$default = ( $this->main->library->url->static_base[ 1 ] ?? '' ) === '' ? true : false;
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );

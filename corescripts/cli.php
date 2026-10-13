@@ -42,6 +42,7 @@ $map = [
 	'admin:passwd'   => 'AdminPasswd.php' ,
 	'settings:set'   => 'SettingsSet.php' ,
 	'settings:list'  => 'SettingsList.php' ,
+	'vars:extract'   => 'VarsExtract.php' ,
 ];
 
 if ( $command === 'help' || ! array_key_exists( $command , $map ) ) {
@@ -88,6 +89,7 @@ $class_map = [
 	'admin:passwd'   => 'AdminPasswd' ,
 	'settings:set'   => 'SettingsSet' ,
 	'settings:list'  => 'SettingsList' ,
+	'vars:extract'   => 'VarsExtract' ,
 ];
 $class = $class_map[ $command ];
 

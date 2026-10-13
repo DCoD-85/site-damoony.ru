@@ -1,0 +1,19 @@
+{
+	"default": {
+		"available": [
+			"",
+			"index",
+			"docs",
+			"news",
+			"downloads",
+			"download",
+			"login",
+			"logout",
+			"registration",
+			"profile"
+		],
+		"auth": false,
+		"search": true,
+		"default": false
+	}
+}

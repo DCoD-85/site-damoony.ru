@@ -211,3 +211,41 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 	font-family: ui-monospace, Consolas, monospace;
 	font-size: 13px;
 }
+
+/* --- inline-формы и button-ссылки --- */
+.inline { display: inline; }
+button.btn-toggle {
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	font: inherit;
+}
+button.btn-toggle:hover { text-decoration: underline; }
+
+/* --- флаги страницы (auth/search/default) --- */
+.tree-flags { display: inline-flex; gap: 4px; }
+
+.tree-flags .inline { display: inline; }
+
+button.flag {
+	font-size: 11px;
+	padding: 1px 6px;
+	border: 1px solid transparent;
+	border-radius: 3px;
+	cursor: pointer;
+	font-family: ui-monospace, Consolas, monospace;
+	background: none;
+}
+button.flag-on {
+	background: #e6f0ff;
+	color: #2a63d6;
+	border-color: #b8cdfa;
+}
+button.flag-off {
+	background: #f0f0f2;
+	color: #aaa;
+	border-color: #e0e0e4;
+}
+button.flag:hover { border-color: #2a63d6; }
+button.flag-off:hover { color: #666; border-color: #bbb; }
