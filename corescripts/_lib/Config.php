@@ -85,6 +85,30 @@ class Config {
 		$ref = $value;
 	}
 
+	public function remove ( string $path ) : void {
+		$keys = explode( '.' , $path );
+		$last = array_pop( $keys );
+
+		$ref = &$this->data;
+		foreach ( $keys as $k ) {
+			if ( ! isset( $ref[ $k ] ) || ! is_array( $ref[ $k ] ) ) return;
+			$ref = &$ref[ $k ];
+		}
+		unset( $ref[ $last ] );
+	}
+
+	public function removeKeys ( array $keys ) : void {
+		if ( empty( $keys ) ) return;
+		$last = array_pop( $keys );
+
+		$ref = &$this->data;
+		foreach ( $keys as $k ) {
+			if ( ! isset( $ref[ $k ] ) || ! is_array( $ref[ $k ] ) ) return;
+			$ref = &$ref[ $k ];
+		}
+		unset( $ref[ $last ] );
+	}
+	
 	public function save ( ) : void {
 		$backup = $this->path . '.bak';
 		@copy( $this->path , $backup );
