@@ -296,34 +296,13 @@ switch ( $p ) {
 			exit;
 		}
 
-		if ( Validate::domain( $domain ) !== null ) {
-			header( 'Location: ?p=dashboard' );
-			exit;
-		}
+		require_once CS_CMD . '/AlliasToggle.php';
 
-		if ( Validate::allias_name( $name ) !== null ) {
-			header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
-			exit;
-		}
-
-		$cfg  = new Config( Paths::config() );
-		$real = Paths::real( $domain );
-
-		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
-			header( 'Location: ?p=dashboard' );
-			exit;
-		}
-
-		$flag = ( $value === '0' ) ? false : true;
-
-		try {
-			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $name , $flag ) {
-				$cfg->setKeys( [ 'alliases_available' , $real , $name ] , $flag );
-			} );
-		} catch ( Throwable $e ) {
-			http_response_code( 500 );
-			exit( 'Write failed: ' . $e->getMessage( ) );
-		}
+		AlliasToggle::run( [
+			'domain' => $domain ,
+			'name'   => $name ,
+			'value'  => $value ,
+		] );
 
 		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
 		exit;
@@ -343,29 +322,12 @@ switch ( $p ) {
 			exit;
 		}
 
-		if ( Validate::domain( $domain ) !== null ) {
-			header( 'Location: ?p=dashboard' );
-			exit;
-		}
+		require_once CS_CMD . '/DomainToggle.php';
 
-		$cfg  = new Config( Paths::config() );
-		$real = Paths::real( $domain );
-
-		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
-			header( 'Location: ?p=dashboard' );
-			exit;
-		}
-
-		$flag = ( $value === '0' ) ? false : true;
-
-		try {
-			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $flag ) {
-				$cfg->setKeys( [ 'domains_available' , $real ] , $flag );
-			} );
-		} catch ( Throwable $e ) {
-			http_response_code( 500 );
-			exit( 'Write failed: ' . $e->getMessage( ) );
-		}
+		DomainToggle::run( [
+			'domain' => $domain ,
+			'value'  => $value ,
+		] );
 
 		header( 'Location: ?p=dashboard' );
 		exit;

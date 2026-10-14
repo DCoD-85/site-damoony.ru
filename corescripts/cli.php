@@ -46,6 +46,8 @@ $map = [
 	'settings:set'   => [ 'SettingsSet.php'  , 'SettingsSet'  ] ,
 	'settings:list'  => [ 'SettingsList.php' , 'SettingsList' ] ,
 	'page:toggle'    => [ 'PageToggle.php'   , 'PageToggle'   ] ,
+	'allias:toggle'  => [ 'AlliasToggle.php' , 'AlliasToggle' ] ,
+	'domain:toggle'  => [ 'DomainToggle.php' , 'DomainToggle' ] ,
 	'vars:extract'   => [ 'VarsExtract.php'  , 'VarsExtract'  ] ,
 ];
 
