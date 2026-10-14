@@ -635,37 +635,47 @@ switch ( $p ) {
 				$available = [ '' ];
 			}
 
-			# валидация: длина + отсутствие "жадных" паттернов
-			$bad = [ ];
-			foreach ( $available as $line ) {
-				if ( $line === '' ) continue;
+			# валидация только при search=true (иначе regex не используется в роутере)
+			if ( $search ) {
+				$bad = [ ];
+				foreach ( $available as $line ) {
+					if ( $line === '' ) continue;
 
-				# длина одного правила
-				if ( strlen( $line ) > 64 ) {
-					$bad[ ] = $line . ' (длина > 64)';
-					continue;
+					if ( strlen( $line ) > 64 ) {
+						$bad[ ] = $line . ' — длина > 64';
+						continue;
+					}
+
+					if ( preg_match( '/^[\.\*\+\?]+$/' , $line ) ) {
+						$bad[ ] = $line . ' — catch-all regex';
+						continue;
+					}
+
+					if ( preg_match( '/[#\s\/]/' , $line ) ) {
+						$bad[ ] = $line . ' — запрещённый символ';
+						continue;
+					}
 				}
 
-				# чистый catch-all: .*, ^.*$, .+, .?
-				if ( preg_match( '/^[\.\*\+\?]+$/' , $line ) ) {
-					$bad[ ] = $line . ' (catch-all)';
-					continue;
+				if ( ! empty( $bad ) ) {
+					# вернуть форму с ошибкой, чтобы пользователь мог исправить
+					View::render( 'page_edit' , [
+						'domain'    => $domain ,
+						'allias'    => $allias ,
+						'path'      => $path ,
+						'cls_short' => $cls_short ,
+						'json_file' => $json_file ,
+						'saved'     => false ,
+						'errors'    => array_merge( [ 'Недопустимые правила available:' ] , $bad ) ,
+						'current'   => [
+							'available' => $available ,
+							'auth'      => $auth ,
+							'search'    => $search ,
+							'default'   => $default ,
+						] ,
+					] );
+					break;
 				}
-
-				# запрещённые спецсимволы вне regex-формата: # / пробелы
-				if ( preg_match( '/[#\s\/]/' , $line ) ) {
-					$bad[ ] = $line . ' (запрещённый символ)';
-					continue;
-				}
-			}
-			if ( ! empty( $bad ) ) {
-				View::render( 'result' , [
-					'result'     => new Result( ) ,
-					'title'      => 'Недопустимые правила available' ,
-					'back_url'   => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) ,
-					'back_label' => 'Назад' ,
-				] );
-				break;
 			}
 
 			$data = [

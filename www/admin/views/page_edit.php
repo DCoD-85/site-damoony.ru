@@ -16,6 +16,14 @@
 	<div class="ok-msg">✓ Сохранено</div>
 <?php endif ?>
 
+<?php if ( ! empty( $errors ) ) : ?>
+	<div class="error-msg">
+		<?php foreach ( $errors as $e ) : ?>
+			<div>✘ <?= htmlspecialchars( $e ) ?></div>
+		<?php endforeach ?>
+	</div>
+<?php endif ?>
+
 <?php if ( ! is_file( $json_file ) ) : ?>
 	<div class="error-msg">
 		Файл переменных не найден: <code><?= htmlspecialchars( $json_file ) ?></code><br>
