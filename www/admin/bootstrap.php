@@ -877,57 +877,15 @@ switch ( $p ) {
 			exit;
 		}
 
-		if ( ! in_array( $key , [ 'auth' , 'search' , 'default' ] , true ) ) {
-			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-			exit;
-		}
+		require_once CS_CMD . '/PageToggle.php';
 
-		# защита от path traversal (единая валидация)
-		if ( Validate::page_path( $path ) !== null ) {
-			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-			exit;
-		}
-
-		$cfg  = new Config( Paths::config() );
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
-
-		if ( $real === null ) {
-			header( 'Location: ?p=dashboard' );
-			exit;
-		}
-
-		$base      = Paths::algoritm( $domain , $allias );
-		$cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
-		$sub_dir   = $path === '' ? $base : $base . '/' . $path;
-		$php_file  = $sub_dir . '/' . $cls_short . '.php';
-		$json_file = $sub_dir . '/' . $cls_short . '.data.json';
-
-		if ( ! is_file( $php_file ) ) {
-			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-			exit;
-		}
-
-		# читаем текущий .data.json (или дефолт)
-		$data = [ 'default' => [
-			'available' => [ '' ] ,
-			'auth'      => false ,
-			'search'    => true ,
-			'default'   => false ,
-		] ];
-
-		$cur = Json::read( $json_file );
-		if ( is_array( $cur ) && isset( $cur[ 'default' ] ) && is_array( $cur[ 'default' ] ) ) {
-			$data[ 'default' ] = array_merge( $data[ 'default' ] , $cur[ 'default' ] );
-		}
-
-		$data[ 'default' ][ $key ] = ( $value === '0' ) ? false : true;
-
-		try {
-			Json::writeAtomic( $json_file , $data );
-		} catch ( Throwable $e ) {
-			http_response_code( 500 );
-			exit( 'Write failed: ' . $e->getMessage( ) );
-		}
+		PageToggle::run( [
+			'domain' => $domain ,
+			'allias' => $allias ,
+			'path'   => $path ,
+			'key'    => $key ,
+			'value'  => $value ,
+		] );
 
 		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
 		exit;

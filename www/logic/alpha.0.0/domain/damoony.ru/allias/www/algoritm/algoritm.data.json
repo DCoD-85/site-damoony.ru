@@ -6,7 +6,7 @@
 			"qwert"
 		],
 		"auth": false,
-		"search": false,
+		"search": true,
 		"default": false
 	}
 }

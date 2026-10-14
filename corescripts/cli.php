@@ -45,6 +45,7 @@ $map = [
 	'admin:passwd'   => [ 'AdminPasswd.php'  , 'AdminPasswd'  ] ,
 	'settings:set'   => [ 'SettingsSet.php'  , 'SettingsSet'  ] ,
 	'settings:list'  => [ 'SettingsList.php' , 'SettingsList' ] ,
+	'page:toggle'    => [ 'PageToggle.php'   , 'PageToggle'   ] ,
 	'vars:extract'   => [ 'VarsExtract.php'  , 'VarsExtract'  ] ,
 ];
 
