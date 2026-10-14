@@ -53,7 +53,15 @@ $p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
 # --- login / logout ---
 if ( $p === 'login' ) {
 	$error = null;
+
 	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+		# CSRF-защита (до обработки логина)
+		if ( ! Csrf::check( ) ) {
+			http_response_code( 403 );
+			exit( 'CSRF token invalid' );
+		}
+
 		$login = (string) ( $_POST[ 'login' ]    ?? '' );
 		$pass  = (string) ( $_POST[ 'password' ] ?? '' );
 		if ( $auth->login( $login , $pass ) ) {

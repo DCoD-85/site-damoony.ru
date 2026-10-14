@@ -6,6 +6,7 @@
 	<?php endif ?>
 
 	<form method="post" action="?p=login">
+		<?= Csrf::field( ) ?>
 		<label>Логин
 			<input type="text" name="login" autofocus autocomplete="username">
 		</label>
