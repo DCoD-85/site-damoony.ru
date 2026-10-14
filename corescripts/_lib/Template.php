@@ -43,4 +43,14 @@ class Template {
 		exec( 'php -l ' . escapeshellarg( $file ) . ' 2>&1' , $out , $code );
 		return $code === 0 ? null : implode( "\n" , $out );
 	}
+
+	public static function render_str ( string $content , array $vars ) : string {
+    $search  = [ ];
+    $replace = [ ];
+    foreach ( $vars as $k => $v ) {
+        $search[ ]  = '<' . $k . '>';
+        $replace[ ] = (string) $v;
+    }
+    return str_replace( $search , $replace , $content );
+}
 }
