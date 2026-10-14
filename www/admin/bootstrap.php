@@ -52,6 +52,13 @@ $p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
 
 # --- login / logout ---
 if ( $p === 'login' ) {
+
+	# уже авторизован → сразу на dashboard
+	if ( $auth->check( ) ) {
+		header( 'Location: ?p=dashboard' );
+		exit;
+	}
+
 	$error = null;
 
 	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
