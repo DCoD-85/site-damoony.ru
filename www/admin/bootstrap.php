@@ -841,7 +841,7 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$cfg  = new Config( Paths::config() );
 		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 
 		if ( $real === null ) {
@@ -849,9 +849,9 @@ switch ( $p ) {
 			exit;
 		}
 
-		# список аллиасов домена
+		# список аллиасов real-домена
 		$alliases = [ ];
-		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) {
 			if ( $a === '' ) continue;
 			$alliases[ ] = $a;
 		}
@@ -859,7 +859,7 @@ switch ( $p ) {
 		$blocks = Scan::blocksFor( $domain );
 
 		# --- POST ---
-				if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 
 			$allias = (string) ( $_POST[ 'allias' ] ?? '' );
 			$block  = (string) ( $_POST[ 'block' ]  ?? '' );
@@ -868,7 +868,7 @@ switch ( $p ) {
 			$result = new Result( );
 
 			# путь к будущему filler'у
-			$block_path = PROJECT_ROOT . '/www/logic/alpha.0.0/domain/' . $domain . '/alliasglobal/' . $block;
+			$block_path = Paths::block( $domain , $block );
 			$filler_php = $block_path . '/' . $block . '_' . $allias . '.php';
 
 			if ( is_file( $filler_php ) ) {
@@ -884,17 +884,16 @@ switch ( $p ) {
 				] );
 			}
 
-			# включить в конфиге, если попросили
+			# включить в конфиге, если попросили (по real)
 			if ( $result->ok && $enable ) {
 				try {
-					$cur = $cfg->getKeys( [ 'fillers' , $domain , $allias , $block ] );
-					if ( $cur === true ) {
-						$result->step( 'Уже включено в site.config' , true , "fillers[{$domain}][{$allias}][{$block}]" );
-					} else {
-						$cfg->setKeys( [ 'fillers' , $domain , $allias , $block ] , true );
-						$cfg->save( );
-						$result->step( 'Включено в site.config' , true , "fillers[{$domain}][{$allias}][{$block}] = true" );
-					}
+					Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $block ) {
+						$cur = $cfg->getKeys( [ 'fillers' , $real , $allias , $block ] );
+						if ( $cur !== true ) {
+							$cfg->setKeys( [ 'fillers' , $real , $allias , $block ] , true );
+						}
+					} );
+					$result->step( 'Включено в site.config' , true , "fillers[{$real}][{$allias}][{$block}] = true" );
 				} catch ( Throwable $e ) {
 					$result->warn( 'Не удалось включить в конфиге: ' . $e->getMessage( ) );
 				}
