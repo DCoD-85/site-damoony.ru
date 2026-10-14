@@ -36,7 +36,8 @@
 
 		<label class="checkbox">
 			<input type="checkbox" name="enable" value="1" checked>
-			Включить в <code>site.config</code> (<code>fillers[domain][allias][block] = true</code>)
+			Включить в <code>site.config</code>
+			(<code>fillers[domain][allias][block] = true</code>)
 		</label>
 
 		<button type="submit">Создать</button>

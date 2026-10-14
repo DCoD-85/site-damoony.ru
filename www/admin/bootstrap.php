@@ -828,27 +828,42 @@ switch ( $p ) {
 		$blocks = Scan::blocksFor( $domain );
 
 		# --- POST ---
-		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+				if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 
 			$allias = (string) ( $_POST[ 'allias' ] ?? '' );
 			$block  = (string) ( $_POST[ 'block' ]  ?? '' );
 			$enable = ! empty( $_POST[ 'enable' ] );
 
-			require_once CS_CMD . '/FillerNew.php';
+			$result = new Result( );
 
-			$result = FillerNew::run( [
-				'name'   => $allias ,       # имя filler = имя аллиаса
-				'block'  => $block ,
-				'domain' => $domain ,
-				'allias' => $allias ,
-			] );
+			# путь к будущему filler'у
+			$block_path = PROJECT_ROOT . '/www/logic/alpha.0.0/domain/' . $domain . '/alliasglobal/' . $block;
+			$filler_php = $block_path . '/' . $block . '_' . $allias . '.php';
 
-			# при успехе — включить в конфиге, если попросили
+			if ( is_file( $filler_php ) ) {
+				# уже есть — просто отметить
+				$result->step( 'Filler уже существует' , true , Fs::rel( $filler_php ) );
+			} else {
+				require_once CS_CMD . '/FillerNew.php';
+				$result = FillerNew::run( [
+					'name'   => $allias ,
+					'block'  => $block ,
+					'domain' => $domain ,
+					'allias' => $allias ,
+				] );
+			}
+
+			# включить в конфиге, если попросили
 			if ( $result->ok && $enable ) {
 				try {
-					$cfg->setKeys( [ 'fillers' , $domain , $allias , $block ] , true );
-					$cfg->save( );
-					$result->step( 'Включено в site.config' , true , "fillers[{$domain}][{$allias}][{$block}] = true" );
+					$cur = $cfg->getKeys( [ 'fillers' , $domain , $allias , $block ] );
+					if ( $cur === true ) {
+						$result->step( 'Уже включено в site.config' , true , "fillers[{$domain}][{$allias}][{$block}]" );
+					} else {
+						$cfg->setKeys( [ 'fillers' , $domain , $allias , $block ] , true );
+						$cfg->save( );
+						$result->step( 'Включено в site.config' , true , "fillers[{$domain}][{$allias}][{$block}] = true" );
+					}
 				} catch ( Throwable $e ) {
 					$result->warn( 'Не удалось включить в конфиге: ' . $e->getMessage( ) );
 				}
