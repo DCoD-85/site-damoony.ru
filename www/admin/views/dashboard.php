@@ -8,21 +8,21 @@
 			<tr>
 				<th>Домен</th>
 				<th>Namespace</th>
-				<th>Домен</th>
+				<th>Статус</th>
 				<th>Файлы</th>
 				<th>Аллиасы</th>
-				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php foreach ( $domains as $d ) : ?>
+				<?php $d_enc = urlencode( $d[ 'domain' ] ); ?>
 				<tr>
 					<td>
-						<b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b>
+						<a href="?p=domain:edit&domain=<?= $d_enc ?>" class="domain-link">
+							<b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b>
+						</a>
 						<?php if ( ! empty( $d[ 'aliases' ] ) ) : ?>
-							<div class="hint" style="font-size:11px;color:#888;">
-								aliases: <?= htmlspecialchars( implode( ', ' , $d[ 'aliases' ] ) ) ?>
-							</div>
+							<div class="hint">aliases: <?= htmlspecialchars( implode( ', ' , $d[ 'aliases' ] ) ) ?></div>
 						<?php endif ?>
 					</td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
@@ -37,16 +37,15 @@
 								<?= $d[ 'avail' ] ? '● вкл' : '○ выкл' ?>
 							</button>
 						</form>
-						<a href="?p=domain:remove&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-							class="btn-danger">Удалить</a>
+						<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger">Удалить</a>
 					</td>
-					<td><?= $d[ 'fs' ]    ? '✓' : '✗' ?></td>
-					<td><?= htmlspecialchars( implode( ', ' , $d[ 'alliases' ] ) ) ?></td>
+					<td><?= $d[ 'fs' ] ? '✓' : '✗' ?></td>
 					<td>
-						<a href="?p=domain:edit&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-							class="btn-edit">Редактировать</a>
-						<a href="?p=allias:list&domain=<?= urlencode( $d[ 'domain' ] ) ?>"
-							class="btn-edit">Аллиасы</a>
+						<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
+							<a href="?p=pages:tree&domain=<?= $d_enc ?>&allias=<?= urlencode( $a ) ?>"
+								class="allias-link"><?= htmlspecialchars( $a ) ?></a>
+						<?php endforeach ?>
+						<a href="?p=allias:new&domain=<?= $d_enc ?>" class="allias-add" title="Новый аллиас">+ новый</a>
 					</td>
 				</tr>
 			<?php endforeach ?>

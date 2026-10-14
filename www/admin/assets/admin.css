@@ -264,3 +264,43 @@ button.flag-off:hover { color: #666; border-color: #bbb; }
 	border-radius: 3px;
 	font-size: 12px;
 }
+
+/* dashboard: домен и аллиасы как ссылки */
+.domain-link {
+	color: #1a1a1a;
+	text-decoration: none;
+}
+.domain-link:hover {
+	color: #069;
+	text-decoration: underline;
+}
+
+.allias-link {
+	display: inline-block;
+	padding: 2px 8px;
+	margin: 0 4px 4px 0;
+	background: #f0f0f0;
+	border-radius: 4px;
+	color: #333;
+	text-decoration: none;
+	font-size: 13px;
+}
+.allias-link:hover {
+	background: #e0e8f0;
+	color: #069;
+}
+
+.allias-add {
+	display: inline-block;
+	padding: 2px 8px;
+	color: #069;
+	text-decoration: none;
+	font-size: 13px;
+	border: 1px dashed #069;
+	border-radius: 4px;
+}
+.allias-add:hover {
+	background: #069;
+	color: #fff;
+	border-style: solid;
+}

@@ -142,7 +142,17 @@ switch ( $p ) {
 		break;
 
 	case 'allias:new' :
-		$domains = array_keys( (array) ( new Config( PROJECT_ROOT . '/config/site.config' ) )->get( 'domains_real' ) );
+		$cfg         = new Config( Paths::config() );
+		$domains_raw = (array) $cfg->get( 'domains_real' );
+
+		# только real-домены (key === value): аллиасы принадлежат real
+		$domains = [ ];
+		foreach ( $domains_raw as $d => $real ) {
+			if ( $d === $real ) $domains[ ] = $d;
+		}
+
+		$prefill_domain = (string) ( $_GET[ 'domain' ] ?? '' );
+
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/AlliasNew.php';
 			$post_domain = (string) ( $_POST[ 'domain' ] ?? '' );
@@ -158,7 +168,10 @@ switch ( $p ) {
 				'back_label' => 'К аллиасам' ,
 			] );
 		} else {
-			View::render( 'allias_new' , [ 'domains' => $domains ] );
+			View::render( 'allias_new' , [
+				'domains'        => $domains ,
+				'prefill_domain' => $prefill_domain ,
+			] );
 		}
 		break;
 
