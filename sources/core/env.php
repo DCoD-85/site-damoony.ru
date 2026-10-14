@@ -34,6 +34,11 @@ class core_env {
 	
 	public function php_version () : string { return PHP_VERSION; }
 	
+	public function is_https () : bool {
+		return ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
+		    || ( ( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' );
+	}
+
 	public function apply ( ) {
 		if ( $this->is_dev( ) ) {
 			error_reporting( E_ALL );

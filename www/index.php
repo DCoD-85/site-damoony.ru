@@ -1,18 +1,21 @@
 <?PHP
 
 # 0: Стартуем скрипт
-$start = microtime( true );
+$start    = microtime( true );
 $start_hr = hrtime( true );
 
-# --- РОУТИНГ /admin/ — до session_start, до header ---
+# для debug_attach() в visuorelease и visuolog_row
+$GLOBALS[ 'start' ]    = $start;
+$GLOBALS[ 'start_hr' ] = $start_hr;
+
 # --- РОУТИНГ /admin/ — до session_start, до header ---
 $path = trim( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? '/' , PHP_URL_PATH ) ?? '/' , '/' );
 
 if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 
-	$ip = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
+	$ip      = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
 	$allowed = [ '127.0.0.1' , '::1' ];
-	
+
 	$cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'site.config';
 	if ( is_file( $cfg_path ) ) {
 		$cfg = @json_decode( @file_get_contents( $cfg_path ) , true );
@@ -34,42 +37,26 @@ if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 	# IP не в списке → fallthrough: main.php → 404 движка
 }
 
-# host
-$host = explode( '.' , strrev( $_SERVER[ 'HTTP_HOST' ] ) , 3 );
-$host = strrev( implode( '.' , [ $host[ 0 ] , $host[ 1 ] ] ) );
+# host (damoony2.ru → damoony.ru)
+$host = explode( '.' , strrev( $_SERVER[ 'HTTP_HOST' ] ?? '' ) , 3 );
+$host = strrev( implode( '.' , [ $host[ 0 ] ?? '' , $host[ 1 ] ?? '' ] ) );
 
 # Content-Type
 header( 'Content-Type: text/html; charset=UTF-8' );
 
-# version 1 : start
-# session_set_cookie_params( 0 , domain : '.' . $host );
-# if ( isset( $_COOKIE[ 'PHPSESSID' ] ) ){
-# 	setcookie( 'PHPSESSID' , $_COOKIE[ 'PHPSESSID' ] , 0 , '/' , '.' . $host );
-# 	# session_name( $_COOKIE[ 'PHPSESSID' ] );
-# } else session_start();
-# version 1 : end
+# session — secure только по HTTPS
+$is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
+         || ( ( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' );
 
-# version 2 : start
 session_set_cookie_params( [
-	'lifetime'=>0 ,
-	'path'=>'/' ,
-	'domain'=>'.' . $host ,
-	'secure'=>true ,
-	'httponly'=>true ,
-	'samesite'=>'Lax'
+	'lifetime' => 0 ,
+	'path'     => '/' ,
+	'domain'   => '.' . $host ,
+	'secure'   => $is_https ,
+	'httponly' => true ,
+	'samesite' => 'Lax' ,
 ] );
-
-if ( isset( $_COOKIE[ 'PHPSESSID' ] ) ){
-	setcookie( 'PHPSESSID' , $_COOKIE[ 'PHPSESSID' ] , [
-		'path'=>'/' ,
-		'domain'=>'.' . $host ,
-		'secure'=>true ,
-		'httponly'=>true ,
-		'samesite'=>'Lax'
-	] );
-	session_start( );
-} else session_start();
-# version 2 : end
+session_start( );
 
 # 2 : Показывать / Не показывать ошибки и предупреждения
 Error_Reporting( E_ALL & ~E_NOTICE & ~E_DEPRECATED );
@@ -79,14 +66,33 @@ define( 'SCRIPTSTART_MT' , $start );
 define( 'SCRIPTSTART_HR' , $start_hr );
 
 # 4 : Определяем константу, по которой будем определять подлинность запроса
-if( ! defined( TRUE ) ) define( 'GDEF_SECURE_CONSTANT' , 'TRUE' );
-if( ! defined( 'DS' ) ) define( 'DS' , DIRECTORY_SEPARATOR );
-if( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
-if( ! defined( 'BR' ) ) define( 'BR' , PHP_EOL );
-if( ! defined( 'SIMPLECMS' ) ) define( 'SIMPLECMS' , true );
+if ( ! defined( 'GDEF_SECURE_CONSTANT' ) ) define( 'GDEF_SECURE_CONSTANT' , 'TRUE' );
+if ( ! defined( 'DS' ) ) define( 'DS' , DIRECTORY_SEPARATOR );
+if ( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
+if ( ! defined( 'BR' ) ) define( 'BR' , PHP_EOL );
+if ( ! defined( 'SIMPLECMS' ) ) define( 'SIMPLECMS' , true );
 
 function error ( string $title , string $message , string $file = '' , string $line = '' ) {
-	# ... (без изменений)
+	$log = date( 'Y-m-d H:i:s' ) . ' | ' . $title . ' | ' . $message;
+	if ( $file !== '' ) $log .= ' | ' . $file;
+	if ( $line !== '' ) $log .= ':' . $line;
+	@error_log( $log );
+
+	if ( defined( 'GL_DEBUG' ) && GL_DEBUG === true ) {
+		if ( ! headers_sent( ) ) {
+			http_response_code( 500 );
+			header( 'Content-Type: text/html; charset=UTF-8' );
+		}
+		echo '<!doctype html><html><head><meta charset="utf-8"><title>' . htmlspecialchars( $title ) . '</title></head><body>';
+		echo '<h1>' . htmlspecialchars( $title ) . '</h1>';
+		echo '<p>' . htmlspecialchars( $message ) . '</p>';
+		if ( $file !== '' ) echo '<p><small>' . htmlspecialchars( $file ) . ':' . (int) $line . '</small></p>';
+		echo '</body></html>';
+		exit;
+	}
+
+	http_response_code( 500 );
+	exit( 'Internal Server Error' );
 }
 
 function error_file ( string $path , string $file , string $line ) {
@@ -94,6 +100,7 @@ function error_file ( string $path , string $file , string $line ) {
 }
 
 function warning_file ( string $path , string $file , string $line ) { }
+
 function error_class ( string $classname , string $file , string $line ) {
 	error( 'Отсутствует класс' , 'Отсутствует класс: ' . $classname . '. Проверьте целостность структуры сайта.' , $file , $line );
 }

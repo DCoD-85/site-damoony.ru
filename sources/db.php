@@ -133,31 +133,46 @@ class db {
 	}
 	
 	public function update ( string $table , array $data , array $where , array $types = [ ] ) : db_query_interface {
-		$set = [ ];
+		$set       = [ ];
+		$auto      = [ ];
+
 		foreach ( $data as $col => $val ) {
-			$set[ ] = '`' . $col . '`=%s';
+			$ph     = is_int( $val ) ? '%d' : '%s';
+			$set[ ] = '`' . $col . '`=' . $ph;
+			$auto[ ] = $ph;
 		}
-		
+
 		$where_sql = [ ];
 		foreach ( $where as $col => $val ) {
-			$where_sql[ ] = '`' . $col . '`=%s';
+			$ph          = is_int( $val ) ? '%d' : '%s';
+			$where_sql[ ] = '`' . $col . '`=' . $ph;
+			$auto[ ]      = $ph;
 		}
-		
+
 		$sql = 'UPDATE `' . $table . '` SET ' . implode( ' , ' , $set ) . ' WHERE ' . implode( ' AND ' , $where_sql );
 		$values = array_merge( array_values( $data ) , array_values( $where ) );
-		
-		return $this->query( $sql , $values , $types );
+
+		# если $types не задан — используем auto (%s/%d по типу значения)
+		$ph = empty( $types ) ? $auto : $types;
+
+		return $this->query( $sql , $values , $ph );
 	}
-	
+
 	public function delete ( string $table , array $where , array $types = [ ] ) : db_query_interface {
 		$where_sql = [ ];
+		$auto      = [];
+
 		foreach ( $where as $col => $val ) {
-			$where_sql[ ] = '`' . $col . '`=%s';
+			$ph           = is_int( $val ) ? '%d' : '%s';
+			$where_sql[ ] = '`' . $col . '`=' . $ph;
+			$auto[ ]      = $ph;
 		}
-		
+
 		$sql = 'DELETE FROM `' . $table . '` WHERE ' . implode( ' AND ' , $where_sql );
 		$values = array_values( $where );
-		
-		return $this->query( $sql , $values , $types );
+
+		$ph = empty( $types ) ? $auto : $types;
+
+		return $this->query( $sql , $values , $ph );
 	}
 }

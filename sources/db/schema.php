@@ -151,9 +151,15 @@ class db_schema {
 	
 	public function run ( ) : self {
 		$sql = $this->sql( );
-		if ( $sql !== '' ) {
-			$this->db->select( $sql )->affected( );
+		if ( $sql === '' ) return $this;
+
+		$q = $this->db->select( $sql );
+
+		$err = $q->error( );
+		if ( $err !== '' ) {
+			throw new \db_exception( $err , $sql );
 		}
+
 		return $this;
 	}
 	
