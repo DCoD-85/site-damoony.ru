@@ -123,7 +123,9 @@ switch ( $p ) {
 
 		View::render( 'dashboard' , [ 'domains' => $rows ] );
 		break;
+	
 	case 'domain:new' :
+	
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/DomainNew.php';
 			$result = DomainNew::run( [
@@ -142,6 +144,7 @@ switch ( $p ) {
 		break;
 
 	case 'allias:new' :
+
 		$cfg         = new Config( Paths::config() );
 		$domains_raw = (array) $cfg->get( 'domains_real' );
 
@@ -275,17 +278,34 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+		if ( Validate::domain( $domain ) !== null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
 
-		if ( $real === null ) {
+		if ( Validate::allias_name( $name ) !== null ) {
+			header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
+			exit;
+		}
+
+		$cfg  = new Config( Paths::config() );
+		$real = Paths::real( $domain );
+
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
 
 		$flag = ( $value === '0' ) ? false : true;
-		$cfg->setKeys( [ 'alliases_available' , $domain , $name ] , $flag );
-		$cfg->save( );
+
+		try {
+			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $name , $flag ) {
+				$cfg->setKeys( [ 'alliases_available' , $real , $name ] , $flag );
+			} );
+		} catch ( Throwable $e ) {
+			http_response_code( 500 );
+			exit( 'Write failed: ' . $e->getMessage( ) );
+		}
 
 		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
 		exit;
@@ -305,17 +325,29 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+		if ( Validate::domain( $domain ) !== null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
 
-		if ( $real === null ) {
+		$cfg  = new Config( Paths::config() );
+		$real = Paths::real( $domain );
+
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
 
 		$flag = ( $value === '0' ) ? false : true;
-		$cfg->setKeys( [ 'domains_available' , $domain ] , $flag );
-		$cfg->save( );
+
+		try {
+			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $flag ) {
+				$cfg->setKeys( [ 'domains_available' , $real ] , $flag );
+			} );
+		} catch ( Throwable $e ) {
+			http_response_code( 500 );
+			exit( 'Write failed: ' . $e->getMessage( ) );
+		}
 
 		header( 'Location: ?p=dashboard' );
 		exit;
@@ -499,7 +531,7 @@ switch ( $p ) {
 		] );
 		break;
 
-		case 'page:edit' :
+	case 'page:edit' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
@@ -759,7 +791,7 @@ switch ( $p ) {
 		] );
 		break;
 
-		case 'page:toggle' :
+	case 'page:toggle' :
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
 			http_response_code( 405 );
@@ -921,6 +953,7 @@ switch ( $p ) {
 		break;
 	
 	case 'settings' :
+
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
 		# SettingsSet падает на неизвестном ключе → фильтруем $_POST
