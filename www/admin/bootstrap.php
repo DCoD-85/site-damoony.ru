@@ -184,12 +184,21 @@ switch ( $p ) {
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 
-		$cfg_path = PROJECT_ROOT . '/config/site.config';
-		$cfg      = new Config( $cfg_path );
+		if ( Validate::domain( $domain ) !== null ) {
+			View::render( 'result' , [
+				'result'     => new Result( ) ,
+				'title'      => 'Некорректный домен' ,
+				'back_url'   => '?p=dashboard' ,
+				'back_label' => 'К списку домен' ,
+			] );
+			break;
+		}
+
+		$cfg  = new Config( Paths::config() );
+		$real = Paths::real( $domain );
 
 		# --- валидация домена ---
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
-		if ( $real === null ) {
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
 			View::render( 'result' , [
 				'result'     => new Result( ) ,
 				'title'      => 'Домен не найден' ,
@@ -217,20 +226,21 @@ switch ( $p ) {
 				if ( $skin_err !== null ) {
 					$errors[ ] = $skin_err;
 				} else {
-					$skin_dir = PROJECT_ROOT . '/www/media/' . $domain . '/skin/' . $skin;
+					$skin_dir = Paths::skins( $domain ) . '/' . $skin;
 					if ( ! is_dir( $skin_dir ) ) {
-						$errors[ ] = "Тема '{$skin}' не найдена в media/{$domain}/skin/";
+						$errors[ ] = "Тема '{$skin}' не найдена в media/" . Paths::real( $domain ) . "/skin/";
 					}
 				}
 			}
 
 			if ( empty( $errors ) ) {
 				try {
-					$cfg->setKeys( [ 'domains_titles' , $domain ] , $title );
-					if ( $skin !== '' ) {
-						$cfg->setKeys( [ 'domains_skins' , $domain ] , $skin );
-					}
-					$cfg->save( );
+					Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $title , $skin ) {
+						$cfg->setKeys( [ 'domains_titles' , $real ] , $title );
+						if ( $skin !== '' ) {
+							$cfg->setKeys( [ 'domains_skins' , $real ] , $skin );
+						}
+					} );
 					header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' );
 					exit;
 				} catch ( Throwable $e ) {
@@ -250,8 +260,8 @@ switch ( $p ) {
 		}
 
 		# --- GET ---
-		$title = (string) ( $cfg->getKeys( [ 'domains_titles' , $domain ] ) ?? $cfg->get( 'title' , '' ) );
-		$skin  = (string) ( $cfg->getKeys( [ 'domains_skins'  , $domain ] ) ?? $cfg->get( 'skin'  , 'default' ) );
+		$title = (string) ( $cfg->getKeys( [ 'domains_titles' , $real ] ) ?? $cfg->get( 'title' , '' ) );
+		$skin  = (string) ( $cfg->getKeys( [ 'domains_skins'  , $real ] ) ?? $cfg->get( 'skin'  , 'default' ) );
 
 		View::render( 'domain_edit' , [
 			'domain'  => $domain ,
