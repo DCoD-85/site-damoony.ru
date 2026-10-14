@@ -10,7 +10,8 @@
 			"profile",
 			"agreement",
 			"registration",
-			"d1"
+			"d1",
+			"test"
 		],
 		"auth": false,
 		"search": true,

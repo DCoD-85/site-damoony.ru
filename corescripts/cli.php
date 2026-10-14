@@ -17,7 +17,9 @@ define( 'PROJECT_ROOT' , dirname( CS_ROOT ) );
 
 require_once CS_LIB . '/Cli.php';
 require_once CS_LIB . '/Fs.php';
+require_once CS_LIB . '/Json.php';
 require_once CS_LIB . '/Paths.php';
+require_once CS_LIB . '/Blocks.php';
 require_once CS_LIB . '/Template.php';
 require_once CS_LIB . '/Config.php';
 require_once CS_LIB . '/Validate.php';
