@@ -635,6 +635,39 @@ switch ( $p ) {
 				$available = [ '' ];
 			}
 
+			# валидация: длина + отсутствие "жадных" паттернов
+			$bad = [ ];
+			foreach ( $available as $line ) {
+				if ( $line === '' ) continue;
+
+				# длина одного правила
+				if ( strlen( $line ) > 64 ) {
+					$bad[ ] = $line . ' (длина > 64)';
+					continue;
+				}
+
+				# чистый catch-all: .*, ^.*$, .+, .?
+				if ( preg_match( '/^[\.\*\+\?]+$/' , $line ) ) {
+					$bad[ ] = $line . ' (catch-all)';
+					continue;
+				}
+
+				# запрещённые спецсимволы вне regex-формата: # / пробелы
+				if ( preg_match( '/[#\s\/]/' , $line ) ) {
+					$bad[ ] = $line . ' (запрещённый символ)';
+					continue;
+				}
+			}
+			if ( ! empty( $bad ) ) {
+				View::render( 'result' , [
+					'result'     => new Result( ) ,
+					'title'      => 'Недопустимые правила available' ,
+					'back_url'   => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) ,
+					'back_label' => 'Назад' ,
+				] );
+				break;
+			}
+
 			$data = [
 				'default' => [
 					'available' => $available ,
