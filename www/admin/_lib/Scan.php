@@ -129,6 +129,23 @@ class Scan {
 		];
 	}
 
+		# блоки домена: папки alliasglobal/* кроме служебных
+	public static function blocksFor ( string $domain ) : array {
+		$dir = PROJECT_ROOT . '/www/logic/alpha.0.0/domain/' . $domain . '/alliasglobal';
+		if ( ! is_dir( $dir ) ) return [ ];
+
+		$skip = [ 'debug' , 'script' ];
+		$out  = [ ];
+		foreach ( scandir( $dir ) as $name ) {
+			if ( $name === '.' || $name === '..' ) continue;
+			if ( in_array( $name , $skip , true ) ) continue;
+			if ( ! is_dir( $dir . '/' . $name ) ) continue;
+			$out[ ] = $name;
+		}
+		sort( $out );
+		return $out;
+	}
+	
 	# --- helper ---
 	private static function listDirs ( string $dir ) : array {
 		if ( ! is_dir( $dir ) ) return [ ];

@@ -798,6 +798,80 @@ switch ( $p ) {
 		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
 		exit;
 
+	case 'filler:new' :
+
+		require_once ADMIN_ROOT . '/_lib/Scan.php';
+
+		$domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' );
+		$allias = (string) ( $_GET[ 'allias' ] ?? $_POST[ 'allias' ] ?? '' );
+
+		if ( $domain === '' ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+
+		if ( $real === null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
+
+		# список аллиасов домена
+		$alliases = [ ];
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
+			if ( $a === '' ) continue;
+			$alliases[ ] = $a;
+		}
+
+		$blocks = Scan::blocksFor( $domain );
+
+		# --- POST ---
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+
+			$allias = (string) ( $_POST[ 'allias' ] ?? '' );
+			$block  = (string) ( $_POST[ 'block' ]  ?? '' );
+			$enable = ! empty( $_POST[ 'enable' ] );
+
+			require_once CS_CMD . '/FillerNew.php';
+
+			$result = FillerNew::run( [
+				'name'   => $allias ,       # имя filler = имя аллиаса
+				'block'  => $block ,
+				'domain' => $domain ,
+				'allias' => $allias ,
+			] );
+
+			# при успехе — включить в конфиге, если попросили
+			if ( $result->ok && $enable ) {
+				try {
+					$cfg->setKeys( [ 'fillers' , $domain , $allias , $block ] , true );
+					$cfg->save( );
+					$result->step( 'Включено в site.config' , true , "fillers[{$domain}][{$allias}][{$block}] = true" );
+				} catch ( Throwable $e ) {
+					$result->warn( 'Не удалось включить в конфиге: ' . $e->getMessage( ) );
+				}
+			}
+
+			View::render( 'result' , [
+				'result'     => $result ,
+				'title'      => "Filler: {$domain} / {$allias} / {$block}" ,
+				'back_url'   => '?p=allias:list&domain=' . urlencode( $domain ) ,
+				'back_label' => 'К аллиасам' ,
+			] );
+			break;
+		}
+
+		# --- GET ---
+		View::render( 'filler_new' , [
+			'domain'   => $domain ,
+			'allias'   => $allias ,
+			'alliases' => $alliases ,
+			'blocks'   => $blocks ,
+		] );
+		break;
+	
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
