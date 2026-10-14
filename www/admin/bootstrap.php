@@ -521,24 +521,27 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+		if ( Validate::domain( $domain ) !== null || Validate::allias_name( $allias ) !== null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
 
-		if ( $real === null ) {
+		$cfg = new Config( Paths::config() );
+
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
 
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
-		$logic    = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
-		$base = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
+		$base = Paths::algoritm( $domain , $allias );
 		$tree = is_dir( $base ) ? Scan::pageTree( $base ) : [ ];
 
 		View::render( 'pages_tree' , [
 			'domain'  => $domain ,
 			'allias'  => $allias ,
-			'logic'   => $logic ,
+			'logic'   => Paths::logic( ) ,
 			'tree'    => $tree ,
 			'has_dir' => is_dir( $base ) ,
 		] );
@@ -682,22 +685,23 @@ switch ( $p ) {
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
 
-		if ( $domain === '' ) {
+		if ( $domain === '' || Validate::domain( $domain ) !== null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+		$cfg = new Config( Paths::config() );
 
-		if ( $real === null ) {
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
 
-		# список аллиасов домена
+		$real = Paths::real( $domain );
+
+		# список аллиасов real-домена
 		$alliases = [ ];
-		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) {
 			if ( $a === '' ) continue;
 			$alliases[ ] = $a;
 		}
@@ -774,16 +778,16 @@ switch ( $p ) {
 			break;
 		}
 
-		$logic     = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
-		$alliases  = (array)  $cfg->getKeys( [ 'alliases_real'      , $domain ] , [ ] );
-		$available = (array)  $cfg->getKeys( [ 'alliases_available' , $domain ] , [ ] );
-		$fillers   = (array)  $cfg->getKeys( [ 'fillers'            , $domain ] , [ ] );
+		$real      = Paths::real( $domain );
+		$alliases  = (array)  $cfg->getKeys( [ 'alliases_real'      , $real ] , [ ] );
+		$available = (array)  $cfg->getKeys( [ 'alliases_available' , $real ] , [ ] );
+		$fillers   = (array)  $cfg->getKeys( [ 'fillers'            , $real ] , [ ] );
 
 		$rows = [ ];
 		foreach ( $alliases as $alias => $target ) {
 			if ( $alias === '' ) continue;
 
-			$fs_path = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $alias;
+			$fs_path = Paths::allias( $domain , $alias );
 			$f       = (array) ( $fillers[ $alias ] ?? [ ] );
 
 			$enabled = 0;
