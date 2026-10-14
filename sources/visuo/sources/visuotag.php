@@ -324,46 +324,79 @@ class visuotag {
 	#  Find
 	# ------------------------------------------------------------
 
+	# ------------------------------------------------------------
+	#  find — DFS-поиск по дереву.
+	#
+	#  $tagname — имя тега (null = любой)
+	#  $class   — имя класса (null = без фильтра)
+	#  $id      — id (null = без фильтра)
+	#  $eq      — какой по счёту совпадающий узел (0 = первый)
+	#
+	#  Примеры:
+	#    ->find('div')                      — первый div
+	#    ->find(class: 'dt_top')            — первый с этим классом
+	#    ->find('div', 'dt_top')            — первый div.dt_top
+	#    ->find('div', 'dt_top', null, 2)   — третий div.dt_top
+	#    ->find(id: 'main')                 — по id
+	# ------------------------------------------------------------
 	public function find ( null|string $tagname = null ,
-	                       null|visuotag $visuotag = null ,
-	                       int $eq = 0 ,
-	                       int $fec = 0 ,
-	                       int $cicle = 0 ,
 	                       null|string $class = null ,
-	                       null|string $id = null ) : null|visuotag {
-		# log
-		if ( $this->visuorelease && $cicle === 0 ) {
-			$this->visuorelease->visuolog->add( 'Поиск тега: ' . $tagname , __METHOD__ , __FILE__ , __LINE__ );
+	                       null|string $id = null ,
+	                       int $eq = 0 ) : null|visuotag {
+
+		if ( $this->visuorelease ) {
+			$this->visuorelease->visuolog->add(
+				'Поиск тега: ' . ( $tagname ?? '*' )
+				. ( $class !== null ? ' .' . $class : '' )
+				. ( $id    !== null ? ' #' . $id    : '' ) ,
+				__METHOD__ , __FILE__ , __LINE__
+			);
 		}
 
-		if ( $visuotag !== null ) return $visuotag;
+		$counter = 0;
+		return $this->_find( $tagname , $class , $id , $eq , $counter );
+	}
 
-		# match by tag / class / id
-		if ( $tagname === null ) {
-			if ( $class !== null ) {
-				if ( $this->attrs( )->class( )->get( $class ) === $class ) return $this;
-			} elseif ( $id !== null ) {
-				$is_id = $this->attrs( )->get( 'id' );
-				if ( $is_id !== null && $is_id === $id ) return $this;
-			}
-		} else {
+	# ------------------------------------------------------------
+	#  _find — внутренний DFS. $counter передаётся по ссылке,
+	#  чтобы накапливать совпадения между поддеревьями.
+	# ------------------------------------------------------------
+	protected function _find ( null|string $tagname ,
+	                           null|string $class ,
+	                           null|string $id ,
+	                           int $eq ,
+	                           int &$counter ) : null|visuotag {
+
+		$match = false;
+
+		if ( $tagname !== null ) {
 			if ( $this->tagname === $tagname ) {
 				if ( $class !== null ) {
-					if ( $this->attrs( )->class( )->get( $class ) === $class ) return $this;
+					$match = $this->attrs( )->class( )->get( $class ) === $class;
+				} elseif ( $id !== null ) {
+					$match = $this->attrs( )->get( 'id' ) === $id;
 				} else {
-					return $this;
+					$match = true;
 				}
 			}
+		} elseif ( $class !== null ) {
+			$match = $this->attrs( )->class( )->get( $class ) === $class;
+		} elseif ( $id !== null ) {
+			$match = $this->attrs( )->get( 'id' ) === $id;
 		}
 
-		# depth-first search
+		if ( $match ) {
+			if ( $counter === $eq ) return $this;
+			$counter++;
+		}
+
 		foreach ( $this->elements as $v ) {
-			if ( ! is_object( $v ) ) continue;
-			$visuotag = $v->find( $tagname , $visuotag , $eq , $fec , $cicle + 1 , $class , $id );
-			if ( $visuotag !== null ) return $visuotag;
+			if ( ! $v instanceof visuotag ) continue;
+			$found = $v->_find( $tagname , $class , $id , $eq , $counter );
+			if ( $found !== null ) return $found;
 		}
 
-		return $visuotag;
+		return null;
 	}
 
 	# find tag (from root, descending)
