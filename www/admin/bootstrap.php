@@ -499,11 +499,11 @@ switch ( $p ) {
 		] );
 		break;
 
-	case 'page:edit' :
+		case 'page:edit' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
-		$path = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
+		$path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
 
 		$path_err = Validate::page_path( $path );
 		if ( $path_err !== null ) {
@@ -521,7 +521,7 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$cfg  = new Config( Paths::config() );
 		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 
 		if ( $real === null ) {
@@ -529,8 +529,7 @@ switch ( $p ) {
 			exit;
 		}
 
-		$logic = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
-		$base  = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
+		$base = Paths::algoritm( $domain , $allias );
 
 		# --- вычисляем файлы: path относительно algoritm/ ---
 		$cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
@@ -589,10 +588,17 @@ switch ( $p ) {
 				] ,
 			];
 
-			$out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
-			$out = preg_replace_callback( '/^( +)/m' , fn( $m ) => str_repeat( "\t" , (int) ( strlen( $m[ 1 ] ) / 4 ) ) , $out );
-
-			file_put_contents( $json_file , $out );
+			try {
+				Json::writeAtomic( $json_file , $data );
+			} catch ( Throwable $e ) {
+				View::render( 'result' , [
+					'result'     => new Result( ) ,
+					'title'      => 'Ошибка записи: ' . $e->getMessage( ) ,
+					'back_url'   => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) ,
+					'back_label' => 'Назад' ,
+				] );
+				break;
+			}
 
 			header( 'Location: ?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) . '&saved=1' );
 			exit;
@@ -606,15 +612,13 @@ switch ( $p ) {
 			'default'   => false ,
 		];
 
-		if ( is_file( $json_file ) ) {
-			$json = @json_decode( @file_get_contents( $json_file ) , true );
-			if ( is_array( $json ) && isset( $json[ 'default' ] ) && is_array( $json[ 'default' ] ) ) {
-				$d = $json[ 'default' ];
-				$current[ 'available' ] = isset( $d[ 'available' ] ) && is_array( $d[ 'available' ] ) ? $d[ 'available' ] : [ ];
-				$current[ 'auth' ]      = ! empty( $d[ 'auth' ] );
-				$current[ 'search' ]    = ! isset( $d[ 'search' ] ) || ! empty( $d[ 'search' ] );
-				$current[ 'default' ]   = ! empty( $d[ 'default' ] );
-			}
+		$json = Json::read( $json_file );
+		if ( is_array( $json ) && isset( $json[ 'default' ] ) && is_array( $json[ 'default' ] ) ) {
+			$d = $json[ 'default' ];
+			$current[ 'available' ] = isset( $d[ 'available' ] ) && is_array( $d[ 'available' ] ) ? $d[ 'available' ] : [ ];
+			$current[ 'auth' ]      = ! empty( $d[ 'auth' ] );
+			$current[ 'search' ]    = ! isset( $d[ 'search' ] ) || ! empty( $d[ 'search' ] );
+			$current[ 'default' ]   = ! empty( $d[ 'default' ] );
 		}
 
 		View::render( 'page_edit' , [
@@ -627,7 +631,7 @@ switch ( $p ) {
 			'saved'     => ! empty( $_GET[ 'saved' ] ) ,
 		] );
 		break;
-
+	
 	case 'page:new' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -755,7 +759,7 @@ switch ( $p ) {
 		] );
 		break;
 
-	case 'page:toggle' :
+		case 'page:toggle' :
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
 			http_response_code( 405 );
@@ -784,7 +788,7 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$cfg  = new Config( Paths::config() );
 		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 
 		if ( $real === null ) {
@@ -792,8 +796,7 @@ switch ( $p ) {
 			exit;
 		}
 
-		$logic     = (string) ( $cfg->get( 'logic' , 'alpha.0.0' ) ?? 'alpha.0.0' );
-		$base      = PROJECT_ROOT . '/www/logic/' . $logic . '/domain/' . $domain . '/allias/' . $allias . '/algoritm';
+		$base      = Paths::algoritm( $domain , $allias );
 		$cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
 		$sub_dir   = $path === '' ? $base : $base . '/' . $path;
 		$php_file  = $sub_dir . '/' . $cls_short . '.php';
@@ -812,19 +815,19 @@ switch ( $p ) {
 			'default'   => false ,
 		] ];
 
-		if ( is_file( $json_file ) ) {
-			$raw = @file_get_contents( $json_file );
-			$cur = @json_decode( $raw , true );
-			if ( is_array( $cur ) && isset( $cur[ 'default' ] ) && is_array( $cur[ 'default' ] ) ) {
-				$data[ 'default' ] = array_merge( $data[ 'default' ] , $cur[ 'default' ] );
-			}
+		$cur = Json::read( $json_file );
+		if ( is_array( $cur ) && isset( $cur[ 'default' ] ) && is_array( $cur[ 'default' ] ) ) {
+			$data[ 'default' ] = array_merge( $data[ 'default' ] , $cur[ 'default' ] );
 		}
 
 		$data[ 'default' ][ $key ] = ( $value === '0' ) ? false : true;
 
-		$out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
-		$out = preg_replace_callback( '/^( +)/m' , fn( $m ) => str_repeat( "\t" , (int) ( strlen( $m[ 1 ] ) / 4 ) ) , $out );
-		file_put_contents( $json_file , $out );
+		try {
+			Json::writeAtomic( $json_file , $data );
+		} catch ( Throwable $e ) {
+			http_response_code( 500 );
+			exit( 'Write failed: ' . $e->getMessage( ) );
+		}
 
 		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
 		exit;
