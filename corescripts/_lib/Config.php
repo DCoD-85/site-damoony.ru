@@ -102,8 +102,31 @@ class Config {
 			return str_repeat( "\t" , (int) ( strlen( $m[ 1 ] ) / 4 ) );
 		} , $json );
 
-		if ( file_put_contents( $this->path , $json ) === false ) {
-			throw new RuntimeException( "Cannot write: {$this->path}" );
+		# пишем в целевой файл под эксклюзивной блокировкой
+		$fp = @fopen( $this->path , 'cb' );
+		if ( $fp === false ) {
+			throw new RuntimeException( "Cannot open: {$this->path}" );
+		}
+
+		if ( ! flock( $fp , LOCK_EX ) ) {
+			fclose( $fp );
+			throw new RuntimeException( "Cannot lock: {$this->path}" );
+		}
+
+		if ( ! ftruncate( $fp , 0 ) ) {
+			flock( $fp , LOCK_UN );
+			fclose( $fp );
+			throw new RuntimeException( "Cannot truncate: {$this->path}" );
+		}
+
+		rewind( $fp );
+		$written = fwrite( $fp , $json );
+		fflush( $fp );
+		flock( $fp , LOCK_UN );
+		fclose( $fp );
+
+		if ( $written === false || $written !== strlen( $json ) ) {
+			throw new RuntimeException( "Short write: {$this->path}" );
 		}
 	}
 }
