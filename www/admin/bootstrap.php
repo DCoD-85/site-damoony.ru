@@ -88,24 +88,39 @@ switch ( $p ) {
 	case 'dashboard' :
 		$cfg     = new Config( PROJECT_ROOT . '/config/site.config' );
 		$domains = (array) $cfg->get( 'domains_real' );
-		$rows    = [ ];
+
+		# Собрать real-домены и их алиасы
+		$real_domains = [ ];
+		$aliases      = [ ];
+
 		foreach ( $domains as $d => $real ) {
+			if ( $d === $real ) {
+				$real_domains[ $d ] = true;
+			} else {
+				$aliases[ $real ][ ] = $d;
+			}
+		}
+
+		$rows = [ ];
+		foreach ( array_keys( $real_domains ) as $real ) {
 			$alliases = [ ];
-			foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $d ] , [ ] ) as $a => $t ) {
+			foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) {
 				if ( $a === '' ) continue;
 				$alliases[ ] = $a;
 			}
+
 			$rows[ ] = [
-				'domain'   => $d ,
-				'ns'       => $cfg->getKeys( [ 'domains_namespace' , $d ] ) ?? '—' ,
-				'avail'    => ! empty( $cfg->getKeys( [ 'domains_available' , $d ] ) ) ,
-				'fs'       => is_dir( PROJECT_ROOT . '/www/logic/alpha.0.0/domain/' . $d ) ,
+				'domain'   => $real ,
+				'ns'       => $cfg->getKeys( [ 'domains_namespace' , $real ] ) ?? '—' ,
+				'avail'    => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ,
+				'fs'       => is_dir( Paths::domain( $real ) ) ,
 				'alliases' => $alliases ,
+				'aliases'  => $aliases[ $real ] ?? [ ] ,
 			];
 		}
+
 		View::render( 'dashboard' , [ 'domains' => $rows ] );
 		break;
-
 	case 'domain:new' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/DomainNew.php';

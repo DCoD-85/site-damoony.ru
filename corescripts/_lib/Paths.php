@@ -4,13 +4,43 @@
 #   Paths — единая точка доступа к путям проекта.
 #   Заменяет хардкоды 'alpha.0.0' и ручные конкатенации.
 #
-#   Кэширует logic в статике — читает site.config один раз
-#   за процесс.
+#   ВАЖНО: namespace и папки — по real-домену.
+#   site.config:
+#       "domains_real": {
+#           "damoony2.ru":  "damoony.ru",   ← key=внешний, value=real
+#           "damoony.online":"damoony.ru",
+#           "damoony.ru":   "damoony.ru"
+#       },
+#       "domains_namespace": {
+#           "damoony.ru":   "damoony_ru"    ← key=real
+#       }
+#
+#   Paths::real('damoony2.ru')  → 'damoony.ru'
+#   Paths::ns('damoony2.ru')    → 'damoony_ru'
+#   Paths::domain('damoony2.ru') → '.../domain/damoony.ru'
 # ============================================================
 
 class Paths {
 
-    private static ?string $logic_cache = null;
+    private static ?array $cfg = null;
+
+    # --- конфиг: загружаем один раз за процесс ---
+    private static function cfg ( ) : array {
+        if ( self::$cfg !== null ) return self::$cfg;
+
+        $path = self::project() . '/config/site.config';
+        if ( ! is_file( $path ) ) return self::$cfg = [ ];
+
+        $raw = @file_get_contents( $path );
+        if ( $raw === false ) return self::$cfg = [ ];
+
+        $data = @json_decode( $raw , true );
+        return self::$cfg = is_array( $data ) ? $data : [ ];
+    }
+
+    public static function reset ( ) : void {
+        self::$cfg = null;
+    }
 
     # --- корень ---
     public static function project () : string {
@@ -24,26 +54,22 @@ class Paths {
 
     # --- logic (имя из site.config, fallback alpha.0.0) ---
     public static function logic () : string {
-        if ( self::$logic_cache !== null ) return self::$logic_cache;
-
-        $logic = 'alpha.0.0';
-        $path  = self::config();
-
-        if ( is_file( $path ) ) {
-            $raw = @file_get_contents( $path );
-            if ( $raw !== false ) {
-                $data = @json_decode( $raw , true );
-                if ( is_array( $data ) && ! empty( $data[ 'logic' ] ) && is_string( $data[ 'logic' ] ) ) {
-                    $logic = $data[ 'logic' ];
-                }
-            }
-        }
-
-        return self::$logic_cache = $logic;
+        $logic = self::cfg()[ 'logic' ] ?? null;
+        return is_string( $logic ) && $logic !== '' ? $logic : 'alpha.0.0';
     }
 
-    public static function reset ( ) : void {
-        self::$logic_cache = null;
+    # --- real domain: damoony2.ru → damoony.ru ---
+    #     если домена нет в конфиге (новый) — возвращаем как есть
+    public static function real ( string $domain ) : string {
+        $real = self::cfg()[ 'domains_real' ][ $domain ] ?? null;
+        return is_string( $real ) && $real !== '' ? $real : $domain;
+    }
+
+    # --- namespace домена (по real) ---
+    public static function ns ( string $domain ) : ?string {
+        $real = self::real( $domain );
+        $ns   = self::cfg()[ 'domains_namespace' ][ $real ] ?? null;
+        return is_string( $ns ) && $ns !== '' ? $ns : null;
     }
 
     # --- www/logic/<logic> ---
@@ -51,12 +77,12 @@ class Paths {
         return self::project() . '/www/logic/' . self::logic();
     }
 
-    # --- domain ---
+    # --- domain (по real) ---
     public static function domain ( string $domain ) : string {
-        return self::logicPath() . '/domain/' . $domain;
+        return self::logicPath() . '/domain/' . self::real( $domain );
     }
 
-    # --- allias ---
+    # --- allias (по real) ---
     public static function allias ( string $domain , string $allias ) : string {
         return self::domain( $domain ) . '/allias/' . $allias;
     }
@@ -66,7 +92,7 @@ class Paths {
         return self::allias( $domain , $allias ) . '/algoritm';
     }
 
-    # --- alliasglobal (блоки домена) ---
+    # --- alliasglobal (блоки домена, по real) ---
     public static function blocks ( string $domain ) : string {
         return self::domain( $domain ) . '/alliasglobal';
     }
@@ -75,27 +101,12 @@ class Paths {
         return self::blocks( $domain ) . '/' . $block;
     }
 
-    # --- media ---
+    # --- media (по real) ---
     public static function media ( string $domain ) : string {
-        return self::project() . '/www/media/' . $domain;
+        return self::project() . '/www/media/' . self::real( $domain );
     }
 
     public static function skins ( string $domain ) : string {
         return self::media( $domain ) . '/skin';
-    }
-
-    # --- namespace домена из site.config ---
-    public static function ns ( string $domain ) : ?string {
-        $path = self::config();
-        if ( ! is_file( $path ) ) return null;
-
-        $raw = @file_get_contents( $path );
-        if ( $raw === false ) return null;
-
-        $data = @json_decode( $raw , true );
-        if ( ! is_array( $data ) ) return null;
-
-        $ns = $data[ 'domains_namespace' ][ $domain ] ?? null;
-        return is_string( $ns ) && $ns !== '' ? $ns : null;
     }
 }

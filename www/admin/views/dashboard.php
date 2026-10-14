@@ -17,7 +17,14 @@
 		<tbody>
 			<?php foreach ( $domains as $d ) : ?>
 				<tr>
-					<td><b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b></td>
+					<td>
+						<b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b>
+						<?php if ( ! empty( $d[ 'aliases' ] ) ) : ?>
+							<div class="hint" style="font-size:11px;color:#888;">
+								aliases: <?= htmlspecialchars( implode( ', ' , $d[ 'aliases' ] ) ) ?>
+							</div>
+						<?php endif ?>
+					</td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
 					<td>
 						<form method="post" action="?p=domain:toggle" class="inline">
