@@ -1,0 +1,416 @@
+# Аудит ядра проекта `damoony2.ru`
+
+**Объект:** слой `sources/` (ядро движка)
+**Дата:** 2026-10-14
+**Версия ядра:** по состоянию файлов на момент передачи
+**Объём:** 12 модулей верхнего уровня + 4 подмодуля `core/` + 7 подмодулей `library/` + 7 файлов `db/`
+
+---
+
+## 1. Резюме (Executive Summary)
+
+Ядро представляет собой самописный микро-фреймворк с явным разделением слоёв: точка входа → ядро (sources) → доменная логика (logic) → изолированная админка. Архитектурно решение зрелое: используются интерфейсы, ленивое исполнение SQL, switchboard-загрузка модулей, JSON-конфиги с fallback-логикой.
+
+**Ключевые проблемы:**
+- **Аутентификация пользователя небезопасна** — пароли хранятся и передаются в открытом виде (cookie + SQL + БД).
+- **Сессия ломается на HTTP** из-за `secure=true` без проверки протокола.
+- **Слой БД в dev-режиме склонен к падениям** из-за строгого type-check при неявных `%s` в `update()`/`delete()`.
+- **Обработка ошибок движка фактически отсутствует** — функция `error()` пуста.
+- **Сборка URL вручную** без url-encode.
+
+**Общая зрелость:** архитектура — 8/10, безопасность — 3/10, эксплуатационная готовность — 5/10.
+
+---
+
+## 2. Карта ядра
+
+### 2.1. Точка входа и bootstrap
+```
+www/
+├── .htaccess              — статика напрямую, всё остальное → index.php
+├── index.php              — роутинг /admin, сессия, константы, запуск main
+├── constants.php          — DS/DSA + debug-флаги + лимиты БД
+├── included.php           — хелперы include/bad/error
+├── main.php               — класс main + main_path + main_settings
+└── admin/bootstrap.php    — изолированная админка
+```
+
+### 2.2. Ядро (`sources/`)
+| Модуль | Роль | Подмодули |
+|---|---|---|
+| `render` | рендер-фасад + контейнер флагов | `render__data` |
+| `user` | аутентификация | `user_profile` |
+| `blacklist` | IP-фильтр | — |
+| `vardump` | визуальный дамп | — |
+| `log` | сбор логов в памяти | `log_row` |
+| `core` | агрегатор базовых утилит | `const/env/path/time` |
+| `db` | слой БД | `driver/query/exception/config/schema` + `mysqli/` |
+| `library` | библиотечные хелперы | `gen/dir/url/link/vars/file/image` |
+| `language` | строки локализации | — |
+| `messages` | UI-сообщения | — |
+| `visuo` | визуальный слой (обёртка) | `visuo/*` |
+| `mod` | автозагрузчик модулей | `mod/*` |
+
+### 2.3. Схема взаимодействия
+```
+index.php
+  ├── session_start (+cookie params)
+  ├── error_reporting
+  ├── define(SIMPLECMS, DS, DSA, BR)
+  ├── include constants.php / included.php / main.php
+  └── new main_settings → new main → main->main()
+       ├── path()           → main_path
+       ├── init()           → sources/include.php → все модули
+       │                     → core → user → blacklist → log → vardump
+       │                     → db → library → language → messages → mod
+       │                     → language->load()->init()
+       │                     → logic/<ver>/include.php
+       │                     → blacklist->init()
+       │                     → db->open('login_damoony')
+       │                     → user->authorized()
+       ├── logic()          → domain/allias/algoritm из namespace
+       ├── savedata()       → language->savedefaults()
+       └── release()        → visuorelease->final()
+```
+
+---
+
+## 3. Архитектурный анализ
+
+### 3.1. Сильные стороны
+
+**S-1. Разделение слоёв.** Чёткая граница: bootstrap (`index.php`) / ядро (`sources/`) / доменная логика (`logic/`) / админка (`admin/`). Никаких God-классов размером с движок.
+
+**S-2. Dependency Injection без фреймворка.** Практически все классы принимают `main` (или родительский объект) в конструкторе. Глобального `$GLOBALS['db']` нет.
+
+**S-3. Контракты.** `db_driver_interface` и `db_query_interface` дают формальный контракт для драйверов БД. Это позволяет добавить PDO/Postgres без правки вызывающего кода.
+
+**S-4. Ленивое исполнение SQL.** `db_mysqli_query::execute()` вызывается только в терминальных методах (`result`, `row`, `scalar`, `affected`, `insert_id`). Fluent-цепочка до момента чтения не падает.
+
+**S-5. Switchboard модулей.** `sources/include.php` — единый список порядка загрузки. Легко расширять.
+
+**S-6. Fallback конфигов.** `main_settings::loadExternalConfig()` умеет собирать несколько источников (`site.config`, `render.config`, `lang.config`, `db.secure`) в один объект.
+
+**S-7. DDL-билдер.** `db_schema` + хелпер `col()` — рабочая абстракция над CREATE TABLE без ORM-балласта.
+
+### 3.2. Слабые стороны
+
+**W-1. Двойная и тройная инициализация констант.**
+`DS`/`DSA` определяются в `constants.php`, `included.php`, `core/const.php`, `index.php`. Безвредно, но указывает на отсутствие единого места.
+
+**W-2. Размытые границы ответственности.**
+- `db_mysqli_query::apply_limit()` читает `$_GET['p']`, `$_GET['p_max']` — это уровень контроллера, а не запроса к БД.
+- `main_settings` знает про `$_COOKIE`, `$_SERVER`, `library_url` — это и реестр, и роутер, и settings.
+
+**W-3. Неявный порядок инициализации.**
+`main::init()` создаёт объекты в конкретном порядке, критичном для работоспособности (`render` до `visuorelease`, `library` до `mod`, `language` после `library`). Порядок не задокументирован в коде.
+
+**W-4. Дублирование конфигурации.**
+`secure/db.secure` (тип драйвера) читается дважды: в `main_settings::loadExternalConfig()` и в `db::read_db_type()`. `secure/db.config` (реестр баз) и `secure/db.secure` (тип драйвера) — разные файлы, хотя логически связаны.
+
+**W-5. Динамические классы через `new ($string)` в `main::logic()`.**
+```php
+new ($static_domain.'\\dataprovider')($this)
+new ($static_domain.'\\allias')($this)
+```
+Никакой проверки `class_exists` — если файла домена нет, будет fatal error, а не 404.
+
+**W-6. Обработка ошибок — фиктивная.**
+`error()` в `index.php` пуст. Все остальные слои (`error_file`, `error_class`, `bad`) кидают HTML и `die()`. Нет разделения на recoverable/non-recoverable.
+
+---
+
+## 4. Аудит безопасности
+
+### 🔴 S-1. КРИТИЧНО. Пароли в открытом виде
+
+**Место:** `sources/user.php::user_profile::init()` / `::login()`
+
+**Проблема:**
+```php
+SELECT * FROM toolsusers WHERE login=%s AND password=%s
+```
+Cookie `password` устанавливается в открытом виде через `setcookie('password', $password, ...)`. Хеша нет ни при чтении, ни при записи.
+
+**Следствия:**
+- Любой сбой логирования (лог веб-сервера, MITM, XSS-кража cookie) раскрывает пароль.
+- Утечка БД мгновенно даёт все пароли.
+- Cookie без `HttpOnly`-защиты? `httponly=true` установлен, но значение всё равно открытым текстом.
+
+**CVSS-оценка (условно):** 9.1 (Critical).
+
+**Рекомендация:**
+- `password_hash($plain, PASSWORD_BCRYPT)` при сохранении, `password_verify()` при проверке.
+- Cookie должна содержать только opaque-токен сессии, а не пароль.
+- Если легаси-совместимость обязательна — минимум HMAC-подпись на серверном секрете.
+
+### 🔴 S-2. КРИТИЧНО. Сессия ломается на HTTP
+
+**Место:** `www/index.php`
+
+**Проблема:**
+```php
+session_set_cookie_params([
+  'secure' => true,  // всегда
+  ...
+]);
+```
+
+**Следствия:**
+- На HTTP (типичная локальная разработка через OSPanel) браузер не отдаст cookie — `PHPSESSID` не поднимется, `session_start()` создаст новую сессию на каждом запросе.
+- В логах — циклические редиректы или разлогин.
+
+**Рекомендация:**
+```php
+'secure' => (($_SERVER['HTTPS'] ?? '') === 'on'),
+```
+Как уже сделано в `admin/bootstrap.php`.
+
+### 🟠 S-3. Существенно. Отсутствие url-encode в сборке URL
+
+**Место:** `sources/library/link.php::ahref()`
+
+**Проблема:**
+```php
+$query .= $k . '=' . $v . '&';
+```
+Никакого `urlencode()`/`http_build_query()`. Значения с `&`, `=`, `#`, пробелом, кириллицей, `%` дают некорректный URL.
+
+**Следствия:**
+- Parameter injection при значениях из пользовательского ввода.
+- Битые ссылки на кириллице.
+
+**Рекомендация:** переписать сборку query через `http_build_query()` (сохранив семантику `false`/`true`).
+
+### 🟠 S-4. Существенно. `REMOTE_ADDR` без прокси-учёта
+
+**Место:** `sources/blacklist.php::remote_ip()`
+
+**Проблема:** доверяем только `REMOTE_ADDR`. За reverse-proxy/CDN реальный IP клиента в `X-Forwarded-For`, а `REMOTE_ADDR` — IP прокси.
+
+**Следствия:**
+- Blacklist/whitelist не работает за прокси.
+- Один запрещённый клиент блокирует весь кластер за CDN.
+
+**Рекомендация:** конфигурируемый список trusted-proxy + парсинг `X-Forwarded-For` с конца.
+
+### 🟠 S-5. Существенно. Глобальное отключение исключений mysqli
+
+**Место:** `sources/db/mysqli/driver.php::open()`
+
+**Проблема:** `mysqli_report(MYSQLI_REPORT_OFF)` влияет на весь процесс.
+
+**Следствия:** сторонний код/расширения, ожидающие `mysqli_sql_exception`, не получат его.
+
+**Рекомендация:** вызывать локально перед каждым `new mysqli`, либо использовать try/catch без глобальной настройки.
+
+### 🟡 S-6. Средне. `db_schema::exists()` без экранирования table_name
+
+```php
+'... table_name = %s', [$table]
+```
+Параметризовано — хорошо. Но `columns_of()`:
+```php
+'SHOW COLUMNS FROM `' . $table . '`'
+```
+Здесь прямая конкатенация. Если `$table` приходит из пользовательского ввода — SQL-инъекция.
+
+**Рекомендация:** валидировать `table` через whitelist имён или экранировать обратными кавычками + `escape()`.
+
+### 🟡 S-7. Средне. `main::redirect()` не завершает выполнение
+
+```php
+public function redirect ( null|string $address = null ) {
+  print '<div>REDIRECT: <b>' . $address . '</b></div>';
+  $this->path( $address );
+  $this->main_settings->init( );
+  $this->logic( );
+}
+```
+После `logic()` управление возвращается — потенциально можно случайно отрендерить «нормальную» страницу поверх редиректа.
+
+### 🟡 S-8. Средне. CSRF-защита только в админке
+
+`sources/` вообще не имеет представления о CSRF. Все POST-обработчики в `logic/` (если есть) — потенциально уязвимы.
+
+### 🟢 S-9. Мелочи
+
+- `error_log('DB: ...')` без префикса запроса/пользователя — сложно сопоставить.
+- `db_exception` включает `values` в message → может утечь в логи/на экран в dev.
+- `setcookie` в `user_profile::logout()` без ведущей точки для domain — cookies не удалятся.
+
+---
+
+## 5. Аудит качества кода
+
+### 5.1. Дублирование и мёртвый код
+
+| Место | Что дублируется |
+|---|---|
+| `constants.php` / `included.php` / `core/const.php` / `index.php` | `DS`, `DSA`, `BR` |
+| `index.php` / `core/const.php` | `GL_LOG`, `GL_DEBUG`, `GL_DEBUGHARD` |
+| `main_settings::loadExternalConfig()` / `db::read_db_type()` | чтение `db.secure` |
+| `db_mysqli::query()` / `db::query()` | оба создают `db_mysqli_query` |
+| `vardump::vardump()` / `vardump::my_vardump()` | два разных дампера в одном классе |
+| `log::as_tag()` / `log::astag()` | алиасы |
+| `main_settings::alliases()` | пустой метод-заглушка |
+
+### 5.2. Ошибки и баги
+
+| # | Файл | Описание | Severity |
+|---|---|---|---|
+| B-1 | `index.php` | `if (!defined(TRUE)) define('GDEF_SECURE_CONSTANT','TRUE')` — `defined(TRUE)` всегда true → константа никогда не определяется | High |
+| B-2 | `index.php` | `setcookie('PHPSESSID')` + `session_start()` — порядок и смысл сомнительны | Medium |
+| B-3 | `main.php` | `main::redirect()` не делает `exit` | Medium |
+| B-4 | `mod.php` | `mod::show_list()` — `$return` не инициализирован | Low |
+| B-5 | `library/dir.php` | возвращает и по ссылке, и по значению — неочевидно | Low |
+| B-6 | `db.php` | `update()` / `delete()` жёстко `%s` → coerce может бросить исключение в dev | High |
+| B-7 | `db_mysqli/query.php` | `$stmt->bind_param()` без проверки результата | Medium |
+| B-8 | `db_mysqli/query.php` | `$result->fetch_all()` без `free()` | Medium |
+| B-9 | `db_schema.php` | `run()` теряет query-объект → ошибки DDL уходят в никуда | Medium |
+| B-10 | `user.php` | `logout()` без ведущей точки в domain | Medium |
+| B-11 | `visuo.php` | файл-обёртка без содержимого (это by design) | Info |
+
+### 5.3. Стиль / читаемость
+
+- Смешение `CamelCase` и `snake_case` в именах методов (`vardump::my_vardump`, `library_image::image_resize`).
+- Отступы табами в одном файле, пробелами — в другом.
+- Комментарии на русском и английском вперемешку.
+- Магические числа: `60`, `7*24*60*60`, `1000000`, `111111111`.
+- `?? null` в `$x = $y ?? null` избыточно.
+
+### 5.4. Логирование
+
+- `error_log()` в `db_mysqli_query::log()` без контекста (нет SQL, нет стека).
+- `log::add()` есть, но нигде в ядре не вызывается.
+- `GL_LOG` определён, но не используется.
+
+---
+
+## 6. Аудит производительности
+
+| # | Место | Проблема | Влияние |
+|---|---|---|---|
+| P-1 | `language::savedefaults()` | I/O на каждом `main::main()`, даже если писать нечего | Low |
+| P-2 | `db_mysqli_query::result()` | `fetch_all()` без `LIMIT` при больших таблицах | Medium |
+| P-3 | `library_dir::get()` | рекурсивный скан через `opendir/readdir` без кэша | Low |
+| P-4 | `main_settings::loadExternalConfig()` | 4 file_get_contents + json_decode на каждый запрос | Low |
+| P-5 | `db_config::init()` | ещё один file_get_contents того же `db.secure` | Low |
+| P-6 | `user_profile::init()` | SELECT * без LIMIT 1 (хоть и один row ожидается) | Low |
+| P-7 | `messages::as_tag()` | новый `visuotag` + файловые пути на каждый рендер | Low |
+
+**Вывод:** критичных узких мест нет. Основной потенциал — кэширование JSON-конфигов (APCu/opcache-подобное) и лимиты в `fetch_all`.
+
+---
+
+## 7. Тестируемость
+
+- Нет ни одного unit-теста.
+- Нет DI-контейнера — тестировать модули можно только через `main`.
+- Нет интерфейсов у большинства модулей (только `db_*`).
+- `library_*` и `core_*` жёстко завязаны на `library`/`main` — тяжело мокать.
+
+**Рекомендация:** начать с `db_*` (уже есть интерфейсы) и `language` (чистая логика парсинга).
+
+---
+
+## 8. Соответствие современным практикам
+
+| Практика | Есть | Частично | Нет |
+|---|---|---|---|
+| PSR-4 автозагрузка | | | ✗ |
+| Типизация (`declare(strict_types=1)`) | | | ✗ |
+| Иммутабельность | | | ✗ |
+| Dependency Injection | | ✓ | |
+| Интерфейсы | | ✓ (только db) | |
+| `password_hash` | | | ✗ |
+| CSRF | | ✓ (только админка) | |
+| Prepared statements | | ✓ | |
+| Единый логгер | | | ✗ |
+| Тесты | | | ✗ |
+| Статический анализ (PHPStan/Psalm) | | | ✗ |
+
+---
+
+## 9. Матрица рисков
+
+| ID | Риск | Вероятность | Влияние | Приоритет |
+|---|---|---|---|---|
+| S-1 | Компрометация учётных данных | Высокая | Критическое | **P0** |
+| S-2 | Полная неработоспособность сессии на HTTP | Высокая (dev) | Высокое | **P0** |
+| B-6 | Fatal error в dev при `db->update` | Высокая | Высокое | **P0** |
+| B-1 | Неопределённая константа → warning/fatal | Средняя | Среднее | P1 |
+| S-3 | Parameter injection через URL | Средняя | Высокое | **P1** |
+| S-4 | Обход/ложный срабатыв blacklist | Средняя | Среднее | P1 |
+| W-5 | Fatal error вместо 404 при отсутствии класса домена | Средняя | Высокое | P1 |
+| B-9 | Потеря ошибок DDL | Высокая | Среднее | P2 |
+| P-1 | Лишний I/O на каждом запросе | Высокая | Низкое | P3 |
+| W-1 | Дублирование констант | Высокая | Низкое | P3 |
+
+---
+
+## 10. Рекомендации
+
+### 10.1. P0 — сделать немедленно
+
+1. **Перевести `user` на `password_hash`/`password_verify`**.
+   - Миграция: временно хранить оба поля (`password` legacy + `password_hash` new), при первом успешном входе — перезаписать.
+   - Cookie: только opaque-токен (`random_bytes(32)`), хранимый в `toolsuserslogin`.
+2. **Исправить `secure` для cookie сессии** — как в `admin/bootstrap.php`.
+3. **Починить `db::update()` / `db::delete()`** — авто-тип `%d` для int, `%s` для остальных. Либо явно документировать необходимость `$types`.
+4. **Починить `defined(TRUE)`** в `index.php`.
+5. **Реализовать `error()`** — минимум `error_log` + prod-safe `die()`.
+
+### 10.2. P1 — в течение недели
+
+6. **`library_link::ahref()`** → `http_build_query()` + url-encode.
+7. **`blacklist`** → учитывать trusted-proxy.
+8. **`main::logic()`** → `class_exists` перед `new ($string)` + 404 при отсутствии.
+9. **`db_schema::columns_of()`** → валидация имени таблицы.
+10. **`main::redirect()`** → `exit` после рендера.
+11. **`user_profile::logout()`** → domain с ведущей точкой.
+
+### 10.3. P2 — в течение месяца
+
+12. **Единый логгер** — с уровнями, контекстом, ротацией.
+13. **Кэш JSON-конфигов** — APCu или статика на время запроса.
+14. **`db_mysqli_query`** → `$stmt->close()`, `$result->free()`.
+15. **`db_schema::run()`** → проверка `last_error` и логирование.
+16. **CSRF для логики** — общий `Csrf`-класс + middleware.
+17. **Убрать тройное определение констант** — оставить `core/const` как единственный источник.
+
+### 10.4. P3 — бэклог
+
+18. **PSR-4** через composer autoload.
+19. **`declare(strict_types=1)`** в новых файлах.
+20. **PHPStan level 6+** как CI-гейт.
+21. **Unit-тесты** для `language`, `db_config`, `db_schema`, `library_url`.
+22. **Разделить `main_settings`** на `settings` (реестр), `router` (домен/аллиас), `config_loader`.
+23. **Убрать `$_GET` из `apply_limit()`** — передавать параметры явно.
+
+---
+
+## 11. Оценка по категориям
+
+| Категория | Оценка | Комментарий |
+|---|---|---|
+| Архитектура | 8/10 | Зрелая слоистость, DI, контракты |
+| Читаемость | 6/10 | Местами хаотично, но структура ясна |
+| Безопасность | 3/10 | Критические дыры в auth + cookie + URL |
+| Производительность | 7/10 | Без явных бутылочных горлышек |
+| Тестируемость | 3/10 | Нет тестов, слабое покрытие интерфейсами |
+| Обработка ошибок | 4/10 | `error()` пуст, DDL-ошибки теряются |
+| Расширяемость | 7/10 | Switchboard + namespace-логика — удобно |
+| Legacy-долг | 5/10 | Много дублей и мёртвого кода |
+
+**Средневзвешенная оценка ядра: 5.4 / 10** — при архитектурной зрелости 8/10 и безопасности 3/10.
+
+---
+
+## 12. Заключение
+
+Ядро — **архитектурно грамотный, но небезопасный** фундамент. Основные проблемы локализованы в трёх местах: `user.php` (auth), `index.php` (cookie сессии + `error()`), `db` (update/delete coerce). Они решаемы за 2–3 дня без переписывания архитектуры.
+
+Слой `visuo/` не рассматривался в этом аудите — предполагается отдельный проход. Доменная логика `logic/alpha.0.0/` также требует отдельного аудита, поскольку именно там живёт пользовательский ввод.
+
+**Готовность к продакшену:** условно, при закрытии P0/P1.

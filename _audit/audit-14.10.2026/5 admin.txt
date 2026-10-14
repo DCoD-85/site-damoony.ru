@@ -1,0 +1,556 @@
+# Аудит `www/admin/`
+
+**Объект:** административный интерфейс SimplCMS
+**Область:** `bootstrap.php`, `_lib/{Auth, View, WebRenderer, Csrf, Scan}.php`, `views/*` (15 файлов)
+**Дата:** 2026-10-14
+**Объём:** 21 файл
+
+---
+
+## 1. Резюме
+
+Админка архитектурно изолирована от основного движка (`main.php`/`visuo`), использует собственную сессию (`admin_sid`), отдельный слой `_lib` и `views/`. Импортирует команды `corescripts/commands/*` — единая бизнес-логика с CLI.
+
+**Критические дефекты (P0):**
+1. **Отсутствие защиты от brute-force** на login.
+2. **Race condition** при записи `.data.json` (`page:edit`, `page:toggle`).
+3. **Race condition** при read-modify-write `site.config`.
+4. **Нет транзакционности** при удалении (унаследовано из `corescripts`).
+
+**Существенные дефекты (P1):**
+5. **Login CSRF** — форма `login` без CSRF-токена.
+6. **Хардкод `alpha.0.0`** в путях (6+ мест).
+7. **Regex-инъекция** через поле `available`.
+
+**Оценка:** 6.3 / 10.
+
+---
+
+## 2. Архитектура
+
+### 2.1. Слои
+
+```
+bootstrap.php           ← маршрутизация, сессия, dispatch
+  ├── _lib/Auth.php     ← аутентификация
+  ├── _lib/Csrf.php     ← CSRF-токены
+  ├── _lib/View.php     ← рендер шаблона + layout
+  ├── _lib/WebRenderer  ← Result → HTML
+  ├── _lib/Scan.php     ← сканер ФС для форм
+  └── views/*.php       ← 15 шаблонов
+```
+
+### 2.2. Внешние зависимости
+
+- `corescripts/_lib/*` — `Config`, `Validate`, `Result`, `Fs`, `Template`, `Context`.
+- `corescripts/commands/*` — 7 команд (`DomainNew`, `DomainRemove`, `AlliasNew`, `AlliasRemove`, `PageNew`, `FillerNew`, `SettingsSet`).
+- `config/site.config` — единый источник данных.
+
+### 2.3. Контракт
+
+- Сессия: `admin_sid` (изолированная).
+- Формат ответа: `Result` (общий с CLI).
+- Рендер: `View::render($name, $data)` → `_layout.php` → `include $view_file`.
+- Формат URL: `?p=<route>&<params>`.
+
+### 2.4. Сильные стороны архитектуры
+
+- **S-A1.** Изоляция от `main.php`: `error_reporting`, сессия, CORS не пересекаются.
+- **S-A2.** Единая логика команд: изменения, сделанные через CLI, видны в вебе, и наоборот.
+- **S-A3.** Единый формат `Result` — `WebRenderer` и `Renderer` (CLI) разные, контракт один.
+- **S-A4.** Сессионная cookie настроена корректно (`secure` по HTTPS, `httponly`, `samesite=Lax`).
+- **S-A5.** `View::render` использует `extract(EXTR_SKIP)` — предотвращает подмену `$view_file`/`$layout`.
+
+### 2.5. Слабые стороны архитектуры
+
+- **W-A1.** `PROJECT_ROOT = dirname(dirname(ADMIN_ROOT))` — неявная зависимость от глубины.
+- **W-A2.** `Config` создаётся **16 раз** в bootstrap — нет lazy-singleton.
+- **W-A3.** Пути к `www/logic/alpha.0.0/...` **захардкожены** в 6+ местах (см. §4.2).
+- **W-A4.** `Scan::blocksFor` использует тот же хардкод.
+- **W-A5.** Роутинг через `switch` без валидации `$p` — путь для DoS через несуществующие роуты (низкий риск, но нет логирования).
+
+---
+
+## 3. Безопасность
+
+### 3.1. 🔴 P0 — Критические
+
+#### A-1. Отсутствие защиты от brute-force
+
+**Место:** `Auth::login`.
+
+```php
+public function login(string $login, string $password): bool {
+    if ($this->hash === '') return false;
+    if (!hash_equals($this->login, $login)) return false;
+    if (!password_verify($password, $this->hash)) return false;
+    ...
+}
+```
+
+Нет:
+- счётчика неудачных попыток;
+- задержки между попытками;
+- IP-бана;
+- CAPTCHA;
+- логирования неудач.
+
+**Эксплуатация:** `hydra`, `medusa`, `Burp Intruder` могут перебирать пароли на скорости сети. При bcrypt cost 12 — ~100–200 попыток/сек на CPU. Словарный пароль из 10 000 вариантов — минуты.
+
+**CVSS v3.1:** 8.1 (High) — `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H`.
+
+**Fix:**
+- Таблица/файл `secure/admin_fails.json`: `{ip: {count, last_ts, banned_until}}`.
+- После 3 неудач — `usleep(500_000)`.
+- После 5 — бан IP на 15 минут.
+- Логировать все попытки в `secure/logs/admin.log`.
+
+---
+
+#### A-2. Race condition при записи `.data.json`
+
+**Место:** `bootstrap.php`, роуты `page:edit` и `page:toggle`.
+
+```php
+$out = json_encode($data, JSON_PRETTY_PRINT | ...);
+$out = preg_replace_callback('/^( +)/m', ...);
+file_put_contents($json_file, $out);
+```
+
+**Проблемы:**
+- Нет `LOCK_EX`.
+- Нет temp+rename.
+- Параллельные POST из двух вкладок → **lost update**.
+- При ошибке `json_encode` (битый UTF-8) → `$out = false` → `file_put_contents(false)` → **пустой файл**.
+
+**CVSS v3.1:** 6.5 (Medium) — `AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N`.
+
+**Fix:**
+```php
+$tmp = $json_file . '.tmp.' . bin2hex(random_bytes(4));
+file_put_contents($tmp, $out, LOCK_EX);
+rename($tmp, $json_file);
+```
+
+---
+
+#### A-3. Race condition в `site.config`
+
+**Место:** все роуты с read-modify-write.
+
+```php
+$cfg = new Config(PROJECT_ROOT . '/config/site.config');
+$cfg->setKeys([...], ...);
+$cfg->save();
+```
+
+`Config::save()` использует `LOCK_EX`, но **только на запись**. Между `__construct` (read) и `save()` — окно. Два параллельных запроса → **lost update**.
+
+**CVSS v3.1:** 6.5 (Medium).
+
+**Fix:**
+- Отдельный lock-файл `site.config.lock`.
+- `flock(LOCK_EX)` вокруг всего read-modify-write цикла.
+
+---
+
+#### A-4. Нет транзакционности при удалении
+
+**Место:** роуты `domain:remove`, `allias:remove` → команды `DomainRemove`, `AlliasRemove`.
+
+**Порядок:**
+1. `Fs::rmrf($path)` — файлы удаляются.
+2. `$cfg->save()` — конфиг обновляется.
+
+Если шаг 2 упадёт — **файлы удалены, конфиг указывает на несуществующее**. При следующем запросе движок упадёт в `domain::init()` → `error()` → 500.
+
+**CVSS v3.1:** 6.5 (Medium) — порча данных.
+
+**Fix:** двухфазный commit (см. аудит corescripts).
+
+---
+
+### 3.2. 🟠 P1 — Существенные
+
+#### A-5. Login CSRF
+
+**Место:** `bootstrap.php` + `views/login.php`.
+
+**Форма:**
+```html
+<form method="post" action="?p=login">
+    <input type="text" name="login" ...>
+    <input type="password" name="password" ...>
+    <button type="submit">Войти</button>
+</form>
+```
+
+**Нет `Csrf::field()`.** CSRF-guard в bootstrap:
+```php
+if ($p === 'login') {
+    // POST обрабатывается здесь — ДО guard
+    if ($auth->login($login, $pass)) { ... }
+    exit;
+}
+// CSRF-guard срабатывает только ниже
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::check()) { ... }
+```
+
+**Эксплуатация:** атакующий размещает на своём сайте форму, автоматически отправляющую POST на `?p=login` с известными логином/паролем. Жертва, зайдя на сайт атакующего, залогинится в **его** админку. Дальше — жертва вводит чувствительные данные, которые видит атакующий.
+
+**CVSS v3.1:** 4.3 (Medium) — `AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N`.
+
+**Fix:**
+```php
+// login.php:
+<?= Csrf::field() ?>
+
+// bootstrap.php:
+if ($p === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::check()) {
+    http_response_code(403);
+    exit('CSRF');
+}
+```
+
+---
+
+#### A-6. Хардкод `alpha.0.0`
+
+**Место:** 6+ точек.
+
+| Файл | Строка |
+|---|---|
+| `bootstrap.php` (domain:edit) | `'/www/logic/alpha.0.0/domain/' . $domain` |
+| `bootstrap.php` (pages:tree) | `'/www/logic/' . $logic . '/domain/...'` (правильно!) |
+| `bootstrap.php` (page:edit) | `'/www/logic/' . $logic . '/domain/...'` (правильно!) |
+| `bootstrap.php` (page:new) | `'/www/logic/' . $logic . '/domain/...'` (правильно!) |
+| `bootstrap.php` (page:toggle) | `'/www/logic/' . $logic . '/domain/...'` (правильно!) |
+| `bootstrap.php` (filler:new) | `'/www/logic/alpha.0.0/domain/' . $domain` |
+| `Scan::blocksFor` | `'/www/logic/alpha.0.0/domain/' . $domain . '/alliasglobal'` |
+
+**Где правильно:** `pages:tree`, `page:edit`, `page:new`, `page:toggle` — читают `logic` из `$cfg->get('logic')`.
+**Где хардкод:** `domain:edit` (не критично), `filler:new`, `Scan::blocksFor`.
+
+**Последствия:**
+- Если `site.config.logic = beta.0.1` — `filler:new` не найдёт блоки.
+- `AlliasList` показывает fs для `alpha.0.0`, а filler-файлы для `beta.0.1` — рассинхрон.
+
+**CVSS v3.1:** N/A (функциональный баг).
+
+**Fix:** вынести в `Paths::logic()` или `Config::logic()`.
+
+---
+
+#### A-7. Regex-инъекция через `$available`
+
+**Место:** `bootstrap.php`, роут `page:edit`.
+
+```php
+$available_raw = (string) ($_POST['available'] ?? '');
+$lines = preg_split('/\r\n|\n|\r/', $available_raw);
+foreach ($lines as $line) {
+    $line = trim($line);
+    ...
+    $available[] = $line;
+}
+```
+
+Строки **не валидируются**. Затем попадают в `.data.json` и используются в `algoritm_::include_ext`:
+
+```php
+mb_ereg('^' . $base[0] . '$', $url_base_real[$url_base_pos], $matches);
+```
+
+Если админ вставит `.*` — маршрут `.*` сработает для любого URL.
+
+**Эксплуатация:** аутентифицированный админ может случайно (или злонамеренно, если сессия украдена) подменить маршрутизацию.
+
+**CVSS v3.1:** 4.9 (Medium) — `AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:H/A:N`.
+
+**Fix:** валидировать каждый сегмент:
+```php
+if (!preg_match('/^[a-z0-9_|()\[\]\\-\.]{1,64}$/i', $line)) {
+    $errors[] = "Недопустимое правило: {$line}";
+}
+```
+
+---
+
+### 3.3. 🟡 P2 — Средние
+
+#### A-8. CSRF-токен не ротируется
+
+`Csrf::token()` создаёт токен один раз за сессию, `Auth::login()` не вызывает `Csrf::rotate()`. Если токен скомпрометирован (например, через XSS) — действует до logout.
+
+**Fix:** `Csrf::rotate()` в `Auth::login()` и `Auth::logout()`.
+
+---
+
+#### A-9. Нет absolute timeout сессии
+
+`session_set_cookie_params(['lifetime' => 0])` — cookie живёт до закрытия браузера. Серверная сессия — по `gc_maxlifetime` (по умолчанию 1440 сек). При активных запросах — **бесконечное продление**.
+
+**Fix:** `$_SESSION['created_at']` при логине + проверка в `Auth::check()` «не старше 8 часов».
+
+---
+
+#### A-10. Нет привязки к UA/IP
+
+Украденная cookie `admin_sid` работает с любого IP/UA.
+
+**Fix:** при логине сохранить `hash('sha256', $_SERVER['HTTP_USER_AGENT'])` в `$_SESSION['ua']`; в `Auth::check()` сверять.
+
+---
+
+#### A-11. Нет audit log
+
+Успешные и неудачные логины, изменения конфига, удаления — **не логируются**. При компрометации нет следов.
+
+**Fix:** `secure/logs/admin.log` — timestamp, IP, UA, login, action, result.
+
+---
+
+#### A-12. Прямое чтение `$_SESSION` в `_layout.php`
+
+```php
+<?php if (!empty($_SESSION['admin_ok'])) : ?>
+    ...
+    <?= htmlspecialchars($_SESSION['admin_login'] ?? '') ?>
+```
+
+Нарушает инкапсуляцию `Auth`. Если логика `check()` изменится (например, добавится TTL), `_layout.php` этого не увидит.
+
+**Fix:** передавать через `View::render($view, ['is_auth' => ..., 'login_name' => ...])`.
+
+---
+
+### 3.4. 🟢 P3 — Мелкие
+
+- **A-13.** `logout()` не выставляет `samesite=Lax` при очистке cookie.
+- **A-14.** `default` роут возвращает 404, но не логирует.
+- **A-15.** `exit('CSRF token invalid')` — без HTML-шаблона.
+
+---
+
+## 4. Качество кода
+
+### 4.1. Дублирование
+
+| Что | Где | Количество |
+|---|---|---|
+| `new Config(PROJECT_ROOT . '/config/site.config')` | `bootstrap.php` | 16 раз |
+| Проверка `domains_real[domain]` | `bootstrap.php` | 11 раз |
+| Список аллиасов через цикл | `bootstrap.php` | 5 раз |
+| `$logic = $cfg->get('logic', 'alpha.0.0')` | `bootstrap.php` | 4 раза |
+| `preg_replace_callback('/^( +)/m', ...)` | `bootstrap.php`, `corescripts` | 3 копии |
+| `Csrf::field()` в форме | `views/*` | 11 раз (правильно) |
+
+### 4.2. Мёртвый код
+
+- **`Scan::skins()`** — хардкод `damoony.ru`, не вызывается (используется `skinsFor($domain)`).
+- **`WebRenderer::html()`** — не вызывается **напрямую** в bootstrap, только через `views/result.php`. Корректно.
+- **`Csrf::token()`** вызывается только через `field()` и `check()`.
+
+### 4.3. Ошибки и баги
+
+| # | Файл | Описание | Severity |
+|---|---|---|---|
+| B-A1 | `bootstrap.php` | Нет `exit` после `View::render` | Low |
+| B-A2 | `bootstrap.php` | `filler:new` не валидирует `$block` до конкатенации пути | Medium |
+| B-A3 | `bootstrap.php` | `allias:toggle` не валидирует `$name` через `Validate::allias_name` | Medium |
+| B-A4 | `bootstrap.php` | `domain:toggle` не валидирует `$domain` | Low |
+| B-A5 | `bootstrap.php` | `page:edit` — `$available` не валидируется | **P1** (A-7) |
+| B-A6 | `bootstrap.php` | `settings` — whitelist `['logic', 'connect_type']` дублирует `SettingsSet::WHITELIST` | Low |
+| B-A7 | `Scan.php` | `blocksFor` хардкод `alpha.0.0` | **P1** (A-6) |
+| B-A8 | `Scan.php` | `skinsFor` не валидирует `$domain` на path traversal | Low |
+| B-A9 | `Auth.php` | `check()` не сверяет `admin_login` с текущим конфигом | Medium |
+| B-A10 | `Auth.php` | `login()` не сбрасывает `$_SESSION['created_at']` (отсутствует) | Medium |
+| B-A11 | `View.php` | `$view` не санитизируется (потенциальный path traversal) | Low (все вызовы хардкод) |
+| B-A12 | `_layout.php` | Чтение `$_SESSION` напрямую | Medium |
+| B-A13 | `login.php` | Нет CSRF-поля | **P1** (A-5) |
+| B-A14 | `dashboard.php` | Дубль заголовка столбца «Домен» | Low |
+| B-A15 | `settings.php` | `connect_type` без `required` | Low |
+
+### 4.4. Стиль
+
+- **Комментарии на русском** — единообразно.
+- **Отступы табами** — везде.
+- **Смешение `<?PHP` и `<?php`** в шаблонах (некоторые с `<?PHP /* ... */ ?>`).
+- **Inline-стили** в `page_edit.php` (`style="width:100%;..."`).
+
+---
+
+## 5. Производительность
+
+| # | Место | Проблема | Влияние |
+|---|---|---|---|
+| P-A1 | `Scan::pageTree` | Рекурсивный обход + `parseMeta` для каждой страницы | Medium (для 100+ страниц) |
+| P-A2 | `Scan::parseMeta` | Чтение N `.data.json` без кэша | Medium |
+| P-A3 | `bootstrap.php` | `new Config` 16 раз на разных роутах | Low |
+| P-A4 | `Template::lint` (в командах) | `exec('php -l')` для каждого файла | **High** (в web-контексте) |
+| P-A5 | `AlliasNew::register` | Регистрация в конфиг после создания ~30 файлов | Low |
+
+**P-A4 — критично для веба.** `AlliasNew` запускает lint **для каждого** `.php` файла (7 блоков × 2 + файлы аллиаса = до 20 вызовов `php -l`). В CLI это секунды; в web — **таймаут** при медленном диске/нагруженном CPU.
+
+**Fix:** флаг `--no-lint` для веб-контекста, lint асинхронно или через `opcache_compile_file`.
+
+---
+
+## 6. Тестируемость
+
+- **Все методы `Auth`, `Csrf`, `Scan`, `View`, `WebRenderer` — статические.** Mock невозможен без рефлексии.
+- **`Auth::__construct`** читает `site.config` — нет DI.
+- **`View::render`** использует `include` + глобальные `ADMIN_ROOT`, `$_SESSION` — сайд-эффекты.
+- **`bootstrap.php`** — процедурный, не тестируется unit-тестами.
+- Тестов **нет**.
+
+**Что можно покрыть:**
+- `Csrf` — token/check.
+- `Validate` (в `corescripts`).
+- `Scan::pageTree` — с временной директорией.
+- `WebRenderer` — с моком `Result`.
+
+---
+
+## 7. Матрица рисков
+
+| ID | Риск | Вероятность | Влияние | CVSS | Приоритет |
+|---|---|---|---|---|---|
+| A-1 | Brute-force на login | Высокая | Критическое | 8.1 | **P0** |
+| A-2 | Race в `.data.json` | Высокая | Высокое | 6.5 | **P0** |
+| A-3 | Race в `site.config` | Высокая | Высокое | 6.5 | **P0** |
+| A-4 | Нет отката при удалении | Средняя | Высокое | 6.5 | **P0** |
+| A-5 | Login CSRF | Высокая | Среднее | 4.3 | **P1** |
+| A-6 | Хардкод `alpha.0.0` | Высокая | Среднее | — | **P1** |
+| A-7 | Regex-инъекция `$available` | Средняя | Высокое | 4.9 | **P1** |
+| A-8 | CSRF не ротируется | Средняя | Среднее | — | P2 |
+| A-9 | Нет absolute timeout | Средняя | Среднее | — | P2 |
+| A-10 | Нет UA/IP-привязки | Средняя | Среднее | — | P2 |
+| A-11 | Нет audit log | Высокая | Среднее | — | P2 |
+| A-12 | Прямое `$_SESSION` в layout | Низкая | Среднее | — | P2 |
+| B-A3 | `allias:toggle` без валидации | Средняя | Среднее | — | P2 |
+| B-A9 | `Auth::check` без сверки login | Низкая | Среднее | — | P2 |
+| P-A4 | Lint в web-контексте | Высокая | Среднее | — | P2 |
+| A-13 | `logout` без samesite | Низкая | Низкое | — | P3 |
+| B-A1 | Нет exit после View | Низкая | Низкое | — | P3 |
+| B-A6 | Дубль whitelist | Низкая | Низкое | — | P3 |
+| B-A11 | `View` без санитайза | Низкая | Низкое | — | P3 |
+
+---
+
+## 8. Рекомендации
+
+### 8.1. P0 — немедленно
+
+1. **Brute-force защита** для `Auth::login`:
+   - счётчик неудач в `secure/admin_fails.json`;
+   - `usleep` после 3 попыток;
+   - бан IP на 15 мин после 5;
+   - лог в `secure/logs/admin.log`.
+
+2. **Атомарная запись `.data.json`** в `page:edit` / `page:toggle`:
+   - temp + `rename`;
+   - `LOCK_EX`;
+   - проверка `json_encode` перед записью.
+
+3. **Сериализация read-modify-write `site.config`**:
+   - lock-файл `site.config.lock`;
+   - `flock(LOCK_EX)` на весь цикл (открытие → save).
+
+4. **Двухфазный commit** для `DomainRemove` / `AlliasRemove`:
+   - конфиг → temp;
+   - файлы → `trash/`;
+   - `mv temp config`;
+   - `rmrf trash` (или откат).
+
+### 8.2. P1 — в течение недели
+
+5. **CSRF на login:**
+   - `<?= Csrf::field() ?>` в `login.php`;
+   - проверка в `bootstrap.php` **до** обработки POST.
+
+6. **Убрать хардкод `alpha.0.0`** из `filler:new` и `Scan::blocksFor`:
+   - читать `logic` из `Config`.
+
+7. **Валидация `$available`** в `page:edit`:
+   - `preg_match('/^[a-z0-9_|()\[\]\\-\.]{1,64}$/i', $line)`;
+   - ошибки → назад в форму.
+
+### 8.3. P2 — в течение месяца
+
+8. **`Csrf::rotate()`** в `Auth::login` / `Auth::logout`.
+9. **Absolute timeout** сессии — `created_at` + проверка.
+10. **UA-привязка** — `hash('sha256', HTTP_USER_AGENT)` в сессии.
+11. **Audit log** — все действия админки в `secure/logs/admin.log`.
+12. **`_layout.php`** — не читать `$_SESSION` напрямую, передавать через View.
+13. **Валидация `$name`** в `allias:toggle` через `Validate::allias_name`.
+14. **`Auth::check()`** — сверка `admin_login` с текущим конфигом.
+15. **`--no-lint`** для web-контекста в командах.
+
+### 8.4. P3 — бэклог
+
+16. **Единая обёртка `ConfigProvider`** — lazy-singleton вместо 16 `new Config`.
+17. **`Paths::logic()`** — единый путь к `www/logic/<logic>/`.
+18. **Санитайз `$view`** в `View::render` — проверка `..`.
+19. **`exit` после `View::render`**.
+20. **Убрать дубль whitelist** в `settings` — брать из `SettingsSet::WHITELIST`.
+21. **`Scan::skins()`** — либо использовать, либо удалить.
+22. **`samesite=Lax`** в `logout()`.
+
+---
+
+## 9. Оценка по категориям
+
+| Категория | Оценка | Комментарий |
+|---|---|---|
+| Архитектура | 8/10 | Изоляция, единый контракт, DI отсутствует |
+| Читаемость | 7/10 | Единый стиль, дублирование `Config` |
+| Безопасность | 5/10 | Session fixation закрыт, brute-force и CSRF-login открыты |
+| Производительность | 6/10 | Lint в web, повторный `Config`, `Scan::pageTree` |
+| Тестируемость | 4/10 | Статика, глобальные `$_SESSION`, `include` |
+| Расширяемость | 7/10 | Новый роут = case + view, но `switch` растёт |
+| Legacy-долг | 5/10 | Хардкоды, дублирование, прямой `$_SESSION` |
+
+**Средневзвешенная оценка: 6.3 / 10.**
+
+---
+
+## 10. Заключение
+
+Админка — **самый зрелый слой проекта по архитектуре** (изоляция, единый контракт, разделение `_lib`/`views`). Но реализация страдает от типичных для «внутренних» инструментов дефектов:
+
+**Критическое (P0):**
+- brute-force;
+- race conditions в конфигах и `.data.json`;
+- нет откатов при удалении.
+
+**Существенное (P1):**
+- login CSRF;
+- хардкод `alpha.0.0` в 3 местах;
+- regex-инъекция через `available`.
+
+**Средние (P2):**
+- CSRF не ротируется;
+- нет audit log и TTL;
+- прямой `$_SESSION` в layout.
+
+**Закрыто правильно:**
+- `session_regenerate_id` после логина;
+- `password_hash`/`verify`;
+- `hash_equals` для CSRF и login;
+- `EXTR_SKIP` в View;
+- `secure` cookie по HTTPS.
+
+**Готовность к продакшену:** при закрытии P0 (4 пункта) и P1 (3 пункта) — можно выпускать. Остальное — техдолг.
+
+**Сравнение со слоями:**
+
+| Слой | Оценка |
+|---|---|
+| Ядро | 5.4 |
+| Visuo | 5.6 |
+| Логика | 5.1 |
+| CLI | 6.6 |
+| **Админка** | **6.3** |
+
+Админка — **второй по качеству слой** после CLI. Общие для всего проекта слабости: race conditions, отсутствие транзакционности, хардкоды путей, слабая тестируемость.
