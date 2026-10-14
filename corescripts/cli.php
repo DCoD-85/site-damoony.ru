@@ -28,29 +28,31 @@ $argv    = $_SERVER[ 'argv' ] ?? [ ];
 $command = $argv[ 1 ] ?? 'help';
 $args    = array_slice( $argv , 2 );
 
+# cmd => [ file , class ]
 $map = [
-	'help'           => null ,
-	'domain:new'     => 'DomainNew.php' ,
-	'domain:list'    => 'DomainList.php' ,
-	'domain:remove'  => 'DomainRemove.php' ,
-	'allias:new'     => 'AlliasNew.php' ,
-	'allias:list'    => 'AlliasList.php' ,
-	'allias:remove'  => 'AlliasRemove.php' ,
-	'page:new'       => 'PageNew.php' ,
-	'block:new'      => 'BlockNew.php' ,
-	'filler:new'     => 'FillerNew.php' ,
-	'admin:passwd'   => 'AdminPasswd.php' ,
-	'settings:set'   => 'SettingsSet.php' ,
-	'settings:list'  => 'SettingsList.php' ,
-	'vars:extract'   => 'VarsExtract.php' ,
+	'domain:new'     => [ 'DomainNew.php'    , 'DomainNew'    ] ,
+	'domain:list'    => [ 'DomainList.php'   , 'DomainList'   ] ,
+	'domain:remove'  => [ 'DomainRemove.php' , 'DomainRemove' ] ,
+	'allias:new'     => [ 'AlliasNew.php'    , 'AlliasNew'    ] ,
+	'allias:list'    => [ 'AlliasList.php'   , 'AlliasList'   ] ,
+	'allias:remove'  => [ 'AlliasRemove.php' , 'AlliasRemove' ] ,
+	'page:new'       => [ 'PageNew.php'      , 'PageNew'      ] ,
+	'block:new'      => [ 'BlockNew.php'     , 'BlockNew'     ] ,
+	'filler:new'     => [ 'FillerNew.php'    , 'FillerNew'    ] ,
+	'admin:passwd'   => [ 'AdminPasswd.php'  , 'AdminPasswd'  ] ,
+	'settings:set'   => [ 'SettingsSet.php'  , 'SettingsSet'  ] ,
+	'settings:list'  => [ 'SettingsList.php' , 'SettingsList' ] ,
+	'vars:extract'   => [ 'VarsExtract.php'  , 'VarsExtract'  ] ,
 ];
 
-if ( $command === 'help' || ! array_key_exists( $command , $map ) ) {
-	Cli::help( array_keys( $map ) );
+if ( $command === 'help' || ! isset( $map[ $command ] ) ) {
+	Cli::help( array_merge( [ 'help' ] , array_keys( $map ) ) );
 	exit( 0 );
 }
 
-$file = CS_CMD . DIRECTORY_SEPARATOR . $map[ $command ];
+[ $file_name , $class ] = $map[ $command ];
+
+$file = CS_CMD . DIRECTORY_SEPARATOR . $file_name;
 if ( ! is_file( $file ) ) {
 	Cli::err( "Command not implemented: {$command}" );
 	exit( 1 );
@@ -74,24 +76,6 @@ $ctx = new Context( function ( string $name , bool $ok , string $msg ) {
 	$ok ? Cli::ok( $name . ( $msg !== '' ? ' — ' . $msg : '' ) )
 	    : Cli::err( $name . ( $msg !== '' ? ' — ' . $msg : '' ) );
 } );
-
-# --- класс команды ---
-$class_map = [
-	'domain:new'     => 'DomainNew' ,
-	'domain:list'    => 'DomainList' ,
-	'domain:remove'  => 'DomainRemove' ,
-	'allias:new'     => 'AlliasNew' ,
-	'allias:list'    => 'AlliasList' ,
-	'allias:remove'  => 'AlliasRemove' ,
-	'page:new'       => 'PageNew' ,
-	'block:new'      => 'BlockNew' ,
-	'filler:new'     => 'FillerNew' ,
-	'admin:passwd'   => 'AdminPasswd' ,
-	'settings:set'   => 'SettingsSet' ,
-	'settings:list'  => 'SettingsList' ,
-	'vars:extract'   => 'VarsExtract' ,
-];
-$class = $class_map[ $command ];
 
 if ( ! class_exists( $class ) ) {
 	Cli::err( "Class not found: {$class}" );
