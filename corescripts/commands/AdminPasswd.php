@@ -2,52 +2,54 @@
 
 class AdminPasswd {
 
-	public static function plan ( array $params ) : array {
-		return [ 'login' => $params[ 'name' ] ?? 'admin' ];
-	}
+    public static function plan ( array $params ) : array {
+        return [ 'login' => $params[ 'name' ] ?? 'admin' ];
+    }
 
-	public static function run ( array $params , ?Context $ctx = null ) : Result {
-		$r = new Result( );
+    public static function run ( array $params , ?Context $ctx = null ) : Result {
+        $r = new Result( );
 
-		$login = (string) ( $params[ 'name' ] ?? 'admin' );
-		if ( $login === '' ) {
-			$r->error( 'Логин не может быть пустым' );
-			return $r;
-		}
+        $login = (string) ( $params[ 'name' ] ?? 'admin' );
+        if ( $login === '' ) {
+            $r->error( 'Логин не может быть пустым' );
+            return $r;
+        }
 
-		# пароль — из --password=... или спросить
-		$password = (string) ( $params[ 'password' ] ?? '' );
-		if ( $password === '' ) {
-			Cli::out( '' );
-			$password = Cli::ask( 'Пароль (введите вручную)' );
-			if ( $password === '' ) {
-				$r->error( 'Пароль не может быть пустым' );
-				return $r;
-			}
-		}
+        # пароль — из --password=... или спросить дважды
+        $password = (string) ( $params[ 'password' ] ?? '' );
+        if ( $password === '' ) {
+            Cli::out( '' );
+            $password = Cli::ask( 'Пароль' );
+            if ( $password === '' ) {
+                $r->error( 'Пароль не может быть пустым' );
+                return $r;
+            }
+            $password2 = Cli::ask( 'Пароль (повтор)' );
+            if ( $password !== $password2 ) {
+                $r->error( 'Пароли не совпадают' );
+                return $r;
+            }
+        }
 
-		$hash = password_hash( $password , PASSWORD_DEFAULT );
-		if ( $hash === false ) {
-			$r->error( 'Не удалось создать хеш пароля' );
-			return $r;
-		}
+        $hash = password_hash( $password , PASSWORD_DEFAULT );
+        if ( $hash === false ) {
+            $r->error( 'Не удалось создать хеш пароля' );
+            return $r;
+        }
 
-		# писать в site.config
-		try {
-			$cfg = new Config( PROJECT_ROOT . '/config/site.config' );
-		} catch ( Throwable $e ) {
-			$r->error( 'Не открыть site.config: ' . $e->getMessage( ) );
-			return $r;
-		}
+        try {
+            Config::mutate( Paths::config() , function ( Config $cfg ) use ( $login , $hash ) {
+                $cfg->setKeys( [ 'admin' , 'login' ]         , $login );
+                $cfg->setKeys( [ 'admin' , 'password_hash' ] , $hash );
+            } );
 
-		$cfg->setKeys( [ 'admin' , 'login' ] , $login );
-		$cfg->setKeys( [ 'admin' , 'password_hash' ] , $hash );
-		$cfg->save( );
+            $r->step( 'Логин' , true , $login );
+            $r->step( 'Хеш пароля сохранён в site.config.admin' , true , '' );
+            $ctx?->step( 'Пароль установлен' , true , $login );
+        } catch ( Throwable $e ) {
+            $r->error( 'site.config: ' . $e->getMessage( ) );
+        }
 
-		$r->step( 'Логин' , true , $login );
-		$r->step( 'Хеш пароля сохранён в site.config.admin' , true , '' );
-		$ctx?->step( 'Пароль установлен' , true , $login );
-
-		return $r;
-	}
+        return $r;
+    }
 }
