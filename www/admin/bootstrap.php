@@ -366,17 +366,25 @@ switch ( $p ) {
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 
-		if ( $domain === '' ) {
+		if ( $domain === '' || Validate::domain( $domain ) !== null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
-		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
+		$cfg = new Config( Paths::config() );
 
-		if ( $real === null ) {
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
 			header( 'Location: ?p=dashboard' );
 			exit;
+		}
+
+		$real = Paths::real( $domain );
+
+		# список аллиасов real-домена
+		$alliases = [ ];
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) {
+			if ( $a === '' ) continue;
+			$alliases[ ] = $a;
 		}
 
 		# --- POST ---
@@ -390,35 +398,30 @@ switch ( $p ) {
 			if ( ! $confirm_checked ) {
 				$errors[ ] = 'Подтвердите, что понимаете необратимость';
 			}
-			if ( $confirm_name !== $domain ) {
-				$errors[ ] = 'Имя домена введено неверно';
+			if ( $confirm_name !== $real ) {
+				$errors[ ] = "Имя real-домена введено неверно (нужно: {$real})";
 			}
 
 			if ( empty( $errors ) ) {
 				require_once CS_CMD . '/DomainRemove.php';
 
 				$result = DomainRemove::run( [
-					'name'  => $domain ,
+					'name'  => $real ,
 					'force' => true ,
 				] );
 
 				View::render( 'result' , [
 					'result'     => $result ,
-					'title'      => 'Удаление домена: ' . $domain ,
+					'title'      => 'Удаление домена: ' . $real ,
 					'back_url'   => '?p=dashboard' ,
 					'back_label' => 'К списку домен' ,
 				] );
 				break;
 			}
 
-			$alliases = [ ];
-			foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
-				if ( $a === '' ) continue;
-				$alliases[ ] = $a;
-			}
-
 			View::render( 'domain_remove' , [
 				'domain'   => $domain ,
+				'real'     => $real ,
 				'errors'   => $errors ,
 				'alliases' => $alliases ,
 			] );
@@ -426,14 +429,9 @@ switch ( $p ) {
 		}
 
 		# --- GET ---
-		$alliases = [ ];
-		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $domain ] , [ ] ) as $a => $t ) {
-			if ( $a === '' ) continue;
-			$alliases[ ] = $a;
-		}
-
 		View::render( 'domain_remove' , [
 			'domain'   => $domain ,
+			'real'     => $real ,
 			'errors'   => [ ] ,
 			'alliases' => $alliases ,
 		] );
@@ -449,12 +447,17 @@ switch ( $p ) {
 			exit;
 		}
 
-		$cfg = new Config( PROJECT_ROOT . '/config/site.config' );
+		if ( Validate::domain( $domain ) !== null || Validate::allias_name( $name ) !== null ) {
+			header( 'Location: ?p=dashboard' );
+			exit;
+		}
 
-		$real = $cfg->getKeys( [ 'domains_real'    , $domain ] );
-		$al   = $cfg->getKeys( [ 'alliases_real'   , $domain , $name ] );
+		$cfg  = new Config( Paths::config() );
+		$real = Paths::real( $domain );
 
-		if ( $real === null || $al === null ) {
+		$al = $cfg->getKeys( [ 'alliases_real' , $real , $name ] );
+
+		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null || $al === null ) {
 			header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
 			exit;
 		}
@@ -479,13 +482,13 @@ switch ( $p ) {
 
 				$result = AlliasRemove::run( [
 					'name'   => $name ,
-					'domain' => $domain ,
+					'domain' => $real ,
 					'force'  => true ,
 				] );
 
 				View::render( 'result' , [
 					'result'     => $result ,
-					'title'      => "Удаление аллиаса: {$domain} / {$name}" ,
+					'title'      => "Удаление аллиаса: {$real} / {$name}" ,
 					'back_url'   => '?p=allias:list&domain=' . urlencode( $domain ) ,
 					'back_label' => 'К аллиасам' ,
 				] );

@@ -5,7 +5,7 @@
 </div>
 
 <ul>
-	<li>Папка <code>www/logic/alpha.0.0/domain/<?= htmlspecialchars( $domain ) ?>/</code></li>
+	<li>Папка <code>www/logic/&lt;logic&gt;/domain/<?= htmlspecialchars( $real ?? $domain ) ?>/</code></li>
 	<?php if ( ! empty( $alliases ) ) : ?>
 		<li>Все аллиасы домена: <b><?= htmlspecialchars( implode( ', ' , $alliases ) ) ?></b></li>
 	<?php endif ?>
@@ -31,8 +31,8 @@
 		Я понимаю, что действие необратимо
 	</label>
 
-	<label>Введите имя домена для подтверждения:
-		<input type="text" name="confirm_name" placeholder="<?= htmlspecialchars( $domain , ENT_QUOTES ) ?>" autocomplete="off">
+	<label>Введите имя real-домена для подтверждения (<code><?= htmlspecialchars( $real ?? $domain ) ?></code>):
+		<input type="text" name="confirm_name" placeholder="<?= htmlspecialchars( $real ?? $domain , ENT_QUOTES ) ?>" autocomplete="off">
 	</label>
 
 	<button type="submit" class="btn-danger-solid">Удалить навсегда</button>
