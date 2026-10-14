@@ -177,10 +177,17 @@ switch ( $p ) {
 				$errors[ ] = 'Title не может быть пустым';
 			}
 
-			# skin: проверяем, что папка www/media/<domain>/skin/<skin> существует
-			$skin_dir = PROJECT_ROOT . '/www/media/' . $domain . '/skin/' . $skin;
-			if ( $skin !== '' && ! is_dir( $skin_dir ) ) {
-				$errors[ ] = "Тема '{$skin}' не найдена в media/{$domain}/skin/";
+			# skin: валидация имени + проверка папки
+			if ( $skin !== '' ) {
+				$skin_err = Validate::skin( $skin );
+				if ( $skin_err !== null ) {
+					$errors[ ] = $skin_err;
+				} else {
+					$skin_dir = PROJECT_ROOT . '/www/media/' . $domain . '/skin/' . $skin;
+					if ( ! is_dir( $skin_dir ) ) {
+						$errors[ ] = "Тема '{$skin}' не найдена в media/{$domain}/skin/";
+					}
+				}
 			}
 
 			if ( empty( $errors ) ) {
@@ -465,7 +472,18 @@ switch ( $p ) {
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
-		$path   = trim( (string) ( $_GET[ 'path' ]   ?? '' ) , '/' );
+		$path = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
+
+		$path_err = Validate::page_path( $path );
+		if ( $path_err !== null ) {
+			View::render( 'result' , [
+				'result'     => new Result( ) ,
+				'title'      => 'Некорректный путь: ' . $path_err ,
+				'back_url'   => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) ,
+				'back_label' => 'К страницам' ,
+			] );
+			break;
+		}
 
 		if ( $domain === '' || $allias === '' ) {
 			header( 'Location: ?p=dashboard' );
@@ -609,7 +627,18 @@ switch ( $p ) {
 
 			$allias = (string) ( $_POST[ 'allias' ] ?? '' );
 			$name   = trim( (string) ( $_POST[ 'name' ] ?? '' ) );
-			$parent = trim( (string) ( $_POST[ 'parent' ] ?? '' ) , '/' );
+			$parent   = trim( (string) ( $_POST[ 'parent' ] ?? '' ) , '/' );
+			$path_err = Validate::page_path( $parent );
+			if ( $path_err !== null ) {
+				View::render( 'page_new' , [
+					'domain'   => $domain ,
+					'allias'   => $allias ,
+					'parent'   => $parent ,
+					'alliases' => $alliases ,
+					'error'    => $path_err ,
+				] );
+				break;
+			}
 
 			require_once CS_CMD . '/PageNew.php';
 
@@ -718,12 +747,8 @@ switch ( $p ) {
 			exit;
 		}
 
-		# защита от path traversal
-		if ( $path !== '' && ! preg_match( '#^[a-z][a-z0-9_/]*$#i' , $path ) ) {
-			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-			exit;
-		}
-		if ( str_contains( $path , '..' ) ) {
+		# защита от path traversal (единая валидация)
+		if ( Validate::page_path( $path ) !== null ) {
 			header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
 			exit;
 		}

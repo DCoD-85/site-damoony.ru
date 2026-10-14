@@ -4,6 +4,10 @@
 	Домен: <code><?= htmlspecialchars( $domain , ENT_QUOTES ) ?></code>
 </p>
 
+<?php if ( ! empty( $error ) ) : ?>
+	<div class="error-msg">✘ <?= htmlspecialchars( $error ) ?></div>
+<?php endif ?>
+
 <?php if ( ! empty( $parent ) ) : ?>
 	<p class="hint">
 		Родитель: <code><?= htmlspecialchars( $parent ) ?></code>
