@@ -63,15 +63,31 @@ if ( ! is_file( $file ) ) {
 
 require_once $file;
 
-# --- парсинг аргументов: --key=value ---
-$params = [ ];
+# --- парсинг аргументов ---
+#   --key=value   → $params[key] = value
+#   --flag        → $params[flag] = true
+#   позиционные   → $params[positional][] + $params[name] (первый)
+$params     = [ ];
+$positional = [ ];
+
 foreach ( $args as $a ) {
 	if ( str_starts_with( $a , '--' ) ) {
 		$kv = explode( '=' , substr( $a , 2 ) , 2 );
 		$params[ $kv[ 0 ] ] = $kv[ 1 ] ?? true;
+	} elseif ( $a === '-h' ) {
+		Cli::out( "Usage: php corescripts/cli.php {$command} [--key=value] [--flag] [positional]" );
+		exit( 0 );
 	} else {
-		$params[ 'name' ] = $a;
+		$positional[ ] = $a;
 	}
+}
+
+# первый позиционный — исторический $params['name']
+if ( ! empty( $positional ) && ! isset( $params[ 'name' ] ) ) {
+	$params[ 'name' ] = $positional[ 0 ];
+}
+if ( ! empty( $positional ) ) {
+	$params[ 'positional' ] = $positional;
 }
 
 # --- обработчик шага → печатает сразу ---
