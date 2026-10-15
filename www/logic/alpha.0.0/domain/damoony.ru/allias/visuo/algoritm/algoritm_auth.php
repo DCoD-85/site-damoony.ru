@@ -18,13 +18,15 @@ class algoritm_auth
 		$this->default( );
 	}
 
-	public function default ( ) {
+		public function default ( ) {
+		http_response_code( 401 );
+
 		$main = $this->main;
 		$visuorelease = $main->visuorelease;
 		$center = $main->alliasglobal->center;
 
 		$scheme = $main->alliasscheme;
-		$scheme->load( 'error' );
+		$scheme->load( 'login' );
 
 		$vt_center = new visuotag( $visuorelease );
 		$vt_center->tag( 'div' )->content( 'Вы должны быть зарегистрированы для просмотра данной страницы' );

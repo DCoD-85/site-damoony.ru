@@ -18,13 +18,11 @@ class algoritm_error
 	}
 
 	public function default ( ) {
+		http_response_code( 404 );
+
 		$main = $this->main;
 		$visuorelease = $main->visuorelease;
 
-		$library = $main->library;
-		$url = $library->url( );
-		$url_base = $url->static_base;
-		$url_vars = $url->static_vars;
 		$center = $main->alliasglobal->center;
 
 		$scheme = $main->alliasscheme;
