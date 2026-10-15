@@ -55,6 +55,17 @@ require_once TEST_ROOT . '/lib/View.php';
 $suites  = Runner::discover( TEST_ROOT . '/cases' );
 $by_name = [];
 
+# --- режим single: ?s=suite ---
+$single = isset( $_GET[ 's' ] ) ? (string) $_GET[ 's' ] : '';
+
+if ( $single !== '' ) {
+    if ( ! isset( $suites[ $single ] ) ) {
+        http_response_code( 404 );
+        exit( 'Suite not found: ' . htmlspecialchars( $single ) );
+    }
+    $suites = [ $single => $suites[ $single ] ];
+}
+
 foreach ( $suites as $name => $suite ) {
     $by_name[ $name ] = Runner::run( $suite );
 }
@@ -108,12 +119,16 @@ $body = $ve->release( );
         .case.err .case-title { color: #9b1c1c; font-weight: 600; }
         .case-time { text-align: right; color: #8a94a4; font-size: 12px; }
         .case-msg { grid-column: 1 / -1; margin: 6px 0 0; padding: 8px 12px; background: #fff; border-left: 3px solid #d33; color: #333; white-space: pre-wrap; font-size: 12px; overflow: auto; }
-    </style>
+		
+		.page_header { display: flex; justify-content: space-between; align-items: center; }
+		.page_header a:hover { color: #fff; }
+	</style>
 </head>
 <body>
 
 <div class="page_header">
-    <h1>Visuo — tests</h1>
+    <h1>Visuo — tests<?= $single !== '' ? ' · ' . htmlspecialchars( $single ) : '' ?></h1>
+    <a href="list.php" style="color:#a6b1c2;text-decoration:none;font-size:13px;">Список →</a>
 </div>
 
 <div class="page_wrap">
