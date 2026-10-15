@@ -18,7 +18,7 @@ class algoritm_auth
 		$this->default( );
 	}
 
-		public function default ( ) {
+	public function default ( ) {
 		http_response_code( 401 );
 
 		$main = $this->main;

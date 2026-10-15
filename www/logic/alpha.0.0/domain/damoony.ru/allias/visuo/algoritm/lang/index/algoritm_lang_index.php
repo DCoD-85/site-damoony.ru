@@ -1,14 +1,9 @@
 <?PHP
 
-namespace damoony_ru\visuo;
+namespace damoony\visuo;
 
 class algoritm_lang_index
 	extends \algoritm_ {
-
-	public array $available = [ '' ];
-	public bool  $auth      = false;
-	public bool  $search    = true;
-	public bool  $default   = true;
 
 	public function release ( ) {
 		$default = $this->is_default( );
@@ -22,7 +17,7 @@ class algoritm_lang_index
 	private function render ( ) {
 		$main = $this->main;
 		$lang = $main->language;
-
+		
 		$main->alliasglobal->head->title(
 			$lang->get( 'VISUO_TITLE' , [ ] , 'visuo' ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
 		);
@@ -32,9 +27,16 @@ class algoritm_lang_index
 		$vt->tag( 'div' , class : 'visuo visuo-index' )
 			->tag( 'h1' )->content( $lang->get( 'VISUO_TITLE' , [ ] , 'visuo' ) )->parent( )
 			->tag( 'p'  )->content( $lang->get( 'VISUO_INTRO' , [ ] , '' ) )->parent( )
-			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) );
+			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) )->parent( )
+			->content( time( ) );
 
-		$main->alliasglobal->center->visuotag( )->append( $vt );
+		$center = $main->alliasglobal->center;
+		$center->wrapper_set( 'div' );
+		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
+		$center->wrapper_set( 'div' );
+		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
+		$center->wrapper_set( 'div' );
+		$center->section_add( 'test3' , $vt ); // ->visuotag( )->append( $vt );
 
 		return true;
 	}
