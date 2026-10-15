@@ -34,9 +34,9 @@ abstract class visuoel_field__button extends visuoel_field__element {
 		# слот 1 — label
 		if ( $d->show_label && $d->label !== '' ) {
 			$label = $box->tag( 'div' , class : 'field-label' );
-			$label->content( htmlspecialchars( $d->label , ENT_QUOTES ) );
+			$label->content( $d->esc( $d->label ) );
 			if ( $d->label_comment !== '' ) {
-				$label->tag( 'span' , class : 'label_comment' )->content( htmlspecialchars( $d->label_comment , ENT_QUOTES ) );
+				$label->tag( 'span' , class : 'label_comment' )->content( $d->esc( $d->label_comment ) );
 			}
 		}
 
@@ -57,12 +57,12 @@ abstract class visuoel_field__button extends visuoel_field__element {
 
 		# слот 3 — hint
 		if ( $d->show_hint && $d->hint !== '' ) {
-			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
+			$box->tag( 'div' , class : 'hint' )->content( $d->esc( $d->hint ) );
 		}
 
 		# error
 		if ( $d->error !== '' ) {
-			$box->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->esc( $d->error ) );
 		}
 
 		$this->vt_start = $field;

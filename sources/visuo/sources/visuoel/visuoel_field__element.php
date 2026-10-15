@@ -82,9 +82,9 @@ abstract class visuoel_field__element extends visuoel_group_element {
 		if ( $d->show_label && $d->label !== '' ) {
 			$label = $box->tag( 'label' , class : 'field-label' );
 			$label->attrs_add( 'for' , 'field_' . $d->name );
-			$label->content( $d->label );
+			$label->content( $d->esc( $d->label ) );
 			if ( $d->label_comment !== '' ) {
-				$label->tag( 'span' , class : 'label_comment' )->content( $d->label_comment );
+				$label->tag( 'span' , class : 'label_comment' )->content( $d->esc( $d->label_comment ) );
 			}
 		}
 
@@ -93,12 +93,12 @@ abstract class visuoel_field__element extends visuoel_group_element {
 
 		# слот 3 — hint
 		if ( $d->show_hint && $d->hint !== '' ) {
-			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
+			$box->tag( 'div' , class : 'hint' )->content( $d->esc( $d->hint ) );
 		}
 
 		# error — всегда, если задан
 		if ( $d->error !== '' ) {
-			$box->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->esc( $d->error ) );
 		}
 
 		$this->vt_start = $field;

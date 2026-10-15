@@ -49,12 +49,12 @@ class visuoel_field_checkbox_group extends visuoel_field__element {
 
 		# hint
 		if ( $d->show_hint && $d->hint !== '' ) {
-			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
+			$box->tag( 'div' , class : 'hint' )->content( $d->esc( $d->hint ) );
 		}
 
 		# error
 		if ( $d->error !== '' ) {
-			$box->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->esc( $d->error ) );
 		}
 
 		$this->vt_start = $field;

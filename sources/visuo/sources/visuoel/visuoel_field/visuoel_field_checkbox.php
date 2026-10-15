@@ -58,17 +58,17 @@ class visuoel_field_checkbox extends visuoel_field__element {
 		}
 
 		if ( $d->label !== '' ) {
-			$label->tag( 'span' , class : 'field-name' )->content( $d->label );
+			$label->tag( 'span' , class : 'field-name' )->content( $d->esc( $d->label ) );
 		}
 
 		# hint
 		if ( $d->show_hint && $d->hint !== '' ) {
-			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
+			$box->tag( 'div' , class : 'hint' )->content( $d->esc( $d->hint ) );
 		}
 
 		# error
 		if ( $d->error !== '' ) {
-			$box->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->esc( $d->error ) );
 		}
 
 		$this->vt_start = $field;

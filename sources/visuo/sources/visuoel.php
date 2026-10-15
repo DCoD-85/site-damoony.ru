@@ -269,6 +269,11 @@ class visuoel__data {
 		$this->node = $node;
 	}
 
+	# html-экранирование значений (единая точка для всего visuo)
+	public function esc ( null|string $s ) : string {
+		return htmlspecialchars( (string) $s , ENT_QUOTES , 'UTF-8' );
+	}
+
 	public function add ( visuoel|visuotag $el ) : static {
 		$this->node->add( $el );
 		return $this;

@@ -37,21 +37,21 @@ class visuoel_field_block extends visuoel_field__element {
 		# label (не рисуется, если пусто или hide_label)
 		if ( $d->show_label && $d->label !== '' ) {
 			$label = $box->tag( 'label' , class : 'field-label' );
-			$label->content( htmlspecialchars( $d->label , ENT_QUOTES ) );
+			$label->content( $d->esc( $d->label ) );
 		}
 
-		# content
+		# content (html = raw, text = esc)
 		$content = $box->tag( 'div' , class : 'field-content' );
-		$content->content( $d->is_html ? $d->content : htmlspecialchars( $d->content , ENT_QUOTES ) );
+		$content->content( $d->is_html ? $d->content : $d->esc( $d->content ) );
 
 		# hint
 		if ( $d->show_hint && $d->hint !== '' ) {
-			$box->tag( 'div' , class : 'hint' )->content( $d->hint );
+			$box->tag( 'div' , class : 'hint' )->content( $d->esc( $d->hint ) );
 		}
 
 		# error
 		if ( $d->error !== '' ) {
-			$box->tag( 'div' , class : 'error' )->content( $d->error );
+			$box->tag( 'div' , class : 'error' )->content( $d->esc( $d->error ) );
 		}
 
 		$this->vt_start = $field;

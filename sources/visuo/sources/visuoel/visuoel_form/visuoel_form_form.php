@@ -40,7 +40,7 @@ class visuoel_form_form extends visuoel_group_element {
 		if ( $d->form_data_jquery )  $form->data_add( 'load'        , $d->form_data_jquery );
 
 		if ( $v = $d->title_text ) {
-			$form = $form->tag( 'div' , class : 'form_title' )->content( $v )->parent( );
+			$form = $form->tag( 'div' , class : 'form_title' )->content( $d->esc( $v ) )->parent( );
 		}
 
 		if ( $v = $d->form_class ) {

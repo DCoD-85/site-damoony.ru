@@ -23,7 +23,7 @@ class visuoel_tabs_page extends visuoel_group_element {
 		$title = $title->tag( 'span' , class : 'tab_title' );
 		$title->data_add( 'tab-target' , $id , false );
 		$title->attrs_actions_add( 'onclick' , 'visuotabs_show(this)' );
-		if ( $d->title !== '' ) $title->content( $d->title );
+		if ( $d->title !== '' ) $title->content( $d->esc( $d->title ) );
 		$this->vt_title = $title;
 
 		$page = new visuotag( );
