@@ -431,17 +431,17 @@ return [
             Assert::same( $st , $r->elements[ 0 ] );
         },
 
-        'element — creates cl_el' => function ( ) {
+		'el — creates cl_el' => function ( ) {
             $r = new visuotag( );
-            $r->element( );
+            $r->el( );
             Assert::count( 1 , $r->elements );
             Assert::eq( 'el' , $r->elements[ 0 ]->tagname );
             Assert::true( $r->elements[ 0 ]->attrs( )->class( )->has( 'cl_el' ) );
         },
 
-        'element — returns $this' => function ( ) {
+        'el — returns $this' => function ( ) {
             $r = new visuotag( );
-            $ret = $r->element( );
+            $ret = $r->el( );
             Assert::same( $r , $ret );
         },
 

@@ -14,6 +14,6 @@
 		],
 		"auth": false,
 		"search": true,
-		"default": false
+		"default": true
 	}
 }

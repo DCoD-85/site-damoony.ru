@@ -253,8 +253,13 @@ class algoritm_ {
 					$this->error_( $this->algoritm_classes[ $url_base_pos ] );
 				}
 			} else {
+				
 				http_response_code( 403 );
-				$this->algoritm_classes[ $url_base_pos - 1 ]->release( );
+				if ( $url_base_pos > 0 && isset( $this->algoritm_classes[ $url_base_pos - 1 ] ) ) {
+					$this->algoritm_classes[ $url_base_pos - 1 ]->release( );
+				} else {
+					$this->error_( $object );
+				}
 			}
 		} else {
 			if( ( $in_array === '' || is_null( $in_array ) ) && $object->algoritmdata->default === true ){

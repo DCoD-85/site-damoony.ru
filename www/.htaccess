@@ -19,6 +19,7 @@ DirectoryIndex index.php index.htm index.html
 
 Options -Indexes
 
+# --- dev: прямой доступ к /tests/ ---
 RewriteCond %{REQUEST_FILENAME} ^(.*)tests(.*)$
 RewriteRule ^(.*)$ tests?%{QUERY_STRING} [NC]
 
