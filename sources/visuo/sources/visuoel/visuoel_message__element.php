@@ -20,7 +20,7 @@ abstract class visuoel_message__element extends visuoel_group_element {
 		$vt = $vt->tag( 'div' , class : 'message message_' . $this->message_type( ) );
 
 		if ( $d->text !== '' ) {
-			$vt->content( htmlspecialchars( $d->text , ENT_QUOTES ) );
+			$vt->content( $d->esc( $d->text ) );
 		}
 
 		$this->vt_start = $vt;

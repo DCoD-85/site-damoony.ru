@@ -27,7 +27,7 @@ class visuoel_form_fieldset extends visuoel_group_element {
 		$vt = $vt->tag( 'fieldset' , class : $this->css_class );
 
 		if ( $d->legend !== '' ) {
-			$vt->tag( 'legend' )->content( htmlspecialchars( $d->legend , ENT_QUOTES ) )->parent( );
+			$vt->tag( 'legend' )->content( $d->esc( $d->legend ) )->parent( );
 		}
 
 		$this->vt_start = $vt;

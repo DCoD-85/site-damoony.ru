@@ -18,7 +18,7 @@ abstract class visuoel_block__element extends visuoel_group_element {
 		$vt = $vt->tag( $this->tag , class : $this->css_class );
 
 		if ( $d->content !== '' ) {
-			$vt->content( htmlspecialchars( $d->content , ENT_QUOTES ) );
+			$vt->content( $d->esc( $d->content ) );
 		}
 
 		$this->vt_start = $vt;

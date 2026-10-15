@@ -41,7 +41,7 @@ class visuoel_table_cell extends visuoel_group_element {
 			if ( $d->width > 0 )   $vt->attrs_style_add( 'width: ' . $d->width . '%;' );
 
 			if ( $d->content !== '' ) {
-				$vt->content( $d->is_html ? $d->content : htmlspecialchars( $d->content , ENT_QUOTES ) );
+				$vt->content( $d->is_html ? $d->content : $d->esc( $d->content ) );
 			}
 
 			$this->vt_start = $vt;

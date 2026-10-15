@@ -34,7 +34,7 @@ abstract class visuoel_button__element extends visuoel_group_element {
 		if ( $d->disabled ) $vt->attrs_add( 'disabled' , 'disabled' );
 
 		if ( $d->text !== '' ) {
-			$vt->content( htmlspecialchars( $d->text , ENT_QUOTES ) );
+			$vt->content( $d->esc( $d->text ) );
 		}
 
 		$this->vt_start = $vt;

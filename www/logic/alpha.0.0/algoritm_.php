@@ -319,18 +319,25 @@ class algoritm_ {
 	}
 
 	public function error_ ( object $object ) {
-		# если HTTP-код ещё не выставлен → 500
-		if ( http_response_code( ) === 200 ) {
-			http_response_code( 500 );
-		}
-
 		$main = $this->main;
 		$args = [ ];
 
 		$domain = $main->main_settings->domain_accepted( false );
 		$allias = $main->main_settings->allias_accepted( );
 
+		$top = $main->alliasglobal->top;
+		$left = $main->alliasglobal->left;
 		$center = $main->alliasglobal->center;
+		$right = $main->alliasglobal->right;
+		$bottom = $main->alliasglobal->bottom;
+
+		$class = $this->main->algoritm->errorclass;
+		$path = $this->main->algoritm->errorpath . $class . '.php';
+		$class = '\\' . $domain . '\\' . $allias . '\\' . $class;
+
+		( include_once $path ) or error_file( $path , __FILE__ , __LINE__ );
+
+		$center->visuotag( )->clear( );
 
 		$url_base_pos = 0;
 		$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );

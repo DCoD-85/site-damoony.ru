@@ -38,9 +38,9 @@ class visuoel_field_checkbox_group extends visuoel_field__element {
 		# заголовок группы
 		if ( $d->show_label && $d->label !== '' ) {
 			$label = $box->tag( 'div' , class : 'field-label' );
-			$label->content( htmlspecialchars( $d->label , ENT_QUOTES ) );
+			$label->content( $d->esc( $d->label ) );
 			if ( $d->label_comment !== '' ) {
-				$label->tag( 'span' , class : 'label_comment' )->content( htmlspecialchars( $d->label_comment , ENT_QUOTES ) );
+				$label->tag( 'span' , class : 'label_comment' )->content( $d->esc( $d->label_comment ) );
 			}
 		}
 

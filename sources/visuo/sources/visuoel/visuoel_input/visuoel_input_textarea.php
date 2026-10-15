@@ -28,7 +28,7 @@ class visuoel_input_textarea extends visuoel_input__element {
 		if ( $d->readonly )            $vt->attrs_add( 'readonly'     , 'readonly' );
 		if ( $d->disabled )            $vt->attrs_add( 'disabled'     , 'disabled' );
 
-		if ( $d->value !== '' ) $vt->content( htmlspecialchars( $d->value , ENT_QUOTES ) );
+		if ( $d->value !== '' ) $vt->content( $d->esc( $d->value ) );
 
 		$this->vt_start = $vt;
 		$this->vt_end   = $vt;

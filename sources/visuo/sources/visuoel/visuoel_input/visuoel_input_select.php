@@ -31,7 +31,7 @@ class visuoel_input_select extends visuoel_input__element {
 		if ( $d->placeholder_option !== '' ) {
 			$opt = $vt->tag( 'option' );
 			$opt->attrs_add( 'value' , '' , true );
-			$opt->content( htmlspecialchars( $d->placeholder_option , ENT_QUOTES ) );
+			$opt->content( $d->esc( $d->placeholder_option ) );
 		}
 
 		# options
