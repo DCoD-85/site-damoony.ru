@@ -26,6 +26,7 @@ if ( ! function_exists( 'error_file' ) ) {
 $root_dir  = dirname( __DIR__ );             # www/
 $proj_root = dirname( $root_dir );           # корень проекта
 define( 'VISUO_SRC' , $proj_root . '/sources/visuo/sources' );
+define( 'SOURCES'   , $proj_root . '/sources' );
 define( 'TEST_ROOT' , __DIR__ );
 
 # --- visuotag stack ---
@@ -50,6 +51,7 @@ require_once TEST_ROOT . '/lib/CaseResult.php';
 require_once TEST_ROOT . '/lib/Suite.php';
 require_once TEST_ROOT . '/lib/Runner.php';
 require_once TEST_ROOT . '/lib/View.php';
+require_once TEST_ROOT . '/lib/Stubs.php';
 
 # --- discovery + run ---
 $suites  = Runner::discover( TEST_ROOT . '/cases' );
