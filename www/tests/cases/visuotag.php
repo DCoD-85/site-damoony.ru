@@ -17,18 +17,13 @@ return [
         require_once VISUO_SRC . '/visuoattrs.php';
         require_once VISUO_SRC . '/visuotag.php';
 
-        # stub для stage-5 hooks
+        # реальные классы для stage-5 (meta + link)
+        require_once VISUO_SRC . '/visuolink.php';
+        require_once VISUO_SRC . '/visuometa.php';
+
+        # stub только для visuostruct
         if ( ! class_exists( 'visuostruct' ) ) {
             class visuostruct { }
-        }
-        if ( ! class_exists( 'visuometa' ) ) {
-            class visuometa {
-                public function as_tag ( ) : visuotag {
-                    $vt = new visuotag( );
-                    $vt->tag( 'title' )->content( 'stub' );
-                    return $vt;
-                }
-            }
         }
     },
 
@@ -448,9 +443,10 @@ return [
         'meta — append' => function ( ) {
             $r = new visuotag( );
             $m = new visuometa( );
+            $m->title( )->data( 'X' );
             $r->meta( $m );
             Assert::count( 1 , $r->elements );
-            Assert::contains( '<title>' , $r->release( ) );
+            Assert::contains( '<title>X</title>' , $r->release( ) );
         },
 
         'findstruct — named' => function ( ) {

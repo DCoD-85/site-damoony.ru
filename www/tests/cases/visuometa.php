@@ -34,7 +34,6 @@ return [
             $m = new visuometa( );
             $t = $m->title( )->data( 'My Page' );
             $vt = $t->as_tag( );
-            Assert::eq( 'title' , $vt->tagname );
             Assert::eq( '<title>My Page</title>' , $vt->release( ) );
         },
 

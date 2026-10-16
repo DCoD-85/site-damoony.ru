@@ -15,6 +15,7 @@
 # $singleton — режим фабрик:
 #   true  — повторный вызов возвращает тот же элемент;
 #   false — каждый вызов создаёт новый.
+# Проверяется по дочернему классу (через $this->visuoel_X->singleton).
 
 class visuoel {
 	# --- refs ---
@@ -130,7 +131,7 @@ class visuoel {
 
 	/** @return visuoel_form */
 	public function form ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_form !== null ) return $this->visuoel_form;
+		if ( $this->visuoel_form !== null && $this->visuoel_form->singleton ) return $this->visuoel_form;
 
 		$el = new visuoel_form( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -141,7 +142,7 @@ class visuoel {
 
 	/** @return visuoel_tabs */
 	public function tabs ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_tabs !== null ) return $this->visuoel_tabs;
+		if ( $this->visuoel_tabs !== null && $this->visuoel_tabs->singleton ) return $this->visuoel_tabs;
 
 		$el = new visuoel_tabs( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -152,7 +153,7 @@ class visuoel {
 
 	/** @return visuoel_input */
 	public function input ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_input !== null ) return $this->visuoel_input;
+		if ( $this->visuoel_input !== null && $this->visuoel_input->singleton ) return $this->visuoel_input;
 
 		$el = new visuoel_input( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -163,7 +164,7 @@ class visuoel {
 
 	/** @return visuoel_field */
 	public function field ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_field !== null ) return $this->visuoel_field;
+		if ( $this->visuoel_field !== null && $this->visuoel_field->singleton ) return $this->visuoel_field;
 
 		$el = new visuoel_field( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -174,7 +175,7 @@ class visuoel {
 
 	/** @return visuoel_button */
 	public function button ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_button !== null ) return $this->visuoel_button;
+		if ( $this->visuoel_button !== null && $this->visuoel_button->singleton ) return $this->visuoel_button;
 
 		$el = new visuoel_button( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -185,7 +186,7 @@ class visuoel {
 
 	/** @return visuoel_block */
 	public function block ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_block !== null ) return $this->visuoel_block;
+		if ( $this->visuoel_block !== null && $this->visuoel_block->singleton ) return $this->visuoel_block;
 
 		$el = new visuoel_block( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -196,7 +197,7 @@ class visuoel {
 
 	/** @return visuoel_message */
 	public function message ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_message !== null ) return $this->visuoel_message;
+		if ( $this->visuoel_message !== null && $this->visuoel_message->singleton ) return $this->visuoel_message;
 
 		$el = new visuoel_message( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;
@@ -207,7 +208,7 @@ class visuoel {
 
 	/** @return visuoel_table */
 	public function table ( null|visuoel__data $__data = null ) : visuoel {
-		if ( $this->singleton && $this->visuoel_table !== null ) return $this->visuoel_table;
+		if ( $this->visuoel_table !== null && $this->visuoel_table->singleton ) return $this->visuoel_table;
 
 		$el = new visuoel_table( $this , $__data );
 		if ( $this->visuoel_group === null ) $this->visuoel_group = $el;

@@ -41,7 +41,7 @@ class visuoel_table_cell extends visuoel_group_element {
 			if ( $d->width > 0 )   $vt->attrs_style_add( 'width: ' . $d->width . '%;' );
 
 			if ( $d->content !== '' ) {
-				$vt->content( $d->is_html ? $d->content : $d->esc( $d->content ) );
+				$vt->content( $d->is_html ? $d->content : htmlspecialchars( $d->content , ENT_QUOTES ) );
 			}
 
 			$this->vt_start = $vt;
@@ -51,13 +51,14 @@ class visuoel_table_cell extends visuoel_group_element {
 
 		# дивный режим — только скелет
 		$class = 'col';
+		if ( $d->width > 0 )     $class .= ' cols_' . $d->width;
 		if ( $d->class  !== '' ) $class .= ' ' . $d->class;
 		if ( $d->inline )        $class .= ' colelsinline';
 
 		$vt = new visuotag( );
 		$vt = $vt->tag( 'div' , class : $class );
 
-		if ( $d->width > 0 && $d->class === '' ) {
+		if ( $d->width > 0 ) {
 			$vt->attrs_style_add( 'width: ' . $d->width . '%;' );
 		}
 
@@ -87,9 +88,8 @@ class visuoel_table_cell extends visuoel_group_element {
 
 		if ( $d->content_block === null ) {
 			$block = new visuoel_field_block( );
-			$block->parent = $this;
+			$this->add( $block );
 			$d->content_block = $block;
-			$this->elements[ ] = $block;
 		}
 
 		$d->content_block->data( )->content = $d->content;
