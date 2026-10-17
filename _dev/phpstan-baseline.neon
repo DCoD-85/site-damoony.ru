@@ -127,6 +127,72 @@ parameters:
 			path: ../engine/library/link.php
 
 		-
+			message: '#^Call to method clear\(\) on an unknown class algoritm_\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Call to method debug\(\) on an unknown class algoritm_\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Call to method start\(\) on an unknown class algoritm_\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Constructor of class main_settings has an unused parameter \$main\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Instantiated class domain not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Method main\:\:main_error\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Property main\:\:\$algoritm has unknown class algoritm_ as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Property main\:\:\$algoritm_ has unknown class algoritm_ as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Property main\:\:\$domain has unknown class domain as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Property main_path\:\:\$main is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: ../engine/main.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: ../engine/main.php
+
+		-
 			message: '#^Variable \$return might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -151,10 +217,28 @@ parameters:
 			path: ../engine/visuo/sources/visuoel/visuoel_block/visuoel_block_html.php
 
 		-
+			message: '#^Return type \(visuoel_button_button\) of method visuoel_button\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: ../engine/visuo/sources/visuoel/visuoel_button.php
+
+		-
+			message: '#^Return type \(visuoel_form_form\) of method visuoel_form\:\:form\(\) should be compatible with return type \(visuoel_form\) of method visuoel\:\:form\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: ../engine/visuo/sources/visuoel/visuoel_form.php
+
+		-
 			message: '#^Method visuoel_group_element\:\:data\(\) should return visuoel_group_element__data but returns visuoel__data\|null\.$#'
 			identifier: return.type
 			count: 1
 			path: ../engine/visuo/sources/visuoel/visuoel_group_element.php
+
+		-
+			message: '#^Return type \(visuoel_input_button\) of method visuoel_input\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: ../engine/visuo/sources/visuoel/visuoel_input.php
 
 		-
 			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
