@@ -28,6 +28,11 @@ header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
 if ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) {
 	header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
 }
+# --- rate limit для логина ---
+require_once PROJECT_ROOT . '/sources/middleware.php';
+if ( $p === 'login' && $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+	middleware::rateLimit( 'admin:login' , 10 , 60 , 1800 );   # 10 попыток/мин, бан 30 мин
+}
 
 header(
 	"Content-Security-Policy: default-src 'self'; "
@@ -70,6 +75,12 @@ require_once ADMIN_ROOT . '/_lib/AuditLog.php';
 $auth = new Auth( );
 
 $p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
+
+# rate limit на login
+if ( $p === 'login' && $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+	require_once PROJECT_ROOT . '/sources/middleware.php';
+	middleware::rateLimit( 'admin:login' , 10 , 60 , 1800 );
+}
 
 # --- login / logout ---
 if ( $p === 'login' ) {

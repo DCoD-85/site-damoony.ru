@@ -44,27 +44,13 @@ $host = strrev( implode( '.' , [ $host[ 0 ] ?? '' , $host[ 1 ] ?? '' ] ) );
 # Content-Type
 header( 'Content-Type: text/html; charset=UTF-8' );
 
-# --- security headers ---
-header( 'X-Content-Type-Options: nosniff' );
-header( 'X-Frame-Options: SAMEORIGIN' );
-header( 'Referrer-Policy: strict-origin-when-cross-origin' );
-header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
+# --- middleware pipeline ---
+require_once __DIR__ . '/../sources/middleware.php';
 
-if ( $is_https ) {
-	header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
-}
-
-# CSP — минимальный, разрешает только self + inline (пока) + шрифты + CDN plyr
-header(
-	"Content-Security-Policy: default-src 'self'; "
-	. "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.plyr.io; "
-	. "style-src 'self' 'unsafe-inline'; "
-	. "img-src 'self' data: https:; "
-	. "font-src 'self' data:; "
-	. "media-src 'self' https://cdn.plyr.io; "
-	. "connect-src 'self'; "
-	. "frame-ancestors 'self'"
-);
+( new middleware( ) )
+    ->add( fn( ) => middleware::securityHeaders( $is_https ) , 'security' )
+    ->add( fn( ) => middleware::rateLimit( 'site' , 120 , 60 , 900 ) , 'rate-limit' )
+    ->run( );
 
 # session — secure только по HTTPS
 $is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
