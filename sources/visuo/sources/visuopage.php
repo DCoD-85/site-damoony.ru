@@ -23,7 +23,6 @@ class visuopage {
 		if ( $main->visuorelease->visuotag === null ) return;
 
 		$vt_root = $main->visuorelease->visuotag->root( );
-		if ( $vt_root === null ) return;
 
 		$blocks = [ 'top' , 'left' , 'center' , 'right' , 'bottom' ];
 
@@ -38,10 +37,8 @@ class visuopage {
 				$slot->clear( );
 				continue;
 			}
-
-			if ( $override instanceof visuotag ) {
-				$slot->clear( )->append( $override );
-			}
+			
+			$slot->clear( )->append( $override );
 		}
 	}
 }

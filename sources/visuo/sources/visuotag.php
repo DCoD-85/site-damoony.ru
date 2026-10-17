@@ -435,7 +435,7 @@ class visuotag {
 			# wrap:
 			# - root — не оборачивается
 			# - всё остальное — оборачивается в <tag ...>...</tag>
-			if ( $root === false && $this->visuoel === null ) {
+			if ( $root === false && ! ( $this->visuoel instanceof visuoel ) ) {
 				$html = '<' . $tagname . $html_attrs . '>' . $html . '</' . $tagname . '>';
 			}
 		} else {
