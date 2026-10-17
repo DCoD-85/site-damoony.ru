@@ -133,24 +133,6 @@ parameters:
 			path: ../sources/mod.php
 
 		-
-			message: '#^Parameter \#1 \$string of function mb_strlen expects string, bool given\.$#'
-			identifier: argument.type
-			count: 3
-			path: ../sources/vardump.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_strlen expects string, int given\.$#'
-			identifier: argument.type
-			count: 3
-			path: ../sources/vardump.php
-
-		-
-			message: '#^Parameter \#1 \$string of function mb_strlen expects string, null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: ../sources/vardump.php
-
-		-
 			message: '#^Parameter \#2 \$varname of method vardump\:\:my_vardump\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 3
@@ -1069,40 +1051,10 @@ parameters:
 			path: ../sources/visuo/sources/visuolink.php
 
 		-
-			message: '#^Parameter \#1 \$html of method visuotag\:\:content\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: ../sources/visuo/sources/visuolog.php
-
-		-
-			message: '#^Parameter \#4 \$line of method visuolog\:\:add\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 3
-			path: ../sources/visuo/sources/visuometa.php
-
-		-
-			message: '#^Instanceof between visuotag and visuotag will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: ../sources/visuo/sources/visuopage.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between visuotag and null will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: ../sources/visuo/sources/visuopage.php
-
-		-
 			message: '#^Strict comparison using \=\=\= between visuotag and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: ../sources/visuo/sources/visuorelease.php
-
-		-
-			message: '#^Parameter \#4 \$line of method visuolog\:\:add\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 6
-			path: ../sources/visuo/sources/visuotag.php
 
 		-
 			message: '#^Strict comparison using \!\=\= between visuotag and null will always evaluate to true\.$#'
