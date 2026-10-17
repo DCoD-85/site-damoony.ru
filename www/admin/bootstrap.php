@@ -65,6 +65,7 @@ require_once ADMIN_ROOT . '/_lib/Auth.php';
 require_once ADMIN_ROOT . '/_lib/View.php';
 require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
 require_once ADMIN_ROOT . '/_lib/Csrf.php';
+require_once ADMIN_ROOT . '/_lib/AuditLog.php';
 
 $auth = new Auth( );
 
@@ -92,9 +93,11 @@ if ( $p === 'login' ) {
 		$login = (string) ( $_POST[ 'login' ]    ?? '' );
 		$pass  = (string) ( $_POST[ 'password' ] ?? '' );
 		if ( $auth->login( $login , $pass ) ) {
+			AuditLog::login_ok( );
 			header( 'Location: ?p=dashboard' );
 			exit;
 		}
+		AuditLog::login_fail( );
 		$error = 'Неверный логин или пароль';
 	}
 	View::render( 'login' , [ 'error' => $error ] );
@@ -102,6 +105,7 @@ if ( $p === 'login' ) {
 }
 
 if ( $p === 'logout' ) {
+	AuditLog::logout( );
 	$auth->logout( );
 	header( 'Location: ?p=login' );
 	exit;
@@ -167,6 +171,11 @@ switch ( $p ) {
 				'name'     => $_POST[ 'domain' ] ?? '' ,
 				'register' => ! empty( $_POST[ 'register' ] ) ,
 			] );
+			AuditLog::action_ok( 'domain:new' , [
+				'domain'   => $_POST[ 'domain' ] ?? '' ,
+				'register' => ! empty( $_POST[ 'register' ] ) ,
+				'ok'       => $result->ok ,
+			] );
 			View::render( 'result' , [
 				'result'     => $result ,
 				'title'      => 'Создание домена' ,
@@ -198,6 +207,11 @@ switch ( $p ) {
 				'name'     => $_POST[ 'name' ]   ?? '' ,
 				'domain'   => $post_domain ,
 				'register' => ! empty( $_POST[ 'register' ] ) ,
+			] );
+			AuditLog::action_ok( 'allias:new' , [
+				'domain' => $post_domain ,
+				'name'   => $_POST[ 'name' ] ?? '' ,
+				'ok'     => $result->ok ,
 			] );
 			View::render( 'result' , [
 				'result'     => $result ,
@@ -276,6 +290,7 @@ switch ( $p ) {
 							$cfg->setKeys( [ 'domains_skins' , $real ] , $skin );
 						}
 					} );
+					AuditLog::action_ok( 'domain:edit' , [ 'domain' => $real , 'title' => $title , 'skin' => $skin ] );
 					header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' );
 					exit;
 				} catch ( Throwable $e ) {
@@ -325,11 +340,12 @@ switch ( $p ) {
 
 		require_once CS_CMD . '/AlliasToggle.php';
 
-		AlliasToggle::run( [
+		$result = AlliasToggle::run( [
 			'domain' => $domain ,
 			'name'   => $name ,
 			'value'  => $value ,
 		] );
+		AuditLog::action_ok( 'allias:toggle' , [ 'domain' => $domain , 'name' => $name , 'value' => $value , 'ok' => $result->ok ] );
 
 		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
 		exit;
@@ -351,10 +367,11 @@ switch ( $p ) {
 
 		require_once CS_CMD . '/DomainToggle.php';
 
-		DomainToggle::run( [
+		$result = DomainToggle::run( [
 			'domain' => $domain ,
 			'value'  => $value ,
 		] );
+		AuditLog::action_ok( 'domain:toggle' , [ 'domain' => $domain , 'value' => $value , 'ok' => $result->ok ] );
 
 		header( 'Location: ?p=dashboard' );
 		exit;
@@ -405,6 +422,11 @@ switch ( $p ) {
 				$result = DomainRemove::run( [
 					'name'  => $real ,
 					'force' => true ,
+				] );
+
+				AuditLog::action_ok( 'domain:remove' , [
+					'domain' => $real ,
+					'ok'     => $result->ok ,
 				] );
 
 				View::render( 'result' , [
@@ -481,6 +503,12 @@ switch ( $p ) {
 					'name'   => $name ,
 					'domain' => $real ,
 					'force'  => true ,
+				] );
+
+				AuditLog::action_ok( 'allias:remove' , [
+					'domain' => $real ,
+					'name'   => $name ,
+					'ok'     => $result->ok ,
 				] );
 
 				View::render( 'result' , [
@@ -678,6 +706,7 @@ switch ( $p ) {
 
 			try {
 				Json::writeAtomic( $json_file , $data );
+				AuditLog::action_ok( 'page:edit' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path ] );
 			} catch ( Throwable $e ) {
 				View::render( 'result' , [
 					'result'     => new Result( ) ,
@@ -772,6 +801,7 @@ switch ( $p ) {
 				'domain' => $domain ,
 				'allias' => $allias ,
 			] );
+			AuditLog::action_ok( 'page:new' , [ 'domain' => $domain , 'allias' => $allias , 'name' => $name , 'ok' => $result->ok ] );
 
 			View::render( 'result' , [
 				'result'     => $result ,
@@ -868,13 +898,14 @@ switch ( $p ) {
 
 		require_once CS_CMD . '/PageToggle.php';
 
-		PageToggle::run( [
+		$result = PageToggle::run( [
 			'domain' => $domain ,
 			'allias' => $allias ,
 			'path'   => $path ,
 			'key'    => $key ,
 			'value'  => $value ,
 		] );
+		AuditLog::action_ok( 'page:toggle' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'key' => $key , 'ok' => $result->ok ] );
 
 		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
 		exit;
@@ -944,6 +975,7 @@ switch ( $p ) {
 						}
 					} );
 					$result->step( 'Включено в site.config' , true , "fillers[{$real}][{$allias}][{$block}] = true" );
+					AuditLog::action_ok( 'filler:new' , [ 'domain' => $real , 'allias' => $allias , 'block' => $block ] );
 				} catch ( Throwable $e ) {
 					$result->warn( 'Не удалось включить в конфиге: ' . $e->getMessage( ) );
 				}
@@ -985,6 +1017,7 @@ switch ( $p ) {
 			}
 
 			$result = SettingsSet::run( $params );
+			AuditLog::action_ok( 'settings:set' , [ 'params' => $params , 'ok' => $result->ok ] );
 
 			if ( $result->ok ) {
 				header( 'Location: ?p=settings&saved=1' );
