@@ -9,7 +9,7 @@ parameters:
         - ../corescripts/commands
         - ../www/admin/_lib
     scanFiles:
-        - ../www/main.php
+        - ../engine/main.php
     bootstrapFiles:
         - stubs.php
     treatPhpDocTypesAsCertain: false
