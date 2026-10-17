@@ -14,7 +14,7 @@ class Scan {
 
     # www/logic/* — только папки, где есть include.php
     public static function logics ( ) : array {
-        $dir = Paths::project() . '/www/logic';
+        $dir = Paths::project() . '/logic';
         $out = [ ];
         foreach ( self::listDirs( $dir ) as $name ) {
             if ( is_file( $dir . '/' . $name . '/include.php' ) ) {
