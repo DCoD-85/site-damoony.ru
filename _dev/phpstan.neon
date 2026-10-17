@@ -1,12 +1,13 @@
+includes:
+    - phpstan-baseline.neon
+
 parameters:
-    level: 0
+    level: 5
     paths:
         - ../sources
         - ../corescripts/_lib
         - ../corescripts/commands
         - ../www/admin/_lib
-    excludePaths:
-        - ../sources/visuo/sources/visuoel
     scanFiles:
         - ../www/main.php
     bootstrapFiles:
