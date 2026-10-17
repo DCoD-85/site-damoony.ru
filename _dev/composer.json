@@ -12,7 +12,7 @@
     },
     "autoload": {
         "classmap": [
-            "../sources/",
+            "../engine/",
             "../corescripts/_lib/",
             "../corescripts/commands/"
         ],

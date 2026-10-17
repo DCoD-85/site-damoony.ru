@@ -72,7 +72,7 @@ $p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
 
 # rate limit на login
 if ( $p === 'login' && $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-	require_once PROJECT_ROOT . '/sources/middleware.php';
+	require_once PROJECT_ROOT . '/engine/middleware.php';
 	middleware::rateLimit( 'admin:login' , 10 , 60 , 1800 );
 }
 

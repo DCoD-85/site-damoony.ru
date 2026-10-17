@@ -10,8 +10,8 @@ if ( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
 
 $root      = dirname( __DIR__ );
 $www       = $root . '/www';
-$visuo_src = $root . '/sources/visuo/sources';
-$sources   = $root . '/sources';
+$visuo_src = $root . '/engine/visuo/sources';
+$sources   = $root . '/engine';
 
 if ( ! defined( 'VISUO_SRC' ) ) define( 'VISUO_SRC' , $visuo_src );
 if ( ! defined( 'SOURCES'   ) ) define( 'SOURCES'   , $sources   );
@@ -29,13 +29,16 @@ if ( ! function_exists( 'error_file' ) ) {
 # тесты ожидают стабильные URL (без cache-buster)
 if ( ! defined( 'VISUOLINK_RAND_DEFAULT' ) ) define( 'VISUOLINK_RAND_DEFAULT' , false );
 
-require_once $root . '/_dev/vendor/autoload.php';
-
-require_once $root . '/_dev/vendor/autoload.php';
-
+# Test helpers + Stubs — ДО autoload:
+# untyped class main из Stubs.php должен быть объявлен раньше,
+# иначе autoloader подтянет engine/main.php с typed ?visuorelease,
+# и $m->visuorelease = new fake_visuorelease() даст TypeError.
 require_once $www . '/tests/lib/AssertException.php';
 require_once $www . '/tests/lib/Assert.php';
 require_once $www . '/tests/lib/CaseResult.php';
 require_once $www . '/tests/lib/Suite.php';
 require_once $www . '/tests/lib/Runner.php';
 require_once $www . '/tests/lib/Stubs.php';
+
+# Composer autoload — только для классов, которых нет в Stubs
+require_once $root . '/_dev/vendor/autoload.php';

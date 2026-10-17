@@ -57,7 +57,7 @@ class main {
 	}
 	public function init( ) {
 		# 
-		( include_once $path = __DIR__ . DS . '..' . DS . 'sources' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
 		# 
 		$this->visuorelease = $this->visuorelease ?: new visuorelease( $this );
