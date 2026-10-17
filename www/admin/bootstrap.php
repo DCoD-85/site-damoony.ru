@@ -19,6 +19,26 @@ session_set_cookie_params( [
 
 session_start( );
 
+# --- security headers ---
+header( 'X-Content-Type-Options: nosniff' );
+header( 'X-Frame-Options: DENY' );
+header( 'Referrer-Policy: same-origin' );
+header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
+
+if ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) {
+	header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
+}
+
+header(
+	"Content-Security-Policy: default-src 'self'; "
+	. "script-src 'self' 'unsafe-inline'; "
+	. "style-src 'self' 'unsafe-inline'; "
+	. "img-src 'self' data:; "
+	. "font-src 'self' data:; "
+	. "connect-src 'self'; "
+	. "frame-ancestors 'none'"
+);
+
 define( 'ADMIN_ROOT'   , __DIR__ );
 define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
 
