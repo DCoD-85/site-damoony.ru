@@ -5,4 +5,6 @@
 /phpunit.phar
 /composer-setup.php
 /.phpunit.cache/
-/phpstan-baseline.neon
+/phpstan_level5.txt
+/phpstan_novisuoel.txt
+/phpstan_visuoel.txt
