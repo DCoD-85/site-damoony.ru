@@ -16,8 +16,10 @@ session_set_cookie_params( [
 	'httponly' => true ,
 	'samesite' => 'Lax' ,
 ] );
-
 session_start( );
+
+define( 'ADMIN_ROOT'   , __DIR__ );
+define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
 
 # --- security headers ---
 header( 'X-Content-Type-Options: nosniff' );
@@ -27,11 +29,6 @@ header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
 
 if ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) {
 	header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
-}
-# --- rate limit для логина ---
-require_once PROJECT_ROOT . '/sources/middleware.php';
-if ( $p === 'login' && $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-	middleware::rateLimit( 'admin:login' , 10 , 60 , 1800 );   # 10 попыток/мин, бан 30 мин
 }
 
 header(
@@ -43,9 +40,6 @@ header(
 	. "connect-src 'self'; "
 	. "frame-ancestors 'none'"
 );
-
-define( 'ADMIN_ROOT'   , __DIR__ );
-define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
 
 $cs = PROJECT_ROOT . '/corescripts';
 
