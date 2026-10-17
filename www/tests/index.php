@@ -25,8 +25,8 @@ if ( ! function_exists( 'error_file' ) ) {
 # --- пути ---
 $root_dir  = dirname( __DIR__ );             # www/
 $proj_root = dirname( $root_dir );           # корень проекта
-define( 'VISUO_SRC' , $proj_root . '/sources/visuo/sources' );
-define( 'SOURCES'   , $proj_root . '/sources' );
+define( 'VISUO_SRC' , $proj_root . '/engine/visuo/sources' );
+define( 'SOURCES'   , $proj_root . '/engine' );
 define( 'TEST_ROOT' , __DIR__ );
 
 # --- visuotag stack ---
