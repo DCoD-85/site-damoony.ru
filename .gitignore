@@ -37,3 +37,5 @@ www/media/*/
 language/domains/*/save.txt.inc
 *.Разбор проекта*.md
 secure/admin_fails.json
+_dev/*.txt
+_dev/.phpunit.cache/
