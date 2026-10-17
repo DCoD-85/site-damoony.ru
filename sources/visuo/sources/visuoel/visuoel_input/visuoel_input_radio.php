@@ -5,6 +5,12 @@ class visuoel_input_radio extends visuoel_input__element {
 		return 'radio';
 	}
 
+	public function data ( ) : visuoel_input_radio__data {
+		/** @var visuoel_input_radio__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input_radio__data( $this );
 	}

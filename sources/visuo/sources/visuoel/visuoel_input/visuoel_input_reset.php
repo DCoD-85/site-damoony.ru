@@ -5,6 +5,12 @@ class visuoel_input_reset extends visuoel_input__element {
 		return 'reset';
 	}
 
+	public function data ( ) : visuoel_input_reset__data {
+		/** @var visuoel_input_reset__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input_reset__data( $this );
 	}

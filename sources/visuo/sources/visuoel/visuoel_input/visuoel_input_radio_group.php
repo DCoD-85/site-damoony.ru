@@ -8,6 +8,12 @@ class visuoel_input_radio_group extends visuoel_input__element {
 		return 'radio_group';
 	}
 
+	public function data ( ) : visuoel_input_radio_group__data {
+		/** @var visuoel_input_radio_group__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input_radio_group__data( $this );
 	}

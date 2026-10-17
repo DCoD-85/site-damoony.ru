@@ -5,6 +5,12 @@ class visuoel_input_text extends visuoel_input__element {
 		return 'text';
 	}
 
+	public function data ( ) : visuoel_input_text__data {
+		/** @var visuoel_input_text__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input_text__data( $this );
 	}

@@ -8,6 +8,12 @@ class visuoel_input_select extends visuoel_input__element {
 		return 'select';
 	}
 
+	public function data ( ) : visuoel_input_select__data {
+		/** @var visuoel_input_select__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input_select__data( $this );
 	}

@@ -673,54 +673,6 @@ parameters:
 			path: ../sources/visuo/sources/visuoel/visuoel_group_element.php
 
 		-
-			message: '#^Method visuoel_input\:\:get_email__data\(\) should return visuoel_input_email__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_file__data\(\) should return visuoel_input_file__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_hidden__data\(\) should return visuoel_input_hidden__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_password__data\(\) should return visuoel_input_password__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_select__data\(\) should return visuoel_input_select__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_submit__data\(\) should return visuoel_input_submit__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_text__data\(\) should return visuoel_input_text__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
-			message: '#^Method visuoel_input\:\:get_textarea__data\(\) should return visuoel_input_textarea__data\|null but returns visuoel_input__element__data\.$#'
-			identifier: return.type
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
-
-		-
 			message: '#^Return type \(visuoel_input_button\) of method visuoel_input\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
 			identifier: method.childReturnType
 			count: 1

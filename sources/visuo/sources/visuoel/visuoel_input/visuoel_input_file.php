@@ -5,6 +5,12 @@ class visuoel_input_file extends visuoel_input__element {
 		return 'file';
 	}
 
+	public function data ( ) : visuoel_input_file__data {
+		/** @var visuoel_input_file__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function make_default_data ( ) : visuoel__data {
 		return new visuoel_input_file__data( $this );
 	}
