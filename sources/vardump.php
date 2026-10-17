@@ -107,7 +107,7 @@ class vardump {
 				}
 				
 				
-				$title_strlen = ( is_string( $var ) ? ':' . mb_strlen( $var ) : '' );
+				$title_strlen = ( is_string( $var ) ? ':' . mb_strlen( (string) $var ) : '' );
 				$visuotag->tag( 'div' , class : 'my_vardump_row' )
 					->tag( 'span' , class : 'my_vardump_row_type' )->content( $title_type . $title_len )
 					->parent( )->tag( 'span' , class : 'my_vardump_row_name' )->content( $title_var )
@@ -172,19 +172,19 @@ class vardump {
 					}
 					else if( is_string( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'.htmlspecialchars( $v ).'</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'.htmlspecialchars( $v ).'</span>
 						</div><div class="clear">
 						</div>';
 					}
 					else if( is_int( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 						</div><div class="clear">
 						</div>';
 					}
 					else if( is_bool( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 						</div><div class="clear">
 						</div>';
 					}
@@ -238,25 +238,25 @@ class vardump {
 					}
 					else if( is_string( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'.htmlspecialchars( $v ).'</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'.htmlspecialchars( $v ).'</span>
 						</div><div class="clear">
 						</div>';
 					}
 					else if( is_int( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 						</div><div class="clear">
 						</div>';
 					}
 					else if( is_bool( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 						</div><div class="clear">
 						</div>';
 					}
 					else if( is_null( $v ) ){
 						$return .= '<div class="my_vardump_row">
-							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">NULL</span>
+							<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$k.'</b> = <span style="color : #693 ; ">NULL</span>
 						</div><div class="clear">
 						</div>';
 					}
@@ -271,7 +271,7 @@ class vardump {
 			
 			if( is_string( $v ) ){
 				$return .= '<div class="my_vardump_row">
-					<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'.htmlspecialchars( $v ).'</span>
+					<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'.htmlspecialchars( $v ).'</span>
 				</div><div class="clear">
 				</div>';
 			}
@@ -279,7 +279,7 @@ class vardump {
 				$return .= '<div class="my_vardump_row">
 					<span class="my_vardump_row_body">
 						' . ( $headers == true
-							 ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>'
+							 ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>'
 							  : ''
 							) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 				</div><div class="clear">
@@ -287,13 +287,13 @@ class vardump {
 			}
 			else if( is_bool( $v ) ){
 				$return .= '<div class="my_vardump_row">
-					<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'. $v .'</span>
+					<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 				</div><div class="clear">
 				</div>';
 			}
 			else if( is_null( $v ) ){
 				$return .= '<div class="my_vardump_row">
-					<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( $v ).'</b>' : '' ) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'. $v .'</span>
+					<span class="my_vardump_row_body">' . ( $headers == true ? strtoupper( $var_type ).':<b>'.mb_strlen( (string) $v ).'</b>' : '' ) . '</span> <b>'.$v.'</b> = <span style="color : #693 ; ">'. $v .'</span>
 				</div><div class="clear">
 				</div>';
 			}

@@ -13,7 +13,7 @@ class visuolog {
 		$this->settings_online = $online;
 	}
 
-	public function add ( string $message , string $method , string $file , string $line ) : void {
+	public function add ( string $message , string $method , string $file , int|string $line ) : void {
 		if( isset( $_SERVER[ 'DOCUMENT_ROOT' ] ) && $_SERVER[ 'DOCUMENT_ROOT' ] !== '' ) {
 			$dr = str_replace( '/' , DS , $_SERVER[ 'DOCUMENT_ROOT' ] );
 			$file = str_replace( $dr , '...' , $file );
@@ -76,7 +76,7 @@ class visuolog_row {
 	public string $message = '';
 	public string $method = '';
 	public string $file = '';
-	public string $line = '';
+	public int|string $line = '';
 	public null|DateTime $datetime = null;
 
 	# --- methods ---
@@ -84,13 +84,13 @@ class visuolog_row {
 		$this->visuolog = $visuolog;
 	}
 
-	public function add ( string $message , int $row_num , string $method , string $file , string $line ) : void {
+	public function add ( string $message , int $row_num , string $method , string $file , int|string $line ) : void {
 		$this->hrtime   = hrtime( true );
 		$this->row_num  = $row_num;
 		$this->message  = $message;
 		$this->method   = $method;
 		$this->file     = $file;
-		$this->line     = $line;
+		$this->line = (string) $line;
 		$this->datetime = new DateTime( );
 	}
 

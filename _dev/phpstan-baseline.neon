@@ -1,6 +1,1122 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Strict comparison using \=\=\= between non\-empty\-string and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: ../corescripts/commands/AdminPasswd.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: ../corescripts/commands/SettingsSet.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: ../sources/blacklist.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>allias_real_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: ../sources/blacklist.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>domain_real_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: ../sources/blacklist.php
+
+		-
+			message: '#^Access to an undefined property db_driver_interface\:\:\$config\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/db.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: ../sources/db.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: ../sources/db/config.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: ../sources/db/mysqli/driver.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: ../sources/db/mysqli/query.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''SELECT'' and ''SELECT'' will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: ../sources/db/mysqli/query.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between false and true will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: ../sources/db/mysqli/query.php
+
+		-
+			message: '#^Call to an undefined method db_query_interface\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: ../sources/db/schema.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: ../sources/library.php
+
+		-
+			message: '#^Property library_dir\:\:\$library is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: ../sources/library/dir.php
+
+		-
+			message: '#^Property library_file\:\:\$library is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: ../sources/library/file.php
+
+		-
+			message: '#^Call to method library_gen\:\:init\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
+			count: 1
+			path: ../sources/library/gen.php
+
+		-
+			message: '#^Property library_gen\:\:\$library is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: ../sources/library/gen.php
+
+		-
+			message: '#^Property library_image\:\:\$library is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: ../sources/library/image.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: ../sources/library/link.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between true and true will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: ../sources/library/link.php
+
+		-
+			message: '#^Variable \$return might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: ../sources/mod.php
+
+		-
+			message: '#^Parameter \#1 \$string of function mb_strlen expects string, bool given\.$#'
+			identifier: argument.type
+			count: 3
+			path: ../sources/vardump.php
+
+		-
+			message: '#^Parameter \#1 \$string of function mb_strlen expects string, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: ../sources/vardump.php
+
+		-
+			message: '#^Parameter \#1 \$string of function mb_strlen expects string, null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: ../sources/vardump.php
+
+		-
+			message: '#^Parameter \#2 \$varname of method vardump\:\:my_vardump\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: ../sources/vardump.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>visuoel" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: ../sources/visuo/sources/visuoel.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_block/visuoel_block_html.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_block__element.php
+
+		-
+			message: '#^Return type \(visuoel_button_button\) of method visuoel_button\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$css_class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_button__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_button__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_button__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_button__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_button__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$is_html\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_block.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$checked\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label_comment\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$checked\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label_comment\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field/visuoel_field_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$css_class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label_comment\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__button.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$accept\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$autocomplete\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$cols\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$label_comment\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$multiple\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$options\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$placeholder\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$placeholder_option\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$readonly\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$rows\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$selected\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_hint\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$show_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$size\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_field__element.php
+
+		-
+			message: '#^Return type \(visuoel_form_form\) of method visuoel_form\:\:form\(\) should be compatible with return type \(visuoel_form\) of method visuoel\:\:form\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$legend\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_fieldset.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_data_jquery\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_enctype\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_jquery\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_method\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$form_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$title_text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_form/visuoel_form_form.php
+
+		-
+			message: '#^Method visuoel_group_element\:\:data\(\) should return visuoel_group_element__data but returns visuoel__data\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_group_element.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_email__data\(\) should return visuoel_input_email__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_file__data\(\) should return visuoel_input_file__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_hidden__data\(\) should return visuoel_input_hidden__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_password__data\(\) should return visuoel_input_password__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_select__data\(\) should return visuoel_input_select__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_submit__data\(\) should return visuoel_input_submit__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_text__data\(\) should return visuoel_input_text__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Method visuoel_input\:\:get_textarea__data\(\) should return visuoel_input_textarea__data\|null but returns visuoel_input__element__data\.$#'
+			identifier: return.type
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Return type \(visuoel_input_button\) of method visuoel_input\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$selected\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_checkbox_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$selected\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_radio_group.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$autocomplete\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$multiple\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$options\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$placeholder_option\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$readonly\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$selected\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$size\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_select.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$autocomplete\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$cols\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$placeholder\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$readonly\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$rows\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input/visuoel_input_textarea.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$accept\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$autocomplete\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$checked\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$multiple\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$placeholder\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$readonly\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_input__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_message__element.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$html_attrs\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_table.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$html_mode\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_table.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$colspan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$inline\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$is_html\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$rowspan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$width\.$#'
+			identifier: property.notFound
+			count: 2
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel_field__element__data\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel_field__element__data\:\:\$is_html\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_table/visuoel_table_cell.php
+
+		-
+			message: '#^Access to an undefined property visuoel__data\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: ../sources/visuo/sources/visuoel/visuoel_tabs/visuoel_tabs_page.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between true and true will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: ../sources/visuo/sources/visuolink.php
+
+		-
+			message: '#^Parameter \#1 \$html of method visuotag\:\:content\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: ../sources/visuo/sources/visuolog.php
+
+		-
+			message: '#^Parameter \#4 \$line of method visuolog\:\:add\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: ../sources/visuo/sources/visuometa.php
+
+		-
+			message: '#^Instanceof between visuotag and visuotag will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: ../sources/visuo/sources/visuopage.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between visuotag and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: ../sources/visuo/sources/visuopage.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between visuotag and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: ../sources/visuo/sources/visuorelease.php
+
+		-
+			message: '#^Parameter \#4 \$line of method visuolog\:\:add\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 6
+			path: ../sources/visuo/sources/visuotag.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between visuotag and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: ../sources/visuo/sources/visuotag.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: ../sources/visuo/sources/visuotag.php
+
+		-
 			message: '#^Path in include\(\) "/views/_layout\.php" is not a file or it does not exist\.$#'
 			identifier: include.fileNotFound
 			count: 1

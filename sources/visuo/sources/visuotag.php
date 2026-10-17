@@ -268,8 +268,8 @@ class visuotag {
 		return $this->attrs_add( 'id' , $value );
 	}
 
-	public function content ( string $html ) : visuotag {
-		$this->elements[ ] = $html;
+	public function content ( string|int|float $html ) : visuotag {
+		$this->elements[ ] = (string) $html;
 		return $this;
 	}
 
