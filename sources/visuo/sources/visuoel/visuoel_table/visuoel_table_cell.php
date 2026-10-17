@@ -91,9 +91,11 @@ class visuoel_table_cell extends visuoel_group_element {
 			$this->add( $block );
 			$d->content_block = $block;
 		}
-
-		$d->content_block->data( )->content = $d->content;
-		$d->content_block->data( )->is_html = $d->is_html;
+		
+		/** @var visuoel_field_block__data $bdata */
+		$bdata = $d->content_block->data( );
+		$bdata->content = $d->content;
+		$bdata->is_html = $d->is_html;
 	}
 
 	# --- proxies to data (fluent) ---

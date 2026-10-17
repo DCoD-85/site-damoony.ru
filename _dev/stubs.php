@@ -7,7 +7,7 @@ if ( ! defined( 'CS_ROOT'  ) ) define( 'CS_ROOT'  , '' );
 if ( ! defined( 'CS_LIB'   ) ) define( 'CS_LIB'   , '' );
 if ( ! defined( 'CS_CMD'   ) ) define( 'CS_CMD'   , '' );
 if ( ! defined( 'CS_TPL'   ) ) define( 'CS_TPL'   , '' );
-if ( ! defined( 'ADMIN_ROOT' ) ) define( 'ADMIN_ROOT' , '' );
+if ( ! defined( 'ADMIN_ROOT' ) ) define( 'ADMIN_ROOT' , __DIR__ . '/../www/admin' );
 
 function error ( string $title , string $message , string $file = '' , int $line = 0 ) : never {}
 function error_file ( string $path , string $file , int $line ) : never {}

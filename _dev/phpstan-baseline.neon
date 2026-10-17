@@ -151,28 +151,10 @@ parameters:
 			path: ../sources/visuo/sources/visuoel/visuoel_block/visuoel_block_html.php
 
 		-
-			message: '#^Return type \(visuoel_button_button\) of method visuoel_button\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_button.php
-
-		-
-			message: '#^Return type \(visuoel_form_form\) of method visuoel_form\:\:form\(\) should be compatible with return type \(visuoel_form\) of method visuoel\:\:form\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_form.php
-
-		-
 			message: '#^Method visuoel_group_element\:\:data\(\) should return visuoel_group_element__data but returns visuoel__data\|null\.$#'
 			identifier: return.type
 			count: 1
 			path: ../sources/visuo/sources/visuoel/visuoel_group_element.php
-
-		-
-			message: '#^Return type \(visuoel_input_button\) of method visuoel_input\:\:button\(\) should be compatible with return type \(visuoel_button\) of method visuoel\:\:button\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: ../sources/visuo/sources/visuoel/visuoel_input.php
 
 		-
 			message: '#^Access to an undefined property visuoel__data\:\:\$disabled\.$#'
@@ -371,9 +353,3 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 1
 			path: ../sources/visuo/sources/visuotag.php
-
-		-
-			message: '#^Path in include\(\) "/views/_layout\.php" is not a file or it does not exist\.$#'
-			identifier: include.fileNotFound
-			count: 1
-			path: ../www/admin/_lib/View.php
