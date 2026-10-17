@@ -44,6 +44,10 @@ $host = strrev( implode( '.' , [ $host[ 0 ] ?? '' , $host[ 1 ] ?? '' ] ) );
 # Content-Type
 header( 'Content-Type: text/html; charset=UTF-8' );
 
+# is_https — до middleware
+$is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
+         || ( ( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' );
+
 # --- middleware pipeline ---
 require_once __DIR__ . '/../sources/middleware.php';
 
@@ -51,10 +55,6 @@ require_once __DIR__ . '/../sources/middleware.php';
     ->add( fn( ) => middleware::securityHeaders( $is_https ) , 'security' )
     ->add( fn( ) => middleware::rateLimit( 'site' , 120 , 60 , 900 ) , 'rate-limit' )
     ->run( );
-
-# session — secure только по HTTPS
-$is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
-         || ( ( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' );
 
 session_set_cookie_params( [
 	'lifetime' => 0 ,
@@ -113,9 +113,11 @@ function error_class ( string $classname , string $file , string $line ) {
 	error( 'Отсутствует класс' , 'Отсутствует класс: ' . $classname . '. Проверьте целостность структуры сайта.' , $file , $line );
 }
 
-( include_once $path = __DIR__ . DS . 'constants.php' ) or error_file( $path , __FILE__ , __LINE__ );
-( include_once $path = __DIR__ . DS . 'included.php' ) or error_file( $path , __FILE__ , __LINE__ );
-( include_once $path = __DIR__ . DS . 'main.php' ) or error_file( $path , __FILE__ , __LINE__ );
+$engine = __DIR__ . DS . '..' . DS . 'engine';
+
+( include_once $path = $engine . DS . 'constants.php' ) or error_file( $path , __FILE__ , __LINE__ );
+( include_once $path = $engine . DS . 'included.php' ) or error_file( $path , __FILE__ , __LINE__ );
+( include_once $path = $engine . DS . 'main.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 $url = null;
 

@@ -85,7 +85,7 @@ class main {
 		$this->language->load( )->init( );
 		
 		$logic_ver = $this->main_settings->get( 'logic' );
-		( include_once $path = __DIR__ . DS . 'logic' . DS . $logic_ver . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = dirname( __DIR__ ) . DS . 'logic' . DS . $logic_ver . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
 		$this->blacklist->init( );
 		

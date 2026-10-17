@@ -9,6 +9,8 @@ error_reporting( E_ALL );
 ini_set( 'display_errors' , '1' );
 header( 'Content-Type: text/html; charset=UTF-8' );
 
+print phpinfo( );
+
 $cases_dir   = __DIR__ . '/cases';
 $archive_dir = __DIR__ . '/archive';
 
