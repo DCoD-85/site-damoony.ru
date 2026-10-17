@@ -17,8 +17,8 @@
             "../corescripts/commands/"
         ],
         "files": [
-            "../www/constants.php",
-            "../www/included.php"
+            "../engine/constants.php",
+            "../engine/included.php"
         ]
     },
     "autoload-dev": {
