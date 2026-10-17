@@ -26,7 +26,7 @@ class visuoel_form_form extends visuoel_group_element {
 	}
 
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 
 		$form = new visuotag( );
 		$form = $form->tag( 'form' );

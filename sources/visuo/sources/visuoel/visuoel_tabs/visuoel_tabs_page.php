@@ -17,7 +17,7 @@ class visuoel_tabs_page extends visuoel_group_element {
 
 	protected function build ( ) : void {
 		$id = 'tab_' . spl_object_id( $this );
-		$d  = $this->__data;
+		$d  = $this->data();
 
 		$title = new visuotag( );
 		$title = $title->tag( 'span' , class : 'tab_title' );

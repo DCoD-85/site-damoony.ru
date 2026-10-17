@@ -34,8 +34,14 @@ class visuoel_table extends visuoel_group {
 		return new visuoel_table__data( $this );
 	}
 
+	public function data ( ) : visuoel_table__data {
+		/** @var visuoel_table__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 
 		if ( $d->html_mode ) {
 			$vt = new visuotag( );
@@ -53,12 +59,12 @@ class visuoel_table extends visuoel_group {
 	}
 
 	public function html_mode ( bool $mode = true ) : static {
-		$this->__data->html_mode = $mode;
+		$this->data()->html_mode = $mode;
 		return $this;
 	}
 
 	public function attr ( string $name , string $value ) : static {
-		$this->__data->html_attrs[ $name ] = $value;
+		$this->data()->html_attrs[ $name ] = $value;
 		return $this;
 	}
 

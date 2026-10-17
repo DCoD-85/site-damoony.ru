@@ -29,8 +29,14 @@ class visuoel_field_radio extends visuoel_field__element {
 		return new visuoel_field_radio__data( $this );
 	}
 
+	public function data ( ) : visuoel_field_radio__data {
+		/** @var visuoel_field_radio__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 
 		$field = new visuotag( );
 		$field = $field->tag( 'div' , class : 'field field_radio' );

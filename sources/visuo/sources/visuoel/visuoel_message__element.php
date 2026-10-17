@@ -14,7 +14,7 @@ abstract class visuoel_message__element extends visuoel_group_element {
 	}
 
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 
 		$vt = new visuotag( );
 		$vt = $vt->tag( 'div' , class : 'message message_' . $this->message_type( ) );

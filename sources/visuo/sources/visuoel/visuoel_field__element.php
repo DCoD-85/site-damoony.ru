@@ -33,7 +33,7 @@ abstract class visuoel_field__element extends visuoel_group_element {
 		$input_el = $this->make_input( );
 		if ( $input_el === null ) return;
 
-		$d   = $this->__data;
+		$d   = $this->data();
 		$inp = $input_el->data( );
 
 		$inp->id                 = 'field_' . $d->name;
@@ -71,7 +71,7 @@ abstract class visuoel_field__element extends visuoel_group_element {
 	}
 
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 
 		$field = new visuotag( );
 		$field = $field->tag( 'div' , class : 'field field_' . $this->input_type( ) );

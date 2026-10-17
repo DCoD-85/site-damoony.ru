@@ -23,8 +23,14 @@ abstract class visuoel_field__button extends visuoel_field__element {
 		return new visuoel_field__button__data( $this );
 	}
 
+	public function data ( ) : visuoel_field__button__data {
+		/** @var visuoel_field__button__data $data */
+		$data = $this->__data;
+		return $data;
+	}
+
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 
 		$field = new visuotag( );
 		$field = $field->tag( 'div' , class : 'field field_' . $this->input_type( ) );

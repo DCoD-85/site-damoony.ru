@@ -30,7 +30,7 @@ class visuoel_table_cell extends visuoel_group_element {
 	}
 
 	protected function build ( ) : void {
-		$d = $this->__data;
+		$d = $this->data();
 		$html_mode = $this->detect_html_mode( );
 
 		if ( $html_mode ) {
