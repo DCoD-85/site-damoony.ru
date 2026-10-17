@@ -89,9 +89,9 @@ class SettingsSet {
                 return null;
 
             case 'logic' :
-                $p = PROJECT_ROOT . '/www/logic/' . $value . '/include.php';
+                $p = Paths::project() . '/logic/' . $value . '/include.php';
                 if ( ! is_file( $p ) ) {
-                    return "движок '{$value}' не найден (нет www/logic/{$value}/include.php)";
+                    return "движок '{$value}' не найден (нет logic/{$value}/include.php)";
                 }
                 return null;
         }
