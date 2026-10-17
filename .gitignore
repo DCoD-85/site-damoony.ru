@@ -35,6 +35,5 @@ www/media/*/
 
 # Language доменов: авто-дефолты не коммитим
 language/domains/*/save.txt.inc
-_audit/
 *.Разбор проекта*.md
 secure/admin_fails.json
