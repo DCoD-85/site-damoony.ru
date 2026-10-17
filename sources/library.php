@@ -23,16 +23,24 @@ class library {
 		( include_once $path = __DIR__ . DS . 'library' . DS . 'file.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		( include_once $path = __DIR__ . DS . 'library' . DS . 'image.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
-		$this->gen = class_exists( 'library_gen' ) ?  new library_gen( $this ) : error_class( 'library_gen' , __FILE__ , __LINE__ );
-		$this->dir = class_exists( 'library_dir' ) ?  new library_dir( $this ) : error_class( 'library_dir' , __FILE__ , __LINE__ );
-		$this->url = class_exists( 'library_url' ) ?  new library_url( $this ) : error_class( 'library_url' , __FILE__ , __LINE__ );
-		$this->link = class_exists( 'library_link' ) ?  new library_link( $this ) : error_class( 'library_link' , __FILE__ , __LINE__ );
-		$this->vars = class_exists( 'library_vars' ) ?  new library_vars( $this ) : error_class( 'library_vars' , __FILE__ , __LINE__ );
-		$this->file = class_exists( 'library_file' ) ?  new library_file( $this ) : error_class( 'library_file' , __FILE__ , __LINE__ );
-		$this->image = class_exists( 'library_image' ) ?  new library_image( $this ) : error_class( 'library_image' , __FILE__ , __LINE__ );
+		$this->gen   = self::make( 'library_gen'   , $this );
+		$this->dir   = self::make( 'library_dir'   , $this );
+		$this->url   = self::make( 'library_url'   , $this );
+		$this->link  = self::make( 'library_link'  , $this );
+		$this->vars  = self::make( 'library_vars'  , $this );
+		$this->file  = self::make( 'library_file'  , $this );
+		$this->image = self::make( 'library_image' , $this );
 
 		// init library classes
 		$this->url->init( );
+	}
+	
+	private static function make ( string $class , self $library ) : object {
+		if ( ! class_exists( $class ) ) {
+			error_class( $class , __FILE__ , __LINE__ );
+			throw new \LogicException( "Class {$class} not found" );
+		}
+		return new $class( $library );
 	}
 
 	public function gen ( ) {

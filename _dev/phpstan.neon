@@ -1,0 +1,15 @@
+parameters:
+    level: 0
+    paths:
+        - ../sources
+        - ../corescripts/_lib
+        - ../corescripts/commands
+        - ../www/admin/_lib
+    excludePaths:
+        - ../sources/visuo/sources/visuoel
+    scanFiles:
+        - ../www/main.php
+    bootstrapFiles:
+        - stubs.php
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false

@@ -1,0 +1,8 @@
+/vendor/
+/composer.lock
+/composer.phar
+/phpstan.phar
+/phpunit.phar
+/composer-setup.php
+/.phpunit.cache/
+/phpstan-baseline.neon
