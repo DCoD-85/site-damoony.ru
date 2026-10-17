@@ -49,7 +49,7 @@ $is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
          || ( ( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' );
 
 # --- middleware pipeline ---
-require_once __DIR__ . '/../sources/middleware.php';
+require_once __DIR__ . '/../engine/middleware.php';
 
 ( new middleware( ) )
     ->add( fn( ) => middleware::securityHeaders( $is_https ) , 'security' )
