@@ -1,0 +1,10 @@
+{
+    "name": "damoony/alogic",
+    "description": "Alternative logic router for Damoony",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "alogic\\": ""
+        }
+    }
+}
