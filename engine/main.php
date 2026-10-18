@@ -85,8 +85,8 @@ class main {
 		$this->language->load( )->init( );
 		
 		$logic_ver = $this->main_settings->get( 'logic' );
-		( include_once $path = dirname( __DIR__ ) . DS . 'logic' . DS . $logic_ver . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		
+		( include_once $path = dirname( __DIR__ ) . DS . 'engines' . DS . 'legacy' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
+
 		$this->blacklist->init( );
 		
 		$db = $this->db->db( );
@@ -120,7 +120,7 @@ class main {
 		
 		# --- ВЫБОР ДВИЖКА ЛОГИКИ ---
 		if ( $this->main_settings->get( 'logic_type' ) === 'alogic' ) {
-			require_once __DIR__ . '/alogic_bridge.php';
+			require_once dirname( __DIR__ ) . '/engines/alogic/alogic_bridge.php';
 			alogic_resolve( $this , $static_domain , $static_allias );
 		} else {
 			# Старая логика (legacy)
