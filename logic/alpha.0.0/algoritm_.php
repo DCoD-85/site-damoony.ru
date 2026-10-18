@@ -238,7 +238,7 @@ class algoritm_ {
 		$class = $this->main->algoritm->baseclass;
 		$path = $this->main->algoritm->basepath . $class . '.php';
 		$class = '\\' . $static_domain . '\\' . $static_allias . '\\' . $class;
-
+		
 		$this->on_route( $class , $path );
 
 		if( $in_array && include_once $path ){
@@ -279,8 +279,14 @@ class algoritm_ {
 		}
 	}
 
-	public function release_ ( object $object ){
+	public function release_ ( object $object ) {
+		// Отключаем старую магию URL для нового роутера
+		if ( $this->main->main_settings->get( 'logic_type' ) === 'alogic' ) {
+			return; 
+		}
+
 		$available = $object->algoritmdata->available;
+        // ... дальше твой старый код ...
 		$auth = $object->algoritmdata->auth;
 		$search = $object->algoritmdata->search;
 		$default = $object->algoritmdata->default;

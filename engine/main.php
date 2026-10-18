@@ -209,7 +209,7 @@ class main_path {
 class main_settings {
 	# vars
 	public null|main $main = null;
-	public string $logic_type = 'alogic'; // 'legacy' или 'alogic'
+	public string $logic_type = 'legacy'; // 'legacy' или 'alogic'
 	public string $domain_real_name;
 	public string $allias_real_name;
 	private string $language;

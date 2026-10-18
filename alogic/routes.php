@@ -7,19 +7,11 @@ use alogic\Router;
 /** @var Router $router */
 $router = new Router();
 
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/index', 'algoritm_lang_index');
+// Основные страницы (из algoritm_lang.data.json)
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}', 'algoritm_lang');
+$router->add('/{lang:[a-z]{2}-[a-z]{2}}/{page:index|docs|news|downloads|download|login|logout|registration}', 'algoritm_lang_index');
 
-// Пример из вашего ТЗ:
-// /users/ — список всех пользователей
-$router->add('/users', 'algoritm_users_list');
-
-// /users/{SameUser} — сводная информация по профилю
-// Регулярка из вашего примера: [A-Z0-9]{5,30}
-$router->add('/users/{login:[A-Z0-9]{5,30}}', 'algoritm_users_profile');
-
-// /users/{SameUser}/{tab} — конкретные страницы
-// Ограничиваем tab тремя значениями
-$router->add('/users/{login:[A-Z0-9]{5,30}}/{tab:name|info|history|messages}', 'algoritm_users_tab');
+// Профиль пользователя (динамика)
+$router->add('/{lang:[a-z]{2}-[a-z]{2}}/profile/{login:[A-Za-z0-9_-]+}', 'algoritm_profile_user');
 
 return $router;
