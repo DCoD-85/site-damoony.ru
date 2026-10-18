@@ -3,10 +3,21 @@
 
 function alogic_resolve( $main , $static_domain , $static_allias ) {
     require_once __DIR__ . '/bootstrap.php';
-    $router = require_once __DIR__ . '/routes.php';
+    
+    // 1. Ищем routes.php в аллиасе
+    $logic_ver = $main->main_settings->get('logic');
+    $domain = $main->main_settings->domain_real_name;
+    $local_routes = dirname(dirname(__DIR__)) . "/app/{$logic_ver}/domain/{$domain}/allias/{$static_allias}/routes.php";
+    
+    if ( file_exists( $local_routes ) ) {
+        $router = require_once $local_routes;
+    } else {
+        $router = require_once __DIR__ . '/routes.php'; // Фоллбэк
+    }
     
     $uri = $_SERVER[ 'REQUEST_URI' ] ?? '/';
     $match = $router->match( $uri );
+    // ... дальше код без изменений ...
     
     if ( $match === null ) {
         alogic_error( $main , $static_domain , $static_allias , 404 );

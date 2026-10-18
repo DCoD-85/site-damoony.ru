@@ -20,9 +20,18 @@ class algoritm_lang
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
 		
+		
 		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'index' ] , $url_vars );
 		http_response_code( 307 );
 		header( 'Location: ' . $href );
 		exit;
+	}
+
+	public function guest  ( ) { return $this->render( ); }
+	public function logged ( ) { return $this->render( ); }
+
+	public function render ( ) {
+		
+		$this->default( );
 	}
 }
