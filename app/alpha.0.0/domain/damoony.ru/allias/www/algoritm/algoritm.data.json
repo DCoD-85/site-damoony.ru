@@ -1,0 +1,12 @@
+{
+	"default": {
+		"available": [
+			"index",
+			"dd",
+			"qwert"
+		],
+		"auth": false,
+		"search": true,
+		"default": false
+	}
+}

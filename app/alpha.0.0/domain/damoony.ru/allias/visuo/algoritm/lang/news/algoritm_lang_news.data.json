@@ -1,0 +1,11 @@
+{
+	"default": {
+		"available": [
+			"" ,
+			"([a-z0-9-]+)|page"
+		],
+		"auth": false,
+		"search": true,
+		"default": true
+	}
+}

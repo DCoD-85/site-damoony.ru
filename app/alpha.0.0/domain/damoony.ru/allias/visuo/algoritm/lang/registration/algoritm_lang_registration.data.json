@@ -1,0 +1,10 @@
+{
+	"default": {
+		"available": [
+			"registration"
+		],
+		"auth": false,
+		"search": false,
+		"default": true
+	}
+}

@@ -1,0 +1,10 @@
+{
+	"default": {
+		"available": [
+			"login"
+		],
+		"auth": false,
+		"search": false,
+		"default": true
+	}
+}
