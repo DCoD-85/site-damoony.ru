@@ -1,10 +1,8 @@
 <?PHP
 
 function alogic_resolve( $main , $static_domain , $static_allias ) {
-    // Подключаем автозагрузчик
+    // 1. Подключаем автозагрузчик и маршруты
     require_once dirname( __DIR__ ) . '/alogic/bootstrap.php';
-
-    // Загружаем маршруты
     $router = require_once dirname( __DIR__ ) . '/alogic/routes.php';
     
     $uri = $_SERVER[ 'REQUEST_URI' ] ?? '/';
@@ -15,23 +13,39 @@ function alogic_resolve( $main , $static_domain , $static_allias ) {
         die( '404 Not Found (alogic)' );
     }
     
-    $handler = $match[ 'handler' ];
-    $full_handler = $static_domain . '\\' . $static_allias . '\\' . $handler;
+    $handler = $match[ 'handler' ]; // например, 'algoritm_profile_user'
+    $params  = $match[ 'params'  ]; // например, ['login' => 'SameUser']
     
-    // Теперь класс должен найтись автоматически
-    if ( ! class_exists( $full_handler ) ) {
-        http_response_code( 500 );
-        die( 'Class not found: ' . htmlspecialchars( $full_handler ) );
-    }
-    
-    // Загружаем схему
+    // 2. Загружаем схему
     $scheme = $main->alliasscheme;
     $scheme->load( 'visuo' );
 
-    // Запускаем алгоритм
-    $main->algoritm = new $full_handler( $main , $match[ 'params' ] );
-    $main->algoritm->algoritm();
+    // 3. Строим цепочку классов (эмуляция старого include_ext)
+    // algoritm_profile_user -> ['algoritm', 'algoritm_profile', 'algoritm_profile_user']
+    $parts = explode( '_' , str_replace( 'algoritm_' , '' , $handler ) );
+    $chain = [ 'algoritm' ];
+    $current = 'algoritm';
     
-    // Финализация
+    foreach ( $parts as $part ) {
+        if ( $part === '' ) continue;
+        $current .= '_' . $part;
+        $chain[] = $current;
+    }
+
+    // 4. Запускаем цепочку
+    foreach ( $chain as $class_name ) {
+        $full_class = $static_domain . '\\' . $static_allias . '\\' . $class_name;
+        
+        if ( class_exists( $full_class ) ) {
+            // Создаем и запускаем каждый уровень
+            $instance = new $full_class( $main , $params );
+            $instance->algoritm();
+            
+            // Сохраняем последний (самый глубокий) класс в main->algoritm
+            $main->algoritm = $instance;
+        }
+    }
+    
+    // 5. Финализация схемы
     $scheme->reload( );
 }
