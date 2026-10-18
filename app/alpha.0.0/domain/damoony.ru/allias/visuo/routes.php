@@ -3,7 +3,7 @@
 
 use alogic\Router;
 
-$router = new Router(); // <--- ДОБАВИТЬ ЭТО
+$router = new Router();
 
 /** @var Router $router */
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/index', 'algoritm_lang_index');
@@ -17,4 +17,4 @@ $router->add('/{lang:[a-z]{2}-[a-z]{2}}/download/{page:[a-zA-Z0-9_-]+}', 'algori
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/{page:login|logout|registration|help}', 'algoritm_lang_index');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}', 'algoritm_lang');
 
-return $router; // <--- ДОБАВИТЬ
+return $router;

@@ -57,6 +57,7 @@ class main {
 	}
 	public function init( ) {
 		# 
+		require_once __DIR__ . '/autoload.php';
 		( include_once $path = __DIR__ . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
 		# 
