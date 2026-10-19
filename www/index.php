@@ -11,17 +11,18 @@ $GLOBALS[ 'start_hr' ] = $start_hr;
 # --- РОУТИНГ /admin/ — до session_start, до header ---
 $path = trim( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? '/' , PHP_URL_PATH ) ?? '/' , '/' );
 
+# --- конфиг: один раз (admin IP + host whitelist) ---
+$cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'site.config';
+$cfg = is_file( $cfg_path ) ? @json_decode( @file_get_contents( $cfg_path ) , true ) : null;
+if ( ! is_array( $cfg ) ) $cfg = [ ];
+
 if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 
 	$ip      = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
 	$allowed = [ '127.0.0.1' , '::1' ];
 
-	$cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'site.config';
-	if ( is_file( $cfg_path ) ) {
-		$cfg = @json_decode( @file_get_contents( $cfg_path ) , true );
-		if ( is_array( $cfg ) && ! empty( $cfg[ 'admin' ][ 'ips' ] ) && is_array( $cfg[ 'admin' ][ 'ips' ] ) ) {
-			$allowed = array_merge( $allowed , $cfg[ 'admin' ][ 'ips' ] );
-		}
+	if ( ! empty( $cfg[ 'admin' ][ 'ips' ] ) && is_array( $cfg[ 'admin' ][ 'ips' ] ) ) {
+		$allowed = array_merge( $allowed , $cfg[ 'admin' ][ 'ips' ] );
 	}
 
 	if ( in_array( $ip , $allowed , true ) ) {
@@ -37,9 +38,35 @@ if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 	# IP не в списке → fallthrough: main.php → 404 движка
 }
 
-# host (damoony2.ru → damoony.ru)
-$host = explode( '.' , strrev( $_SERVER[ 'HTTP_HOST' ] ?? '' ) , 3 );
-$host = strrev( implode( '.' , [ $host[ 0 ] ?? '' , $host[ 1 ] ?? '' ] ) );
+# host — валидация по config/site.config:domains_real (C2+C4+H2)
+$raw_host = $_SERVER[ 'HTTP_HOST' ] ?? '';
+$host     = strtolower( preg_replace( '/:\d+$/', '', $raw_host ) );
+
+if ( empty( $cfg[ 'domains_real' ] ) || ! is_array( $cfg[ 'domains_real' ] ) ) {
+	http_response_code( 500 );
+	exit( 'Configuration error' );
+}
+$host_valid = false;
+foreach ( array_keys( $cfg[ 'domains_real' ] ) as $known ) {
+	# точное совпадение: damoony2.ru, damoony.ru, ...
+	if ( $host === $known ) { $host_valid = true; break; }
+
+	# <allias>.<known>: visuo.damoony2.ru, www.damoony.ru, ...
+	$suffix = '.' . $known;
+	if ( strlen( $host ) > strlen( $suffix ) && substr( $host , -strlen( $suffix ) ) === $suffix ) {
+		$prefix = substr( $host , 0 , -strlen( $suffix ) );
+		$real   = $cfg[ 'domains_real' ][ $known ];
+		if ( isset( $cfg[ 'alliases_real' ][ $real ][ $prefix ] )
+		  || ! empty( $cfg[ 'alliases_available' ][ $real ][ $prefix ] ) ) {
+			$host_valid = true;
+			break;
+		}
+	}
+}
+if ( ! $host_valid ) {
+	http_response_code( 400 );
+	exit( 'Bad Host' );
+}
 
 # Content-Type
 header( 'Content-Type: text/html; charset=UTF-8' );
@@ -64,7 +91,6 @@ try {
 session_set_cookie_params( [
 	'lifetime' => 0 ,
 	'path'     => '/' ,
-	'domain'   => '.' . $host ,
 	'secure'   => $is_https ,
 	'httponly' => true ,
 	'samesite' => 'Lax' ,
