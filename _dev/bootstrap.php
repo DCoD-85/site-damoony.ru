@@ -41,4 +41,5 @@ require_once $www . '/tests/lib/Runner.php';
 require_once $www . '/tests/lib/Stubs.php';
 
 # Composer autoload — только для классов, которых нет в Stubs
-require_once $root . '/_dev/vendor/autoload.php';
+$autoload = $root . '/_dev/vendor/autoload.php';
+if ( is_file( $autoload ) ) require_once $autoload;

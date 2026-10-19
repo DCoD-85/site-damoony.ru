@@ -18,6 +18,9 @@ jobs:
           php-version: '8.4'
           extensions: mysqli, mbstring, dom, xmlwriter, tokenizer
 
+      - name: Composer install
+        run: composer install --working-dir=_dev --no-progress --prefer-dist
+
       - name: PHPUnit
         run: php _dev/bin/phpunit.phar -c _dev/phpunit.xml
 
