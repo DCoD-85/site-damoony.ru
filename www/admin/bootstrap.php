@@ -838,6 +838,24 @@ switch ( $p ) {
         View::render( 'allias_fillers' , [ 'domain' => $domain , 'allias' => $allias , 'rows' => $rows ] );
         break;
 
+
+    case 'filler:edit' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+        $block  = (string) ( $_GET[ 'block' ] ?? '' );
+        $f_dir  = Paths::block( $domain , $block );
+        $php_f  = $f_dir . '/' . $block . '_' . $allias . '.php';
+        $data_f = $f_dir . '/' . $block . '_' . $allias . '.data.php';
+        if ( ! is_file( $php_f ) ) { header( 'Location: ?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); exit; }
+        
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            Fs::writeAtomic( $php_f , $_POST[ 'php' ] );
+            Fs::writeAtomic( $data_f , $_POST[ 'data' ] );
+            header( 'Location: ?p=filler:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&block=' . urlencode($block) . '&saved=1' ); exit;
+        }
+        View::render( 'filler_edit' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => file_get_contents( $php_f ) , 'data' => file_get_contents( $data_f ) ] );
+        break;
+
     case 'filler:toggle' :
         if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit; }
         $domain = (string) ( $_POST[ 'domain' ] ?? '' );
