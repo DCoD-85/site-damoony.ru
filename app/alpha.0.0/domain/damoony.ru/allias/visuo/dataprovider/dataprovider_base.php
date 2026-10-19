@@ -10,10 +10,15 @@ abstract class dataprovider_base {
 	# --- state ---
 	protected string $localname = 'visuo_damoony';
 
-	# --- methods ---
 	public function __construct ( dataprovider $facade ) {
 		$this->facade = $facade;
 		$this->main   = $facade->main;
+
+		$domain = $this->main->main_settings->domain_real_name ?? '';
+		$map    = $this->main->main_settings->domain_db ?? [];
+		if ( is_array( $map ) && isset( $map[ $domain ] ) && $map[ $domain ] !== '' ) {
+			$this->localname = (string) $map[ $domain ];
+		}
 	}
 
 	# Открыть свою БД и вернуть query-объект.
