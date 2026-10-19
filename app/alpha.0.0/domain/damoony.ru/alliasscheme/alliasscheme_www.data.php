@@ -5,21 +5,22 @@
 return array (
   'tag' => 'div',
   'class' => 'dt',
-  'return' => true,
+  'layout' => 'horizontal',
   'children' => 
   array (
     0 => 
     array (
       'tag' => 'div',
       'class' => 'dt_top',
-      'return' => false,
+      'layout' => 'vertical',
       'enabled' => true,
+      'return' => false,
     ),
     1 => 
     array (
       'tag' => 'div',
       'class' => 'dt_middle',
-      'return' => true,
+      'layout' => 'vertical',
       'enabled' => true,
       'children' => 
       array (
@@ -27,31 +28,39 @@ return array (
         array (
           'tag' => 'div',
           'class' => 'dt_left',
-          'return' => false,
+          'layout' => 'vertical',
           'enabled' => true,
+          'return' => false,
         ),
         1 => 
         array (
           'tag' => 'div',
           'class' => 'dt_center',
-          'return' => false,
+          'layout' => 'horizontal',
           'enabled' => true,
-        ),
-        2 => 
-        array (
-          'tag' => 'div',
-          'class' => 'dt_right',
-          'return' => false,
-          'enabled' => true,
+          'children' => 
+          array (
+            0 => 
+            array (
+              'tag' => 'div',
+              'class' => 'dt_right',
+              'layout' => 'vertical',
+              'enabled' => true,
+              'return' => false,
+            ),
+            1 => 
+            array (
+              'tag' => 'div',
+              'class' => 'dt_bottom',
+              'layout' => 'vertical',
+              'enabled' => true,
+              'return' => false,
+            ),
+          ),
+          'return' => true,
         ),
       ),
-    ),
-    2 => 
-    array (
-      'tag' => 'div',
-      'class' => 'dt_bottom',
-      'return' => false,
-      'enabled' => true,
+      'return' => true,
     ),
   ),
 );

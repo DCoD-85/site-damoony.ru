@@ -1,51 +1,65 @@
 <?php
-// Рекурсивная отрисовка структуры дерева в виде списка
-function render_tree ( $nodes, $parent = 'root' ) {
-    echo "<ul class='scheme-tree' data-parent='$parent'>";
-    foreach ( $nodes as $n ) {
-        $class = $n['class'] ?? 'node';
-        $name  = str_replace('dt_', '', $class);
-        $name  = $name ?: $class;
-        $enabled = $n['enabled'] ?? true;
-        
-        $checked = $enabled ? 'checked' : '';
-        echo "<li class='tree-node' data-class='{$class}'>";
-        echo "  <div class='node-header' draggable='true'>";
-        echo "    <span class='drag-handle'>≡</span>";
-        echo "    <label><input type='checkbox' class='node-enabled' {$checked}> {$name}</label>";
-        echo "    <code class='node-code'>$class</code>";
-        echo "  </div>";
-        
-        if ( !empty($n['children']) ) {
-            render_tree( $n['children'], $class );
+// Рекурсивная отрисовка узла
+function render_node ( $n, $is_root = false ) {
+    $class   = $n['class']   ?? 'node';
+    $layout  = $n['layout']  ?? 'vertical';
+    $name    = str_replace('dt_', '', $class) ?: $class;
+    $enabled = $n['enabled'] ?? true;
+    
+    $checked   = $enabled ? 'checked' : '';
+    $sel_v     = $layout === 'vertical'   ? 'selected' : '';
+    $sel_h     = $layout === 'horizontal' ? 'selected' : '';
+    $draggable = $is_root ? 'false' : 'true';
+    $handle    = $is_root ? '<span style="width:16px; display:inline-block;"></span>' : '<span class="drag-handle">≡</span>';
+    
+    $root_class = $is_root ? ' tree-root' : '';
+    $badge      = $is_root ? ' <span class="root-badge">(Контейнер)</span>' : '';
+
+    echo "<li class='tree-node{$root_class}' data-class='{$class}'>";
+    echo "  <div class='node-header' draggable='{$draggable}'>";
+    echo "    {$handle}";
+    echo "    <label><input type='checkbox' class='node-enabled' {$checked} " . ($is_root ? 'disabled' : '') . "> <b>{$name}</b>{$badge}</label>";
+    echo "    <select class='node-layout' style='margin-left:10px; font-size:12px; padding:2px; border-radius:3px; border:1px solid #ccc;'>";
+    echo "      <option value='vertical' {$sel_v}>↓ Вертикально</option>";
+    echo "      <option value='horizontal' {$sel_h}>→ Горизонтально</option>";
+    echo "    </select>";
+    echo "    <code class='node-code'>{$class}</code>";
+    echo "  </div>";
+    
+    if ( !empty($n['children']) ) {
+        echo "<ul class='scheme-tree'>";
+        foreach ( $n['children'] as $child ) {
+            render_node( $child, false );
         }
-        echo "</li>";
+        echo "</ul>";
+    } else {
+        echo "<ul class='scheme-tree' style='min-height:10px;'></ul>";
     }
-    echo "</ul>";
+    echo "</li>";
 }
 
-// Рекурсивная отрисовка Wireframe (вложенные рамки)
+// Рекурсивная отрисовка Wireframe
 function render_wireframe ( $nodes ) {
     foreach ( $nodes as $n ) {
-        $class = $n['class'] ?? '';
+        $class   = $n['class']   ?? '';
         if ( !$class ) continue;
         $enabled = $n['enabled'] ?? true;
-        
-        $name  = str_replace('dt_', '', $class);
-        $name  = $name ?: $class;
+        $layout  = $n['layout']  ?? 'vertical';
+        $name    = str_replace('dt_', '', $class) ?: $class;
 
         if ( $enabled ) {
-            echo "<div style='display:flex; flex-direction:column; flex:1; border:2px dashed #2a63d6; background:rgba(42, 99, 214, 0.05); padding:10px; border-radius:6px; margin:4px; min-width:80px; text-align:center;'>";
+            echo "<div style='display:flex; flex-direction:column; flex:1; box-sizing:border-box; border:2px dashed #2a63d6; background:rgba(42, 99, 214, 0.05); padding:10px; border-radius:6px; margin:4px; min-width:80px; text-align:center;'>";
             echo "<div style='font-size:12px; color:#2a63d6; font-weight:bold; margin-bottom:8px;'>$name</div>";
             
             if ( !empty($n['children']) ) {
-                echo "<div style='display:flex; gap:8px; flex:1; align-items:stretch;'>";
+                $flex_dir = $layout === 'horizontal' ? 'row' : 'column';
+                echo "<div style='display:flex; flex-direction:$flex_dir; gap:8px; flex:1; align-items:stretch;'>";
                 render_wireframe( $n['children'] );
                 echo "</div>";
             }
             echo "</div>";
         } else {
-            echo "<div style='display:flex; flex-direction:column; flex:1; border:2px solid #ddd; background:#fafafa; padding:10px; border-radius:6px; margin:4px; color:#aaa; font-size:12px; text-align:center;'>$name (выкл)</div>";
+            echo "<div style='display:flex; flex-direction:column; flex:1; box-sizing:border-box; border:2px solid #ddd; background:#fafafa; padding:10px; border-radius:6px; margin:4px; color:#aaa; font-size:12px; text-align:center;'>$name (выкл)</div>";
         }
     }
 }
@@ -64,107 +78,176 @@ function render_wireframe ( $nodes ) {
     
     <div style="flex:1; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06);">
         <h3 style="margin-top:0;">Дерево блоков</h3>
-        <p class="hint" style="font-size:12px; color:#666; margin-bottom:15px;">Перетаскивайте блоки за иконку <b>≡</b>, чтобы менять вложенность.</p>
+        <p class="hint" style="font-size:12px; color:#666; margin-bottom:15px;">
+            Перетаскивайте за <b>≡</b>. Верхняя/нижняя часть блока — вставка рядом. Центр — вложение внутрь.
+        </p>
         
-        <?php render_tree( $scheme_data['children'] ); ?>
+        <?php render_node( $scheme_data, true ); ?>
         
         <button type="submit" style="margin-top:20px;">Сохранить схему</button>
     </div>
 
     <div style="flex:2; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06);">
         <h3 style="margin-top:0;">Визуализация</h3>
-        <div style="display:flex; gap:10px; min-height:200px;">
-            <?php render_wireframe( $scheme_data['children'] ); ?>
-        </div>
+		<div style="display:flex; flex:1; min-height:200px; box-sizing:border-box;">
+			<?php render_wireframe( [ $scheme_data ] ); ?>
+		</div>
     </div>
 </form>
 
 <style>
-/* Стили для дерева */
-.scheme-tree { list-style: none; padding-left: 20px; margin: 0; border-left: 1px dashed #ccc; }
-.scheme-tree[data-parent="root"] { padding-left: 0; border-left: none; }
-.tree-node { margin: 6px 0; }
-.node-header { display: flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 8px 12px; border: 1px solid #e0e4eb; border-radius: 4px; cursor: grab; }
+/* Стили для корневого контейнера */
+.tree-root {
+    background: #eef2f6;
+    border: 2px solid #c9cdd6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 0;
+}
+.tree-root > .scheme-tree {
+    padding-left: 10px;
+    border-left: none;
+    margin-top: 10px;
+}
+.tree-root > .node-header {
+    background: #fff;
+    border-bottom: 3px solid #2a63d6;
+    cursor: default;
+}
+.root-badge {
+    font-size: 11px;
+    color: #555;
+    font-weight: normal;
+    margin-left: 5px;
+    background: #dde3ec;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Стили для обычных узлов */
+.scheme-tree { list-style: none; padding-left: 20px; margin: 0; border-left: 2px dashed #c9cdd6; min-height: 10px; }
+.tree-node { margin: 6px 0; position: relative; }
+.node-header { display: flex; align-items: center; gap: 8px; background: #fff; padding: 8px 12px; border: 1px solid #e0e4eb; border-radius: 4px; cursor: grab; }
 .node-header:active { cursor: grabbing; }
 .drag-handle { color: #999; font-size: 16px; cursor: grab; }
 .node-code { font-size: 11px; color: #888; margin-left: auto; }
-.dragging { opacity: 0.5; border: 2px dashed #2a63d6; }
-.drag-over > .node-header { background: #e3f0ff; border-color: #2a63d6; }
+.dragging { opacity: 0.5; }
+
+/* Зоны сброса */
+.drop-above { border-top: 3px solid #2a63d6 !important; }
+.drop-below { border-bottom: 3px solid #2a63d6 !important; }
+.drop-inside > .node-header { background: #e3f0ff !important; border-color: #2a63d6 !important; }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     let dragged = null;
 
-    const nodes = document.querySelectorAll('.node-header');
-    nodes.forEach(header => {
+    // 1. Настройка перетаскивания (только за иконку ≡)
+    document.querySelectorAll('.node-header[draggable="true"]').forEach(header => {
+        const handle = header.querySelector('.drag-handle');
+        
+        // Разрешаем drag только при клике на ручку
+        if (handle) {
+            handle.addEventListener('mousedown', () => { header.setAttribute('draggable', 'true'); });
+            header.addEventListener('mouseup', () => { if(!dragged) header.setAttribute('draggable', 'false'); });
+            header.addEventListener('mouseleave', () => { if(!dragged) header.setAttribute('draggable', 'false'); });
+        }
+
         header.addEventListener('dragstart', function(e) {
-            dragged = this.parentNode;
+            dragged = this.closest('.tree-node');
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', 'drag');
         });
 
         header.addEventListener('dragend', function() {
             this.classList.remove('dragging');
             dragged = null;
-        });
-
-        header.parentNode.addEventListener('dragover', function(e) {
-            e.preventDefault(); // Разрешаем drop
-            if (this === dragged || this.contains(dragged)) return;
-            this.classList.add('drag-over');
-        });
-
-        header.parentNode.addEventListener('dragleave', function() {
-            this.classList.remove('drag-over');
-        });
-
-        header.parentNode.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('drag-over');
-            if (this !== dragged && !this.contains(dragged)) {
-                // Перемещаем DOM-элемент
-                let ul = this.querySelector('.scheme-tree');
-                if (!ul) {
-                    ul = document.createElement('ul');
-                    ul.className = 'scheme-tree';
-                    ul.setAttribute('data-parent', this.dataset.class || '');
-                    this.appendChild(ul);
-                }
-                ul.appendChild(dragged);
-            }
+            document.querySelectorAll('.tree-node').forEach(el => {
+                el.classList.remove('drop-above', 'drop-below', 'drop-inside');
+            });
         });
     });
 
-    // Сборка JSON перед отправкой
+    // 2. Обработка зон сброса (вешаем прямо на header, чтобы высота была правильной)
+    document.querySelectorAll('.node-header').forEach(header => {
+        header.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const li = this.closest('.tree-node');
+            if (li === dragged || li.contains(dragged)) return;
+            
+            // Считаем координаты именно ЗАГОЛОВКА, а не всего <li>
+            const rect = this.getBoundingClientRect();
+            const offset = e.clientY - rect.top;
+            
+            document.querySelectorAll('.tree-node').forEach(el => {
+                el.classList.remove('drop-above', 'drop-below', 'drop-inside');
+            });
+
+            // 30% сверху, 30% снизу, 40% по центру
+            if (offset < rect.height * 0.3) {
+                li.classList.add('drop-above');
+            } else if (offset > rect.height * 0.7) {
+                li.classList.add('drop-below');
+            } else {
+                li.classList.add('drop-inside');
+            }
+        });
+
+        header.addEventListener('dragleave', function(e) {
+            const li = this.closest('.tree-node');
+            if (!li.contains(e.relatedTarget)) {
+                li.classList.remove('drop-above', 'drop-below', 'drop-inside');
+            }
+        });
+
+        header.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const li = this.closest('.tree-node');
+            li.classList.remove('drop-above', 'drop-below', 'drop-inside');
+            
+            if (li === dragged || li.contains(dragged)) return;
+
+            const rect = this.getBoundingClientRect();
+            const offset = e.clientY - rect.top;
+
+            if (offset < rect.height * 0.3) {
+                li.parentNode.insertBefore(dragged, li); // Вставить выше
+            } else if (offset > rect.height * 0.7) {
+                li.parentNode.insertBefore(dragged, li.nextSibling); // Вставить ниже
+            } else {
+                let ul = li.querySelector(':scope > .scheme-tree'); // Вложить внутрь
+                if (!ul) {
+                    ul = document.createElement('ul');
+                    ul.className = 'scheme-tree';
+                    li.appendChild(ul);
+                }
+                ul.appendChild(dragged);
+            }
+            dragged = null;
+        });
+    });
+
+    // 3. Сборка JSON перед отправкой
     document.getElementById('scheme-form').addEventListener('submit', function(e) {
-        // Восстанавливаем исходную структуру JSON из DOM
-        function buildTree(ul) {
+        function buildChildren(ul) {
             let arr = [];
+            if (!ul) return arr;
             ul.querySelectorAll(':scope > .tree-node').forEach(li => {
                 let classStr = li.dataset.class;
                 let enabled = li.querySelector('.node-enabled').checked;
-                let node = { tag: 'div', class: classStr, return: true, enabled: enabled };
+                let layout = li.querySelector('.node-layout').value;
+                let node = { tag: 'div', class: classStr, layout: layout, enabled: enabled };
                 
                 let childUl = li.querySelector(':scope > .scheme-tree');
-                if (childUl) node.children = buildTree(childUl);
+                let children = buildChildren(childUl);
+                if (children.length > 0) node.children = children;
                 arr.push(node);
             });
             return arr;
         }
 
-        let rootUl = document.querySelector('.scheme-tree[data-parent="root"]');
-        let children = buildTree(rootUl);
-        
-        // Формируем итоговый массив как в data.php
-        let finalData = {
-            tag: 'div',
-            class: 'dt',
-            return: true,
-            children: children
-        };
-        
-        // Проставляем корректный return (false для листьев, true для родителей)
         function fixReturn(nodes) {
             nodes.forEach(n => {
                 if (n.children) {
@@ -175,8 +258,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        fixReturn(finalData.children);
 
+        let rootNode = document.querySelector('.tree-root');
+        let finalData = {
+            tag: 'div',
+            class: rootNode.dataset.class,
+            layout: rootNode.querySelector('.node-layout').value,
+            children: buildChildren(rootNode.querySelector(':scope > .scheme-tree'))
+        };
+        
+        fixReturn(finalData.children);
         document.getElementById('scheme_json').value = JSON.stringify(finalData);
     });
 });

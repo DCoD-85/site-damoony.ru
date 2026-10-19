@@ -27,7 +27,8 @@ class alliasscheme_error {
 		$skin   = $main->main_settings->skin( 'skin' );
 		$allias = $main->main_settings->skin( 'allias' );
 
-		$media = DSA . 'media' . DSA . 'damoony.ru' . DSA;
+		$real_domain = $main->main_settings->domain_real_name ?? 'damoony.ru';
+		$media = DSA . 'media' . DSA . $real_domain . DSA;
 
 		# --- общие ---
 		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;

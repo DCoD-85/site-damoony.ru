@@ -915,6 +915,23 @@ switch ( $p ) {
         break;
 
 
+
+    case 'schemes:list' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        
+        $dir = Paths::domain( $domain ) . '/alliasscheme';
+        $schemes = [];
+        if ( is_dir( $dir ) ) {
+            foreach ( glob( $dir . '/alliasscheme_*.php' ) as $file ) {
+                if ( str_ends_with( $file , '.data.php' ) ) continue;
+                $schemes[] = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $file ) );
+            }
+        }
+        
+        View::render( 'schemes_list' , [ 'domain' => $domain , 'schemes' => $schemes ] );
+        break;
+
     case 'scheme:edit' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );

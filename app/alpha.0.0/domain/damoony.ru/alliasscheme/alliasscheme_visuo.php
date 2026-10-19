@@ -28,7 +28,8 @@ class alliasscheme_visuo {
 		$skin   = $main->main_settings->skin( 'skin' );
 		$allias = $main->main_settings->skin( 'allias' );
 
-		$media = DSA . 'media' . DSA . 'damoony.ru' . DSA;
+		$real_domain = $main->main_settings->domain_real_name ?? 'damoony.ru';
+		$media = DSA . 'media' . DSA . $real_domain . DSA;
 
 		# --- общие ---
 		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
@@ -142,31 +143,47 @@ class alliasscheme_visuo {
 	}
 
 	public function body ( ) {
-		$main = $this->main;
-		$visuorelease = $this->visuorelease;
-		$visuorelease->visuotag_clear( );
-		
+        $main = $this->main;
+        $visuorelease = $this->visuorelease;
+        $visuorelease->visuotag_clear( );
 
-		$vt = new \visuotag( );
-		$vt->tag( '!DOCTYPE html' , false , return : false )
-			->tag( 'html' , class : 'cl_html ' . 'scheme_visuo scheme_login ' . ( $main->user->is_guest( ) ? ' guest' : ' logged' ) )
-				->tag( 'head' , class : 'cl_head' , return : false )
-				->tag( 'body' , class : 'cl_body' )
-					->append( vt: $this->body_preload( ) )
-					->tag( 'div' , id : 'popup_result' )->parent( )
-					->tag( 'div' , class : 'dt' )
-						->tag( 'div' , class : 'dt_top' , return : false )
-						->tag( 'div' , class : 'dt_middle' )
-							->tag( 'div' , class : 'dt_left' , return : false )
-							->tag( 'div' , class : 'dt_center' , return : false )
-							->tag( 'div' , class : 'dt_right' , return : false )
-						->parent( )
-						->tag( 'div' , class : 'dt_bottom' , return : false )
-					->parent( )->tag( 'div' , class : 'dt_policy' , return : true )
-					->parent( )->tag( 'div' , class : 'dt_debug' , return : true );
-		
-		$visuorelease->visuotag_set( $vt );
+        $vt = new \visuotag( );
+        $body = $vt->tag( '!DOCTYPE html' , false , return : false )
+            ->tag( 'html' , class : 'cl_html scheme_visuo ' . ( $main->user->is_guest( ) ? ' guest' : ' logged' ) )
+                ->tag( 'head' , class : 'cl_head' , return : false )
+                ->tag( 'body' , class : 'cl_body' )
+                    ->append( vt: $this->body_preload( ) )
+                    ->tag( 'div' , id : 'popup_result' )->parent( );
+
+        $scheme_data = require __DIR__ . '/alliasscheme_visuo.data.php';
+        $this->_render_node( $body , $scheme_data );
+
+        $body->tag( 'div' , class : 'dt_policy' , return : true )
+            ->parent( )->tag( 'div' , class : 'dt_debug' , return : true );
+        
+        $visuorelease->visuotag_set( $vt );
+    }
+
+	private function _render_node ( \visuotag $cursor , array $node ) : \visuotag {
+		if ( isset( $node['enabled'] ) && $node['enabled'] === false ) {
+			return $cursor;
+		}
+		$tag    = $node['tag']    ?? 'div';
+		$class  = $node['class']  ?? '';
+		$id     = $node['id']     ?? '';
+		$return = $node['return'] ?? false;
+		$child = $cursor->tag( $tag , class : $class , id : $id , return : $return );
+		if ( ! empty( $node['children'] ) ) {
+			foreach ( $node['children'] as $child_node ) {
+				$this->_render_node( $child , $child_node );
+			}
+		}
+		if ( $return === true ) {
+			$child = $child->parent( );
+		}
+		return $child;
 	}
+
     public function clear ( ) {
         $logic = $this;
         
