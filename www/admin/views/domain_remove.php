@@ -5,7 +5,7 @@
 </div>
 
 <ul>
-	<li>Папка <code>www/logic/&lt;logic&gt;/domain/<?= htmlspecialchars( $real ?? $domain ) ?>/</code></li>
+	<li>Папка <code>app/&lt;logic&gt;/domain/<?= htmlspecialchars( $real ?? $domain ) ?>/</code></li>
 	<?php if ( ! empty( $alliases ) ) : ?>
 		<li>Все аллиасы домена: <b><?= htmlspecialchars( implode( ', ' , $alliases ) ) ?></b></li>
 	<?php endif ?>

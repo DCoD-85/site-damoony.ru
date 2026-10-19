@@ -17,6 +17,12 @@ class DomainRemove {
             return $r;
         }
 
+        $real = Paths::real( $domain );
+        if ( $real !== $domain ) {
+            $r->error( "Только real-домен: {$domain} → {$real}" );
+            return $r;
+        }
+
         $domain_path = Paths::domain( $domain );
 
         # --- подтверждение ---

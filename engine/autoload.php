@@ -41,7 +41,7 @@ spl_autoload_register(function ($class) {
             $domain_real = array_search($domain_ns, $config['domains_namespace'] ?? []);
             
             if ($domain_real) {
-                $logic_ver = 'alpha.0.0';
+                $logic_ver = (string) ($config['logic'] ?? 'alpha.0.0');
                 $base_dir = dirname(__DIR__) . "/app/{$logic_ver}/domain/{$domain_real}/allias/{$allias}/algoritm/";
                 $file = $base_dir . $file_path;
                 

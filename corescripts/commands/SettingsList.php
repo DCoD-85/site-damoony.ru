@@ -27,7 +27,7 @@ class SettingsList {
 
         Cli::out( '' );
         Cli::info( 'Доступные движки:' );
-        foreach ( glob( Paths::project() . '/logic/*' , GLOB_ONLYDIR ) as $dir ) {
+        foreach ( glob( Paths::project() . '/app/*' , GLOB_ONLYDIR ) as $dir ) {
             Cli::out( '  - ' . basename( $dir ) );
         }
 

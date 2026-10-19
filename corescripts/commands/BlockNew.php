@@ -26,7 +26,7 @@ class BlockNew {
 			return $r;
 		}
 
-		$domain_path = PROJECT_ROOT . '/www/logic/alpha.0.0/domain/' . $domain;
+		$domain_path = Paths::domain( $domain );
 		if ( ! is_dir( $domain_path ) ) {
 			$r->error( "Домен не найден: {$domain_path}" );
 			return $r;

@@ -92,7 +92,7 @@ function alogic_error( $main , $static_domain , $static_allias , $code = 404 ) {
 
     $logic_ver = $main->main_settings->get('logic');
     $domain = $main->main_settings->domain_real_name;
-    $base_dir = dirname(__DIR__) . "/logic/{$logic_ver}/domain/{$domain}/allias/";
+    $base_dir = dirname(__DIR__) . "/app/{$logic_ver}/domain/{$domain}/allias/";
     
     // 1. Ищем в текущем аллиасе (например, visuo)
     $current_path = $base_dir . $static_allias . '/algoritm/algoritm_error.php';

@@ -14,10 +14,10 @@ class Scan {
 
     # www/logic/* — только папки, где есть include.php
     public static function logics ( ) : array {
-        $dir = Paths::project() . '/logic';
+        $dir = Paths::project() . '/app';
         $out = [ ];
         foreach ( self::listDirs( $dir ) as $name ) {
-            if ( is_file( $dir . '/' . $name . '/include.php' ) ) {
+            if ( is_dir( $dir . '/' . $name . '/domain' ) ) {
                 $out[ ] = $name;
             }
         }

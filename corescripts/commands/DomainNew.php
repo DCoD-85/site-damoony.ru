@@ -10,7 +10,7 @@ class DomainNew {
         return [
             'domain'    => $domain ,
             'namespace' => $ns ,
-            'path'      => 'www/logic/' . Paths::logic() . '/domain/' . $domain ,
+            'path'      => 'app/' . Paths::logic() . '/domain/' . $domain ,
             'templates' => Template::scan( CS_TPL . '/domain' ) ,
         ];
     }

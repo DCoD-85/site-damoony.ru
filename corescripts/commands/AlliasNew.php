@@ -10,7 +10,7 @@ class AlliasNew {
         return [
             'name'   => $name ,
             'domain' => $domain ,
-            'path'   => 'www/logic/' . Paths::logic() . '/domain/' . $domain . '/allias/' . $name ,
+            'path'   => 'app/' . Paths::logic() . '/domain/' . $domain . '/allias/' . $name ,
         ];
     }
 
@@ -156,7 +156,7 @@ class AlliasNew {
 
         # 8. регистрация
         if ( ! empty( $params[ 'register' ] ) ) {
-            self::register( $r , $domain , $name , $ctx );
+            self::register( $r , Paths::real( $domain ) , $name , $ctx );
         }
 
         return $r;

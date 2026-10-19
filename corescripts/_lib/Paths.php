@@ -74,7 +74,7 @@ class Paths {
 
     # --- www/logic/<logic> ---
     public static function logicPath () : string {
-        return self::project() . '/logic/' . self::logic();
+        return self::project() . '/app/' . self::logic();
     }
 
     # --- domain (по real) ---

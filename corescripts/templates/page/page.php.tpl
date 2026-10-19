@@ -2,13 +2,13 @@
 
 namespace <domain_ns>\<allias>;
 
-class algoritm_lang_<name>
+class algoritm_<name>
 	extends \algoritm_ {
 
 	public array $available = [ '' ];
 	public bool  $auth      = false;
 	public bool  $search    = true;
-	public bool  $default   = true;
+	public bool  $default   = false;
 
 	public function release ( ) {
 		$this->load_vars( );

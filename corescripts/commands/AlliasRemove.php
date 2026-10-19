@@ -68,9 +68,10 @@ class AlliasRemove {
         # --- 2. site.config (под lock) ---
         try {
             Config::mutate( Paths::config() , function ( Config $cfg ) use ( $domain , $name ) {
-                $cfg->removeKeys( [ 'alliases_real'      , $domain , $name ] );
-                $cfg->removeKeys( [ 'alliases_available' , $domain , $name ] );
-                $cfg->removeKeys( [ 'fillers'            , $domain , $name ] );
+                $real = Paths::real( $domain );
+                $cfg->removeKeys( [ 'alliases_real'      , $real , $name ] );
+                $cfg->removeKeys( [ 'alliases_available' , $real , $name ] );
+                $cfg->removeKeys( [ 'fillers'            , $real , $name ] );
             } );
             $r->step( 'site.config обновлён' , true , $name );
             $ctx?->step( 'site.config обновлён' , true , $name );

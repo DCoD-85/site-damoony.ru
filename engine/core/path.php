@@ -21,7 +21,7 @@ class core_path {
 		$this->root    = dirname( $this->sources );
 		$this->www     = $this->root  . DS . 'www';
 		$this->secure  = $this->root  . DS . 'secure';
-		$this->logic   = $this->www   . DS . 'logic';
+		$this->logic   = $this->root  . DS . 'app';
 	}
 	
 	public function get ( string $name ) : string {
