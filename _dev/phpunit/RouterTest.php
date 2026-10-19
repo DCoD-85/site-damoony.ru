@@ -41,4 +41,13 @@ class RouterTest extends TestCase {
         $match = $this->router->match('/profile/123'); // Ожидается [A-Z]
         $this->assertNull($match);
     }
+
+    public function testRootMatch() {
+        $router = new Router();
+        $router->add('/', 'algoritm_index');
+        $m = $router->match('/');
+        $this->assertNotNull($m);
+        $this->assertEquals('algoritm_index', $m['handler']);
+        $this->assertNotNull($router->match(''));
+    }
 }

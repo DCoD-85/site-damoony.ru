@@ -10,7 +10,7 @@ if ( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
 
 $root      = dirname( __DIR__ );
 $www       = $root . '/www';
-$visuo_src = $root . '/engine/visuo/sources';
+$visuo_src = $root . '/visuo/sources';
 $sources   = $root . '/engine';
 
 if ( ! defined( 'VISUO_SRC' ) ) define( 'VISUO_SRC' , $visuo_src );
