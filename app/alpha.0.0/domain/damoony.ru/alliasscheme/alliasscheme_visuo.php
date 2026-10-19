@@ -101,7 +101,7 @@ class alliasscheme_visuo {
 		$meta->link( )->js( $js_eng . 'engine_popup.js' );
 		$meta->link( )->js( $js_eng . 'engine_load.js' );
 		$meta->link( )->js( $js_eng . 'engine_page.js' );
-		$meta->link( )->js( $js_eng . 'engine_visuotablebox.js' );
+		$meta->link( )->js( $js_eng . 'engine_visuo.js' );
 		$meta->link( )->js( $js_eng . 'engine.js' );
 		$meta->link( )->js( $js_eng . 'engine_ready.js' );
 

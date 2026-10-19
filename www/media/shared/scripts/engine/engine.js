@@ -11,6 +11,7 @@ $( document ).ready( function( ) {
 		load : engine_load ,
 		popup : engine_popup ,
 		page : engine_page ,
+		visuo : engine_visuo
 	};
 	// engine.prepare = engine_prepare;
 	// engine.load = engine_load;
@@ -21,5 +22,6 @@ $( document ).ready( function( ) {
 	engine.popup.check( engine );
 	engine.load.check( engine );
 	engine.page.check( engine );
+	engine.visuo.check( engine );
 	// engine.html.check( engine );
 } );
