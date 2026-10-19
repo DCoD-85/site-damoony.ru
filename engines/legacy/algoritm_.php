@@ -182,6 +182,9 @@ class algoritm_ {
 		$url = $this->main->library->url( );
 	}
 
+	public function start ( ) {
+	}
+
 	public function debug ( ) {
 	}
 
