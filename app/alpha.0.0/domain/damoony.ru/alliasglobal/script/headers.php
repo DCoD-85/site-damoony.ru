@@ -98,7 +98,7 @@ class alliasglobal_script_headers extends alliasglobalscript {
 		$url_allias = $url->static_allias;
 		$url_base   = $url->static_base;
 
-		setcookie( 'skin' , $skin , 0 , '/' , $url_allias[ 0 ] ?? '' );
+		\cookie::set( 'skin' , $skin , [ 'expires' => 0 ] );
 
 		$href = $link->href( $url_domain , $url_base , use_all_adress_data : false );
 
