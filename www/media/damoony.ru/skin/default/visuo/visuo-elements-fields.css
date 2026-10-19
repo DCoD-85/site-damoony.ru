@@ -1,0 +1,10 @@
+.field_text { }
+
+.field_password { }
+
+.field_checkbox { }
+.field_checkbox .field-label { padding : 0px ; display : flex ; }
+.field_checkbox .field-label .border-box { width : 45px ; height : 30px ; background : #EEE ; border-radius : 3px ; }
+.field_checkbox .field-label .field-name { padding : 5px ; }
+
+.field_radio { }

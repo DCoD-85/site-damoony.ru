@@ -1,0 +1,157 @@
+
+.field { padding : 15px ; }
+.field > .box { }
+.field .field-label { display : block ; padding : 0 0 10px 0 ; }
+.field .hint { display : block ; font-size : 14px ; padding : 10px 0 0px 0 ; color : #999 ; }
+.field.field_block { padding : 20px ; }
+.field > .box > .border-box { border : solid #DDD 1px ; border-radius : 3px ; }
+.field > .box > .border-box input { border-radius : 3px ; }
+.field > .box > .border-box select { border-radius : 3px ; }
+
+
+
+
+.col.colelsinline .field { padding-left : 15px ; padding-right : 0px ; }
+.col.colelsinline .field:last-child { padding-right : 15px ; }
+
+
+
+
+/*
+.visuotable .ttype.tfoot .col_block { display : flex ; }
+.visuotable .ttype.tfoot .col_block .field { width : 100% ; }
+.visuotable .ttype.tfoot .col_block .field:first-child { padding-right : 0px ; }
+.visuotable .ttype.tfoot .col_block .field:last-child { padding-left : 0px ; }
+.visuotable .ttype.tfoot .col_block .field:only-child { padding : 10px ; }
+*/
+
+.visuotable .ttype.tfoot .col_inside { padding : 20px 0px 0px 0px ; }
+.visuotable .ttype.tfoot .col_block { display : flex ; }
+.visuotable .ttype.tfoot .col_block .field { width : 100% ; padding : 5px 0px ; }
+.visuotable .ttype.tfoot .col_block .field .border-box { border : none ; }
+.visuotable .ttype.tfoot .col_block .field button { padding : 20px ; }
+.visuotable .ttype.tfoot .col_block .field:first-child { }
+.visuotable .ttype.tfoot .col_block .field:first-child .border-box ,
+.visuotable .ttype.tfoot .col_block .field:first-child .border-box button { border-radius : 3px 0px 0px 3px; }
+.visuotable .ttype.tfoot .col_block .field:last-child { }
+.visuotable .ttype.tfoot .col_block .field:last-child .border-box ,
+.visuotable .ttype.tfoot .col_block .field:last-child .border-box button { border-radius : 0px 3px 3px 0px ; }
+.visuotable .ttype.tfoot .col_block .field:only-child .border-box ,
+.visuotable .ttype.tfoot .col_block .field:only-child .border-box button { border-radius : 3px ; }
+.visuotable .ttype.tfoot .col_block .field.field_submit button { background : #369 ; color : #EEE ; }
+.visuotable .ttype.tfoot .col_block .field.field_submit button:hover { background : #357 ; color : #EEE ; }
+.visuotable .ttype.tfoot .col_block .field.field_button button { background : #CCC ; color : #EEE ; }
+.visuotable .ttype.tfoot .col_block .field.field_button button:hover { background : #999 ; color : #EEE ; }
+.visuotable .ttype.tfoot .col_block .field.field_reset button{ background : #F9F9F9 ; color : #999 ; }
+.visuotable .ttype.tfoot .col_block .field.field_reset button:hover { background : #EEE ; color : #999 ; }
+
+.visuotable .ttype.tfoot .col_block .field.field_block { padding : 15px ; }
+
+/*
+.field {
+    margin-bottom: 0;
+}
+
+.field > .box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field > .box > .field-label {
+    font-weight: 600;
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.field > .box > .field-label .label_comment {
+    font-weight: 400;
+    color: #999;
+    font-size: 13px;
+    margin-left: 6px;
+}
+
+.field > .box > .border-box {
+    display: block;
+}
+
+.field > .box > .border-box > input[type=text],
+.field > .box > .border-box > input[type=email],
+.field > .box > .border-box > input[type=password],
+.field > .box > .border-box > input[type=file],
+.field > .box > .border-box > select,
+.field > .box > .border-box > textarea {
+    display: block;
+    width: 100%;
+    padding: 6px 8px;
+    background: #FFF;
+    border: solid #DDD 1px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.field > .box > .hint {
+    font-size: 13px;
+    color: #999;
+    margin-top: 2px;
+}
+
+.field > .box > .error {
+    font-size: 13px;
+    color: #C33;
+    margin-top: 2px;
+}
+
+.field.field_checkbox,
+.field.field_radio {
+    margin-bottom: 8px;
+}
+
+.field.field_checkbox > .box > .field-label,
+.field.field_radio > .box > .field-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    cursor: pointer;
+    color: #333;
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.field.field_checkbox > .box > .field-label > .border-box,
+.field.field_radio > .box > .field-label > .border-box {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.field.field_checkbox > .box > .field-label > .border-box > input,
+.field.field_radio > .box > .field-label > .border-box > input {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.field.field_checkbox > .box > .field-label > .field-name,
+.field.field_radio > .box > .field-label > .field-name {
+    display: inline-block;
+}
+
+.field.field_checkbox_group > .box > .options,
+.field.field_radio_group > .box > .options {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.field.field_checkbox_group > .box > .options > .field,
+.field.field_radio_group > .box > .options > .field {
+    margin: 0;
+}
+
+*/
