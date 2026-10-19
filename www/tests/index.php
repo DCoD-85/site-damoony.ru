@@ -155,6 +155,11 @@ function visuotabs_show( el ) {
     var target = document.getElementById( el.dataset.tabTarget );
     if ( target ) target.classList.add( 'selected' );
 }
+
+document.addEventListener( 'click' , function ( e ) {
+    var el = e.target.closest( '[data-action="tabs-show"]' );
+    if ( el ) visuotabs_show( el );
+} );
 </script>
 
 </body>
