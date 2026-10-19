@@ -8,7 +8,7 @@
 	<?php 
 	// Получаем список всех аллиасов, чтобы отрисовать табы
 	$cfg = new Config( Paths::config() );
-	$alliases = array_keys((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], []));
+	$alliases = array_values(array_unique((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], [])));
 	foreach ( $alliases as $a ) : 
 	?>
 		<a href="?p=allias:fillers&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($a) ?>" class="<?= $a === $allias ? 'active' : '' ?>">Filler: <?= htmlspecialchars($a) ?></a>

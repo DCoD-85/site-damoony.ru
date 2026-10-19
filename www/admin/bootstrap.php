@@ -832,7 +832,8 @@ switch ( $p ) {
 	    case 'allias:fillers' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $allias = (string) ( $_GET[ 'allias' ] ?? '' );
-        if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        if ( $allias === '' ) { header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) ); exit; }
         require_once ADMIN_ROOT . '/_lib/Scan.php';
         $rows = Scan::fillersFor( $domain , $allias );
         View::render( 'allias_fillers' , [ 'domain' => $domain , 'allias' => $allias , 'rows' => $rows ] );
@@ -913,13 +914,53 @@ switch ( $p ) {
         View::render( 'result' , [ 'result' => $result , 'title' => 'Удаление блока' , 'back_url' => '?p=blocks:list&domain=' . urlencode($domain) , 'back_label' => 'К блокам' ] );
         break;
 
+
+    case 'scheme:edit' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
+        
+        $file_php  = Paths::domain( $domain ) . '/alliasscheme/alliasscheme_' . $scheme . '.php';
+        $file_data = Paths::domain( $domain ) . '/alliasscheme/alliasscheme_' . $scheme . '.data.php';
+        
+        if ( ! is_file( $file_data ) ) {
+            View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Файл схемы не найден' , 'back_url' => '?p=blocks:list&domain=' . urlencode($domain) , 'back_label' => 'Назад' ] );
+            break;
+        }
+
+        $data = require $file_data;
+        
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            // Обновляем enabled на основе POST
+            $blocks = $_POST[ 'blocks' ] ?? [];
+            foreach ( $data['children'] as &$node ) {
+                if ( isset($node['class']) && str_starts_with($node['class'], 'dt_') ) {
+                    $node['enabled'] = in_array($node['class'], $blocks);
+                }
+                if ( !empty($node['children']) ) {
+                    foreach ( $node['children'] as &$child ) {
+                        if ( isset($child['class']) && str_starts_with($child['class'], 'dt_') ) {
+                            $child['enabled'] = in_array($child['class'], $blocks);
+                        }
+                    }
+                }
+            }
+            unset($node);
+            $php_code = '<?PHP' . "\n# ============================================================\n#   alliasscheme_" . $scheme . ".data.php — структура схемы\n# ============================================================\nreturn " . var_export($data, true) . ";\n";
+            file_put_contents($file_data, $php_code);
+            header('Location: ?p=scheme:edit&domain=' . urlencode($domain) . '&scheme=' . urlencode($scheme) . '&saved=1');
+            exit;
+        }
+
+        View::render( 'scheme_edit' , [ 'domain' => $domain , 'scheme' => $scheme , 'data' => $data ] );
+        break;
+
     case 'blocks:list' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
         require_once ADMIN_ROOT . '/_lib/Scan.php';
         $blocks = Scan::blocksDetailsFor( $domain );
         $cfg = new Config( Paths::config() );
-        $alliases = array_keys((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], []));
+        $alliases = array_values(array_unique((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], [])));
         View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks , 'alliases' => $alliases ] );
         break;
 

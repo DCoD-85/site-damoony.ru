@@ -167,6 +167,32 @@ class alliasscheme_www {
 		
 		$visuorelease->visuotag_set( $vt );
 	}
+
+	private function _render_node ( \visuotag $cursor , array $node ) : \visuotag {
+		if ( isset( $node['enabled'] ) && $node['enabled'] === false ) {
+			return $cursor;
+		}
+
+		$tag    = $node['tag']    ?? 'div';
+		$class  = $node['class']  ?? '';
+		$id     = $node['id']     ?? '';
+		$return = $node['return'] ?? false;
+
+		$child = $cursor->tag( $tag , class : $class , id : $id , return : $return );
+
+		if ( ! empty( $node['children'] ) ) {
+			foreach ( $node['children'] as $child_node ) {
+				$this->_render_node( $child , $child_node );
+			}
+		}
+
+		if ( $return === true ) {
+			$child = $child->parent( );
+		}
+
+		return $child;
+	}
+
     public function clear ( ) {
         $logic = $this;
         
