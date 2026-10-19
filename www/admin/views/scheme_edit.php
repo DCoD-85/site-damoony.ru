@@ -1,6 +1,6 @@
 <?php
 // Рекурсивная отрисовка узла
-function render_node ( $n, $is_root = false ) {
+function render_node ( $n, $domain, $is_root = false ) {
     $class   = $n['class']   ?? 'node';
     $layout  = $n['layout']  ?? 'vertical';
     $name    = str_replace('dt_', '', $class) ?: $class;
@@ -14,8 +14,21 @@ function render_node ( $n, $is_root = false ) {
     
     $root_class = $is_root ? ' tree-root' : '';
     $badge      = $is_root ? ' <span class="root-badge">(Контейнер)</span>' : '';
+    
+    // Проверка наличия файлов блока
+    $is_layout = ($n['type'] ?? 'block') === 'layout';
+    $block_exists = true;
+    if ( $is_layout ) {
+        $badge = ' <span style="color:#888; font-size:11px;">(Визуальный)</span>';
+    } elseif ( ! $is_root && $class !== 'dt' ) {
+        $block_name = str_replace('dt_', '', $class);
+        if ( ! is_dir( Paths::block( $domain , $block_name ) ) ) {
+            $block_exists = false;
+            $badge = ' <span style="color:#a11; font-size:11px;">(удалён)</span>';
+        }
+    }
 
-    echo "<li class='tree-node{$root_class}' data-class='{$class}'>";
+    echo "<li class='tree-node{$root_class} ' . (!$block_exists ? 'block-missing' : '') . '' data-class='{$class}'>";
     echo "  <div class='node-header' draggable='{$draggable}'>";
     echo "    {$handle}";
     echo "    <label><input type='checkbox' class='node-enabled' {$checked} " . ($is_root ? 'disabled' : '') . "> <b>{$name}</b>{$badge}</label>";
@@ -29,7 +42,7 @@ function render_node ( $n, $is_root = false ) {
     if ( !empty($n['children']) ) {
         echo "<ul class='scheme-tree'>";
         foreach ( $n['children'] as $child ) {
-            render_node( $child, false );
+            render_node( $child, $domain, false );
         }
         echo "</ul>";
     } else {
@@ -82,7 +95,7 @@ function render_wireframe ( $nodes ) {
             Перетаскивайте за <b>≡</b>. Верхняя/нижняя часть блока — вставка рядом. Центр — вложение внутрь.
         </p>
         
-        <?php render_node( $scheme_data, true ); ?>
+        <?php render_node( $scheme_data, $domain, true ); ?>
         
         <button type="submit" style="margin-top:20px;">Сохранить схему</button>
     </div>
@@ -132,6 +145,7 @@ function render_wireframe ( $nodes ) {
 .drag-handle { color: #999; font-size: 16px; cursor: grab; }
 .node-code { font-size: 11px; color: #888; margin-left: auto; }
 .dragging { opacity: 0.5; }
+.block-missing > .node-header { background: #fdf2f2; border-color: #f5c6c6; color: #a11; }
 
 /* Зоны сброса */
 .drop-above { border-top: 3px solid #2a63d6 !important; }

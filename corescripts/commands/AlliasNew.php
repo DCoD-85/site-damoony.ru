@@ -115,7 +115,17 @@ class AlliasNew {
         if ( ! is_file( $src_block ) || ! is_file( $src_block_data ) ) {
             $r->warn( 'Шаблоны filler не найдены — пропускаю' );
         } else {
-            foreach ( Blocks::LIST as $block ) {
+            $blocks_dir = Paths::blocks( $domain );
+			$blocks = [];
+			if ( is_dir($blocks_dir) ) {
+				foreach ( scandir($blocks_dir) as $b ) {
+					if ($b === '.' || $b === '..') continue;
+					if (is_dir($blocks_dir . '/' . $b) && is_file($blocks_dir . '/' . $b . '/' . $b . '.php')) {
+						$blocks[] = $b;
+					}
+				}
+			}
+			foreach ( $blocks as $block ) {
                 $block_dir = Paths::block( $domain , $block );
                 if ( ! is_dir( $block_dir ) ) {
                     $r->warn( "Блок не найден: {$block}" );
@@ -136,8 +146,8 @@ class AlliasNew {
                 Fs::write( $out , $c );
                 $r->file( $out );
             }
-            $r->step( "Filler'ы" , true , count( Blocks::LIST ) . ' блоков' );
-            $ctx?->step( "Filler'ы" , true , count( Blocks::LIST ) . ' блоков' );
+            $r->step( "Filler'ы" , true , count( $blocks ) . ' блоков' );
+            $ctx?->step( "Filler'ы" , true , count( $blocks ) . ' блоков' );
         }
 
         # 7. lint

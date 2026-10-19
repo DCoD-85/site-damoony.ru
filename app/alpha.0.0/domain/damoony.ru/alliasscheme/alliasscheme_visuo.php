@@ -184,7 +184,32 @@ class alliasscheme_visuo {
 		return $child;
 	}
 
-    public function clear ( ) {
+    
+    private function _init_nodes ( array $nodes ) : void {
+        foreach ( $nodes as $n ) {
+            if ( !empty($n['class']) && str_starts_with($n['class'], 'dt_') ) {
+                $this->{$n['class']} = $this->dt_root->find( class : $n['class'] );
+            }
+            if ( !empty($n['children']) ) $this->_init_nodes( $n['children'] );
+        }
+    }
+
+    private function _refresh_nodes ( array $nodes ) : void {
+        foreach ( $nodes as $n ) {
+            if ( !empty($n['class']) && str_starts_with($n['class'], 'dt_') ) {
+                $dt = $this->{$n['class']};
+                if ( $dt && ($n['type'] ?? 'block') === 'block' ) {
+                    $name = str_replace('dt_', '', $n['class']);
+                    if ( isset( $this->main->alliasglobal->{$name} ) ) {
+                        $dt->clear( )->append( $this->main->alliasglobal->{$name}->as_tag( ) );
+                    }
+                }
+            }
+            if ( !empty($n['children']) ) $this->_refresh_nodes( $n['children'] );
+        }
+    }
+
+	public function clear ( ) {
         $logic = $this;
         
 		$logic->dt_root = null;
@@ -214,28 +239,10 @@ class alliasscheme_visuo {
     }
 	
 	public function refresh ( bool $reload = false ) {
-		$main = $this->main;
-		$logic = $this;
-
-		# print( 'asd' . ( $main->alliasglobal->bottom->as_tag( ) ) );
-		if( $reload == true ){
-			# die( $logic->dt_bottom->release( ) );
-		}
-
-		! $logic->dt_top ? : $top = $main->alliasglobal->top->as_tag( );
-		! $logic->dt_left ?: $left = $main->alliasglobal->left->as_tag( );
-		! $logic->dt_center ?: $center = $main->alliasglobal->center->as_tag( );
-		! $logic->dt_right ?: $right = $main->alliasglobal->right->as_tag( );
-		! $logic->dt_bottom ?: $bottom = $main->alliasglobal->bottom->as_tag( );
-		! $logic->dt_policy ?: $policy = $main->alliasglobal->policy->as_tag( );
-		
-		! $logic->dt_top ?: $logic->dt_top->clear( )->append( $top );
-		! $logic->dt_left ?: $logic->dt_left->clear( )->append( $left );
-		! $logic->dt_center ?: $logic->dt_center->clear( )->append( $center );
-		! $logic->dt_right ?: $logic->dt_right->clear( )->append( $right );
-		! $logic->dt_bottom ?: $logic->dt_bottom->clear( )->append( $bottom );
-		! $logic->dt_policy ?: $logic->dt_policy->clear( )->append( $policy );
-	}
+        $logic = $this;
+        $scheme_data = require __DIR__ . '/alliasscheme_visuo.data.php';
+        $logic->_refresh_nodes( [ $scheme_data ] );
+    }
 
 	public function load ( ) {
 		$this->meta( );

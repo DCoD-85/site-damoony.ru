@@ -92,7 +92,47 @@ class BlockNew {
 			$ctx?->step( 'alliasglobal.php пропатчен' , true , $name );
 		}
 
-		# 3. lint
+
+		# 4. Создать заглушки филлеров для всех существующих аллиасов
+		try {
+			$cfg = new Config( Paths::config() );
+			$real = Paths::real( $domain );
+			$alliases = array_values(array_unique((array)$cfg->getKeys([ 'alliases_real' , $real ], [])));
+			$alliases = array_filter($alliases, fn($a) => $a !== '');
+
+			$tpl_filler_php  = CS_TPL . '/filler/block.php.tpl';
+			$tpl_filler_data = CS_TPL . '/filler/block.data.php.tpl';
+
+			if ( is_file($tpl_filler_php) && is_file($tpl_filler_data) ) {
+				foreach ( $alliases as $allias ) {
+					$filler_php  = $block_path . '/' . $name . '_' . $allias . '.php';
+					$filler_data = $block_path . '/' . $name . '_' . $allias . '.data.php';
+
+					if ( ! Fs::exists($filler_php) ) {
+						$vars_filler = [ 'name' => $allias , 'block' => $name , 'domain' => $domain , 'domain_ns' => $ns ];
+						Fs::write( $filler_php ,  Template::render_str( file_get_contents( $tpl_filler_php ) , $vars_filler ) );
+						Fs::write( $filler_data , Template::render_str( file_get_contents( $tpl_filler_data ) , $vars_filler ) );
+						$r->file( $filler_php );
+						$r->file( $filler_data );
+					}
+				}
+				
+				Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $alliases , $name ) {
+					foreach ( $alliases as $allias ) {
+						if ( ! $cfg->hasKeys( [ 'fillers' , $real , $allias , $name ] ) ) {
+							$cfg->setKeys( [ 'fillers' , $real , $allias , $name ] , false );
+						}
+					}
+				} );
+				$r->step( 'Заглушки филлеров созданы' , true , count($alliases) . ' аллиасов' );
+				$ctx?->step( 'Заглушки филлеров' , true , count($alliases) . ' аллиасов' );
+			}
+		} catch ( Throwable $e ) {
+			$r->warn( 'Не удалось создать заглушки филлеров: ' . $e->getMessage() );
+		}
+
+		# 5. lint
+
 		$lint_errors = 0;
 		foreach ( $r->created as $full ) {
 			if ( substr( $full , -4 ) !== '.php' ) continue;

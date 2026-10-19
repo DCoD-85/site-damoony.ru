@@ -5,7 +5,7 @@
 return array (
   'tag' => 'div',
   'class' => 'dt',
-  'layout' => 'horizontal',
+  'layout' => 'vertical',
   'children' => 
   array (
     0 => 
@@ -20,7 +20,7 @@ return array (
     array (
       'tag' => 'div',
       'class' => 'dt_middle',
-      'layout' => 'vertical',
+      'layout' => 'horizontal',
       'enabled' => true,
       'children' => 
       array (

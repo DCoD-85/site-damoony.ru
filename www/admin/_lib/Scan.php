@@ -133,13 +133,67 @@ class Scan {
 
 
 
+
+    private static function blocksFromSchemes ( string $domain ) : array {
+        $schemes_dir = Paths::domain( $domain ) . '/alliasscheme';
+        $out = [];
+        if ( ! is_dir($schemes_dir) ) return $out;
+
+        foreach ( glob( $schemes_dir . '/alliasscheme_*.data.php' ) as $file ) {
+            $data = require $file;
+            $walk = function ( $nodes ) use ( &$walk , &$out ) {
+                foreach ( $nodes as $n ) {
+                    if ( !empty($n['class']) && str_starts_with($n['class'], 'dt_') ) {
+                        $name = str_replace('dt_', '', $n['class']);
+                        if ( $name !== 'script' ) $out[] = $name;
+                    }
+                    if ( !empty($n['children']) ) $walk($n['children']);
+                }
+            };
+            $walk( [$data] );
+        }
+        return array_unique($out);
+    }
+
+
+    
+
+
+    
+
+
+    # --- визуальные контейнеры схем ---
+    public static function layoutsFor ( string $domain ) : array {
+        $schemes_dir = Paths::domain( $domain ) . '/alliasscheme';
+        $out = [];
+        if ( ! is_dir($schemes_dir) ) return $out;
+
+        foreach ( glob( $schemes_dir . '/alliasscheme_*.data.php' ) as $file ) {
+            $data = require $file;
+            $walk = function ( $nodes ) use ( &$walk , &$out ) {
+                foreach ( $nodes as $n ) {
+                    if ( isset($n['type']) && $n['type'] === 'layout' ) {
+                        $out[] = $n['class'];
+                    }
+                    if ( !empty($n['children']) ) $walk($n['children']);
+                }
+            };
+            $walk( [$data] );
+        }
+        return array_unique($out);
+    }
+
     # --- детали блоков домена ---
     public static function blocksDetailsFor ( string $domain ) : array {
         $dir = Paths::blocks( $domain );
-        $out = [ ];
-        if ( ! is_dir( $dir ) ) return $out;
+        $real_blocks   = self::blocksFor( $domain );
+        $scheme_blocks = self::blocksFromSchemes( $domain );
+        $all_blocks    = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
+        sort( $all_blocks );
 
-        foreach ( self::blocksFor( $domain ) as $name ) {
+        $out = [ ];
+        foreach ( $all_blocks as $name ) {
+            if ( $name === 'script' ) continue;
             $php  = $dir . '/' . $name . '/' . $name . '.php';
             $data = $dir . '/' . $name . '/' . $name . '.data.php';
             $out[ ] = [
@@ -157,9 +211,14 @@ class Scan {
         $real = Paths::real( $domain );
         $fillers_cfg = (array) $cfg->getKeys( [ 'fillers' , $real , $allias ] , [] );
         $base_dir = Paths::blocks( $domain );
-        $out = [ ];
+        
+        $real_blocks   = self::blocksFor( $domain );
+        $scheme_blocks = self::blocksFromSchemes( $domain );
+        $all_blocks    = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
+        sort( $all_blocks );
 
-        foreach ( Blocks::LIST as $block ) {
+        $out = [ ];
+        foreach ( $all_blocks as $block ) {
             if ( $block === 'script' ) continue;
 
             $base_php   = $base_dir . '/' . $block . '/' . $block . '.php';
