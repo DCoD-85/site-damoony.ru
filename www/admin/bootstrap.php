@@ -860,6 +860,41 @@ switch ( $p ) {
         header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
         exit;
 
+
+    case 'block:new' :
+        require_once CS_CMD . '/BlockNew.php';
+        $domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' );
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $result = BlockNew::run( [ 'name' => $_POST[ 'name' ] , 'domain' => $domain ] );
+            View::render( 'result' , [ 'result' => $result , 'title' => 'Новый блок' , 'back_url' => '?p=blocks:list&domain=' . urlencode($domain) , 'back_label' => 'К блокам' ] );
+        } else {
+            View::render( 'block_new' , [ 'domain' => $domain ] );
+        }
+        break;
+
+    case 'block:edit' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $name   = (string) ( $_GET[ 'name' ] ?? '' );
+        $php_file  = Paths::block( $domain , $name ) . '/' . $name . '.php';
+        $data_file = Paths::block( $domain , $name ) . '/' . $name . '.data.php';
+        if ( ! is_file( $php_file ) ) { header( 'Location: ?p=blocks:list&domain=' . urlencode($domain) ); exit; }
+        
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            Fs::writeAtomic( $php_file , $_POST[ 'php' ] );
+            Fs::writeAtomic( $data_file , $_POST[ 'data' ] );
+            header( 'Location: ?p=block:edit&domain=' . urlencode($domain) . '&name=' . urlencode($name) . '&saved=1' ); exit;
+        }
+        View::render( 'block_edit' , [ 'domain' => $domain , 'name' => $name , 'php' => file_get_contents( $php_file ) , 'data' => file_get_contents( $data_file ) ] );
+        break;
+
+    case 'block:remove' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $name   = (string) ( $_GET[ 'name' ] ?? '' );
+        require_once CS_CMD . '/BlockRemove.php';
+        $result = BlockRemove::run( [ 'domain' => $domain , 'name' => $name ] );
+        View::render( 'result' , [ 'result' => $result , 'title' => 'Удаление блока' , 'back_url' => '?p=blocks:list&domain=' . urlencode($domain) , 'back_label' => 'К блокам' ] );
+        break;
+
     case 'blocks:list' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }

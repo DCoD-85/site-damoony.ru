@@ -1,6 +1,6 @@
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 	<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code></h1>
-	<a href="?p=dashboard" class="btn-cancel">← К доменам</a>
+	<div><a href="?p=block:new&domain=<?= urlencode($domain) ?>" class="btn-edit" style="margin-right:20px;">+ Создать блок</a><a href="?p=dashboard" class="btn-cancel">← К доменам</a></div>
 </div>
 
 <p class="hint">
@@ -27,7 +27,9 @@
 					<td><?= $b['has_php'] ? '✓' : '✗' ?></td>
 					<td><?= $b['has_data'] ? '✓' : '✗' ?></td>
 					<td>
-						<a href="?p=allias:fillers&domain=<?= urlencode( $domain ) ?>&allias=www" class="btn-edit">К филлерам www</a>
+						<a href="?p=block:edit&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-edit">Ред.</a>
+						<a href="?p=allias:fillers&domain=<?= urlencode( $domain ) ?>&allias=www" class="btn-edit">Филлеры www</a>
+						<a href="?p=block:remove&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-danger" onclick="return confirm('Удалить блок?')">Удалить</a>
 					</td>
 				</tr>
 			<?php endforeach ?>
