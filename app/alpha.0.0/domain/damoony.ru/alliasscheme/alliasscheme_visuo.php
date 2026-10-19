@@ -35,9 +35,8 @@ class alliasscheme_visuo {
 		$js_lib   = DSA . 'media' . DSA . 'shared' . DSA . 'scripts' . DSA . 'lib' . DSA;
 		$js_eng   = DSA . 'media' . DSA . 'shared' . DSA . 'scripts' . DSA . 'engine' . DSA;
 
-		# --- папка аллиаса (с точкой на конце) ---
-		$all_dir  = $media . 'skin' . DSA . $skin . DSA . $allias . '.' . DSA;
-		$all_css  = $all_dir . 'css' . DSA;
+		# --- папка аллиаса — те же css/, что у $skin_css ---
+		$all_css  = $skin_css;
 
 		# --- папка движка visuoel (всегда visuo.) ---
 		$engine_dir = $media . 'skin' . DSA . $skin . DSA . 'visuo' . DSA;
