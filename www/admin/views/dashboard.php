@@ -14,6 +14,7 @@
 				<th>Статус</th>
 				<th>Файлы</th>
 				<th>Аллиасы</th>
+				<th>Управление</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -25,7 +26,7 @@
 							<b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b>
 						</a>
 						<?php if ( ! empty( $d[ 'aliases' ] ) ) : ?>
-							<div class="hint">aliases: <?= htmlspecialchars( implode( ', ' , $d[ 'aliases' ] ) ) ?></div>
+							<div class="hint" style="font-size:11px; color:#888; margin-top:4px;">aliases: <?= htmlspecialchars( implode( ', ' , $d[ 'aliases' ] ) ) ?></div>
 						<?php endif ?>
 					</td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
@@ -40,15 +41,23 @@
 								<?= $d[ 'avail' ] ? '● вкл' : '○ выкл' ?>
 							</button>
 						</form>
-						<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger">Удалить</a>
 					</td>
 					<td><?= $d[ 'fs' ] ? '✓' : '✗' ?></td>
 					<td>
-						<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
-							<a href="?p=pages:tree&domain=<?= $d_enc ?>&allias=<?= urlencode( $a ) ?>"
-								class="allias-link"><?= htmlspecialchars( $a ) ?></a>
-						<?php endforeach ?>
-						<a href="?p=allias:new&domain=<?= $d_enc ?>" class="allias-add" title="Новый аллиас">+ новый</a>
+						<div class="allias-list">
+							<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
+								<a href="?p=allias:fillers&domain=<?= $d_enc ?>&allias=<?= urlencode( $a ) ?>"
+									class="allias-link" title="Управление филлерами"><?= htmlspecialchars( $a ) ?></a>
+							<?php endforeach ?>
+							<a href="?p=allias:new&domain=<?= $d_enc ?>" class="allias-add" title="Новый аллиас">+ новый</a>
+						</div>
+					</td>
+					<td>
+						<div class="action-links">
+							<a href="?p=allias:list&domain=<?= $d_enc ?>" class="btn-sub">Все аллиасы</a>
+							<a href="?p=blocks:list&domain=<?= $d_enc ?>" class="btn-sub">Блоки</a>
+							<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger">Удалить</a>
+						</div>
 					</td>
 				</tr>
 			<?php endforeach ?>

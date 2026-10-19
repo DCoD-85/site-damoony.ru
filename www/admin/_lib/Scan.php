@@ -132,6 +132,25 @@ class Scan {
     }
 
 
+
+    # --- детали блоков домена ---
+    public static function blocksDetailsFor ( string $domain ) : array {
+        $dir = Paths::blocks( $domain );
+        $out = [ ];
+        if ( ! is_dir( $dir ) ) return $out;
+
+        foreach ( self::blocksFor( $domain ) as $name ) {
+            $php  = $dir . '/' . $name . '/' . $name . '.php';
+            $data = $dir . '/' . $name . '/' . $name . '.data.php';
+            $out[ ] = [
+                'name'      => $name ,
+                'has_php'   => is_file( $php ) ,
+                'has_data'  => is_file( $data ) ,
+            ];
+        }
+        return $out;
+    }
+
     # --- филлеры аллиаса ---
     public static function fillersFor ( string $domain , string $allias ) : array {
         $cfg  = new Config( Paths::config() );

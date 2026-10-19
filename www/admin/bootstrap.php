@@ -859,7 +859,16 @@ switch ( $p ) {
         AuditLog::action_ok( 'filler:remove' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'ok' => $result->ok ] );
         header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
         exit;
-case 'allias:list' :
+
+    case 'blocks:list' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        require_once ADMIN_ROOT . '/_lib/Scan.php';
+        $blocks = Scan::blocksDetailsFor( $domain );
+        View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks ] );
+        break;
+
+    case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 

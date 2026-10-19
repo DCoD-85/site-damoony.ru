@@ -304,3 +304,15 @@ button.flag-off:hover { color: #666; border-color: #bbb; }
 	color: #fff;
 	border-style: solid;
 }
+/* dashboard new layout */
+.table td { vertical-align: top; }
+.allias-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.action-links { display: flex; flex-direction: column; gap: 6px; }
+.action-links .btn-sub { font-size: 12px; color: #2a63d6; text-decoration: none; }
+.action-links .btn-sub:hover { text-decoration: underline; }
+.allias-link {
+	display: inline-block; padding: 2px 8px; background: #f0f2f6;
+	border: 1px solid #e0e4eb; border-radius: 4px; color: #2a63d6;
+	text-decoration: none; font-size: 13px; font-weight: 500;
+}
+.allias-link:hover { background: #e0e8f0; }
