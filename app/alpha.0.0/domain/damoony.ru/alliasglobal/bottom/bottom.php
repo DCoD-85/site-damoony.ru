@@ -130,16 +130,17 @@ class alliasglobal_bottom extends alliasblock {
 
 		$vt_info->tag( 'div' , class : 'title' )->content( 'Версии сайта:' );
 
+		$ua = array_pad( $url_allias , 2 , '' );
 		$info_links = $vt_info->tag( 'div' , class : 'links' );
 		$info_links->tag( 'a' )
-			->attrs_add( 'href' , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , $url_base , [ 'version' => 'desctop' ] ) )
-			->content( 'Десктопная версия' );
+				->attrs_add( 'href' , $link->href( [ $ua[ 1 ] , $ua[ 0 ] ] , $url_base , [ 'version' => 'desctop' ] ) )
+				->content( 'Десктопная версия' );
 		$info_links->tag( 'a' )
-			->attrs_add( 'href' , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , $url_base , [ 'version' => 'mobile' ] ) )
-			->content( 'Мобильная версия' );
+				->attrs_add( 'href' , $link->href( [ $ua[ 1 ] , $ua[ 0 ] ] , $url_base , [ 'version' => 'mobile' ] ) )
+				->content( 'Мобильная версия' );
 		$info_links->tag( 'a' )
-			->attrs_add( 'href' , $link->href( [ $url_allias[ 1 ] , $url_allias[ 0 ] ] , $url_base , [ 'version' => 'app' ] ) )
-			->content( 'Приложение' );
+				->attrs_add( 'href' , $link->href( [ $ua[ 1 ] , $ua[ 0 ] ] , $url_base , [ 'version' => 'app' ] ) )
+				->content( 'Приложение' );
 
 		$vt_policy = new \visuotag( );
 		$vt_policy = $vt_policy->tag( 'div' , class : 'bottom_nav_policy' );

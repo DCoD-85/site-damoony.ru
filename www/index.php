@@ -144,6 +144,37 @@ function error_class ( string $classname , string $file , string $line ) {
 	error( 'Отсутствует класс' , 'Отсутствует класс: ' . $classname . '. Проверьте целостность структуры сайта.' , $file , $line );
 }
 
+# --- глобальные обработчики (H4) ---
+set_error_handler( static function ( int $errno , string $errstr , string $errfile , int $errline ) : bool {
+	# типы, которые не превращаем в исключения (шум / уже маскируются)
+	if ( in_array( $errno , [ E_DEPRECATED , E_NOTICE , E_USER_DEPRECATED , E_USER_NOTICE ] , true ) ) return false;
+	# если error_reporting уже исключил тип — не мешаем
+	if ( ! ( error_reporting( ) & $errno ) ) return false;
+	throw new \ErrorException( $errstr , 0 , $errno , $errfile , $errline );
+} );
+
+set_exception_handler( static function ( \Throwable $e ) : void {
+	error(
+		'Unhandled: ' . get_class( $e ) ,
+		$e->getMessage( ) . ' @ ' . $e->getFile( ) . ':' . $e->getLine( ) ,
+		$e->getFile( ) ,
+		(string) $e->getLine( )
+	);
+} );
+
+register_shutdown_function( static function ( ) : void {
+	$err = error_get_last( );
+	if ( $err === null ) return;
+	if ( ! in_array( $err[ 'type' ] , [ E_ERROR , E_PARSE , E_CORE_ERROR , E_COMPILE_ERROR , E_USER_ERROR ] , true ) ) return;
+
+	# уже что-то выведено — не дублируем HTML, только лог
+	if ( headers_sent( ) ) {
+		@error_log( 'FATAL: ' . $err[ 'message' ] . ' @ ' . $err[ 'file' ] . ':' . $err[ 'line' ] );
+		return;
+	}
+	error( 'Fatal' , $err[ 'message' ] , $err[ 'file' ] , (string) $err[ 'line' ] );
+} );
+
 $engine = __DIR__ . DS . '..' . DS . 'engine';
 
 ( include_once $path = $engine . DS . 'constants.php' ) or error_file( $path , __FILE__ , __LINE__ );
