@@ -142,7 +142,8 @@ class library_link {
 			if ( ! empty( $allias_address ) ) {
 				$allias = '';
 				foreach ( $allias_address as $value ) {
-					is_null( $value ) ?: $allias .= $value . '.';
+					if ( $value === null || $value === '' ) continue;
+					$allias .= $value . '.';
 				}
 				$allias = mb_substr( $allias , 0 , mb_strlen( $allias ) - 1 );
 				
