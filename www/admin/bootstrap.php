@@ -829,7 +829,37 @@ switch ( $p ) {
 		] );
 		break;
 
-	case 'allias:list' :
+	    case 'allias:fillers' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+        if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        require_once ADMIN_ROOT . '/_lib/Scan.php';
+        $rows = Scan::fillersFor( $domain , $allias );
+        View::render( 'allias_fillers' , [ 'domain' => $domain , 'allias' => $allias , 'rows' => $rows ] );
+        break;
+
+    case 'filler:toggle' :
+        if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit; }
+        $domain = (string) ( $_POST[ 'domain' ] ?? '' );
+        $allias = (string) ( $_POST[ 'allias' ] ?? '' );
+        $block  = (string) ( $_POST[ 'block' ]  ?? '' );
+        $value  = (string) ( $_POST[ 'value' ]  ?? '' );
+        require_once CS_CMD . '/FillerToggle.php';
+        $result = FillerToggle::run( [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'value' => $value ] );
+        AuditLog::action_ok( 'filler:toggle' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'ok' => $result->ok ] );
+        header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+        exit;
+
+    case 'filler:remove' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+        $block  = (string) ( $_GET[ 'block' ]  ?? '' );
+        require_once CS_CMD . '/FillerRemove.php';
+        $result = FillerRemove::run( [ 'domain' => $domain , 'allias' => $allias , 'block' => $block ] );
+        AuditLog::action_ok( 'filler:remove' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'ok' => $result->ok ] );
+        header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
+        exit;
+case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 
@@ -924,6 +954,7 @@ switch ( $p ) {
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' );
 		$allias = (string) ( $_GET[ 'allias' ] ?? $_POST[ 'allias' ] ?? '' );
+		$block  = (string) ( $_GET[ 'block' ]  ?? '' );
 
 		if ( $domain === '' ) {
 			header( 'Location: ?p=dashboard' );

@@ -131,6 +131,36 @@ class Scan {
         return $out;
     }
 
+
+    # --- филлеры аллиаса ---
+    public static function fillersFor ( string $domain , string $allias ) : array {
+        $cfg  = new Config( Paths::config() );
+        $real = Paths::real( $domain );
+        $fillers_cfg = (array) $cfg->getKeys( [ 'fillers' , $real , $allias ] , [] );
+        $base_dir = Paths::blocks( $domain );
+        $out = [ ];
+
+        foreach ( Blocks::LIST as $block ) {
+            if ( $block === 'script' ) continue;
+
+            $base_php   = $base_dir . '/' . $block . '/' . $block . '.php';
+            $has_base   = is_file( $base_php );
+
+            $filler_php = $base_dir . '/' . $block . '/' . $block . '_' . $allias . '.php';
+            $has_filler = is_file( $filler_php );
+
+            $enabled    = ! empty( $fillers_cfg[ $block ] );
+
+            $out[ ] = [
+                'name'       => $block ,
+                'has_base'   => $has_base ,
+                'has_filler' => $has_filler ,
+                'enabled'    => $enabled ,
+            ];
+        }
+        return $out;
+    }
+
     # --- helper ---
     private static function listDirs ( string $dir ) : array {
         if ( ! is_dir( $dir ) ) return [ ];

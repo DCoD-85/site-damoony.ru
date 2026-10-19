@@ -29,7 +29,7 @@
 		<label>Блок
 			<select name="block" required>
 				<?php foreach ( $blocks as $b ) : ?>
-					<option value="<?= htmlspecialchars( $b , ENT_QUOTES ) ?>"><?= htmlspecialchars( $b ) ?></option>
+					<option value="<?= htmlspecialchars( $b , ENT_QUOTES ) ?>" <?= $b === ( $block ?? '' ) ? 'selected' : '' ?>><?= htmlspecialchars( $b ) ?></option>
 				<?php endforeach ?>
 			</select>
 		</label>
