@@ -50,31 +50,22 @@ class AlliasRemove {
             }
         }
 
-        # --- 1. удалить папку аллиаса ---
+                # --- 1. переместить папку аллиаса в карантин ---
+        $trash_path = $allias_path . '_trash_' . time();
+        $in_trash = false;
+        
         if ( is_dir( $allias_path ) ) {
-            Fs::rmrf( $allias_path );
-            $r->step( 'Удалена папка аллиаса' , true , Fs::rel( $allias_path ) );
-            $ctx?->step( 'Удалена папка аллиаса' , true , Fs::rel( $allias_path ) );
-        }
-
-        # --- 2. удалить filler'ы ---
-        $removed = 0;
-        foreach ( Blocks::LIST as $block ) {
-            $files = [
-                Paths::block( $domain , $block ) . '/' . $block . '_' . $name . '.php' ,
-                Paths::block( $domain , $block ) . '/' . $block . '_' . $name . '.data.php' ,
-            ];
-            foreach ( $files as $f ) {
-                if ( is_file( $f ) ) {
-                    @unlink( $f );
-                    $removed++;
-                }
+            if ( rename( $allias_path , $trash_path ) ) {
+                $in_trash = true;
+                $r->step( 'Папка аллиаса в карантине' , true , Fs::rel( $trash_path ) );
+                $ctx?->step( 'Папка аллиаса в карантине' , true , Fs::rel( $trash_path ) );
+            } else {
+                $r->error( "Не удалось переместить папку аллиаса в карантин" );
+                return $r;
             }
         }
-        $r->step( "Удалено filler-файлов" , true , (string) $removed );
-        $ctx?->step( "Удалено filler-файлов" , true , (string) $removed );
 
-        # --- 3. site.config (под lock) ---
+        # --- 2. site.config (под lock) ---
         try {
             Config::mutate( Paths::config() , function ( Config $cfg ) use ( $domain , $name ) {
                 $cfg->removeKeys( [ 'alliases_real'      , $domain , $name ] );
@@ -83,8 +74,36 @@ class AlliasRemove {
             } );
             $r->step( 'site.config обновлён' , true , $name );
             $ctx?->step( 'site.config обновлён' , true , $name );
+            
+            # --- 3. окончательное удаление папки и filler'ов ---
+            if ( $in_trash && is_dir( $trash_path ) ) {
+                Fs::rmrf( $trash_path );
+            }
+            
+            $removed = 0;
+            foreach ( Blocks::LIST as $block ) {
+                $files = [
+                    Paths::block( $domain , $block ) . '/' . $block . '_' . $name . '.php' ,
+                    Paths::block( $domain , $block ) . '/' . $block . '_' . $name . '.data.php' ,
+                ];
+                foreach ( $files as $f ) {
+                    if ( is_file( $f ) ) {
+                        @unlink( $f );
+                        $removed++;
+                    }
+                }
+            }
+            $r->step( "Удалено filler-файлов" , true , (string) $removed );
+            $ctx?->step( "Удалено filler-файлов" , true , (string) $removed );
+            
         } catch ( Throwable $e ) {
-            $r->error( "site.config: " . $e->getMessage( ) );
+            # --- ОТКАТ ---
+            if ( $in_trash && is_dir( $trash_path ) ) {
+                rename( $trash_path , $allias_path );
+                $r->error( "Ошибка конфига: " . $e->getMessage() . " (папка восстановлена)" );
+            } else {
+                $r->error( "site.config: " . $e->getMessage( ) );
+            }
         }
 
         return $r;

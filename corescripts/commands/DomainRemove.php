@@ -37,11 +37,19 @@ class DomainRemove {
             }
         }
 
-        # --- 1. удалить папку ---
+                # --- 1. переместить папку в карантин ---
+        $trash_path = $domain_path . '_trash_' . time();
+        $in_trash = false;
+        
         if ( is_dir( $domain_path ) ) {
-            Fs::rmrf( $domain_path );
-            $r->step( 'Удалена папка домена' , true , Fs::rel( $domain_path ) );
-            $ctx?->step( 'Удалена папка домена' , true , Fs::rel( $domain_path ) );
+            if ( rename( $domain_path , $trash_path ) ) {
+                $in_trash = true;
+                $r->step( 'Папка домена в карантине' , true , Fs::rel( $trash_path ) );
+                $ctx?->step( 'Папка домена в карантине' , true , Fs::rel( $trash_path ) );
+            } else {
+                $r->error( "Не удалось переместить папку домена в карантин" );
+                return $r;
+            }
         }
 
         # --- 2. site.config (под lock) ---
@@ -58,10 +66,21 @@ class DomainRemove {
             } );
             $r->step( 'site.config обновлён' , true , $domain );
             $ctx?->step( 'site.config обновлён' , true , $domain );
+            
+            # --- 3. окончательное удаление ---
+            if ( $in_trash && is_dir( $trash_path ) ) {
+                Fs::rmrf( $trash_path );
+            }
         } catch ( Throwable $e ) {
-            $r->error( "site.config: " . $e->getMessage( ) );
+            # --- ОТКАТ ---
+            if ( $in_trash && is_dir( $trash_path ) ) {
+                rename( $trash_path , $domain_path );
+                $r->error( "Ошибка конфига: " . $e->getMessage() . " (папка восстановлена)" );
+            } else {
+                $r->error( "site.config: " . $e->getMessage( ) );
+            }
         }
 
         return $r;
-    }
+	}
 }
