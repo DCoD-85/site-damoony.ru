@@ -51,10 +51,15 @@ $is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
 # --- middleware pipeline ---
 require_once __DIR__ . '/../engine/middleware.php';
 
-( new middleware( ) )
-    ->add( fn( ) => middleware::securityHeaders( $is_https ) , 'security' )
-    ->add( fn( ) => middleware::rateLimit( 'site' , 120 , 60 , 900 ) , 'rate-limit' )
-    ->run( );
+try {
+    ( new middleware( ) )
+        ->add( fn( ) => middleware::securityHeaders( $is_https ) , 'security' )
+        ->add( fn( ) => middleware::rateLimit( 'site' , 120 , 60 , 900 ) , 'rate-limit' )
+        ->run( );
+} catch ( StopMiddleware $e ) {
+    http_response_code( 429 );
+    die( 'Too Many Requests' ); // Теперь это безопасно, мы перехватили управление
+}
 
 session_set_cookie_params( [
 	'lifetime' => 0 ,

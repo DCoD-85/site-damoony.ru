@@ -1,6 +1,6 @@
 <?PHP
 
-namespace damoony\visuo;
+namespace damoony_ru\visuo;
 
 class algoritm_lang_index
 	extends \algoritm_ {
@@ -33,10 +33,6 @@ class algoritm_lang_index
 		$center = $main->alliasglobal->center;
 		$center->wrapper_set( 'div' );
 		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
-		$center->wrapper_set( 'div' );
-		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
-		$center->wrapper_set( 'div' );
-		$center->section_add( 'test3' , $vt ); // ->visuotag( )->append( $vt );
 
 		return true;
 	}

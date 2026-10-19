@@ -34,6 +34,9 @@ class middleware {
         header( 'Referrer-Policy: strict-origin-when-cross-origin' );
         header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
 
+		// ДОБАВИТЬ CSP (разрешаем inline-скрипты для visuo)
+    	header( "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" );
+		
         if ( $is_https ) {
             header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
         }
@@ -55,7 +58,7 @@ class middleware {
         if ( $data[ 'banned_until' ] > $now ) {
             http_response_code( 429 );
             header( 'Retry-After: ' . ( $data[ 'banned_until' ] - $now ) );
-            die( 'Too Many Requests' );
+            throw new StopMiddleware( 'Too Many Requests' );
         }
 
         if ( ( $now - $data[ 'start' ] ) > $window ) {

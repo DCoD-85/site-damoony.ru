@@ -1,11 +1,9 @@
 {
 	"default": {
 		"available": [
-			"1",
-			"2",
-			"3"
+			""
 		],
-		"auth": true,
+		"auth": false,
 		"search": true,
 		"default": true
 	}

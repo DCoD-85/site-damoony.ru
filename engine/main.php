@@ -57,6 +57,7 @@ class main {
 	}
 	public function init( ) {
 		# 
+		require_once __DIR__ . '/autoload.php';
 		( include_once $path = __DIR__ . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 		
 		# 
@@ -85,8 +86,8 @@ class main {
 		$this->language->load( )->init( );
 		
 		$logic_ver = $this->main_settings->get( 'logic' );
-		( include_once $path = dirname( __DIR__ ) . DS . 'logic' . DS . $logic_ver . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		
+		( include_once $path = dirname( __DIR__ ) . DS . 'engines' . DS . 'legacy' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
+
 		$this->blacklist->init( );
 		
 		$db = $this->db->db( );
@@ -118,11 +119,17 @@ class main {
 		$this->alliasglobal = new ($static_domain.'\\alliasglobal')( $this );
 		$this->alliasscheme = new ($static_domain.'\\alliasscheme')( $this );
 		
-		# algoritm
-		$main->algoritm = new ($static_domain . '\\' . $static_allias . '\\' . 'algoritm')( $this , [ ] );
-		$main->algoritm->clear( );
-		$main->algoritm->start( );
-		$main->algoritm->debug( );
+		# --- ВЫБОР ДВИЖКА ЛОГИКИ ---
+		if ( $this->main_settings->get( 'logic_type' ) === 'alogic' ) {
+			require_once dirname( __DIR__ ) . '/engines/alogic/alogic_bridge.php';
+			alogic_resolve( $this , $static_domain , $static_allias );
+		} else {
+			# Старая логика (legacy)
+			$main->algoritm = new ($static_domain . '\\' . $static_allias . '\\' . 'algoritm')( $this , [ ] );
+			$main->algoritm->clear( );
+			$main->algoritm->start( );
+			$main->algoritm->debug( );
+		}
 	}
 
 	public function savedata ( ) {
@@ -203,6 +210,7 @@ class main_path {
 class main_settings {
 	# vars
 	public null|main $main = null;
+	public string $logic_type = 'legacy'; // 'legacy' или 'alogic'
 	public string $domain_real_name;
 	public string $allias_real_name;
 	private string $language;
