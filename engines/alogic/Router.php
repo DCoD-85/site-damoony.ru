@@ -29,9 +29,6 @@ class Router
             }
         }
 
-        // Если корень "/" - делаем пустой паттерн
-        if ($regex === '/') $regex = '';
-
         $regex = '#^' . $regex . '$#';
 
         $this->routes[] = [
