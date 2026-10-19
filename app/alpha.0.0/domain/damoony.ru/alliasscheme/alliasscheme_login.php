@@ -108,7 +108,7 @@ class alliasscheme_login {
 		
 
 		$vt = new \visuotag( );
-		$vt->tag( '! doctype' , false , return : false )
+		$vt->tag( '!DOCTYPE html' , false , return : false )
 			->tag( 'html' , class : 'cl_html scheme_login' )
 				->tag( 'head' , class : 'cl_head' , return : false )
 				->tag( 'body' , class : 'cl_body' )
