@@ -222,17 +222,10 @@ class user extends \user {
 	#   cookie
 	# ---------------------------------------------------------------
 	private function set_cookie ( string $token , int $expires ) : void {
-		if ( headers_sent( ) ) return;
-		setcookie( 'visuo_sid' , $token , [
-			'expires'  => $expires ,
-			'path'     => '/' ,
-			'httponly' => true ,
-			'samesite' => 'Lax' ,
-			'secure'   => ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) ,
-		] );
+		\cookie::set( 'visuo_sid' , $token , [ 'expires' => $expires ] );
 	}
 
 	private function clear_cookie ( ) : void {
-		$this->set_cookie( '' , time( ) - 3600 );
+		\cookie::delete( 'visuo_sid' );
 	}
 }
