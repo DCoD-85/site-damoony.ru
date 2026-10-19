@@ -23,7 +23,13 @@
 				<td><?= $has_data ? '✓' : '✗ (нет)' ?></td>
 				<td>
 					<?php if ( $has_data ) : ?>
-						<a href="?p=scheme:edit&domain=<?= urlencode( $domain ) ?>&scheme=<?= urlencode( $s ) ?>" class="btn-edit">Ред.</a>
+						<div class="td-actions">
+                        <a href="?p=scheme:edit&domain=<?= urlencode( $domain ) ?>&scheme=<?= urlencode( $s ) ?>" class="btn-edit">Ред.</a>
+                        <a href="?p=scheme:copy&domain=<?= urlencode( $domain ) ?>&scheme=<?= urlencode( $s ) ?>" class="btn-edit">Копировать</a>
+                        <?php if ( !in_array($s, ['www', 'visuo', 'error']) ) : ?>
+                            <a href="?p=scheme:remove&domain=<?= urlencode( $domain ) ?>&scheme=<?= urlencode( $s ) ?>" class="btn-danger">Удалить</a>
+                        <?php endif ?>
+                    </div>
 					<?php else : ?>
 						<span class="btn-cancel" style="opacity:0.5; cursor:not-allowed;">Нет data.php</span>
 					<?php endif ?>

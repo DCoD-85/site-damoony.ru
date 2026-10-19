@@ -932,6 +932,7 @@ switch ( $p ) {
         View::render( 'schemes_list' , [ 'domain' => $domain , 'schemes' => $schemes ] );
         break;
 
+    
     case 'scheme:edit' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
@@ -965,9 +966,10 @@ switch ( $p ) {
         if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
         require_once ADMIN_ROOT . '/_lib/Scan.php';
         $blocks = Scan::blocksDetailsFor( $domain );
+        $layouts = Scan::layoutsFor( $domain );
         $cfg = new Config( Paths::config() );
         $alliases = array_values(array_unique((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], [])));
-        View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks , 'alliases' => $alliases ] );
+        View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks , 'layouts' => $layouts , 'alliases' => $alliases ] );
         break;
 
     case 'allias:list' :
