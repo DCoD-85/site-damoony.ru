@@ -933,6 +933,77 @@ switch ( $p ) {
         break;
 
     
+    case 'scheme:copy' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $source = (string) ( $_GET[ 'scheme' ] ?? '' );
+        
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $target = trim((string)$_POST[ 'target' ]);
+            if ( $target === '' || !preg_match('/^[a-z][a-z0-9_]*$/', $target) ) {
+                View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Некорректное имя схемы' , 'back_url' => '?p=schemes:list&domain=' . urlencode($domain) , 'back_label' => 'Назад' ] );
+                break;
+            }
+            
+            $dir = Paths::domain( $domain ) . '/alliasscheme';
+            $src_php  = $dir . '/alliasscheme_' . $source . '.php';
+            $src_data = $dir . '/alliasscheme_' . $source . '.data.php';
+            $dst_php  = $dir . '/alliasscheme_' . $target . '.php';
+            $dst_data = $dir . '/alliasscheme_' . $target . '.data.php';
+            
+            if ( is_file($src_php) && is_file($src_data) ) {
+                $c_php = file_get_contents($src_php);
+                $c_php = str_replace( 'class alliasscheme_' . $source , 'class alliasscheme_' . $target , $c_php );
+                $c_php = str_replace( 'alliasscheme_' . $source . '.data.php' , 'alliasscheme_' . $target . '.data.php' , $c_php );
+                file_put_contents( $dst_php , $c_php );
+                
+                $c_data = file_get_contents($src_data);
+                file_put_contents( $dst_data , $c_data );
+                
+                $main_file = Paths::domain($domain) . '/alliasscheme.php';
+                if (is_file($main_file)) {
+                    $main_c = file_get_contents($main_file);
+                    $prop_src  = 'alliasscheme_' . $source;
+                    $prop_dst  = 'alliasscheme_' . $target;
+                    
+                    if (strpos($main_c, $prop_dst) === false) {
+                        $new_prop = 'public null|' . $prop_dst . ' $' . $target . ' = null;';
+                        $old_prop = 'public null|' . $prop_src . ' $' . $source . ' = null;';
+                        $main_c = str_replace($old_prop, $old_prop . "\n\t" . $new_prop, $main_c);
+                        
+                        $new_init = '$this->' . $target . ' = new ' . $prop_dst . '( $this );';
+                        $old_init = '$this->' . $source . ' = new ' . $prop_src . '( $this );';
+                        $main_c = str_replace($old_init, $old_init . "\n\t\t" . $new_init, $main_c);
+                        
+                        $new_inc = "( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_dst . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );";
+                        $old_inc = "( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_src . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );";
+                        $main_c = str_replace($old_inc, $old_inc . "\n\t\t\t" . $new_inc, $main_c);
+                        
+                        file_put_contents($main_file, $main_c);
+                    }
+                }
+                header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&copied=1' ); exit;
+            }
+        }
+        View::render( 'scheme_copy' , [ 'domain' => $domain , 'source' => $source ] );
+        break;
+
+    case 'scheme:remove' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
+        if ( $scheme === 'www' || $scheme === 'visuo' || $scheme === 'error' ) {
+            die('Базовые схемы удалять нельзя');
+        }
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $confirm = trim((string)$_POST[ 'confirm' ]);
+            if ( $confirm === $scheme ) {
+                $dir = Paths::domain( $domain ) . '/alliasscheme';
+                @unlink( $dir . '/alliasscheme_' . $scheme . '.php' );
+                @unlink( $dir . '/alliasscheme_' . $scheme . '.data.php' );
+                header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&removed=1' ); exit;
+            }
+        }
+        View::render( 'scheme_remove' , [ 'domain' => $domain , 'scheme' => $scheme ] );
+        break;
     case 'scheme:edit' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
