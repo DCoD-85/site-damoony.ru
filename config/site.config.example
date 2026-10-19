@@ -117,7 +117,7 @@
 	"title": "Damoony",
 	"admin": {
 		"login": "admin",
-		"password_hash": "$2y$12$kpSU5cFnZRV0B1pK3F/2xO6YW0ojnY1CAqGHjg3dF1Ko4u2a3ANLq",
+		"password_hash": "CHANGE_ME",
 		"ips": []
 	},
 	"logic_type": "alogic"

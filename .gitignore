@@ -39,3 +39,7 @@ language/domains/*/save.txt.inc
 secure/admin_fails.json
 _dev/*.txt
 _dev/.phpunit.cache/
+
+# Секреты и локальные конфиги
+config/site.config
+config/site.config.lock
