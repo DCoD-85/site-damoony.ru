@@ -6,6 +6,10 @@
 #   использовали один и тот же класс main.
 # ============================================================
 
+if ( ! interface_exists( 'VisuoHost' ) ) {
+    require_once dirname( __DIR__ , 3 ) . '/visuo/VisuoHost.php';
+}
+
 if ( ! class_exists( 'stub_main_settings' ) ) {
     class stub_main_settings {
         public string $domain_real_name = 'damoony.ru';
@@ -41,7 +45,7 @@ if ( ! class_exists( 'stub_render' ) ) {
 }
 
 if ( ! class_exists( 'main' ) ) {
-    class main {
+    class main implements VisuoHost {
         public $main_settings;
         public $visuorelease = null;
         public $render;
@@ -53,5 +57,14 @@ if ( ! class_exists( 'main' ) ) {
         }
 
         public function __get ( $n ) { return null; }
+
+        // --- Реализация интерфейса VisuoHost ---
+        public function getRootTag(): visuotag {
+            return new visuotag();
+        }
+
+        public function applyPageOverrides(visuostruct_html $struct): void {
+            // Заглушка для тестов
+        }
     }
 }
