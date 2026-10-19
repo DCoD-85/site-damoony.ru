@@ -172,7 +172,7 @@ class Scan {
             $data = require $file;
             $walk = function ( $nodes ) use ( &$walk , &$out ) {
                 foreach ( $nodes as $n ) {
-                    if ( isset($n['type']) && $n['type'] === 'layout' ) {
+                    if ( ($n['type'] ?? '') === 'layout' ) {
                         $out[] = $n['class'];
                     }
                     if ( !empty($n['children']) ) $walk($n['children']);
@@ -188,7 +188,9 @@ class Scan {
         $dir = Paths::blocks( $domain );
         $real_blocks   = self::blocksFor( $domain );
         $scheme_blocks = self::blocksFromSchemes( $domain );
-        $all_blocks    = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
+        $all_blocks = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
+        $all_blocks = array_diff( $all_blocks , [ 'middle' ] );
+        $all_blocks    = array_diff( $all_blocks , [ 'middle' ] ); // Убираем визуальный контейнер
         sort( $all_blocks );
 
         $out = [ ];
@@ -214,7 +216,9 @@ class Scan {
         
         $real_blocks   = self::blocksFor( $domain );
         $scheme_blocks = self::blocksFromSchemes( $domain );
-        $all_blocks    = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
+        $all_blocks = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
+        $all_blocks = array_diff( $all_blocks , [ 'middle' ] );
+        $all_blocks    = array_diff( $all_blocks , [ 'middle' ] ); // Убираем визуальный контейнер
         sort( $all_blocks );
 
         $out = [ ];

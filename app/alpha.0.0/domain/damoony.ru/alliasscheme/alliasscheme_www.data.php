@@ -1,7 +1,4 @@
 <?PHP
-# ============================================================
-#   alliasscheme_www.data.php — структура схемы
-# ============================================================
 return array (
   'tag' => 'div',
   'class' => 'dt',
@@ -15,6 +12,7 @@ return array (
       'layout' => 'vertical',
       'enabled' => true,
       'return' => false,
+      'type' => 'block',
     ),
     1 => 
     array (
@@ -31,6 +29,7 @@ return array (
           'layout' => 'vertical',
           'enabled' => true,
           'return' => false,
+          'type' => 'block',
         ),
         1 => 
         array (
@@ -47,6 +46,7 @@ return array (
               'layout' => 'vertical',
               'enabled' => true,
               'return' => false,
+              'type' => 'block',
             ),
             1 => 
             array (
@@ -55,12 +55,15 @@ return array (
               'layout' => 'vertical',
               'enabled' => true,
               'return' => false,
+              'type' => 'block',
             ),
           ),
           'return' => true,
+          'type' => 'block',
         ),
       ),
       'return' => true,
+      'type' => 'layout',
     ),
   ),
 );

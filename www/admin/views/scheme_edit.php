@@ -16,7 +16,7 @@ function render_node ( $n, $domain, $is_root = false ) {
     $badge      = $is_root ? ' <span class="root-badge">(Контейнер)</span>' : '';
     
     // Проверка наличия файлов блока
-    $is_layout = ($n['type'] ?? 'block') === 'layout';
+    $is_layout = ($n['type'] ?? 'block') === 'layout' || in_array($class, ['dt', 'dt_middle']);
     $block_exists = true;
     if ( $is_layout ) {
         $badge = ' <span style="color:#888; font-size:11px;">(Визуальный)</span>';
