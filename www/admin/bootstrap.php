@@ -6,6 +6,10 @@
 #   corescripts для доступа к commands и _lib.
 # ============================================================
 
+define( 'ADMIN_ROOT'   , __DIR__ );
+define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
+
+# --- admin config: session name (before session_start) ---
 $admin_cfg = @json_decode( @file_get_contents( PROJECT_ROOT . '/config/admin.config' ) , true ) ?: [ ];
 $admin_session_name = (string) ( $admin_cfg[ 'session_name' ] ?? 'admin_sid' );
 session_name( $admin_session_name );
@@ -19,9 +23,6 @@ session_set_cookie_params( [
 	'samesite' => 'Lax' ,
 ] );
 session_start( );
-
-define( 'ADMIN_ROOT'   , __DIR__ );
-define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
 
 # --- security headers ---
 header( 'X-Content-Type-Options: nosniff' );
