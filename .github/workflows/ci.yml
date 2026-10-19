@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mysqli, mbstring, dom, xmlwriter, tokenizer
+
+      - name: PHPUnit
+        run: php _dev/bin/phpunit.phar -c _dev/phpunit.xml
+
+      - name: PHPStan
+        run: php _dev/bin/phpstan.phar analyse -c _dev/phpstan.neon --no-progress
