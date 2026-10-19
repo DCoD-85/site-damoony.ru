@@ -47,3 +47,5 @@ _backup/
 _tmp/
 _backup/
 _tmp/
+_dev/bin/.phpunit.result.cache
+.phpunit.cache/
