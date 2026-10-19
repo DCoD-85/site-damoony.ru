@@ -85,8 +85,9 @@ class visuostruct_min_error extends visuostruct_min_element {
 	# --- state ---
 	public bool $error = false;
 
-	public function set ( bool $error = false ) : void {
+	public function set ( bool $error = false ) : static {
 		$this->error = $error;
+		return $this;
 	}
 
 	public function release ( ) : bool {
@@ -102,8 +103,9 @@ class visuostruct_min_messages extends visuostruct_min_element {
 	# --- state ---
 	public null|visuotag $visuotag = null;
 
-	public function set ( null|visuotag $visuotag = null ) : void {
+	public function set ( null|visuotag $visuotag = null ) : static {
 		$this->visuotag = $visuotag;
+		return $this;
 	}
 
 	public function release ( ) : string {
@@ -128,12 +130,14 @@ class visuostruct_min_release extends visuostruct_min_element {
 	                      string $layer = '' ,
 	                      bool $popup = false ,
 	                      bool $popup_back = false ,
-	                      bool $popup_navigate = false ) : void {
+	                      bool $popup_navigate = false ) : static {
 		$this->html           = $html;
 		$this->layer          = $layer;
 		$this->popup          = $popup;
 		$this->popup_back     = $popup_back;
 		$this->popup_navigate = $popup_navigate;
+
+		return $this;
 	}
 
 	public function release ( ) : array {
@@ -167,10 +171,11 @@ class visuostruct_min_form extends visuostruct_min_element {
 
 	public function set ( bool $reset = false ,
 	                      null|string $redirect = null ,
-	                      null|int $redirect_time = null ) : void {
+	                      null|int $redirect_time = null ) : static {
 		$this->reset         = $reset;
 		$this->redirect      = $redirect;
 		$this->redirect_time = $redirect_time;
+		return $this;
 	}
 
 	public function release ( ) : array {

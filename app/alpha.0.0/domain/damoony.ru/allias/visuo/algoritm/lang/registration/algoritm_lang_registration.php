@@ -17,8 +17,73 @@ class algoritm_lang_registration
 	}
 
 	# ---------------------------------------------------------------
-	public function guest  ( ) { return $this->render( ); }
+	public function guest  ( ) { return $this->render( false ); }
 	public function logged ( ) { return $this->redirect_profile( ); }
+
+	# --- AJAX ---
+	public function ajax_guest  ( ) { 
+		$main = $this->main;
+		$lang = $main->language;
+		$user = $main->user;
+
+		$errors = [ ];
+		$ok     = false;
+
+		# --- POST ---
+		if ( $this->is_post( ) ) {
+			if ( ! csrf_check( ) ) {
+				$errors[ ] = $lang->get( 'ERROR_CSRF' , [ ] , 'Security error' );
+			} else {
+				$post_login = trim( (string) ( $_POST[ 'login' ] ?? '' ) );
+				$post_email = trim( (string) ( $_POST[ 'email' ] ?? '' ) );
+				$post_disp  = trim( (string) ( $_POST[ 'display_name' ] ?? '' ) );
+
+				$res = $user->register( [
+					'login'            => $post_login ,
+					'email'            => $post_email ,
+					'display_name'     => $post_disp ,
+					'password'         => (string) ( $_POST[ 'password' ] ?? '' ) ,
+					'password_confirm' => (string) ( $_POST[ 'password_confirm' ] ?? '' ) ,
+				] );
+
+				if ( $res[ 'error' ] === null ) {
+					$ok = true;
+				} else {
+					$errors[ ] = $lang->get( $res[ 'error' ] , [ ] , $res[ 'error' ] );
+				}
+			}
+		}
+
+		# --- Если успех ---
+		if ( $ok ) {
+			$msg_vt = new \visuotag( );
+			$msg_vt->tag( 'div' , class : 'message success' )->content( $lang->get( 'OK_REGISTER' , [ ] , 'Registration successful. Please sign in.' ) )->parent( );
+			
+			$min = $main->visuostruct->min( );
+			$min->messages( )->set( $msg_vt );
+			$min->form( )->set( false , '/ru-ru/login' ); // редирект на логин
+			return;
+		}
+
+		# --- Если ошибки ---
+		if ( ! empty( $errors ) ) {
+			$msg_vt = new \visuotag( );
+			foreach ( $errors as $e ) {
+				$msg_vt->tag( 'div' , class : 'message error' )->content( $e )->parent( );
+			}
+			
+			$min = $main->visuostruct->min( );
+			$min->error( )->set( true );
+			$min->messages( )->set( $msg_vt );
+			$min->form( )->set( true , null ); // reset = true
+			return;
+		}
+
+		# Если просто открыли через AJAX
+		$this->render( true );
+	}
+
+	public function ajax_logged ( ) { return $this->redirect_profile( ); }
 
 	# ---------------------------------------------------------------
 	private function redirect_profile ( ) {
@@ -33,41 +98,15 @@ class algoritm_lang_registration
 	}
 
 	# ---------------------------------------------------------------
-	private function render ( ) {
+	private function render ( bool $is_ajax = false ) {
 		$main = $this->main;
 		$lang = $main->language;
 		$user = $main->user;
 
 		$errors     = [ ];
-		$ok         = false;
 		$post_login = '';
 		$post_email = '';
 		$post_disp  = '';
-
-		# --- POST ---
-		if ( $this->is_post( ) ) {
-			if ( ! csrf_check( ) ) {
-				$errors[ ] = $lang->get( 'ERROR_CSRF' , [ ] , 'Security error' );
-			} else {
-				$post_login = trim( (string) ( $_POST[ 'login' ]         ?? '' ) );
-				$post_email = trim( (string) ( $_POST[ 'email' ]         ?? '' ) );
-				$post_disp  = trim( (string) ( $_POST[ 'display_name' ]  ?? '' ) );
-
-				$res = $user->register( [
-					'login'            => $post_login ,
-					'email'            => $post_email ,
-					'display_name'     => $post_disp ,
-					'password'         => (string) ( $_POST[ 'password' ]         ?? '' ) ,
-					'password_confirm' => (string) ( $_POST[ 'password_confirm' ] ?? '' ) ,
-				] );
-
-				if ( $res[ 'error' ] === null ) {
-					$ok = true;
-				} else {
-					$errors[ ] = $lang->get( $res[ 'error' ] , [ ] , $res[ 'error' ] );
-				}
-			}
-		}
 
 		# --- title ---
 		$main->alliasglobal->head->title(
@@ -76,28 +115,6 @@ class algoritm_lang_registration
 
 		# --- UI ---
 		$ve = new \visuoel( );
-
-		# успех — форма не рисуется
-		if ( $ok ) {
-			$ve->message( )->success( )->data( )->set(
-				$lang->get( 'OK_REGISTER' , [ ] , 'Registration successful. Please sign in.' )
-			);
-
-			$library  = $main->library;
-			$link     = $library->link( );
-			$url      = $library->url( );
-			$url_base = $url->static_base;
-			$login_href = $link->href( false , [ $url_base[ 0 ] , 'login' ] , use_all_adress_data : false );
-
-			$ve->block( )->html( )->data( )->set(
-				'<p class="visuo-form-link"><a href="' . h( $login_href ) . '">'
-				. h( $lang->get( 'MENU_LOGIN' , [ ] , 'Login' ) )
-				. '</a></p>'
-			);
-
-			$main->alliasglobal->center->visuotag( )->el( $ve );
-			return true;
-		}
 
 		# ошибки
 		foreach ( $errors as $e ) {
@@ -111,7 +128,7 @@ class algoritm_lang_registration
 			'post' ,
 			'' ,
 			'application/x-www-form-urlencoded' ,
-			false ,
+			true , // Включаем AJAX
 			$lang->get( 'PAGE_REGISTRATION' , [ ] , 'Registration' ) ,
 			'visuo-form visuo-form-registration'
 		);
@@ -185,7 +202,13 @@ class algoritm_lang_registration
 			. '</a></p>'
 		);
 
-		$main->alliasglobal->center->visuotag( )->el( $ve );
+		# --- Вывод (HTML или AJAX JSON) ---
+		if ( $is_ajax ) {
+			$main->visuostruct->ajax( )->address( )->set( $_SERVER['REQUEST_URI'] );
+			$main->visuostruct->ajax( )->center( )->set( $ve->visuotag( ) );
+		} else {
+			$main->alliasglobal->center->visuotag( )->el( $ve );
+		}
 
 		return true;
 	}

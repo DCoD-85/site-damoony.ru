@@ -12,28 +12,16 @@ class algoritm_lang_login
 	}
 
 	# ---------------------------------------------------------------
-	public function guest  ( ) { return $this->render( ); }
+	public function guest  ( ) { return $this->render( false ); }
 	public function logged ( ) { return $this->redirect_profile( ); }
 
-	# ---------------------------------------------------------------
-	private function redirect_profile ( ) {
-		$main = $this->main;
-		$library = $main->library;
-		$link = $library->link( );
-		$url  = $library->url( );
-		$url_base = $url->static_base;
-
-		$href = $link->href( false , [ $url_base[ 0 ] , 'profile' ] , use_all_adress_data : false );
-		redirect( $href );
-	}
-
-	# ---------------------------------------------------------------
-	private function render ( ) {
+	# --- AJAX ---
+	public function ajax_guest  ( ) { 
 		$main = $this->main;
 		$lang = $main->language;
 		$user = $main->user;
 
-		$errors    = [ ];
+		$errors = [ ];
 		$post_login = '';
 
 		# --- POST ---
@@ -48,13 +36,58 @@ class algoritm_lang_login
 				if ( $post_login === '' || $password === '' ) {
 					$errors[ ] = $lang->get( 'ERROR_LOGIN_FAILED' , [ ] , 'Invalid login or password' );
 				} elseif ( $user->authorize( $post_login , $password , $remember ) ) {
-					$this->redirect_profile( );
-					return true;
+					# Успешный вход — командуем JS сделать редирект
+					$min = $main->visuostruct->min( );
+					$min->form( )->set( false , '/ru-ru/profile' );
+					return;
 				} else {
 					$errors[ ] = $lang->get( 'ERROR_LOGIN_FAILED' , [ ] , 'Invalid login or password' );
 				}
 			}
 		}
+
+				# --- Если есть ошибки — отдаем их в messages ---
+		if ( ! empty( $errors ) ) {
+			$msg_vt = new \visuotag( );
+			foreach ( $errors as $e ) {
+				$msg_vt->tag( 'div' , class : 'message error' )->content( $e )->parent( );
+			}
+			
+			$min = $main->visuostruct->min( );
+			$min->error( )->set( true );
+			$min->messages( )->set( $msg_vt );
+			$min->form( )->set( true , null ); // reset = true
+			return;
+		}
+
+		# Если просто открыли страницу через AJAX (GET)
+		$this->render( true );
+	}
+
+	public function ajax_logged ( ) { 
+		return $this->redirect_profile( ); 
+	}
+
+	# ---------------------------------------------------------------
+	private function redirect_profile ( ) {
+		$main = $this->main;
+		$library = $main->library;
+		$link = $library->link( );
+		$url  = $library->url( );
+		$url_base = $url->static_base;
+
+		$href = $link->href( false , [ $url_base[ 0 ] , 'profile' ] , use_all_adress_data : false );
+		redirect( $href );
+	}
+
+	# ---------------------------------------------------------------
+	private function render ( bool $is_ajax = false ) {
+		$main = $this->main;
+		$lang = $main->language;
+		$user = $main->user;
+
+		$errors    = [ ];
+		$post_login = '';
 
 		# --- title ---
 		$main->alliasglobal->head->title(
@@ -76,7 +109,7 @@ class algoritm_lang_login
 			'post' ,
 			'' ,
 			'application/x-www-form-urlencoded' ,
-			false ,
+			true , // Включаем AJAX
 			$lang->get( 'PAGE_LOGIN' , [ ] , 'Login' ) ,
 			'visuo-form visuo-form-login'
 		);
@@ -117,7 +150,7 @@ class algoritm_lang_login
 		$f_btn->data( )->text( $lang->get( 'FORM_SUBMIT_LOGIN' , [ ] , 'Sign in' ) );
 		$form->add( $f_btn );
 
-		# ссылка на регистрацию — отдельный блок
+		# ссылка на регистрацию
 		$library  = $main->library;
 		$link     = $library->link( );
 		$url      = $library->url( );
@@ -131,7 +164,13 @@ class algoritm_lang_login
 			. '</a></p>'
 		);
 
-		$main->alliasglobal->center->visuotag( )->el( $ve );
+		# --- Вывод (HTML или AJAX JSON) ---
+		if ( $is_ajax ) {
+			$main->visuostruct->ajax( )->address( )->set( $_SERVER['REQUEST_URI'] );
+			$main->visuostruct->ajax( )->center( )->set( $ve->visuotag( ) );
+		} else {
+			$main->alliasglobal->center->visuotag( )->el( $ve );
+		}
 
 		return true;
 	}

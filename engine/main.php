@@ -67,8 +67,10 @@ class main implements VisuoHost {
 		$this->visuostruct = $this->visuostruct ?: new visuostruct( $this );
 		
 		$this->render = $this->render ?: new render( $this );
-
-		# $this->render->render__data->init( true );
+		# --- Включаем AJAX-режим, если запрос пришел от JS ---
+		if ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) === 'xmlhttprequest' ) {
+			$this->render->setdata( 'render_ajax' , true );
+		}
 		
 		$this->core = new core( $this );
 		# 
@@ -222,11 +224,12 @@ class main_settings {
 	# vars
 	public null|main $main = null;
 	public string $logic_type = 'legacy'; // 'legacy' или 'alogic'
+	private string $logic = 'alpha.0.0';
+	public bool $ui_ajax_forms = true;
 	public string $domain_real_name;
 	public string $allias_real_name;
 	private string $language;
 	private string $render;
-	private string $logic = 'alpha.0.0';
 	private string $skin;
 	private null|string $skin_allias = 'www';
 	private string $connect_type = '';

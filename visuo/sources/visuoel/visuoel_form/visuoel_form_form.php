@@ -67,8 +67,8 @@ class visuoel_form_form__data extends visuoel_group_element__data {
 	public string $form_method      = 'post';
 	public string $form_action      = '';
 	public string $form_enctype     = 'application/x-www-form-urlencoded';
-	public bool   $form_jquery      = false;
-	public array  $form_data_jquery = [ 'on' => true , 'layerto' => 'load_result' ];
+	public bool   $form_jquery      = true;
+	public array  $form_data_jquery = [ 'on' => true , 'layerto' => 'dt_center' ];
 	public string $title_text       = '';
 	public string $form_class       = '';
 

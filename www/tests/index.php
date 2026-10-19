@@ -25,7 +25,7 @@ if ( ! function_exists( 'error_file' ) ) {
 # --- пути ---
 $root_dir  = dirname( __DIR__ );             # www/
 $proj_root = dirname( $root_dir );           # корень проекта
-define( 'VISUO_SRC' , $proj_root . '/engine/visuo/sources' );
+define( 'VISUO_SRC' , $proj_root . '/visuo/sources' );
 define( 'SOURCES'   , $proj_root . '/engine' );
 define( 'TEST_ROOT' , __DIR__ );
 
@@ -43,6 +43,12 @@ require_once VISUO_SRC . '/visuoel/visuoel_group.php';
 require_once VISUO_SRC . '/visuoel/visuoel_group_element.php';
 require_once VISUO_SRC . '/visuoel/visuoel_tabs/visuoel_tabs_page.php';
 require_once VISUO_SRC . '/visuoel/visuoel_tabs.php';
+
+# --- загрузка VisuoHost до Stubs ---
+require_once $proj_root . '/visuo/VisuoHost.php';
+
+# --- подключаем заглушки ---
+require_once __DIR__ . '/lib/Stubs.php';
 
 # --- test lib ---
 require_once TEST_ROOT . '/lib/AssertException.php';

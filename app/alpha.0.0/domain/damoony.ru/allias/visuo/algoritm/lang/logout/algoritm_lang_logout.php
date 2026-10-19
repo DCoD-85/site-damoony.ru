@@ -14,6 +14,10 @@ class algoritm_lang_logout
 	public function guest  ( ) { return $this->redirect_home( ); }
 	public function logged ( ) { return $this->do_logout( ); }
 
+	# --- AJAX ---
+	public function ajax_guest  ( ) { return $this->redirect_home( ); }
+	public function ajax_logged ( ) { return $this->do_logout( ); }
+
 	# ---------------------------------------------------------------
 	private function do_logout ( ) {
 		$main = $this->main;
