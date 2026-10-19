@@ -918,7 +918,9 @@ switch ( $p ) {
         if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
         require_once ADMIN_ROOT . '/_lib/Scan.php';
         $blocks = Scan::blocksDetailsFor( $domain );
-        View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks ] );
+        $cfg = new Config( Paths::config() );
+        $alliases = array_keys((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], []));
+        View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks , 'alliases' => $alliases ] );
         break;
 
     case 'allias:list' :

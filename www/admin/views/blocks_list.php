@@ -1,15 +1,20 @@
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 	<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code></h1>
-	<div><a href="?p=block:new&domain=<?= urlencode($domain) ?>" class="btn-edit" style="margin-right:20px;">+ Создать блок</a><a href="?p=dashboard" class="btn-cancel">← К доменам</a></div>
+	<div class="td-actions">
+		<a href="?p=block:new&domain=<?= urlencode($domain) ?>" class="btn-edit">+ Блок</a>
+		<a href="?p=dashboard" class="btn-cancel">← Назад</a>
+	</div>
 </div>
 
-<p class="hint">
-	Базовые блоки (<code>alliasglobal</code>), на которых строятся все страницы. 
-	Филлеры (перекрытия для конкретных аллиасов) настраиваются внутри аллиасов.
-</p>
+<div class="nav-tabs">
+	<a href="?p=blocks:list&domain=<?= urlencode($domain) ?>" class="active">Глобальные</a>
+	<?php foreach ( $alliases as $a ) : ?>
+		<a href="?p=allias:fillers&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($a) ?>">Filler: <?= htmlspecialchars($a) ?></a>
+	<?php endforeach ?>
+</div>
 
 <?php if ( empty( $blocks ) ) : ?>
-	<p>Блоки не найдены в <code>alliasglobal/</code>.</p>
+	<p>Блоки не найдены.</p>
 <?php else : ?>
 	<table class="table">
 		<thead>
@@ -27,9 +32,10 @@
 					<td><?= $b['has_php'] ? '✓' : '✗' ?></td>
 					<td><?= $b['has_data'] ? '✓' : '✗' ?></td>
 					<td>
-						<a href="?p=block:edit&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-edit">Ред.</a>
-						<a href="?p=allias:fillers&domain=<?= urlencode( $domain ) ?>&allias=www" class="btn-edit">Филлеры www</a>
-						<a href="?p=block:remove&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-danger" onclick="return confirm('Удалить блок?')">Удалить</a>
+						<div class="td-actions">
+							<a href="?p=block:edit&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-edit">Ред.</a>
+							<a href="?p=block:remove&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-danger" onclick="return confirm('Удалить блок?')">Удалить</a>
+						</div>
 					</td>
 				</tr>
 			<?php endforeach ?>

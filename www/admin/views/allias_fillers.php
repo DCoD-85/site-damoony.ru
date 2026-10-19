@@ -1,14 +1,26 @@
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-	<h1 style="margin:0;">Fillers: <code><?= htmlspecialchars($domain) ?></code> / <code><?= htmlspecialchars($allias) ?></code></h1>
-	<a href="?p=allias:list&domain=<?= urlencode($domain) ?>" class="btn-cancel">← Назад к аллиасам</a>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+	<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code></h1>
+	<a href="?p=dashboard" class="btn-cancel">← Назад</a>
+</div>
+
+<div class="nav-tabs">
+	<a href="?p=blocks:list&domain=<?= urlencode($domain) ?>">Глобальные</a>
+	<?php 
+	// Получаем список всех аллиасов, чтобы отрисовать табы
+	$cfg = new Config( Paths::config() );
+	$alliases = array_keys((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], []));
+	foreach ( $alliases as $a ) : 
+	?>
+		<a href="?p=allias:fillers&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($a) ?>" class="<?= $a === $allias ? 'active' : '' ?>">Filler: <?= htmlspecialchars($a) ?></a>
+	<?php endforeach ?>
 </div>
 
 <table class="table">
 	<thead>
 		<tr>
 			<th>Блок</th>
-			<th>База (<code>block.php</code>)</th>
-			<th>Filler (<code>block_<?= htmlspecialchars($allias) ?>.php</code>)</th>
+			<th>База</th>
+			<th>Filler (<?= htmlspecialchars($allias) ?>)</th>
 			<th>Статус</th>
 			<th>Действия</th>
 		</tr>
@@ -36,14 +48,16 @@
 					<?php endif ?>
 				</td>
 				<td>
-					<?php if ( ! $r['has_base'] ) : ?>
-						<span class="btn-danger">Нет базы</span>
-					<?php elseif ( ! $r['has_filler'] ) : ?>
-						<a href="?p=filler:new&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-edit">+ Создать</a>
-					<?php else : ?>
-						<a href="?p=filler:edit&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-edit">Ред.</a>
-						<a href="?p=filler:remove&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-danger" onclick="return confirm('Удалить филлер?')">Удалить</a>
-					<?php endif ?>
+					<div class="td-actions">
+						<?php if ( ! $r['has_base'] ) : ?>
+							<span class="btn-cancel" style="opacity:0.5; cursor:not-allowed;">Нет базы</span>
+						<?php elseif ( ! $r['has_filler'] ) : ?>
+							<a href="?p=filler:new&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-edit">+ Создать</a>
+						<?php else : ?>
+							<a href="?p=filler:edit&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-edit">Ред.</a>
+							<a href="?p=filler:remove&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-danger" onclick="return confirm('Удалить филлер?')">Удалить</a>
+						<?php endif ?>
+					</div>
 				</td>
 			</tr>
 		<?php endforeach ?>
