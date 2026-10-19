@@ -28,20 +28,27 @@ class alliasscheme_error {
 		$allias = $main->main_settings->skin( 'allias' );
 
 		$media = DSA . 'media' . DSA . 'damoony.ru' . DSA;
-		$shared = DSA . 'media' . DSA . 'shared' . DSA;
-		
-		$skin_css   = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
+
+		# --- общие ---
+		$skin_css = $media . 'skin' . DSA . $skin . DSA . 'css' . DSA;
+		$js_lib   = DSA . 'media' . DSA . 'shared' . DSA . 'scripts' . DSA . 'lib' . DSA;
+		$js_eng   = DSA . 'media' . DSA . 'shared' . DSA . 'scripts' . DSA . 'engine' . DSA;
+
+		# --- папка аллиаса — те же css/, что у $skin_css ---
+		$all_css  = $skin_css;
+
+		# --- папка движка visuoel (всегда visuo.) ---
 		$engine_dir = $media . 'skin' . DSA . $skin . DSA . 'visuo' . DSA;
-		$js_lib     = $shared . 'scripts' . DSA . 'lib' . DSA;
-		$js_eng     = $shared . 'scripts' . DSA . 'engine' . DSA;
 
 		$meta = $this->visuorelease->meta( );
 		$meta->clear( );
 
-		# favicon
+		# --- favicon ---
 		$meta->link( )->favicon( $media . 'favicon.ico#' . $allias );
 
-		# --- CSS скина ---
+		# ============================================================
+		#   ОБЩИЕ CSS СКИНА
+		# ============================================================
 		$meta->link( )->css( $skin_css . 'main.css' );
 		$meta->link( )->css( $skin_css . 'error.css' );
 		$meta->link( )->css( $skin_css . 'vardump.css' );
@@ -56,16 +63,37 @@ class alliasscheme_error {
 		$meta->link( )->css( $skin_css . 'policy.css' );
 		$meta->link( )->css( $skin_css . 'debug.css' );
 
-		# --- CSS visuoel ---
+		# ============================================================
+		#   CSS ДВИЖКА VISUOEL
+		# ============================================================
+		$meta->link( )->css( $engine_dir . 'visuo.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-input.css' );
-		$meta->link( )->css( $engine_dir . 'visuo-elements-form.css' );
-		$meta->link( )->css( $engine_dir . 'visuo-elements-table.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-tabs.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-table.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-form.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-field.css' );
-		$meta->link( )->css( $engine_dir . 'visuo-elements-buttons.css' );
-		$meta->link( )->css( $engine_dir . 'visuo-elements-block.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-fields.css' );
 
-		# --- JS ---
+		# ============================================================
+		#   CSS АЛЛИАСА — только если соответствующий filler включён
+		# ============================================================
+		$ag = $main->alliasglobal;
+		if ( $ag !== null ) {
+			$blocks = [ 'top' , 'left' , 'center' , 'right' , 'bottom' , 'policy' ];
+			foreach ( $blocks as $name ) {
+				$block = $ag->{$name} ?? null;
+				if ( $block === null ) continue;
+
+				$filler = $block->filler;
+				if ( $filler === null || ! $filler->enabled ) continue;
+
+				$meta->link( )->css( $all_css . $name . '.css' );
+			}
+		}
+
+		# ============================================================
+		#   JS — общие (lib + engine)
+		# ============================================================
 		$meta->link( )->js( $js_lib . 'jquery-1.8.3.min.js' );
 		$meta->link( )->js( $js_eng . 'messages.js' );
 		$meta->link( )->js( $js_eng . 'engine_confidence.js' );
@@ -76,6 +104,12 @@ class alliasscheme_error {
 		$meta->link( )->js( $js_eng . 'engine_visuo.js' );
 		$meta->link( )->js( $js_eng . 'engine.js' );
 		$meta->link( )->js( $js_eng . 'engine_ready.js' );
+
+		# ============================================================
+		#   CDN
+		# ============================================================
+		$meta->link( )->js( 'https://cdn.plyr.io/3.8.4/plyr.js' );
+		$meta->link( )->css( 'https://cdn.plyr.io/3.8.4/plyr.css' );
 	}
 
 	public function body_preload ( ) {

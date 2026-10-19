@@ -68,6 +68,7 @@ class alliasscheme_visuo {
 		# ============================================================
 		$meta->link( )->css( $engine_dir . 'visuo.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-input.css' );
+		$meta->link( )->css( $engine_dir . 'visuo-elements-tabs.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-table.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-form.css' );
 		$meta->link( )->css( $engine_dir . 'visuo-elements-field.css' );
