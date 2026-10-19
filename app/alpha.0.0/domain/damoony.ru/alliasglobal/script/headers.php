@@ -57,9 +57,9 @@ class alliasglobal_script_headers extends alliasglobalscript {
 			$exp    = time( ) + 1000000;
 			$path   = '/';
 			$domain = $url_allias[ 0 ] ?? '';
-
-			setcookie( 'language' , $lang , $exp , $path , $domain );
-			setcookie( 'lang'     , $lang , $exp , $path , $domain );
+			$opts = [ 'expires' => time( ) + 1000000 ];
+			\cookie::set( 'language' , $lang , $opts );
+			\cookie::set( 'lang'     , $lang , $opts );
 		}
 
 		# --- 3. URL всегда должен начинаться с языка ---

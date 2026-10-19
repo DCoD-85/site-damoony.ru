@@ -22,6 +22,7 @@ $sources_modules = [
 	'messages' ,
 	'visuo' ,
 	'mod' ,
+	'cookie' ,
 ];
 
 # --- load each module ---

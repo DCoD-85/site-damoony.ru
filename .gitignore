@@ -43,3 +43,7 @@ _dev/.phpunit.cache/
 # Секреты и локальные конфиги
 config/site.config
 config/site.config.lock
+_backup/
+_tmp/
+_backup/
+_tmp/
