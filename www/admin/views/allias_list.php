@@ -1,4 +1,7 @@
-<h1>Домен: <code><?= htmlspecialchars( $domain , ENT_QUOTES ) ?></code> — аллиасы</h1>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+	<h1 style="margin:0;">Домен: <code><?= htmlspecialchars( $domain , ENT_QUOTES ) ?></code> — аллиасы</h1>
+	<a href="?p=allias:new&domain=<?= urlencode( $domain ) ?>" class="btn-edit" style="font-size:15px;">+ Добавить аллиас</a>
+</div>
 
 <p class="hint">
 	<a href="?p=dashboard">← К списку домен</a>

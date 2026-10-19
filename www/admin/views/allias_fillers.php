@@ -1,8 +1,7 @@
-<h1>Fillers: <code><?= htmlspecialchars($domain) ?></code> / <code><?= htmlspecialchars($allias) ?></code></h1>
-
-<p class="hint">
-	<a href="?p=allias:list&domain=<?= urlencode($domain) ?>">← К аллиасам</a>
-</p>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+	<h1 style="margin:0;">Fillers: <code><?= htmlspecialchars($domain) ?></code> / <code><?= htmlspecialchars($allias) ?></code></h1>
+	<a href="?p=allias:list&domain=<?= urlencode($domain) ?>" class="btn-cancel">← Назад к аллиасам</a>
+</div>
 
 <table class="table">
 	<thead>

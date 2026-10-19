@@ -1,4 +1,7 @@
-<h1>Домены</h1>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+	<h1 style="margin:0;">Домены</h1>
+	<a href="?p=domain:new" class="btn-edit" style="font-size:15px;">+ Добавить домен</a>
+</div>
 
 <?php if ( empty( $domains ) ) : ?>
 	<p>Доменов нет.</p>
