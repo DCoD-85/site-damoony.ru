@@ -71,9 +71,19 @@ if ( ! $host_valid ) {
 # Content-Type
 header( 'Content-Type: text/html; charset=UTF-8' );
 
-# is_https — до middleware
-$is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' )
-         || ( ( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' );
+# --- is_https (C3): X-Forwarded-Proto только от доверенных прокси ---
+$is_https = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' );
+
+# Прокси — только из конфига (trusted_proxies), иначе XFP игнорируется.
+$trusted_proxies = $cfg[ 'trusted_proxies' ] ?? [ ];
+if ( is_array( $trusted_proxies ) && ! empty( $trusted_proxies ) ) {
+    $remote = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
+    if ( in_array( $remote , $trusted_proxies , true ) ) {
+        if ( strtolower( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ?? '' ) === 'https' ) {
+            $is_https = true;
+        }
+    }
+}
 
 # --- middleware pipeline ---
 require_once __DIR__ . '/../engine/middleware.php';
@@ -88,12 +98,23 @@ try {
     die( 'Too Many Requests' ); // Теперь это безопасно, мы перехватили управление
 }
 
+# --- SSO-ready: cookie domain для поддоменов из domains_real (8/N) ---
+$real_domain  = $cfg[ 'domains_real' ][ $host ] ?? null;
+$cookie_domain = '';
+if ( $real_domain !== null && $real_domain !== $host ) {
+    $cookie_domain = '.' . $real_domain;
+} elseif ( $real_domain !== null ) {
+    $cookie_domain = '.' . $real_domain;   # 'damoony2.ru' → '.damoony.ru' (SSO с прод-алиасом)
+}
+# если $real_domain === null — cookie_domain = '' (без domain, на точный host)
+
 session_set_cookie_params( [
-	'lifetime' => 0 ,
-	'path'     => '/' ,
-	'secure'   => $is_https ,
-	'httponly' => true ,
-	'samesite' => 'Lax' ,
+    'lifetime' => 0 ,
+    'path'     => '/' ,
+    'domain'   => $cookie_domain ,
+    'secure'   => $is_https ,
+    'httponly' => true ,
+    'samesite' => 'Lax' ,
 ] );
 session_start( );
 

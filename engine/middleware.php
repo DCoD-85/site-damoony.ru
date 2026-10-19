@@ -43,21 +43,33 @@ class middleware {
     }
 
     # rate limiting по IP (для логина + API)
+     # rate limiting по IP (для логина + API)
     public static function rateLimit ( string $key , int $max = 60 , int $window = 60 , int $ban = 900 ) : void {
         $ip = $_SERVER[ 'REMOTE_ADDR' ] ?? '0.0.0.0';
         $file = sys_get_temp_dir( ) . '/simplcms_rl_' . md5( $key . ':' . $ip );
-        $now = time( );
+        $now  = time( );
 
-        $data = [ 'count' => 0 , 'start' => $now , 'banned_until' => 0 ];
-        if ( is_file( $file ) ) {
-            $raw = @file_get_contents( $file );
-            $parsed = @json_decode( $raw , true );
-            if ( is_array( $parsed ) ) $data = $parsed;
+        # --- атомарный read-modify-write (M2) ---
+        $fp = @fopen( $file , 'c+' );
+        if ( $fp === false ) {
+            # fail-open: не можем открыть — не блокируем
+            return;
+        }
+        if ( ! flock( $fp , LOCK_EX ) ) {
+            fclose( $fp );
+            return;
         }
 
+        $raw  = stream_get_contents( $fp );
+        $data = @json_decode( $raw , true );
+        if ( ! is_array( $data ) ) $data = [ ];
+        $data += [ 'count' => 0 , 'start' => $now , 'banned_until' => 0 ];
+
         if ( $data[ 'banned_until' ] > $now ) {
+            $retry = $data[ 'banned_until' ] - $now;
+            flock( $fp , LOCK_UN ); fclose( $fp );
             http_response_code( 429 );
-            header( 'Retry-After: ' . ( $data[ 'banned_until' ] - $now ) );
+            header( 'Retry-After: ' . $retry );
             throw new StopMiddleware( 'Too Many Requests' );
         }
 
@@ -71,7 +83,12 @@ class middleware {
             $data[ 'banned_until' ] = $now + $ban;
         }
 
-        @file_put_contents( $file , json_encode( $data ) , LOCK_EX );
+        ftruncate( $fp , 0 );
+        rewind( $fp );
+        fwrite( $fp , json_encode( $data ) );
+
+        flock( $fp , LOCK_UN );
+        fclose( $fp );
     }
 
     # HSTS only (уже в securityHeaders)
