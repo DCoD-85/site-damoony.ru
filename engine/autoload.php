@@ -2,9 +2,9 @@
 // engine/autoload.php
 
 spl_autoload_register(function ($class) {
-    // 1. Автозагрузка для движка alogic (alogic\Router)
-    if (str_starts_with($class, 'alogic\\')) {
-        $file = dirname(__DIR__) . '/engines/alogic/' . str_replace('\\', '/', substr($class, 7)) . '.php';
+    // 1. Автозагрузка для движка router (router\Router)
+    if (str_starts_with($class, 'router\\')) {
+        $file = dirname(__DIR__) . '/engines/router/' . str_replace('\\', '/', substr($class, 7)) . '.php';
         if (file_exists($file)) require $file;
         return;
     }

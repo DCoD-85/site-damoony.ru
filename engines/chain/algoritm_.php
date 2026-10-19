@@ -284,7 +284,7 @@ class algoritm_ {
 
 	public function release_ ( object $object ) {
 		// Отключаем старую магию URL для нового роутера
-		if ( $this->main->main_settings->get( 'logic_type' ) === 'alogic' ) {
+		if ( $this->main->main_settings->get( 'logic_type' ) === 'router' ) {
 			return; 
 		}
 

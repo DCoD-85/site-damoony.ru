@@ -6,7 +6,9 @@
 #   corescripts для доступа к commands и _lib.
 # ============================================================
 
-session_name( 'admin_sid' );
+$admin_cfg = @json_decode( @file_get_contents( PROJECT_ROOT . '/config/admin.config' ) , true ) ?: [ ];
+$admin_session_name = (string) ( $admin_cfg[ 'session_name' ] ?? 'admin_sid' );
+session_name( $admin_session_name );
 
 session_set_cookie_params( [
 	'lifetime' => 0 ,

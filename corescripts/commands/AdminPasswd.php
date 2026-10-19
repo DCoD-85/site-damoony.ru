@@ -38,9 +38,9 @@ class AdminPasswd {
         }
 
         try {
-            Config::mutate( Paths::config() , function ( Config $cfg ) use ( $login , $hash ) {
-                $cfg->setKeys( [ 'admin' , 'login' ]         , $login );
-                $cfg->setKeys( [ 'admin' , 'password_hash' ] , $hash );
+            Config::mutate( PROJECT_ROOT . '/config/admin.config' , function ( Config $cfg ) use ( $login , $hash ) {
+                $cfg->setKeys( [ 'login' ]         , $login );
+                $cfg->setKeys( [ 'password_hash' ] , $hash );
             } );
 
             $r->step( 'Логин' , true , $login );

@@ -1,7 +1,7 @@
 <?PHP
 // app/alpha.0.0/domain/damoony.ru/allias/visuo/routes.php
 
-use alogic\Router;
+use router\Router;
 
 $router = new Router();
 

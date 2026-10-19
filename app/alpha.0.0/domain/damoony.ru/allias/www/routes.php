@@ -1,7 +1,7 @@
 <?PHP
 // app/alpha.0.0/domain/damoony.ru/allias/www/routes.php
 
-use alogic\Router;
+use router\Router;
 
 $router = new Router(); // <--- ДОБАВИТЬ ЭТО
 

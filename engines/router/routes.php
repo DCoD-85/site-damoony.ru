@@ -1,9 +1,9 @@
 <?PHP
-// engines/alogic/routes.php
+// engines/router/routes.php
 
 require_once __DIR__ . '/Router.php';
 
-use alogic\Router;
+use router\Router;
 
 /** @var Router $router */
 $router = new Router();

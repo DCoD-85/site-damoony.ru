@@ -1,12 +1,12 @@
 <?PHP
-// engines/alogic/alogic_bridge.php
+// engines/router/bridge.php
 
 /**
  * Точка входа для нового движка маршрутизации.
  * Отвечает за поиск маршрута, построение цепочки алгоритмов (algoritm -> algoritm_lang -> algoritm_lang_index)
  * и вызов нужного метода (guest, logged или ajax) для рендера.
  */
-function alogic_resolve( $main , $static_domain , $static_allias ) {
+function router_resolve( $main , $static_domain , $static_allias ) {
     require_once __DIR__ . '/bootstrap.php';
     
      // 1. Ищем routes.php в аллиасе (локальные маршруты)
@@ -17,14 +17,14 @@ function alogic_resolve( $main , $static_domain , $static_allias ) {
     $router = null;
     if ( file_exists( $local_routes ) ) {
         $loaded = require $local_routes;
-        if ( $loaded instanceof \alogic\Router ) $router = $loaded;
+        if ( $loaded instanceof \router\Router ) $router = $loaded;
     }
     if ( $router === null ) {
         $loaded = require __DIR__ . '/routes.php';
-        if ( $loaded instanceof \alogic\Router ) $router = $loaded;
+        if ( $loaded instanceof \router\Router ) $router = $loaded;
     }
     if ( $router === null ) {
-        alogic_error( $main , $static_domain , $static_allias , 500 );
+        router_error( $main , $static_domain , $static_allias , 500 );
         return;
     }
     
@@ -34,7 +34,7 @@ function alogic_resolve( $main , $static_domain , $static_allias ) {
     
     if ( $match === null ) {
         // Маршрут не найден — отдаем 404
-        alogic_error( $main , $static_domain , $static_allias , 404 );
+        router_error( $main , $static_domain , $static_allias , 404 );
         return;
     }
     
@@ -63,7 +63,7 @@ function alogic_resolve( $main , $static_domain , $static_allias ) {
         
         // Если класс из цепочки не существует — 404
         if ( ! class_exists( $full_class ) ) {
-            alogic_error( $main , $static_domain , $static_allias , 404 );
+            router_error( $main , $static_domain , $static_allias , 404 );
             return;
         }
         
@@ -117,9 +117,9 @@ function alogic_resolve( $main , $static_domain , $static_allias ) {
 }
 
 /**
- * Обработчик ошибок для alogic (404 и др.)
+ * Обработчик ошибок для router (404 и др.)
  */
-function alogic_error( $main , $static_domain , $static_allias , $code = 404 ) {
+function router_error( $main , $static_domain , $static_allias , $code = 404 ) {
     http_response_code( $code );
     
     $scheme = $main->alliasscheme;

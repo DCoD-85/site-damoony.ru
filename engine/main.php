@@ -89,7 +89,7 @@ class main implements VisuoHost {
 		$this->language->load( )->init( );
 		
 		$logic_ver = $this->main_settings->get( 'logic' );
-		( include_once $path = dirname( __DIR__ ) . DS . 'engines' . DS . 'legacy' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = dirname( __DIR__ ) . DS . 'engines' . DS . 'chain' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 		$this->blacklist->init( );
 		
@@ -123,9 +123,9 @@ class main implements VisuoHost {
 		$this->alliasscheme = new ($static_domain.'\\alliasscheme')( $this );
 		
 		# --- ВЫБОР ДВИЖКА ЛОГИКИ ---
-		if ( $this->main_settings->get( 'logic_type' ) === 'alogic' ) {
-			require_once dirname( __DIR__ ) . '/engines/alogic/alogic_bridge.php';
-			alogic_resolve( $this , $static_domain , $static_allias );
+		if ( $this->main_settings->get( 'logic_type' ) === 'router' ) {
+			require_once dirname( __DIR__ ) . '/engines/router/bridge.php';
+			router_resolve( $this , $static_domain , $static_allias );
 		} else {
 			# Старая логика (legacy)
 			$main->algoritm = new ($static_domain . '\\' . $static_allias . '\\' . 'algoritm')( $this , [ ] );
@@ -223,7 +223,7 @@ class main_path {
 class main_settings {
 	# vars
 	public null|main $main = null;
-	public string $logic_type = 'legacy'; // 'legacy' или 'alogic'
+	public string $logic_type = 'chain'; // 'chain' или 'router'
 	private string $logic = 'alpha.0.0';
 	public bool $ui_ajax_forms = true;
 	public string $domain_real_name;

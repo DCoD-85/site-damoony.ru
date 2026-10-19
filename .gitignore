@@ -49,3 +49,4 @@ _backup/
 _tmp/
 _dev/bin/.phpunit.result.cache
 .phpunit.cache/
+config/admin.config

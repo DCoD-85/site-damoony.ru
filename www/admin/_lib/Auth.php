@@ -14,12 +14,12 @@ class Auth {
     private const DELAY_USEC  = 500_000;
 
     public function __construct ( ) {
-        $this->path = PROJECT_ROOT . '/config/site.config';
+        $this->path = PROJECT_ROOT . '/config/admin.config';
         if ( is_file( $this->path ) ) {
             $json = file_get_contents( $this->path );
             $data = json_decode( $json , true );
-            if ( isset( $data[ 'admin' ][ 'login' ] ) )         $this->login = (string) $data[ 'admin' ][ 'login' ];
-            if ( isset( $data[ 'admin' ][ 'password_hash' ] ) ) $this->hash  = (string) $data[ 'admin' ][ 'password_hash' ];
+            if ( isset( $data[ 'login' ] ) )         $this->login = (string) $data[ 'login' ];
+            if ( isset( $data[ 'password_hash' ] ) ) $this->hash  = (string) $data[ 'password_hash' ];
         }
     }
 
