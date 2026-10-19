@@ -9,20 +9,18 @@
 
 class visuopage {
 	# --- refs ---
-	public null|\main $main = null;
+	public null|VisuoHost $main = null;
 
 	# --- methods ---
-	public function __construct ( null|\main $main = null ) {
+	public function __construct ( null|VisuoHost $main = null ) {
 		$this->main = $main;
 	}
 
 	public function apply ( visuostruct_html $struct ) : void {
 		$main = $this->main;
 		if ( $main === null ) return;
-		if ( $main->visuorelease === null ) return;
-		if ( $main->visuorelease->visuotag === null ) return;
 
-		$vt_root = $main->visuorelease->visuotag->root( );
+    	$vt_root = $main->getRootTag( );
 
 		$blocks = [ 'top' , 'left' , 'center' , 'right' , 'bottom' ];
 

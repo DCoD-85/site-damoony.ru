@@ -4,8 +4,9 @@
 # created : 10.09.2025
 # author : default
 
+require_once dirname( __DIR__ ) . '/visuo/VisuoHost.php';
 
-class main {
+class main implements VisuoHost {
 	# vars
 	public null|main_path $main_path = null;
 	public null|main_settings $main_settings = null;
@@ -168,6 +169,16 @@ class main {
 		die( '<! doctype><html><head><title>' . $title . '</title><head><body><div>' . $message . '</div></body></html>' );
 	} 
 
+	public function getRootTag(): visuotag {
+        return $this->visuorelease->visuotag->root();
+    }
+
+    public function applyPageOverrides(visuostruct_html $struct): void {
+        if ($this->visuopage !== null) {
+            $this->visuopage->apply($struct);
+        }
+    }
+	
 	# --- guard: is user a guest? (works even if user module is disabled) ---
 	public function is_guest ( ) : bool {
 		return $this->user === null ? true : $this->user->is_guest( );

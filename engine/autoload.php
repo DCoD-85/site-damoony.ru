@@ -8,6 +8,13 @@ spl_autoload_register(function ($class) {
         if (file_exists($file)) require $file;
         return;
     }
+	
+	// 1.1 Автозагрузка для VisuoHost
+    if ( $class === 'VisuoHost' ) {
+        $file = dirname( __DIR__ ) . '/visuo/VisuoHost.php';
+        if ( file_exists( $file ) ) require $file;
+        return;
+    }
 
     // 2. Автозагрузка для доменов (damoony_ru\visuo\algoritm_lang_index)
     $parts = explode('\\', $class);

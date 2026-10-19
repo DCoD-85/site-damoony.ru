@@ -2,7 +2,7 @@
 
 class visuostruct {
 	# --- refs ---
-	public null|\main $main = null;
+	public mixed $main = null;
 
 	# --- state ---
 	public null|visuostruct_html $html = null;
@@ -10,7 +10,7 @@ class visuostruct {
 	public null|visuostruct_ajax $ajax = null;
 
 	# --- methods ---
-	public function __construct ( null|\main $main = null ) {
+	public function __construct ( mixed $main = null ) {
 		$this->main = $main;
 	}
 

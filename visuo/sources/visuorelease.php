@@ -2,7 +2,7 @@
 
 class visuorelease {
 	# --- refs ---
-	public null|\main $main = null;
+	public null|VisuoHost $main = null;
 	public \visuolog $visuolog;
 	public \visuorender $visuorender;
 	public \visuorelease_settings $settings;
@@ -13,7 +13,7 @@ class visuorelease {
 	public null|\visuotag  $visuotag_final = null;
 
 	# --- methods ---
-	public function __construct ( null|\main $main = null ,
+	public function __construct ( null|VisuoHost $main = null ,
 	                              null|\visuorelease_settings $settings = null ) {
 		$this->main        = $main;
 		$this->visuolog    = new visuolog( );
@@ -84,8 +84,8 @@ class visuorelease {
 			}
 
 			if ( $type === 'html' ) {
-				if ( $this->main->visuopage !== null ) {
-					$this->main->visuopage->apply( $struct );
+				if ( $this->main !== null ) {
+					$this->main->applyPageOverrides( $struct );
 				}
 				# дальше — общий HTML-путь
 			}
