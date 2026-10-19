@@ -130,7 +130,7 @@ class alliasglobal_bottom extends alliasblock {
 
 		$vt_info->tag( 'div' , class : 'title' )->content( 'Версии сайта:' );
 
-		$ua = array_pad( $url_allias , 2 , '' );
+		$ua = $url_allias;
 		$info_links = $vt_info->tag( 'div' , class : 'links' );
 		$info_links->tag( 'a' )
 				->attrs_add( 'href' , $link->href( [ $ua[ 1 ] , $ua[ 0 ] ] , $url_base , [ 'version' => 'desctop' ] ) )

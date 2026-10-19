@@ -81,15 +81,21 @@ class library_url {
 	
 	public function domain ( bool $revert = true , null|string $path = null ) {
 		if( is_null( $path ) ) $path = $_SERVER[ 'SERVER_NAME' ];
-		
+
+		# убрать порт (:8080) — H2-класс для всех потребителей
+		$path = preg_replace( '/:\d+$/' , '' , (string) $path );
+
 		$domain = explode( '.' , $path );
 		if( $revert === true ){
 			$domain = array_reverse( $domain );
 			$domain[ 1 ] .= '.' . $domain[ 0 ];
 			unset( $domain[ 0 ] );
 			$domain = array_values( $domain );
+
+			# U4: всегда 2 элемента — [host, allias]. Нет аллиаса — пустая строка.
+			if ( ! isset( $domain[ 1 ] ) ) $domain[ 1 ] = '';
 		}
-		
+
 		return $domain;
 	}
 	
