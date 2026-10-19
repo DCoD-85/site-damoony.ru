@@ -1,4 +1,4 @@
-# Аудит v2 — 19.10.2026
+# Аудит v2 — 19.10.2026 (Финал сессии)
 
 ## Закрыто (закоммичено в main)
 
@@ -20,8 +20,9 @@
 - X2 `dataprovider_base::$localname` из `config:domain_db`
 - U4 `library_url::domain()` → всегда `[host, allias]` (2 элемента)
 - B2 `library_link::href` — пустой аллиас больше не даёт `.host`
-- doctype `<!DOCTYPE html>` вместо `<! do type>` (standards mode)
+- doctype `<!DOCTYPE html>` вместо `<! doctype>` (standards mode)
 - CSS-пути без точки после аллиаса (`www.` → `www`)
+- legacy `algoritm_::start()` — добавлен пустой стаб (убрана мина в `main::logic()`)
 
 ### JS / visuo (M1)
 - Новый `engine_visuo.js` — единый контроллер `data-action`
@@ -30,53 +31,39 @@
 - `policy.php` → `data-action="confidence-show"`/`"confidence-hide"`
 - `/tests/` — delegate для `tabs-show` (standalone runner)
 
-### Тесты / CI
+### Тесты / CI (Инфраструктура)
 - `_dev/bootstrap.php`: `VISUO_SRC` → `visuo/sources` (был `engine/visuo/sources`)
-- `RouterTest` + `testRootMatch` (A5)
-- **436/436** (было 435)
-- **`.github/workflows/ci.yml`** — PHPUnit + PHPStan на push/PR
+- `RouterTest` + `testRootMatch` (A5) + фикс phpunit кэша в `.gitignore`
+- **436/436 тестов** проходят (было 435)
+- **`.github/workflows/ci.yml`** — работает! PHPUnit + PHPStan на push/PR
+- `_dev/phpstan.neon`: добавлены `scanDirectories` для `visuo` и `engines`, `constants.php` в `scanFiles` (устранены 29 ошибок `class.notFound`)
+- PHPStan локально и в CI выдаёт `[OK] No errors` (Level 5, baseline 439)
 
 ## Открыто (roadmap)
 
-### 🔴 блокеры
-- нет (M1 сделан)
-
 ### 🟠 важное
-- **SSO** — `www` → `visuo\user` (сейчас www всегда гость)
-- **PHPStan baseline 439** → Level 6 (стратегически)
+- **SSO (Шаг 2)** — `www` → `visuo\user` (сейчас на www нет реальной авторизации, всегда гость)
+- **PHPStan baseline** — снижать с 439 до 0 (постепенно поднимая Level 6)
 
 ### 🟡 мелочи
-- `alliasscheme_login.php` — путь `media/js/jsengine/` не существует (404)
+- `alliasscheme_login.php` — путь `media/js/jsengine/` не существует (404 на JS в login-схеме)
 - `hert.online`/`idoam.ru` — `onclick` в `policy.php`, `engine_visuotablebox.js` 404 (при активации)
-- `engine_visuotablebox.js` — удалён из схем, файл `.js` можно удалить
-- `engine_confidence.js` — используется `engine_visuo.js`, оставлен
-- `publicsuffix` для `.co.uk` в `domain_for_sso` (сейчас `.co.uk` неверно)
-- `__Host-` префикс при HTTPS
+- `publicsuffix` для `.co.uk` в `domain_for_sso`
+- `__Host-` префикс при HTTPS для куки
 - `visuorelease.php` debug `onclick` ×3 — только `GL_DEBUG=true`, dev-only
 - `visio` дубли: `www/media/damoony.ru/` vs `shared/` vs `corescripts/templates/media/`
-- `db_pass` qwe12345 — сменить до наполнения
-- `<doctype>` `< !DOCTYPE html />` — работает, но не валидно (`raw_html` когда-нибудь)
+- `db_pass` qwe12345 — сменить до наполнения прода
+- `<doctype>` `< !DOCTYPE html />` — работает, но не валидно (перейти на `raw_html`)
 
-## Файлы изменены (сессия)
+## Файлы изменены (ключевые)
 
 - `www/index.php` — Host, cookie, H4, C3
 - `engine/middleware.php` — CSP, rateLimit flock
-- `engine/cookie.php` — новый класс
-- `engine/include.php` — cookie в switchboard
+- `engine/cookie.php` — новый класс (cookie::set, cookie::delete, domain_for_sso)
 - `engine/library/url.php`, `engine/library/link.php` — U4, B2
-- `engine/user.php` — минус мёртвый `login`/`logout`
+- `engine/user.php`, `engines/legacy/algoritm_.php` — минус мёртвый код, плюс стаб
 - `engines/alogic/alogic_bridge.php`, `engines/alogic/Router.php` — A1, A5
-- `app/.../alliasglobal.php` ×3 — X1
-- `app/.../alliasglobal/policy/policy.php` — `data-action`
-- `app/.../alliasglobal/script/headers.php` — language/lang/skin cookie
-- `app/.../alliasglobal/bottom/bottom.php` — guard
-- `app/.../allias/visuo/user.php` — cookie::set
-- `app/.../allias/visuo/dataprovider/dataprovider_base.php` — X2
-- `app/.../alliasscheme/alliasscheme_{visuo,www,error}.php` — CSS, JS
-- `visuo/sources/visuoel/visuoel_tabs/visuoel_tabs_page.php` — data-action
-- `www/media/shared/scripts/engine/engine_visuo.js` — новый
-- `www/media/shared/scripts/engine/engine.js` — `visuo: engine_visuo`
-- `www/tests/index.php` — delegate tabs-show
-- `_dev/bootstrap.php`, `_dev/phpunit/RouterTest.php` — тесты
-- `.github/workflows/ci.yml` — новый
-- `.gitignore` — `_backup/`, `_tmp/`
+- `app/.../allias/visuo/user.php`, `dataprovider_base.php` — cookie, X2
+- `www/media/shared/scripts/engine/engine_visuo.js` — новый JS-контроллер
+- `_dev/bootstrap.php`, `_dev/phpunit/RouterTest.php`, `_dev/phpstan.neon` — тесты, статик-анализ
+- `.github/workflows/ci.yml` — CI pipeline
