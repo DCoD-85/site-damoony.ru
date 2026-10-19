@@ -31,26 +31,26 @@ class alliasglobal {
 
 	public function autoload ( bool $init = true ) : void {
 		# 0. trait
-		( include_once $path = 'alliasglobal' . DS . 'alliasglobal_filler_trait.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'alliasglobal_filler_trait.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 		# 1. base
-		( include_once $path = 'alliasglobal' . DS . 'menu_row.php'           ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'menu.php'               ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'alliasblock.php'        ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'alliasglobalscript.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'menu_row.php'           ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'menu.php'               ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'alliasblock.php'        ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'alliasglobalscript.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 		# 2. blocks
-		( include_once $path = 'alliasglobal' . DS . 'top'    . DS . 'top.php'    ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'left'   . DS . 'left.php'   ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'center' . DS . 'center.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'right'  . DS . 'right.php'  ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'bottom' . DS . 'bottom.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'policy' . DS . 'policy.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'debug' . DS . 'debug.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'top'    . DS . 'top.php'    ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'left'   . DS . 'left.php'   ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'center' . DS . 'center.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'right'  . DS . 'right.php'  ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'bottom' . DS . 'bottom.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'policy' . DS . 'policy.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'debug' . DS . 'debug.php' ) or error_file( $path , __FILE__ , __LINE__ );
 
 		# 3. scripts
-		( include_once $path = 'alliasglobal' . DS . 'script' . DS . 'headers.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = 'alliasglobal' . DS . 'script' . DS . 'head.php'    ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'script' . DS . 'headers.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = __DIR__ . DS . 'alliasglobal' . DS . 'script' . DS . 'head.php'    ) or error_file( $path , __FILE__ , __LINE__ );
 
 		if ( $init === true ) $this->init( );
 	}
