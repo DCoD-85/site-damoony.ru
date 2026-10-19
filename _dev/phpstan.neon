@@ -8,8 +8,13 @@ parameters:
         - ../corescripts/_lib
         - ../corescripts/commands
         - ../www/admin/_lib
+    scanDirectories:
+        - ../visuo
+        - ../visuo/sources
+        - ../engines
     scanFiles:
         - ../engine/main.php
+        - ../engine/constants.php
     bootstrapFiles:
         - stubs.php
     treatPhpDocTypesAsCertain: false
