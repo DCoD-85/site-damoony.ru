@@ -102,4 +102,23 @@ function dinamic_prepare ( ) {
 			return false;
 		});
 	}
+
+	
+	// --- data-action delegate (M1: без inline onclick) ---
+	window.actions = window.actions || {};
+
+	window.actions[ 'confidence-show' ] = function ( el ) {
+		if ( window.engine && engine.confidence ) engine.confidence.showconfidence( el );
+	};
+	window.actions[ 'confidence-hide' ] = function ( el ) {
+		if ( window.engine && engine.confidence ) engine.confidence.hide( el );
+	};
+
+	document.addEventListener( 'click' , function ( e ) {
+		var el = e.target.closest( '[data-action]' );
+		if ( ! el ) return;
+		var name = el.getAttribute( 'data-action' );
+		var fn = window.actions[ name ];
+		if ( typeof fn === 'function' ) { fn( el ); }
+	} );
 }

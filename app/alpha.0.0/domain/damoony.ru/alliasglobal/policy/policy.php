@@ -54,11 +54,11 @@ class alliasglobal_policy extends alliasblock {
 		$body = $fon->tag( 'div' , class : 'policy_body' );
 
 		$body->tag( 'div' , class : 'policy_click' )
-			->attrs_actions_add( 'onclick' , 'engine.confidence.showconfidence( this );' )
+			->data_add( 'action' , 'confidence-show' , false )
 			->content( 'Нажмите чтобы прочитать пользовательское соглашение.<br />Примите или отклоните предложенные условия пользования сайтом.' );
 
 		$body->tag( 'div' , class : 'policy_confidence_close' )
-			->attrs_actions_add( 'onclick' , 'engine.confidence.hide( this );' )
+			->data_add( 'action' , 'confidence-hide' , false )
 			->content( 'Закрыть пользовательское соглашение' );
 
 		$body->tag( 'div' , class : 'policy_confidence' )

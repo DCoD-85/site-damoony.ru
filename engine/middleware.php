@@ -35,9 +35,9 @@ class middleware {
         header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
 
 		// ДОБАВИТЬ CSP (разрешаем inline-скрипты для visuo)
-    	header( "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" );
-		
-        if ( $is_https ) {
+    	header( "Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.plyr.io; style-src 'self' 'unsafe-inline' https://cdn.plyr.io; img-src 'self' data:" );
+        
+		if ( $is_https ) {
             header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
         }
     }
