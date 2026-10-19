@@ -930,28 +930,17 @@ switch ( $p ) {
         $data = require $file_data;
         
         if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-            // Обновляем enabled на основе POST
-            $blocks = $_POST[ 'blocks' ] ?? [];
-            foreach ( $data['children'] as &$node ) {
-                if ( isset($node['class']) && str_starts_with($node['class'], 'dt_') ) {
-                    $node['enabled'] = in_array($node['class'], $blocks);
-                }
-                if ( !empty($node['children']) ) {
-                    foreach ( $node['children'] as &$child ) {
-                        if ( isset($child['class']) && str_starts_with($child['class'], 'dt_') ) {
-                            $child['enabled'] = in_array($child['class'], $blocks);
-                        }
-                    }
-                }
+            $json = $_POST[ 'scheme_json' ] ?? '';
+            $new_data = json_decode( $json , true );
+            if ( is_array( $new_data ) ) {
+                $php_code = '<?PHP' . "\n# ============================================================\n#   alliasscheme_" . $scheme . ".data.php — структура схемы\n# ============================================================\nreturn " . var_export($new_data, true) . ";\n";
+                file_put_contents($file_data, $php_code);
             }
-            unset($node);
-            $php_code = '<?PHP' . "\n# ============================================================\n#   alliasscheme_" . $scheme . ".data.php — структура схемы\n# ============================================================\nreturn " . var_export($data, true) . ";\n";
-            file_put_contents($file_data, $php_code);
             header('Location: ?p=scheme:edit&domain=' . urlencode($domain) . '&scheme=' . urlencode($scheme) . '&saved=1');
             exit;
         }
 
-        View::render( 'scheme_edit' , [ 'domain' => $domain , 'scheme' => $scheme , 'data' => $data ] );
+        View::render( 'scheme_edit' , [ 'domain' => $domain , 'scheme' => $scheme , 'scheme_data' => $data ] );
         break;
 
     case 'blocks:list' :
