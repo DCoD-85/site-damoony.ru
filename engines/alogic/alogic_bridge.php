@@ -9,16 +9,23 @@
 function alogic_resolve( $main , $static_domain , $static_allias ) {
     require_once __DIR__ . '/bootstrap.php';
     
-    // 1. Ищем routes.php в аллиасе (локальные маршруты)
+     // 1. Ищем routes.php в аллиасе (локальные маршруты)
     $logic_ver = $main->main_settings->get('logic');
     $domain = $main->main_settings->domain_real_name;
     $local_routes = dirname(dirname(__DIR__)) . "/app/{$logic_ver}/domain/{$domain}/allias/{$static_allias}/routes.php";
-    
+
+    $router = null;
     if ( file_exists( $local_routes ) ) {
-        $router = require_once $local_routes;
-    } else {
-        // Фоллбэк на глобальные маршруты, если в аллиасе нет своего файла
-        $router = require_once __DIR__ . '/routes.php'; 
+        $loaded = require $local_routes;
+        if ( $loaded instanceof \alogic\Router ) $router = $loaded;
+    }
+    if ( $router === null ) {
+        $loaded = require __DIR__ . '/routes.php';
+        if ( $loaded instanceof \alogic\Router ) $router = $loaded;
+    }
+    if ( $router === null ) {
+        alogic_error( $main , $static_domain , $static_allias , 500 );
+        return;
     }
     
     // 2. Ищем совпадение по текущему URL
