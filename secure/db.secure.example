@@ -1,0 +1,8 @@
+{
+  "db_type": "mysqli",
+  "connect_type": "http://",
+  "db_host": "127.0.0.1",
+  "db_user": "damoony",
+  "db_pass": "ВВЕДИТЕ_ПАРОЛЬ",
+  "db_name": "www_damoony"
+}
