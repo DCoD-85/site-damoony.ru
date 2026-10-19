@@ -27,8 +27,7 @@ class algoritm_lang_index
 		$vt->tag( 'div' , class : 'visuo visuo-index' )
 			->tag( 'h1' )->content( $lang->get( 'VISUO_TITLE' , [ ] , 'visuo' ) )->parent( )
 			->tag( 'p'  )->content( $lang->get( 'VISUO_INTRO' , [ ] , '' ) )->parent( )
-			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) )->parent( )
-			->content( time( ) );
+			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) )->parent( );
 
 		$center = $main->alliasglobal->center;
 		$center->wrapper_set( 'div' );
