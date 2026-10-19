@@ -34,6 +34,10 @@
 			maxlength="32" autocomplete="off" placeholder="news">
 	</label>
 
+	<label>Родительский путь (опционально)
+		<input type="text" name="parent" value="<?= htmlspecialchars( $parent ?? '' , ENT_QUOTES ) ?>" placeholder="news/archive">
+	</label>
+
 	<button type="submit">Создать</button>
 	<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">Отмена</a>
 

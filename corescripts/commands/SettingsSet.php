@@ -82,7 +82,10 @@ class SettingsSet {
                 return null;
 
             case 'skin' :
-                $p = Paths::skins( 'damoony.ru' ) . '/' . $value;
+                $cfg = new Config( Paths::config() );
+                $domains = array_keys((array)$cfg->get('domains_real', []));
+                $def_domain = $domains[0] ?? 'damoony.ru';
+                $p = Paths::skins( $def_domain ) . '/' . $value;
                 if ( ! is_dir( $p ) ) {
                     return "тема '{$value}' не найдена ({$p})";
                 }

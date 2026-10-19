@@ -1052,7 +1052,7 @@ switch ( $p ) {
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
 		# SettingsSet падает на неизвестном ключе → фильтруем $_POST
-		$allowed = [ 'logic' , 'connect_type' ];
+		$allowed = [ 'title' , 'skin' , 'logic' , 'connect_type' ];
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/SettingsSet.php';
@@ -1091,6 +1091,7 @@ switch ( $p ) {
 				'logic'        => (string) ( $cfg->get( 'logic' )        ?? '' ) ,
 				'connect_type' => (string) ( $cfg->get( 'connect_type' ) ?? 'https://' ) ,
 			] ,
+			'skins'        => Scan::skinsFor( array_key_first((array)$cfg->get('domains_real', [])) ?? 'damoony.ru' ) ,
 			'logics'       => Scan::logics( ) ,
 			'connectTypes' => Scan::connectTypes( ) ,
 		] );

@@ -48,6 +48,9 @@ $map = [
 	'page:toggle'    => [ 'PageToggle.php'   , 'PageToggle'   ] ,
 	'allias:toggle'  => [ 'AlliasToggle.php' , 'AlliasToggle' ] ,
 	'domain:toggle'  => [ 'DomainToggle.php' , 'DomainToggle' ] ,
+	'filler:toggle'  => [ 'FillerToggle.php' , 'FillerToggle' ] ,
+	'filler:remove'  => [ 'FillerRemove.php' , 'FillerRemove' ] ,
+	'block:remove'   => [ 'BlockRemove.php'  , 'BlockRemove'  ] ,
 	'vars:extract'   => [ 'VarsExtract.php'  , 'VarsExtract'  ] ,
 ];
 
