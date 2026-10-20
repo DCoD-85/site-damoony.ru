@@ -11,7 +11,7 @@ class algoritm_lang_index
 		$this->release_( $this );
 	}
 
-	public function guest  ( ) { return false; return $this->render( ); }
+	public function guest  ( ) { return false; }
 	public function logged ( ) { return $this->render( ); }
 
 	private function render ( ) {

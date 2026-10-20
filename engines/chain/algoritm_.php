@@ -357,6 +357,7 @@ class algoritm_ {
 		$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
 		$this->algoritm_classes[ $url_base_pos ]->algoritm( );
 		$this->algoritm_classes[ $url_base_pos ]->release( );
+		return true;
 	}
 }
 
