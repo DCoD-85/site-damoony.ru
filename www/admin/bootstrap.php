@@ -999,6 +999,20 @@ switch ( $p ) {
                 $dir = Paths::domain( $domain ) . '/alliasscheme';
                 @unlink( $dir . '/alliasscheme_' . $scheme . '.php' );
                 @unlink( $dir . '/alliasscheme_' . $scheme . '.data.php' );
+                
+                // Чистим упоминания в главном alliasscheme.php
+                $main_file = Paths::domain($domain) . '/alliasscheme.php';
+                if (is_file($main_file)) {
+                    $main_c = file_get_contents($main_file);
+                    $prop = 'alliasscheme_' . $scheme;
+                    $lines = explode("\n", $main_c);
+                    $new_lines = [];
+                    foreach ($lines as $line) {
+                        if (strpos($line, $prop) === false) $new_lines[] = $line;
+                    }
+                    file_put_contents($main_file, implode("\n", $new_lines));
+                }
+                
                 header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&removed=1' ); exit;
             }
         }
