@@ -45,7 +45,7 @@ class algoritm_lang_{name}
 
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
 
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	# ---------------------------------------------------------------

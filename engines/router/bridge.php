@@ -105,10 +105,14 @@ function router_resolve( $main , $static_domain , $static_allias ) {
         $main->algoritm->ajax(); // Вызовет ajax_guest или ajax_logged
     } else {
         // Обычная загрузка страницы (режимы 1 и 2)
+        $res = false;
         if ( $main->is_guest() ) {
-            $main->algoritm->guest();
+            $res = $main->algoritm->guest();
         } else {
-            $main->algoritm->logged();
+            $res = $main->algoritm->logged();
+        }
+        if ( $res === false && strpos( get_class( $instance ) , 'algoritm_error' ) === false ) {
+            router_error(  $main , $static_domain , $static_allias , 404  );
         }
     }
     
@@ -156,11 +160,15 @@ function router_error( $main , $static_domain , $static_allias , $code = 404 ) {
         if ( $instance->is_ajax() ) {
             $instance->ajax();
         } else {
+            $res = false;
             if ( $main->is_guest() ) {
-                $instance->guest();
+                $res = $instance->guest();
             } else {
-                $instance->logged();
+                $res = $instance->logged();
             }
+            if ( $res === false && strpos( get_class( $instance ) , 'algoritm_error' ) === false ) {
+            router_error(  $main , $static_domain , $static_allias , 404  );
+        }
         }
     } else {
         die( '404 Not Found (class not found)' );

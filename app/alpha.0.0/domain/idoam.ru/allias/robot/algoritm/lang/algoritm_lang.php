@@ -10,7 +10,7 @@ class algoritm_lang
 	public function release ( ) {
 		$default = ( $this->main->library->url->static_base[ 1 ] ?? '' ) === '';
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function default ( ) {

@@ -11,7 +11,7 @@ class algoritm_lang_profile
 	# ---------------------------------------------------------------
 	public function release ( ) {
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function guest  ( ) { return false; }   # auth=true — гость сюда не дойдёт

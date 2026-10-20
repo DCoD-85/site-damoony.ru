@@ -8,7 +8,7 @@ class algoritm_lang_index
 	public function release ( ) {
 		$default = $this->is_default( );
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function guest ( )  { return $this->render( ); }

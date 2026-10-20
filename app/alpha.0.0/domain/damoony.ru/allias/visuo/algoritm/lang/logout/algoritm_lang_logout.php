@@ -8,7 +8,7 @@ class algoritm_lang_logout
 	# ---------------------------------------------------------------
 	public function release ( ) {
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function guest  ( ) { return $this->redirect_home( ); }

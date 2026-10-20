@@ -30,7 +30,7 @@ class algoritm
 
 	public function release ( ) {
 		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' ] , false , true , true );
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function default ( ) {

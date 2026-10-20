@@ -13,7 +13,7 @@ class algoritm_<name>
 	public function release ( ) {
 		$this->load_vars( );
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function guest  ( ) { return $this->render( ); }

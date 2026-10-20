@@ -29,7 +29,7 @@ class algoritm
 			$this->search    ?? true ,
 			$this->default   ?? false
 		);
-		$this->release_( $this );
+		return $this->release_( $this );
 	}
 
 	public function default ( ) {
