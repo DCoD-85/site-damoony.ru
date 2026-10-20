@@ -6,7 +6,7 @@
 		<textarea name="php" rows="15"><?= htmlspecialchars($php) ?></textarea>
 	</label>
 	<label>Данные (<code><?= $name ?>.data.php</code>)
-		<textarea name="data" rows="10"><?= htmlspecialchars($data) ?></textarea>
+		<textarea name="data" rows="10"><?= htmlspecialchars($file_data) ?></textarea>
 	</label>
 	<button type="submit">Сохранить</button>
 	<a href="?p=blocks:list&domain=<?= urlencode($domain) ?>" class="btn-cancel">Назад</a>

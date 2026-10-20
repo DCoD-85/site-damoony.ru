@@ -6,7 +6,7 @@
 		<textarea name="php" rows="12"><?= htmlspecialchars($php) ?></textarea>
 	</label>
 	<label>Данные (<code><?= $block ?>_<?= $allias ?>.data.php</code>)
-		<textarea name="data" rows="15"><?= htmlspecialchars($data) ?></textarea>
+		<textarea name="data" rows="15"><?= htmlspecialchars($file_data) ?></textarea>
 	</label>
 	<button type="submit">Сохранить</button>
 	<a href="?p=allias:fillers&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>" class="btn-cancel">Назад</a>

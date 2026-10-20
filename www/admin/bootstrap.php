@@ -854,7 +854,7 @@ switch ( $p ) {
             Fs::writeAtomic( $data_f , $_POST[ 'data' ] );
             header( 'Location: ?p=filler:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&block=' . urlencode($block) . '&saved=1' ); exit;
         }
-        View::render( 'filler_edit' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => file_get_contents( $php_f ) , 'data' => file_get_contents( $data_f ) ] );
+        View::render( 'filler_edit' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => file_get_contents( $php_f ) , 'file_data' => file_get_contents( $data_f ) ] );
         break;
 
     case 'filler:toggle' :
@@ -903,7 +903,7 @@ switch ( $p ) {
             Fs::writeAtomic( $data_file , $_POST[ 'data' ] );
             header( 'Location: ?p=block:edit&domain=' . urlencode($domain) . '&name=' . urlencode($name) . '&saved=1' ); exit;
         }
-        View::render( 'block_edit' , [ 'domain' => $domain , 'name' => $name , 'php' => file_get_contents( $php_file ) , 'data' => file_get_contents( $data_file ) ] );
+        View::render( 'block_edit' , [ 'domain' => $domain , 'name' => $name , 'php' => file_get_contents( $php_file ) , 'file_data' => file_get_contents( $data_file ) ] );
         break;
 
     case 'block:remove' :
