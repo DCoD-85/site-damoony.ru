@@ -22,15 +22,7 @@ class algoritm
 		$scheme->reload( );
 	}
 
-	public function release ( ) {
-		$this->algoritmdata->set(
-			$this->available ?? [ '' ] ,
-			$this->auth      ?? false ,
-			$this->search    ?? true ,
-			$this->default   ?? false
-		);
-		return $this->release_( $this );
-	}
+	
 
 	public function default ( ) {
 	}

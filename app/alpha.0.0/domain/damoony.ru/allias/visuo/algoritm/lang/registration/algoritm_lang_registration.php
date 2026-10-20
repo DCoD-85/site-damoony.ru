@@ -11,10 +11,7 @@ class algoritm_lang_registration
 	public bool  $default   = true;
 
 	# ---------------------------------------------------------------
-	public function release ( ) {
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		return $this->release_( $this );
-	}
+	
 
 	# ---------------------------------------------------------------
 	public function guest  ( ) { return $this->render( false ); }

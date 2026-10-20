@@ -5,13 +5,9 @@ namespace damoony_ru\www;
 class algoritm_lang_index
 	extends \algoritm_ {
 
-	public function release ( ) {
-		$default = $this->is_default( );
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-		return $this->release_( $this );
-	}
+	
 
-	public function guest  ( ) { return false; }
+	public function guest  ( ) { return $this->render( ); }
 	public function logged ( ) { return $this->render( ); }
 
 	private function render ( ) {

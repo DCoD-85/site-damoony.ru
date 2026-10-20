@@ -5,11 +5,7 @@ namespace hert_online\www;
 class algoritm_lang_index
 	extends \algoritm_ {
 
-	public function release ( ) {
-		$default = $this->is_default( );
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-		return $this->release_( $this );
-	}
+	
 
 	public function guest ( )  { return $this->render( ); }
 	public function logged ( ) { return $this->render( ); }

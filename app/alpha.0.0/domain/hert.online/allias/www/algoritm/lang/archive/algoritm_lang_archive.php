@@ -10,11 +10,7 @@ class algoritm_lang_lang_archive
 	public bool  $search    = true;
 	public bool  $default   = true;
 
-	public function release ( ) {
-		$this->load_vars( );
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		return $this->release_( $this );
-	}
+	
 
 	public function guest  ( ) { return $this->render( ); }
 	public function logged ( ) { return $this->render( ); }

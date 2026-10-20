@@ -9,10 +9,7 @@ class algoritm_lang_profile
 	public array $lang_options     = [ ];
 
 	# ---------------------------------------------------------------
-	public function release ( ) {
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		return $this->release_( $this );
-	}
+	
 
 	public function guest  ( ) { return false; }   # auth=true — гость сюда не дойдёт
 	public function logged ( ) { return $this->render( ); }

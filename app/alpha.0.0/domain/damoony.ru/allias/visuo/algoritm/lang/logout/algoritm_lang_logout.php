@@ -6,10 +6,7 @@ class algoritm_lang_logout
 	extends \algoritm_ {
 
 	# ---------------------------------------------------------------
-	public function release ( ) {
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		return $this->release_( $this );
-	}
+	
 
 	public function guest  ( ) { return $this->redirect_home( ); }
 	public function logged ( ) { return $this->do_logout( ); }

@@ -48,10 +48,7 @@ class algoritm
 		$scheme->reload( );
 	}
 
-	public function release ( ) {
-		$this->algoritmdata->set( [ '([a-z]{2}-[a-z]{2})|lang' ] , false , true , true );
-		return $this->release_( $this );
-	}
+	
 
 	public function default ( ) {
 	}

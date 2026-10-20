@@ -80,18 +80,5 @@ class alliasglobal__template extends alliasblock {
 	}
 
 	# release() — вставить данные и меню в слоты каркаса.
-	protected function release ( ) : void {
-		$root = $this->visuotag->root( );
-
-		# Заполнение полей
-		$slot = $root->find( class : 'template_title' );
-		if ( $slot !== null ) $slot->content( $this->title );
-
-		$slot = $root->find( class : 'template_text' );
-		if ( $slot !== null ) $slot->content( $this->text );
-
-		# Вставка меню
-		$slot = $root->find( class : 'template_menu' );
-		if ( $slot !== null ) $slot->append( $this->menu->as_tag( 'nav' ) );
-	}
+	
 }

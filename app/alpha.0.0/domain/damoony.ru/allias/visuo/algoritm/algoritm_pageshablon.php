@@ -40,13 +40,7 @@ class algoritm_lang_{name}
 	#   Здесь: чтение из БД, установка заголовков, изменение $default,
 	#          разбор $args (если URL пришёл с regex-группой)
 	# ---------------------------------------------------------------
-	public function release ( ) {
-		$default = $this->is_default( );
-
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-
-		return $this->release_( $this );
-	}
+	
 
 	# ---------------------------------------------------------------
 	#   DEFAULT — главный роутер

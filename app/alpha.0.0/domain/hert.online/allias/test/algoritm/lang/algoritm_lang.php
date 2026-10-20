@@ -10,13 +10,7 @@ class algoritm_lang
 	public bool  $search    = true;
 	public bool  $default   = true;
 
-	public function release ( ) {
-		$this->load_vars( );
-
-		$default = ( $this->main->library->url->static_base[ 1 ] ?? '' ) === '';
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-		return $this->release_( $this );
-	}
+	
 
 	public function default ( ) {
 		$main     = $this->main;

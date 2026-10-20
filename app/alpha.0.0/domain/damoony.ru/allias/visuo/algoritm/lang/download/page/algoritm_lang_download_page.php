@@ -6,10 +6,7 @@ class algoritm_lang_download_page
 	extends \algoritm_ {
 
 	# ---------------------------------------------------------------
-	public function release ( ) {
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		return $this->release_( $this );
-	}
+	
 
 	public function guest  ( ) { return $this->serve( ); }
 	public function logged ( ) { return $this->serve( ); }

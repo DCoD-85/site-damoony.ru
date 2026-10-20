@@ -580,7 +580,7 @@ switch ( $p ) {
 		] );
 		break;
 
-	        case 'page:code' :
+	            case 'page:code' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $allias = (string) ( $_GET[ 'allias' ] ?? '' );
         $path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
@@ -596,7 +596,17 @@ switch ( $p ) {
             header( 'Location: ?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); exit;
         }
 
-        // Вспомогательная функция для безопасного извлечения методов
+        // 1. Базовые (родительские) методы, которые можно переопределить
+        $parent_methods = [
+            'algoritm'    => "public function algoritm ( ) {\n\t\n}",
+            'guest'       => "public function guest ( ) {\n\treturn false;\n}",
+            'logged'      => "public function logged ( ) {\n\treturn false;\n}",
+            'ajax_guest'  => "public function ajax_guest ( ) {\n\treturn false;\n}",
+            'ajax_logged' => "public function ajax_logged ( ) {\n\treturn false;\n}",
+            'default'     => "public function default ( ) {\n\treturn parent::default();\n}"
+        ];
+
+        // 2. Функция извлечения методов из текущего файла
         $extract_methods = function( $code ) {
             $regex = '/(public|protected|private)?\s*function\s+(\w+)\s*\([^)]*\)\s*(?::\s*\w+)?\s*\{/';
             preg_match_all( $regex , $code , $matches , PREG_OFFSET_CAPTURE );
@@ -625,6 +635,7 @@ switch ( $p ) {
 
         $php_code = file_get_contents( $php_file );
 
+        // 3. Обработка POST запросов
         if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
             if ( isset( $_POST[ 'save_json' ] ) ) {
                 $json_code = (string) ( $_POST[ 'json_code' ] ?? '' );
@@ -644,20 +655,37 @@ switch ( $p ) {
                 header( 'Location: ?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '&method=' . urlencode($method_name) . '&saved=1' );
                 exit;
             }
+
+            // Добавление новой функции (переопределение)
+            if ( isset( $_POST[ 'add_method' ] ) ) {
+                $new_method = (string) $_POST[ 'add_method' ];
+                $methods = $extract_methods( $php_code );
+                if ( isset( $parent_methods[ $new_method ] ) && !isset( $methods[ $new_method ] ) ) {
+                    // Вставляем перед последней закрывающей скобкой класса
+                    $last_brace = strrpos( $php_code , '}' );
+                    if ( $last_brace !== false ) {
+                        $stub = "\n\t" . $parent_methods[ $new_method ] . "\n\n";
+                        $php_code = substr_replace( $php_code , $stub , $last_brace , 0 );
+                        try { Fs::writeAtomic( $php_file , $php_code ); } catch ( Throwable $e ) {}
+                    }
+                }
+                header( 'Location: ?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '&method=' . urlencode($new_method) . '&saved=1' );
+                exit;
+            }
         }
 
         $methods = $extract_methods( $php_code );
         $current_method_code = $method_name && isset($methods[$method_name]) ? $methods[$method_name]['code'] : '';
-
         $json_code = is_file( $json_file ) ? file_get_contents( $json_file ) : '';
         $tab = $_GET['tab'] ?? 'logic';
 
         View::render( 'page_code' , [
             'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short ,
-            'methods' => $methods , 'method_name' => $method_name , 'method_code' => $current_method_code ,
+            'methods' => $methods , 'parent_methods' => $parent_methods , 'method_name' => $method_name , 'method_code' => $current_method_code ,
             'json_code' => $json_code , 'tab' => $tab
         ] );
         break;
+
 
 case 'page:edit' :
 

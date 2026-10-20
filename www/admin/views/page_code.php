@@ -47,13 +47,43 @@ $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
             </form>
         <?php else : ?>
             <div style="display:flex; flex-direction:column; height:100%;">
-                <div class="method-list" style="display:flex; flex-direction:row; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                    <?php foreach ( $methods as $name => $m ) : ?>
-                        <a href="?p=page:code&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&path=<?= urlencode($path) ?>&tab=logic&method=<?= urlencode($name) ?>" 
-                           class="method-link <?= $method_name === $name ? 'active' : '' ?>" style="padding:4px 10px; font-size:12px;">
-                            <?= htmlspecialchars( $name ) ?>()
-                        </a>
-                    <?php endforeach ?>
+                <!-- Блок с функциями -->
+                <div class="method-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px; background:#fff; padding:10px; border:1px solid #eee; border-radius:4px;">
+                    
+                    <div>
+                        <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Активные функции</span>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:5px;">
+                            <?php 
+                            $overridden = array_intersect(array_keys($parent_methods), array_keys($methods));
+                            $custom = array_diff(array_keys($methods), array_keys($parent_methods));
+                            $active_methods = array_merge($overridden, $custom);
+                            ?>
+                            <?php foreach ( $active_methods as $name ) : ?>
+                                <a href="?p=page:code&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&path=<?= urlencode($path) ?>&tab=logic&method=<?= urlencode($name) ?>" 
+                                   class="method-link active <?= $method_name === $name ? 'selected' : '' ?>" style="padding:4px 10px; font-size:12px;">
+                                    <?= htmlspecialchars( $name ) ?>()
+                                </a>
+                            <?php endforeach ?>
+                        </div>
+                    </div>
+
+                    <?php $available = array_diff_key($parent_methods, $methods); ?>
+                    <?php if ( !empty($available) ) : ?>
+                        <div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:10px;">
+                            <span style="font-size:11px; color:#888; text-transform:uppercase; font-weight:bold;">Доступно для добавления (родительские)</span>
+                            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:5px;">
+                                <?php foreach ( $available as $name => $stub ) : ?>
+                                    <form method="post" style="margin:0;">
+                                        <?= Csrf::field() ?>
+                                        <input type="hidden" name="add_method" value="<?= htmlspecialchars($name) ?>">
+                                        <button type="submit" class="method-link" style="padding:4px 10px; font-size:12px; opacity:0.7; cursor:pointer; background:none; border:1px dashed #ccc;">
+                                            + <?= htmlspecialchars( $name ) ?>()
+                                        </button>
+                                    </form>
+                                <?php endforeach ?>
+                            </div>
+                        </div>
+                    <?php endif ?>
                 </div>
 
                 <?php if ( $method_name && isset( $methods[ $method_name ] ) ) : ?>
@@ -64,8 +94,9 @@ $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
                         <button type="submit" class="btn-edit" style="margin-top:10px; padding:10px;">Сохранить функцию</button>
                     </form>
                 <?php else : ?>
-                    <div class="error-msg" style="background:#f5f6f8; color:#666; border:1px dashed #ccc; flex:1; display:flex; align-items:center; justify-content:center;">
-                        Выберите функцию сверху для редактирования.
+                    <div class="error-msg" style="background:#f5f6f8; color:#666; border:1px dashed #ccc; flex:1; display:flex; align-items:center; justify-content:center; text-align:center;">
+                        Выберите активную функцию сверху для редактирования.<br>
+                        Или добавьте новую из списка доступных.
                     </div>
                 <?php endif ?>
             </div>
@@ -90,8 +121,8 @@ $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
     font-size: 14px; line-height: 1.5; padding: 15px; border-radius: 6px; border: 1px solid #333; resize: none; tab-size: 4;
 }
 .code-editor:focus { outline: none; border-color: #2a63d6; }
-.method-list { border-bottom:1px dashed #ccc; padding-bottom:10px; }
 .method-link { background: #fff; border: 1px solid #e0e4eb; border-radius: 4px; color: #333; text-decoration: none; font-family: ui-monospace, Consolas, monospace; }
 .method-link:hover { background: #f0f4ff; border-color: #c6d6f5; }
 .method-link.active { background: #2a63d6; color: #fff; border-color: #2a63d6; font-weight: bold; }
+.method-link.selected { box-shadow: 0 0 0 2px rgba(42,99,214,0.4); }
 </style>

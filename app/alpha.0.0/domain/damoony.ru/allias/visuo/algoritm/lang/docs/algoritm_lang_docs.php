@@ -5,10 +5,7 @@ namespace damoony_ru\visuo;
 class algoritm_lang_docs
 	extends \algoritm_ {
 	# ---------------------------------------------------------------
-	public function release ( ) {
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
-		return $this->release_( $this );
-	}
+	
 
 	public function guest  ( ) { return $this->render_list( ); }
 	public function logged ( ) { return $this->render_list( ); }

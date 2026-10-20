@@ -7,11 +7,7 @@ class algoritm_lang
 
 	public array $available = [ '' , 'index' , 'form' , 'login' , 'logout' , 'redirect' , 'profile' , 'agreement' , 'registration' ];
 
-	public function release ( ) {
-		$default = ( $this->main->library->url->static_base[ 1 ] ?? '' ) === '' ? true : false;
-		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $default );
-		return $this->release_( $this );
-	}
+	
 
 	public function default ( ) {
 		$main = $this->main;

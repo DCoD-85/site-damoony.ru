@@ -14,9 +14,7 @@ class algoritm_auth
 	public function algoritm ( ) {
 	}
 
-	public function release ( ) {
-		$this->default( );
-	}
+	
 
 	public function default ( ) {
 		http_response_code( 401 );
