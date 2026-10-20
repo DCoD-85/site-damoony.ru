@@ -36,4 +36,18 @@ class algoritm_lang_index
 
 		return true;
 	}
+
+	public function algoritm ( ) {
+	
+}
+
+
+	
+
+
+	public function default ( ) {
+print '222';
+	return parent::default();
+}
+
 }
