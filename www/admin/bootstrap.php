@@ -580,7 +580,86 @@ switch ( $p ) {
 		] );
 		break;
 
-	case 'page:edit' :
+	        case 'page:code' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+        $path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
+        $method_name = (string) ( $_GET[ 'method' ] ?? '' );
+
+        $base      = Paths::algoritm( $domain , $allias );
+        $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
+        $sub_dir   = $path === '' ? $base : $base . '/' . $path;
+        $php_file  = $sub_dir . '/' . $cls_short . '.php';
+        $json_file = $sub_dir . '/' . $cls_short . '.data.json';
+
+        if ( ! is_file( $php_file ) ) {
+            header( 'Location: ?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); exit;
+        }
+
+        // Вспомогательная функция для безопасного извлечения методов
+        $extract_methods = function( $code ) {
+            $regex = '/(public|protected|private)?\s*function\s+(\w+)\s*\([^)]*\)\s*(?::\s*\w+)?\s*\{/';
+            preg_match_all( $regex , $code , $matches , PREG_OFFSET_CAPTURE );
+            $methods = [];
+            foreach ( $matches[0] as $index => $match ) {
+                $start_pos = $match[1];
+                $name = $matches[2][$index][0];
+                
+                $brace_level = 1;
+                $pos = $start_pos + strlen($match[0]);
+                $len = strlen($code);
+                while ( $pos < $len && $brace_level > 0 ) {
+                    $char = $code[$pos];
+                    if ( $char === '{' ) $brace_level++;
+                    elseif ( $char === '}' ) $brace_level--;
+                    $pos++;
+                }
+                $methods[$name] = [
+                    'code' => substr($code, $start_pos, $pos - $start_pos),
+                    'start' => $start_pos,
+                    'end' => $pos
+                ];
+            }
+            return $methods;
+        };
+
+        $php_code = file_get_contents( $php_file );
+
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            if ( isset( $_POST[ 'save_json' ] ) ) {
+                $json_code = (string) ( $_POST[ 'json_code' ] ?? '' );
+                try { if ( $json_code !== '' ) Fs::writeAtomic( $json_file , $json_code ); } catch ( Throwable $e ) {}
+                header( 'Location: ?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '&saved=1' );
+                exit;
+            }
+            
+            if ( isset( $_POST[ 'save_method' ] ) ) {
+                $new_method_code = (string) ( $_POST[ 'method_code' ] ?? '' );
+                $methods = $extract_methods( $php_code );
+                if ( isset( $methods[ $method_name ] ) ) {
+                    $m = $methods[ $method_name ];
+                    $php_code = substr($php_code, 0, $m['start']) . $new_method_code . substr($php_code, $m['end']);
+                    try { Fs::writeAtomic( $php_file , $php_code ); } catch ( Throwable $e ) {}
+                }
+                header( 'Location: ?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '&method=' . urlencode($method_name) . '&saved=1' );
+                exit;
+            }
+        }
+
+        $methods = $extract_methods( $php_code );
+        $current_method_code = $method_name && isset($methods[$method_name]) ? $methods[$method_name]['code'] : '';
+
+        $json_code = is_file( $json_file ) ? file_get_contents( $json_file ) : '';
+        $tab = $_GET['tab'] ?? 'logic';
+
+        View::render( 'page_code' , [
+            'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short ,
+            'methods' => $methods , 'method_name' => $method_name , 'method_code' => $current_method_code ,
+            'json_code' => $json_code , 'tab' => $tab
+        ] );
+        break;
+
+case 'page:edit' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		$allias = (string) ( $_GET[ 'allias' ] ?? '' );

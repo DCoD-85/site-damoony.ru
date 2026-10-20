@@ -5,7 +5,7 @@
 	&nbsp;·&nbsp; аллиас: <code><?= htmlspecialchars( $allias ) ?></code>
 	&nbsp;·&nbsp; класс: <code><?= htmlspecialchars( $cls_short ) ?></code>
 	<br>
-	<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>">← К дереву</a>
+	<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>">← К дереву</a> &nbsp;·&nbsp; <a href="?p=page:code&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $path ) ?>" style="font-weight:bold; color:#069;">Редактировать код</a>
 	<?php if ( $path !== '' ) : ?>
 		&nbsp;·&nbsp;
 		<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&parent=<?= urlencode( $path ) ?>">+ Подстраница</a>
