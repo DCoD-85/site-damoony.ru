@@ -56,6 +56,7 @@
 						<div class="action-links">
 							<a href="?p=allias:list&domain=<?= $d_enc ?>" class="btn-sub">Все аллиасы</a>
 							<a href="?p=blocks:list&domain=<?= $d_enc ?>" class="btn-sub">Блоки</a>
+							<a href="?p=schemes:list&domain=<?= $d_enc ?>" class="btn-sub">Схемы</a>
 							<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger">Удалить</a>
 						</div>
 					</td>

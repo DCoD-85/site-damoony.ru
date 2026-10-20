@@ -66,16 +66,18 @@ if ( ! function_exists( 'render_page_node' ) ) {
 }
 ?>
 
-<h1>Страницы: <code><?= htmlspecialchars( $domain ) ?></code> / <code><?= htmlspecialchars( $allias ) ?></code></h1>
-
-<p class="hint">
-	<a href="?p=dashboard">← К доменам</a>
-	&nbsp;·&nbsp;
-	<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>">← К аллиасам</a>
-</p>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+	<h1 style="margin:0;">Страницы: <code><?= htmlspecialchars( $domain ) ?></code> / <code><?= htmlspecialchars( $allias ) ?></code></h1>
+	<div class="td-actions">
+		<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="btn-edit">+ Новая страница</a>
+		<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">← К аллиасам</a>
+	</div>
+</div>
 
 <?php if ( ! $has_dir ) : ?>
-	<div class="error-msg">Каталог <code>algoritm/lang/</code> не найден: <?= htmlspecialchars( $logic ) ?> / <?= htmlspecialchars( $domain ) ?> / <?= htmlspecialchars( $allias ) ?></div>
+	<div class="error-msg">
+		Каталог не найден: <code>app/<?= htmlspecialchars( $logic ) ?>/domain/<?= htmlspecialchars( $domain ) ?>/allias/<?= htmlspecialchars( $allias ) ?>/algoritm/</code>
+	</div>
 <?php elseif ( empty( $tree ) ) : ?>
 	<p>Страниц нет.</p>
 <?php else : ?>

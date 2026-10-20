@@ -1,5 +1,8 @@
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-	<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code></h1>
+	<div style="display:flex; gap:15px; align-items:center;">
+		<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code> / <code><?= htmlspecialchars( $allias ) ?></code></h1>
+		<a href="?p=scheme:edit&domain=<?= urlencode($domain) ?>&scheme=<?= urlencode($allias) ?>" class="btn-edit" style="font-size:12px;">Схема аллиаса</a>
+	</div>
 	<a href="?p=dashboard" class="btn-cancel">← Назад</a>
 </div>
 

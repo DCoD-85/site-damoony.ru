@@ -80,7 +80,7 @@ function render_wireframe ( $nodes ) {
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <h1 style="margin:0;">Схема: <code><?= htmlspecialchars( $scheme ) ?></code></h1>
-    <a href="?p=blocks:list&domain=<?= urlencode($domain) ?>" class="btn-cancel">← Назад</a>
+    <a href="?p=schemes:list&domain=<?= urlencode($domain) ?>" class="btn-cancel">← К списку схем</a>
 </div>
 
 <?php if ( !empty($_GET['saved']) ) : ?><div class="ok-msg">✓ Сохранено</div><?php endif ?>
