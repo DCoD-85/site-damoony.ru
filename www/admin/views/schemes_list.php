@@ -1,4 +1,4 @@
-<?php $active_tab = 'schemes'; require __DIR__ . '/_domain_tabs.php'; ?>
+<?php $active_tab = 'schemes'; $actions = '<a href="?p=scheme:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Добавить схему</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
 
 <table class="table">
 	<thead>

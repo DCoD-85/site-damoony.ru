@@ -1162,6 +1162,64 @@ case 'page:edit' :
         }
         View::render( 'scheme_remove' , [ 'domain' => $domain , 'scheme' => $scheme ] );
         break;
+    case 'scheme:new' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $target = trim((string)$_POST[ 'target' ]);
+            $source = trim((string)$_POST[ 'source' ]);
+            
+            if ( $target === '' || !preg_match('/^[a-z][a-z0-9_]*$/', $target) ) {
+                $errors[] = 'Некорректное имя схемы (только a-z, 0-9, _)';
+            } else {
+                $dir = Paths::domain( $domain ) . '/alliasscheme';
+                $src_php  = $dir . '/alliasscheme_' . $source . '.php';
+                $src_data = $dir . '/alliasscheme_' . $source . '.data.php';
+                $dst_php  = $dir . '/alliasscheme_' . $target . '.php';
+                $dst_data = $dir . '/alliasscheme_' . $target . '.data.php';
+                
+                if ( is_file($src_php) && is_file($src_data) && !is_file($dst_php) ) {
+                    $c_php = file_get_contents($src_php);
+                    $c_php = str_replace( 'class alliasscheme_' . $source , 'class alliasscheme_' . $target , $c_php );
+                    $c_php = str_replace( 'alliasscheme_' . $source . '.data.php' , 'alliasscheme_' . $target . '.data.php' , $c_php );
+                    file_put_contents( $dst_php , $c_php );
+                    
+                    file_put_contents( $dst_data , file_get_contents($src_data) );
+                    
+                    // Регистрация в главном alliasscheme.php
+                    $main_file = Paths::domain($domain) . '/alliasscheme.php';
+                    if (is_file($main_file)) {
+                        $main_c = file_get_contents($main_file);
+                        $prop_src = 'alliasscheme_' . $source;
+                        $prop_dst = 'alliasscheme_' . $target;
+                        if (strpos($main_c, $prop_dst) === false) {
+                            $main_c = str_replace('public null|' . $prop_src . ' $' . $source . ' = null;', 'public null|' . $prop_src . ' $' . $source . ' = null;' . "\n\t" . 'public null|' . $prop_dst . ' $' . $target . ' = null;', $main_c);
+                            $main_c = str_replace('$this->' . $source . ' = new ' . $prop_src . '( $this );', '$this->' . $source . ' = new ' . $prop_src . '( $this );' . "\n\t\t" . '$this->' . $target . ' = new ' . $prop_dst . '( $this );', $main_c);
+                            $main_c = str_replace("( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_src . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );", "( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_dst . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );\n\t\t\t( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_src . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );", $main_c);
+                            file_put_contents($main_file, $main_c);
+                        }
+                    }
+                    
+                    header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&saved=1' ); exit;
+                } else {
+                    $errors[] = 'Исходная схема не найдена или такая уже существует';
+                }
+            }
+        }
+        
+        // Список доступных схем для копирования
+        $dir = Paths::domain( $domain ) . '/alliasscheme';
+        $schemes = [];
+        if ( is_dir($dir) ) {
+            foreach ( glob( $dir . '/alliasscheme_*.php' ) as $file ) {
+                if ( str_ends_with( $file , '.data.php' ) ) continue;
+                $schemes[] = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $file ) );
+            }
+        }
+        
+        View::render( 'scheme_new' , [ 'domain' => $domain , 'schemes' => $schemes , 'errors' => $errors ?? [] ] );
+        break;
     case 'scheme:edit' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
