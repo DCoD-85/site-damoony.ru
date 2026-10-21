@@ -1,7 +1,7 @@
 <?PHP
 
 use PHPUnit\Framework\TestCase;
-use alogic\Router;
+use router\Router;
 
 class RouterTest extends TestCase {
     private Router $router;
