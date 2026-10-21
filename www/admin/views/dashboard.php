@@ -47,7 +47,11 @@
 					<td>
 						<div class="allias-list">
 							<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
-								<span class="allias-link" style="cursor:default;"><?= htmlspecialchars( $a ) ?></span>
+								<a href="?p=allias:edit&domain=<?= $d_enc ?>&allias=<?= urlencode( $a['name'] ) ?>" 
+								   class="allias-link" onclick="event.stopPropagation();" title="Настройки аллиаса"
+								   style="<?= $a['avail'] ? 'background:#e3f7e8; border-color:#c6e6d0; color:#1a7a3b;' : 'opacity:0.6;' ?>">
+									<?= htmlspecialchars( $a['name'] ) ?>
+								</a>
 							<?php endforeach ?>
 						</div>
 					</td>

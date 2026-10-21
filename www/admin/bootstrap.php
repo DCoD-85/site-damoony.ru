@@ -1225,6 +1225,28 @@ case 'page:edit' :
         View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks , 'layouts' => $layouts , 'alliases' => $alliases ] );
         break;
 
+    case 'allias:edit' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+        if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        
+        $cfg  = new Config( Paths::config() );
+        $real = Paths::real( $domain );
+        
+        $is_avail = ! empty( $cfg->getKeys( [ 'alliases_available' , $real , $allias ] ) );
+
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $avail = ! empty( $_POST[ 'available' ] );
+            Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $avail ) {
+                $cfg->setKeys( [ 'alliases_available' , $real , $allias ] , $avail );
+            } );
+            AuditLog::action_ok( 'allias:edit' , [ 'domain' => $real , 'allias' => $allias , 'avail' => $avail ] );
+            header( 'Location: ?p=allias:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&saved=1' );
+            exit;
+        }
+
+        View::render( 'allias_edit' , [ 'domain' => $domain , 'allias' => $allias , 'avail' => $is_avail , 'saved' => ! empty($_GET['saved']) ] );
+        break;
     case 'allias:list' :
 
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
