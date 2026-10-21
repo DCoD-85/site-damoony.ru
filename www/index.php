@@ -31,6 +31,10 @@ if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 	$ip      = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
 	$allowed = [ '127.0.0.1' , '::1' ];
 
+	if ( ! filter_var( $ip , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+		$allowed[] = $ip;
+	}
+
 	// Локальный обход для OSPanel (на проде не сработает)
 	if ( strpos( __DIR__ , 'OSPanel' ) !== false ) {
 		$allowed[ ] = $ip;
