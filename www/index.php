@@ -14,6 +14,9 @@ $path = trim( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? '/' , PHP_URL_PATH ) ?? '/
 # --- конфиг: один раз (admin IP + host whitelist) ---
 $cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'site.config';
 $cfg = is_file( $cfg_path ) ? @json_decode( @file_get_contents( $cfg_path ) , true ) : null;
+
+$admin_cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'admin.config';
+$admin_cfg = is_file( $admin_cfg_path ) ? @json_decode( @file_get_contents( $admin_cfg_path ) , true ) : [];
 if ( ! is_array( $cfg ) ) $cfg = [ ];
 
 if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
@@ -21,8 +24,13 @@ if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 	$ip      = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
 	$allowed = [ '127.0.0.1' , '::1' ];
 
-	if ( ! empty( $cfg[ 'admin' ][ 'ips' ] ) && is_array( $cfg[ 'admin' ][ 'ips' ] ) ) {
-		$allowed = array_merge( $allowed , $cfg[ 'admin' ][ 'ips' ] );
+	// Локальный обход для OSPanel (на проде не сработает)
+	if ( strpos( __DIR__ , 'OSPanel' ) !== false ) {
+		$allowed[ ] = $ip;
+	}
+
+	if ( ! empty( $admin_cfg[ 'ips' ] ) && is_array( $admin_cfg[ 'ips' ] ) ) {
+		$allowed = array_merge( $allowed , $admin_cfg[ 'ips' ] );
 	}
 
 	if ( in_array( $ip , $allowed , true ) ) {
