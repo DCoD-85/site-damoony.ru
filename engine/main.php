@@ -292,7 +292,7 @@ class main_settings {
 		$this->loadExternalConfig( $root . DS . 'config' . DS . 'site.config'   );
 		$this->loadExternalConfig( $root . DS . 'config' . DS . 'render.config' );
 		$this->loadExternalConfig( $root . DS . 'config' . DS . 'lang.config'   );
-		$this->loadExternalConfig( $root . DS . 'config' . DS . 'stubs.config'  );
+		$this->loadExternalConfig( $root . DS . 'config' . DS . 'site.stubs.config'  );
 		$this->loadExternalConfig( $root . DS . 'secure' . DS . 'db.secure'     );
 
 		$url = $this->main->library->url( );
