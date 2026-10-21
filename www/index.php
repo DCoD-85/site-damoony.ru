@@ -117,12 +117,9 @@ try {
 # --- SSO-ready: cookie domain для поддоменов из domains_real (8/N) ---
 $real_domain  = $cfg[ 'domains_real' ][ $host ] ?? ( $is_local_ip ? $host : null );
 $cookie_domain = '';
-if ( $real_domain !== null && $real_domain !== $host ) {
+if ( $real_domain !== null && filter_var( $real_domain , FILTER_VALIDATE_IP ) === false ) {
     $cookie_domain = '.' . $real_domain;
-} elseif ( $real_domain !== null ) {
-    $cookie_domain = '.' . $real_domain;   # 'damoony2.ru' → '.damoony.ru' (SSO с прод-алиасом)
 }
-# если $real_domain === null — cookie_domain = '' (без domain, на точный host)
 
 session_set_cookie_params( [
     'lifetime' => 0 ,
