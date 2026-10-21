@@ -1,6 +1,7 @@
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 	<h1 style="margin:0;">Домены</h1>
 	<div class="td-actions">
+		<a href="?p=stubs:list" class="btn-edit">Библиотека заглушек</a>
 		<a href="?p=domain:new" class="btn-edit">+ Добавить домен</a>
 	</div>
 </div>
@@ -47,10 +48,15 @@
 					<td>
 						<div class="allias-list">
 							<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
-								<a href="?p=allias:edit&domain=<?= $d_enc ?>&allias=<?= urlencode( $a['name'] ) ?>" 
+								<?php 
+								// Поддержка старого и нового формата
+								$a_name = is_array( $a ) ? $a[ 'name' ] : $a;
+								$a_avail = is_array( $a ) ? $a[ 'avail' ] : true;
+								?>
+								<a href="?p=allias:edit&domain=<?= $d_enc ?>&allias=<?= urlencode( $a_name ) ?>" 
 								   class="allias-link" onclick="event.stopPropagation();" title="Настройки аллиаса"
-								   style="<?= $a['avail'] ? 'background:#e3f7e8; border-color:#c6e6d0; color:#1a7a3b;' : 'opacity:0.6;' ?>">
-									<?= htmlspecialchars( $a['name'] ) ?>
+								   style="<?= $a_avail ? 'background:#e3f7e8; border-color:#c6e6d0; color:#1a7a3b;' : 'opacity:0.6;' ?>">
+									<?= htmlspecialchars( $a_name ) ?>
 								</a>
 							<?php endforeach ?>
 						</div>

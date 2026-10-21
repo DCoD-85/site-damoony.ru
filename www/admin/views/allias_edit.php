@@ -1,7 +1,7 @@
-<?php
-$active_tab = 'main';
-$actions = '';
-require __DIR__ . '/_allias_tabs.php';
+<?php 
+$active_tab = 'allias'; $actions = ''; require __DIR__ . '/_domain_tabs.php'; 
+
+$active_tab = 'main'; $actions = ''; require __DIR__ . '/_allias_tabs.php'; 
 ?>
 
 <?php if ( ! empty( $saved ) ) : ?>

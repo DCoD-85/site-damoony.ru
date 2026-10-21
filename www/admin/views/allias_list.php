@@ -1,5 +1,8 @@
-<?php $active_tab = 'allias'; $actions = '<a href="?p=allias:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Добавить аллиас</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
-</div>
+<?php 
+$active_tab = 'allias';
+$actions = '<a href="?p=allias:new&domain=' . urlencode( $domain ) . '" class="btn-edit">+ Добавить аллиас</a>';
+require __DIR__ . '/_domain_tabs.php'; 
+?>
 
 <?php if ( empty( $rows ) ) : ?>
     <p>Аллиасов нет.</p>
@@ -10,39 +13,35 @@
                 <th>Аллиас</th>
                 <th>Файлы</th>
                 <th>Fillers (вкл/всего)</th>
-                <th>Статус</th>
+                <th style="text-align:center;">Статус</th>
                 <th>Действия</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ( $rows as $r ) : ?>
                 <?php $a_enc = urlencode( $r[ 'name' ] ); ?>
-                <tr>
+                <tr style="cursor:pointer;" onclick="window.location='?p=allias:edit&domain=<?= urlencode($domain) ?>&allias=<?= $a_enc ?>';">
                     <td>
-                        <b><?= htmlspecialchars( $r[ 'name' ] ) ?></b>
+                        <a href="?p=allias:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= $a_enc ?>" class="domain-link" style="font-size:16px;">
+                            <b><?= htmlspecialchars( $r[ 'name' ] ) ?></b>
+                        </a>
                     </td>
                     <td><?= $r[ 'fs' ] ? '✓' : '✗' ?></td>
                     <td><?= (int) $r[ 'fillers_enabled' ] ?> / <?= (int) $r[ 'fillers_total' ] ?></td>
-                    <td>
-                        <form method="post" action="?p=allias:toggle" class="inline">
+                    <td style="text-align:center;" onclick="event.stopPropagation();">
+                        <form method="post" action="?p=allias:toggle" style="margin:0; display:inline-block;">
                             <?= Csrf::field( ) ?>
                             <input type="hidden" name="domain" value="<?= htmlspecialchars( $domain , ENT_QUOTES ) ?>">
                             <input type="hidden" name="name"   value="<?= htmlspecialchars( $r[ 'name' ] , ENT_QUOTES ) ?>">
                             <input type="hidden" name="value"  value="<?= $r[ 'avail' ] ? '0' : '1' ?>">
-                            <button type="submit"
-                                class="btn-toggle <?= $r[ 'avail' ] ? 'btn-toggle-on' : 'btn-toggle-off' ?>"
-                                title="<?= $r[ 'avail' ] ? 'Выключить' : 'Включить' ?>">
-                                <?= $r[ 'avail' ] ? '● вкл' : '○ выкл' ?>
-                            </button>
+                            <label class="switch" title="<?= $r[ 'avail' ] ? 'Выключить аллиас' : 'Включить аллиас' ?>">
+                                <input type="checkbox" onchange="this.form.submit()" <?= $r[ 'avail' ] ? 'checked' : '' ?>>
+                                <span class="slider"></span>
+                            </label>
                         </form>
                     </td>
                     <td>
-                        <div class="td-actions">
-                            <a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= $a_enc ?>" class="btn-edit">Страницы</a>
-                            <a href="?p=allias:fillers&domain=<?= urlencode( $domain ) ?>&allias=<?= $a_enc ?>" class="btn-edit">Fillers</a>
-                            <a href="?p=scheme:edit&domain=<?= urlencode( $domain ) ?>&scheme=<?= $a_enc ?>" class="btn-edit">Схема</a>
-                            <a href="?p=allias:remove&domain=<?= urlencode( $domain ) ?>&name=<?= $a_enc ?>" class="btn-danger">Удалить</a>
-                        </div>
+                        <a href="?p=allias:remove&domain=<?= urlencode( $domain ) ?>&name=<?= $a_enc ?>" class="btn-danger" onclick="event.stopPropagation(); return confirm('Удалить аллиас <?= htmlspecialchars($r['name']) ?>?');">Удалить</a>
                     </td>
                 </tr>
             <?php endforeach ?>

@@ -1,4 +1,6 @@
-<?PHP /* @var string $view_file */ ?>
+<?PHP /* @var string $view_file */ 
+$p = $_GET['p'] ?? 'dashboard'; 
+?>
 <!doctype html>
 <html lang="ru">
 <head>
@@ -17,11 +19,33 @@
 	</div>
 	
 	<?php if ( ! empty( $_SESSION[ 'admin_ok' ] ) ) : ?>
-		<nav class="admin-nav" style="margin-left: 30px;">
+		<nav class="admin-nav" style="margin-left: 20px;">
 			<a href="?p=dashboard" class="<?= $p === 'dashboard' ? 'active' : '' ?>">Домены</a>
 			<a href="?p=stubs:list" class="<?= str_starts_with( $p , 'stubs:' ) ? 'active' : '' ?>">Заглушки</a>
 			<a href="?p=settings" class="<?= $p === 'settings' ? 'active' : '' ?>">Настройки</a>
 		</nav>
+
+		<?php 
+		// Хлебные крошки в хедере
+		$domain_crumb = $_GET['domain'] ?? null;
+		$allias_crumb = $_GET['allias'] ?? null;
+		$scheme_crumb = $_GET['scheme'] ?? null;
+		?>
+		<?php if ($domain_crumb): ?>
+			<div style="display:flex; align-items:center; gap:8px; margin-left: 20px; font-size:13px; color:#8892b0; border-left: 1px solid #3a4454; padding-left: 20px;">
+				<a href="?p=domain:edit&domain=<?= urlencode($domain_crumb) ?>" style="color:#8ab4ff; text-decoration:none;">
+					<?= htmlspecialchars($domain_crumb) ?>
+				</a>
+				
+				<?php if ($allias_crumb): ?>
+					<span style="color:#555;">/</span>
+					<span style="color:#fff;"><?= htmlspecialchars($allias_crumb) ?></span>
+				<?php elseif ($scheme_crumb): ?>
+					<span style="color:#555;">/</span>
+					<span style="color:#fff;">Схема: <?= htmlspecialchars($scheme_crumb) ?></span>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
 		
 		<div class="admin-user">
 			<span style="color:#8892b0; margin-right:15px; font-size:13px;">

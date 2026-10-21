@@ -448,3 +448,59 @@ input:focus + .slider {
 input:checked + .slider:before {
   transform: translateX(18px);
 }
+
+/* --- Вторичные табы (для аллиасов) --- */
+.nav-tabs-secondary {
+    background: #f0f2f6;
+    padding: 4px 4px 0;
+    border-radius: 6px;
+    border-bottom: 1px solid #d0d4db;
+}
+.nav-tabs-secondary a {
+    color: #666;
+    padding: 8px 16px;
+    border-bottom: 2px solid transparent;
+    border-radius: 4px 4px 0 0;
+}
+.nav-tabs-secondary a:hover {
+    background: #e4e7ec;
+    color: #333;
+}
+.nav-tabs-secondary a.active {
+    color: #2a63d6;
+    border-bottom-color: #2a63d6;
+    background: #fff;
+    font-weight: bold;
+}
+
+/* --- Новые вкладки (Табы) --- */
+.nav-tabs-domain {
+    display: flex; gap: 4px;
+    border-bottom: 2px solid #e0e4eb; /* Разделительная черта */
+}
+.nav-tabs-domain a {
+    padding: 8px 16px; background: #f4f6f9; border: 1px solid #e0e4eb; border-bottom: none;
+    border-radius: 8px 8px 0 0; color: #666; text-decoration: none; font-size: 14px;
+    margin-bottom: -2px; /* Чтобы активный перекрыл черту */
+}
+.nav-tabs-domain a:hover { background: #e4e7ec; color: #333; }
+.nav-tabs-domain a.active {
+    background: #fff; color: #2a63d6; font-weight: bold;
+    border-bottom: 2px solid #fff;
+}
+
+.nav-tabs-allias {
+    display: flex; gap: 4px;
+    border-bottom: 2px solid #e0e4eb; /* Вторая черта */
+    margin-bottom: 20px;
+}
+.nav-tabs-allias a {
+    padding: 8px 16px; background: #f4f6f9; border: 1px solid #e0e4eb; border-top: none;
+    border-radius: 0 0 8px 8px; color: #666; text-decoration: none; font-size: 14px;
+    margin-top: -2px; /* Прилипаем к черте сверху */
+}
+.nav-tabs-allias a:hover { background: #e4e7ec; color: #333; }
+.nav-tabs-allias a.active {
+    background: #fff; color: #2a63d6; font-weight: bold;
+    border-top: 2px solid #fff;
+}
