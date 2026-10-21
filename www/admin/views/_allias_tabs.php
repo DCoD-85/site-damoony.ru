@@ -2,7 +2,7 @@
 $active_tab = $active_tab ?? ''; 
 $actions = $actions ?? ''; 
 ?>
-<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top: 0;">
+<div class="tabs-row bottom">
     <div class="nav-tabs-allias">
         <a href="?p=allias:edit&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>" class="<?= $active_tab === 'main' ? 'active' : '' ?>">Настройки</a>
         <a href="?p=pages:tree&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>" class="<?= $active_tab === 'pages' ? 'active' : '' ?>">Страницы</a>

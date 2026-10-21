@@ -1,8 +1,6 @@
-<?php 
-$active_tab = 'allias';
-$actions = '<a href="?p=allias:new&domain=' . urlencode( $domain ) . '" class="btn-edit">+ Добавить аллиас</a>';
-require __DIR__ . '/_domain_tabs.php'; 
-?>
+<div class="tabs-wrapper">
+<?php $active_tab = 'allias'; $actions = '<a href="?p=allias:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Добавить аллиас</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
+</div>
 
 <?php if ( empty( $rows ) ) : ?>
     <p>Аллиасов нет.</p>

@@ -1,8 +1,7 @@
-<?php 
-$active_tab = 'allias'; $actions = ''; require __DIR__ . '/_domain_tabs.php'; 
-
-$active_tab = 'main'; $actions = ''; require __DIR__ . '/_allias_tabs.php'; 
-?>
+<div class="tabs-wrapper">
+<?php $active_tab = 'allias'; $actions = ''; require __DIR__ . '/_domain_tabs.php'; ?>
+<?php $active_tab = 'main'; $actions = ''; require __DIR__ . '/_allias_tabs.php'; ?>
+</div>
 
 <?php if ( ! empty( $saved ) ) : ?>
     <div class="ok-msg">✓ Сохранено</div>

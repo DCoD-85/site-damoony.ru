@@ -504,3 +504,76 @@ input:checked + .slider:before {
     background: #fff; color: #2a63d6; font-weight: bold;
     border-top: 2px solid #fff;
 }
+
+/* --- Система вкладок (Табы) --- */
+.tabs-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 25px;
+    margin-top: 20px;
+}
+
+.tabs-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 0;
+    padding: 0;
+}
+
+/* Верхний ряд (Домен) */
+.tabs-row.top {
+    border-bottom: 2px solid #e0e4eb;
+}
+.nav-tabs-domain {
+    display: flex;
+    gap: 4px;
+    margin-bottom: -2px; /* Прилипаем к линии */
+}
+.nav-tabs-domain a {
+    padding: 8px 16px;
+    background: #f4f6f9;
+    border: 1px solid #e0e4eb;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.nav-tabs-domain a:hover { background: #e4e7ec; color: #333; }
+.nav-tabs-domain a.active {
+    background: #fff;
+    color: #2a63d6;
+    font-weight: bold;
+    border-bottom: 2px solid #fff; /* Перекрываем линию */
+}
+
+/* Нижний ряд (Аллиас) */
+.tabs-row.bottom {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+.nav-tabs-allias {
+    display: flex;
+    gap: 4px;
+    margin-top: -2px; /* Прилипаем к линии сверху */
+}
+.nav-tabs-allias a {
+    padding: 8px 16px;
+    background: #f4f6f9;
+    border: 1px solid #e0e4eb;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.nav-tabs-allias a:hover { background: #e4e7ec; color: #333; }
+.nav-tabs-allias a.active {
+    background: #fff;
+    color: #2a63d6;
+    font-weight: bold;
+    border-top: 2px solid #fff;
+}
