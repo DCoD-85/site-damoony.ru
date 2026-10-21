@@ -15,5 +15,5 @@ $actions = $actions ?? '';
     <a href="?p=allias:list&domain=<?= urlencode($domain) ?>&tab=allias" class="<?= $active_tab === 'allias' ? 'active' : '' ?>">Аллиасы</a>
     <a href="?p=blocks:list&domain=<?= urlencode($domain) ?>&tab=blocks" class="<?= $active_tab === 'blocks' ? 'active' : '' ?>">Блоки</a>
     <a href="?p=schemes:list&domain=<?= urlencode($domain) ?>&tab=schemes" class="<?= $active_tab === 'schemes' ? 'active' : '' ?>">Схемы</a>
-    <a href="?p=stub:edit&domain=<?= urlencode($domain) ?>&tab=stub" class="<?= $active_tab === 'stub' ? 'active' : '' ?>">Заглушка</a>
+    <a href="?p=media:list&domain=<?= urlencode($domain) ?>&tab=media" class="<?= $active_tab === 'media' ? 'active' : '' ?>">Медиа</a>
 </div>

@@ -8,23 +8,20 @@ require __DIR__ . '/_domain_tabs.php';
     <div class="ok-msg">✓ Сохранено</div>
 <?php endif ?>
 
+<?php if ( ! empty( $errors ) ) : ?>
+    <div class="error-msg">
+        <?php foreach ( $errors as $e ) : ?>
+            <div>✘ <?= htmlspecialchars( $e ) ?></div>
+        <?php endforeach ?>
+    </div>
+<?php endif ?>
+
 <form method="post" action="?p=domain:edit&domain=<?= urlencode( $domain ) ?>" class="form" style="max-width: 600px;">
     <?= Csrf::field() ?>
 
     <label>Заголовок (title)
         <input type="text" name="title" maxlength="100" required
             value="<?= htmlspecialchars( $current[ 'title' ] , ENT_QUOTES ) ?>">
-    </label>
-
-    <label>Тема (skin)
-        <select name="skin">
-            <?php foreach ( $skins as $s ) : ?>
-                <option value="<?= htmlspecialchars( $s , ENT_QUOTES ) ?>"
-                    <?= $s === $current[ 'skin' ] ? 'selected' : '' ?>>
-                    <?= htmlspecialchars( $s ) ?>
-                </option>
-            <?php endforeach ?>
-        </select>
     </label>
 
     <hr style="margin: 20px 0; border-top: 1px dashed #ccc;">
@@ -38,9 +35,19 @@ require __DIR__ . '/_domain_tabs.php';
         <span>Сайт включен (если выключить — покажется заглушка)</span>
     </div>
 
-    <label>Время действия статуса (авто-включение)
+    <label>Выберите заглушку
+        <select name="stub_current">
+            <?php foreach ( $stubs as $sid => $s ) : ?>
+                <option value="<?= htmlspecialchars($sid) ?>" <?= $sid === $current[ 'stub' ] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($s['title']) ?>
+                </option>
+            <?php endforeach ?>
+        </select>
+    </label>
+
+    <label>Время авто-включения
         <input type="datetime-local" name="stub_until_date" value="<?= !empty($current['until']) ? date('Y-m-d\TH:i', $current['until']) : '' ?>">
-        <small style="color:#888;">Если указать время, сайт автоматически включится в этот момент (если он выключен).</small>
+        <small style="color:#888;">Если указать время, сайт автоматически включится в этот момент.</small>
     </label>
 
     <button type="submit" class="btn-edit" style="margin-top:15px;">Сохранить</button>

@@ -1,7 +1,6 @@
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 	<h1 style="margin:0;">Домены</h1>
 	<div class="td-actions">
-		<a href="?p=stubs:list" class="btn-edit">Библиотека заглушек</a>
 		<a href="?p=domain:new" class="btn-edit">+ Добавить домен</a>
 	</div>
 </div>

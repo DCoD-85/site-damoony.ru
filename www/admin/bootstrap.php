@@ -236,102 +236,68 @@ switch ( $p ) {
 		}
 		break;
 
-	case 'domain:edit' :
+	    case 'domain:edit' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        if ( Validate::domain( $domain ) !== null ) { header( 'Location: ?p=dashboard' ); exit; }
+        
+        $cfg  = new Config( Paths::config() );
+        $real = Paths::real( $domain );
+        
+        if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
+            header( 'Location: ?p=dashboard' ); exit;
+        }
 
-		require_once ADMIN_ROOT . '/_lib/Scan.php';
+        $stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' );
+        $stubs = $stubs_cfg->get( 'stubs' ) ?? [];
 
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $title = trim( (string) ( $_POST[ 'title' ] ?? '' ) );
+            $errors = [];
+            
+            if ( $title === '' ) { $errors[] = 'Title не может быть пустым'; }
+            
+            $domain_available = ! empty( $_POST[ 'domain_available' ] );
+            $stub_current = trim( (string) ( $_POST[ 'stub_current' ] ?? 'maintenance' ) );
+            $stub_until_date = trim( (string) ( $_POST[ 'stub_until_date' ] ?? '' ) );
+            $stub_until = $stub_until_date !== '' ? strtotime( $stub_until_date ) : 0;
 
-		if ( Validate::domain( $domain ) !== null ) {
-			View::render( 'result' , [
-				'result'     => new Result( ) ,
-				'title'      => 'Некорректный домен' ,
-				'back_url'   => '?p=dashboard' ,
-				'back_label' => 'К списку домен' ,
-			] );
-			break;
-		}
+            if ( empty( $errors ) ) {
+                try {
+                    Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $title , $domain_available , $stub_current , $stub_until ) {
+                        $cfg->setKeys( [ 'domains_titles' , $real ] , $title );
+                        $cfg->setKeys( [ 'domains_available' , $real ] , $domain_available );
+                        $cfg->setKeys( [ 'domains_stub' , $real , 'current' ] , $stub_current );
+                        $cfg->setKeys( [ 'domains_stub' , $real , 'until' ] , $stub_until );
+                    } );
+                    AuditLog::action_ok( 'domain:edit' , [ 'domain' => $real , 'title' => $title ] );
+                    header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' ); exit;
+                } catch ( Throwable $e ) {
+                    $errors[] = 'Ошибка сохранения: ' . $e->getMessage();
+                }
+            }
+            
+            $current = [
+                'title' => $title,
+                'avail' => $domain_available,
+                'stub'  => $stub_current,
+                'until' => $stub_until
+            ];
+            View::render( 'domain_edit' , [ 'domain' => $domain , 'current' => $current , 'stubs' => $stubs , 'saved' => false , 'errors' => $errors ] );
+            break;
+        }
 
-		$cfg  = new Config( Paths::config() );
-		$real = Paths::real( $domain );
-
-		# --- валидация домена ---
-		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) {
-			View::render( 'result' , [
-				'result'     => new Result( ) ,
-				'title'      => 'Домен не найден' ,
-				'back_url'   => '?p=dashboard' ,
-				'back_label' => 'К списку домен' ,
-			] );
-			break;
-		}
-
-		# --- POST ---
-		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-
-			$title = trim( (string) ( $_POST[ 'title' ] ?? '' ) );
-			$skin  = trim( (string) ( $_POST[ 'skin' ]  ?? '' ) );
-
-			$errors = [ ];
-
-			if ( $title === '' ) {
-				$errors[ ] = 'Title не может быть пустым';
-			}
-
-			# skin: валидация имени + проверка папки
-			if ( $skin !== '' ) {
-				$skin_err = Validate::skin( $skin );
-				if ( $skin_err !== null ) {
-					$errors[ ] = $skin_err;
-				} else {
-					$skin_dir = Paths::skins( $domain ) . '/' . $skin;
-					if ( ! is_dir( $skin_dir ) ) {
-						$errors[ ] = "Тема '{$skin}' не найдена в media/" . Paths::real( $domain ) . "/skin/";
-					}
-				}
-			}
-
-			if ( empty( $errors ) ) {
-				try {
-					Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $title , $skin ) {
-						$cfg->setKeys( [ 'domains_titles' , $real ] , $title );
-						if ( $skin !== '' ) {
-							$cfg->setKeys( [ 'domains_skins' , $real ] , $skin );
-						}
-					} );
-					AuditLog::action_ok( 'domain:edit' , [ 'domain' => $real , 'title' => $title , 'skin' => $skin ] );
-					header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' );
-					exit;
-				} catch ( Throwable $e ) {
-					$errors[ ] = 'Не сохранить: ' . $e->getMessage( );
-				}
-			}
-
-			# ошибки — показать форму заново с введённым
-			View::render( 'domain_edit' , [
-				'domain'  => $domain ,
-				'saved'   => false ,
-				'errors'  => $errors ,
-				'current' => [ 'title' => $title , 'skin' => $skin , 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ] ,
-				'skins'   => Scan::skinsFor( $domain ) ,
-			] );
-			break;
-		}
-
-		# --- GET ---
-		$title = (string) ( $cfg->getKeys( [ 'domains_titles' , $real ] ) ?? $cfg->get( 'title' , '' ) );
-		$skin  = (string) ( $cfg->getKeys( [ 'domains_skins'  , $real ] ) ?? $cfg->get( 'skin'  , 'default' ) );
-
-		View::render( 'domain_edit' , [
-			'domain'  => $domain ,
-			'saved'   => ! empty( $_GET[ 'saved' ] ) ,
-			'errors'  => [ ] ,
-			'current' => [ 'title' => $title , 'skin' => $skin , 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ] ,
-			'skins'   => Scan::skinsFor( $domain ) ,
-		] );
-		break;
-
-	case 'allias:toggle' :
+        // GET
+        $title = (string) ( $cfg->getKeys( [ 'domains_titles' , $real ] ) ?? $cfg->get( 'title' , '' ) );
+        $current = [
+            'title' => $title,
+            'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ),
+            'stub'  => $cfg->getKeys( [ 'domains_stub' , $real , 'current' ] , 'maintenance' ),
+            'until' => $cfg->getKeys( [ 'domains_stub' , $real , 'until' ] , 0 )
+        ];
+        
+        View::render( 'domain_edit' , [ 'domain' => $domain , 'current' => $current , 'stubs' => $stubs , 'saved' => ! empty( $_GET[ 'saved' ] ) , 'errors' => [] ] );
+        break;
+case 'allias:toggle' :
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) {
 			http_response_code( 405 );
@@ -1438,7 +1404,30 @@ case 'page:edit' :
 		] );
 		break;
 	
-	    case 'stub:edit' :
+	    case 'media:list' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $real = Paths::real( $domain );
+        $media_dir = PROJECT_ROOT . '/www/media/' . $real;
+        
+        $files = [];
+        if ( is_dir( $media_dir ) ) {
+            $it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $media_dir , FilesystemIterator::SKIP_DOTS ) );
+            foreach ( $it as $file ) {
+                if ( $file->isFile() ) {
+                    $files[ ] = [
+                        'name' => substr( $file->getPathname() , strlen( $media_dir ) + 1 ) ,
+                        'size' => $file->getSize() ,
+                        'time' => $file->getMTime()
+                    ];
+                }
+            }
+        }
+        
+        usort($files, fn($a, $b) => strcmp($a['name'], $b['name']));
+        
+        View::render( 'media_list' , [ 'domain' => $domain , 'files' => $files ] );
+        break;
+    case 'stub:edit' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
         
