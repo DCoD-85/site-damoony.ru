@@ -16,18 +16,13 @@ class algoritm_lang_index
 			$lang->get( 'VISUO_TITLE' , [ ] , 'visuo' ) . ' — ' . $lang->get( 'PAGE_HOME' , [ ] , 'Главная' )
 		);
 
-		$vt = new \visuotag( );
-
-		$vt->tag( 'div' , class : 'visuo visuo-index' )
-			->tag( 'h1' )->content( $lang->get( 'VISUO_TITLE' , [ ] , 'visuo' ) )->parent( )
-			->tag( 'p'  )->content( $lang->get( 'VISUO_INTRO' , [ ] , '' ) )->parent( )
-			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) )->parent( );
-
-		$center = $main->alliasglobal->center;
-		$center->wrapper_set( 'div' );
-		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
+		
 
 		return true;
+	
+		$el = new \\visuoel_table();
+		$el->data()->set( "aeeaea" );
+		$this->main->alliasglobal->center->visuotag()->el( $el );
 	}
 
 	public function algoritm ( ) {
