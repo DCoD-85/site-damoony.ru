@@ -1,24 +1,17 @@
 <?PHP
-// app/alpha.0.0/domain/damoony.ru/allias/visuo/routes.php
-
 use router\Router;
 
 $router = new Router();
-
 /** @var Router $router */
+
+$router->add('/{lang:[a-z]{2}-[a-z]{2}}', 'algoritm_lang_index');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/index', 'algoritm_lang_index');
+$router->add('/{lang:[a-z]{2}-[a-z]{2}}/lang', 'algoritm_lang_index');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/login', 'algoritm_lang_login');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/registration', 'algoritm_lang_registration');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/logout', 'algoritm_lang_logout');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/profile', 'algoritm_lang_profile');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/profile/{login:[A-Za-z0-9_-]+}', 'algoritm_lang_profile');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/docs', 'algoritm_lang_docs');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/docs/{page:[a-zA-Z0-9_-]+}', 'algoritm_lang_docs_page');
 $router->add('/{lang:[a-z]{2}-[a-z]{2}}/news', 'algoritm_lang_news');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/news/{page:[a-zA-Z0-9_-]+}', 'algoritm_lang_news_page');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/downloads', 'algoritm_lang_downloads');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/download/{page:[a-zA-Z0-9_-]+}', 'algoritm_lang_download');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}/{page:login|logout|registration|help}', 'algoritm_lang_index');
-$router->add('/{lang:[a-z]{2}-[a-z]{2}}', 'algoritm_lang');
 
 return $router;
