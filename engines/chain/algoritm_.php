@@ -123,9 +123,6 @@ class algoritm_ {
 	# ===============================================================
 	#   HELPERS
 	# ===============================================================
-	# ===============================================================
-	#   HELPERS
-	# ===============================================================
 	public function is_ajax ()    : bool { return (bool) $this->main->render->getdata( 'render_ajax' ); }
 	public function is_guest ()   : bool { return $this->main->is_guest( ); }
 	public function is_post ()    : bool { return ! empty( $_POST ); }

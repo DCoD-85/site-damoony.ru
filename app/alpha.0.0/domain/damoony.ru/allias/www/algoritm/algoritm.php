@@ -5,7 +5,6 @@ namespace damoony_ru\www;
 class algoritm
 	extends \algoritm_ {
 
-	public array $available = [ 'index' , '([a-z]{2}-[a-z]{2})|lang' ];
 	public string $basepath  = __DIR__ . DS;
 	public string $baseclass = 'algoritm';
 	public string $errorpath = __DIR__ . DS;
@@ -21,6 +20,7 @@ class algoritm
 
 	public function start ( ) {
 		$main = $this->main;
+
 		$scheme = $main->alliasscheme;
 		$scheme->load( 'www' );
 		$this->logic( );
@@ -28,8 +28,8 @@ class algoritm
 		$scheme->reload( );
 	}
 
-	
-
 	public function default ( ) {
+		print 'OK';
+
 	}
 }

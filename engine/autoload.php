@@ -29,6 +29,11 @@ spl_autoload_register(function ($class) {
         // Преобразуем algoritm_lang_index -> lang/index/algoritm_lang_index.php
         $class_path = str_replace('algoritm_', '', $handler);
         $class_path = str_replace('_', '/', $class_path);
+
+        // Системные классы (auth, error) лежат в корне, а не в подпапках
+        if ( in_array( $handler , [ 'algoritm_auth' , 'algoritm_error' ] ) ) {
+            $class_path = '';
+        }
         
         $file_path = ($class_path === '') 
             ? $handler . '.php' 

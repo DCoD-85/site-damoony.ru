@@ -2,11 +2,13 @@
 
 namespace damoony_ru\www;
 
-class algoritm_lang
-	extends \algoritm_ {
-	
+class algoritm_lang extends \algoritm_ {
 
-	public function default ( ) {
+	// Вызываем редирект для гостей и авторизованных
+	public function guest  ( ) { return $this->render( ); }
+	public function logged ( ) { return $this->render( ); }
+
+	private function render ( ) {
 		$main = $this->main;
 		$library = $main->library;
 		$link = $library->link( );
@@ -14,9 +16,11 @@ class algoritm_lang
 		$url_domain = $url->static_domain;
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
-
-		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'form' ] , $url_vars );
+		
+		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'index' ] , $url_vars );
+		
 		http_response_code( 307 );
 		header( 'Location: ' . $href );
+		exit;
 	}
 }

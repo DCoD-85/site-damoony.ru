@@ -5,8 +5,6 @@ namespace damoony_ru\www;
 class algoritm_lang_index
 	extends \algoritm_ {
 
-	
-
 	public function guest  ( ) { return $this->render( ); }
 	public function logged ( ) { return $this->render( ); }
 
@@ -23,16 +21,11 @@ class algoritm_lang_index
 		$vt->tag( 'div' , class : 'visuo visuo-index' )
 			->tag( 'h1' )->content( $lang->get( 'VISUO_TITLE' , [ ] , 'visuo' ) )->parent( )
 			->tag( 'p'  )->content( $lang->get( 'VISUO_INTRO' , [ ] , '' ) )->parent( )
-			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) )->parent( )
-			->content( time( ) );
+			->tag( 'p'  )->content( $lang->get( 'VISUO_TAGLINE' , [ ] , '' ) )->parent( );
 
 		$center = $main->alliasglobal->center;
 		$center->wrapper_set( 'div' );
 		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
-		$center->wrapper_set( 'div' );
-		$center->section_add( 'test' , $vt ); // ->visuotag( )->append( $vt );
-		$center->wrapper_set( 'div' );
-		$center->section_add( 'test3' , $vt ); // ->visuotag( )->append( $vt );
 
 		return true;
 	}
@@ -40,10 +33,6 @@ class algoritm_lang_index
 	public function algoritm ( ) {
 	
 }
-
-
-	
-
 
 	public function default ( ) {
 print '222';

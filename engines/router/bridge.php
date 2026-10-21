@@ -85,11 +85,37 @@ function router_resolve( $main , $static_domain , $static_allias ) {
         // Проверка авторизации (если требуется auth, а пользователь гость)
         if ( $instance->auth === true && $main->is_guest() ) {
             $auth_class = $static_domain . '\\' . $static_allias . '\\algoritm_auth';
+
+            // Подключаем системный класс напрямую
+            $logic_ver = $main->main_settings->get('logic');
+            $domain_real = $main->main_settings->domain_real_name;
+            $auth_file = dirname(dirname(__DIR__)) . "/app/{$logic_ver}/domain/{$domain_real}/allias/{$static_allias}/algoritm/algoritm_auth.php";
+            
+            if ( file_exists( $auth_file ) ) {
+                require_once $auth_file;
+            }
+
             if ( class_exists( $auth_class ) ) {
+                // Очищаем центр от предыдущих рендеров
+                if ( method_exists( $main->alliasglobal->center , "sections_clear" ) ) {
+                    $main->alliasglobal->center->sections_clear();
+                }
+                $main->alliasglobal->center->visuotag()->clear();
+
+                // Создаем и запускаем auth
                 $auth_instance = new $auth_class( $main , $params );
                 $main->algoritm = $auth_instance;
+                
                 $auth_instance->release();
-                $scheme->reload();
+                
+                // Рендерим форму авторизации
+                $auth_instance->guest();
+                
+                // Перерисовываем схему
+                if ( $scheme ) {
+                    $scheme->reload();
+                }
+                
                 return;
             }
         }

@@ -1,40 +1,28 @@
 <?PHP
-
 namespace damoony_ru\www;
 
-use \main;
-use \algoritm_;
-use \algoritmdata_;
-use \visuotag;
+class algoritm_error extends \algoritm_ {
 
-class algoritm_error
-	extends algoritm_ {
+    public function guest  ( ) { return $this->render(); }
+    public function logged ( ) { return $this->render(); }
 
-	public function algoritm ( ) {
-	}
+    private function render ( ) {
+        $main = $this->main;
+        $visuorelease = $main->visuorelease;
+        $center = $main->alliasglobal->center;
 
-	
+        // Очищаем центр перед выводом ошибки
+        $center->visuotag()->clear();
 
-	public function default ( ) {
-		$main = $this->main;
-		$visuorelease = $main->visuorelease;
+        $vt_center = new \visuotag( $visuorelease );
+        $vt_center
+            ->tag( 'div' , class : 'error' )
+                ->tag( 'div' , class : 'error_head' )->content( '404' )->parent()
+                ->tag( 'div' , class : 'error_title' )->content( 'Page not found<hr />Страница не найдена' );
 
-		$library = $main->library;
-		$url = $library->url( );
-		$url_base = $url->static_base;
-		$url_vars = $url->static_vars;
-		$center = $main->alliasglobal->center;
+        $center->wrapper_set( 'div' );
+        $center->section_add( 'error' , $vt_center );
 
-		$scheme = $main->alliasscheme;
-		$scheme->load( 'error' );
-
-		$vt_center = new visuotag( $visuorelease );
-		$vt_center
-			->tag( 'div' , class : 'error' )
-				->tag( 'div' , class : 'error_head' )->content( '404' )
-				->parent( )
-				->tag( 'div' , class : 'error_title' )->content( 'Page not found<hr />Страница не найдена' );
-
-		$center->visuotag( )->append( $vt_center );
-	}
+        return true;
+    }
 }
