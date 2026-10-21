@@ -289,6 +289,7 @@ class main_settings {
 		# init
 		$root = dirname( __DIR__ );
 
+		$this->loadExternalConfig( $root . DS . 'config' . DS . 'cms.config'    );
 		$this->loadExternalConfig( $root . DS . 'config' . DS . 'site.config'   );
 		$this->loadExternalConfig( $root . DS . 'config' . DS . 'render.config' );
 		$this->loadExternalConfig( $root . DS . 'config' . DS . 'lang.config'   );

@@ -1461,7 +1461,7 @@ case 'page:edit' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 
 		# SettingsSet падает на неизвестном ключе → фильтруем $_POST
-		$allowed = [ 'title' , 'skin' , 'logic' , 'connect_type' ];
+		$allowed = [ 'logic' , 'logic_type' , 'connect_type' , 'ui_ajax_forms' ];
 
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/SettingsSet.php';

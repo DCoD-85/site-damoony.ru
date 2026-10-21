@@ -28,7 +28,8 @@ class Paths {
     private static function cfg ( ) : array {
         if ( self::$cfg !== null ) return self::$cfg;
 
-        $path = self::project() . '/config/site.config';
+        $path = self::project() . '/config/cms.config';
+        if ( ! is_file( $path ) ) $path = self::project() . '/config/site.config';
         if ( ! is_file( $path ) ) return self::$cfg = [ ];
 
         $raw = @file_get_contents( $path );
