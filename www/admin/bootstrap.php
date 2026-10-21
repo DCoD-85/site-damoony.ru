@@ -1379,7 +1379,38 @@ case 'page:edit' :
 		] );
 		break;
 	
-	case 'settings' :
+	    case 'stub:edit' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
+        
+        $cfg  = new Config( Paths::config() );
+        $real = Paths::real( $domain );
+
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $stub_enabled = ! empty( $_POST[ 'stub_enabled' ] );
+            $stub_title = trim( (string) ( $_POST[ 'stub_title' ] ?? '' ) );
+            $stub_text = trim( (string) ( $_POST[ 'stub_text' ] ?? '' ) );
+            $stub_until_date = (string) ( $_POST[ 'stub_until_date' ] ?? '' );
+            $stub_until = $stub_until_date !== '' ? strtotime( $stub_until_date ) : 0;
+
+            Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $stub_enabled , $stub_title , $stub_text , $stub_until ) {
+                $cfg->setKeys( [ 'domains_stub' , $real ] , [
+                    'enabled' => $stub_enabled , 'title' => $stub_title , 'text' => $stub_text , 'until' => $stub_until
+                ] );
+            } );
+            
+            AuditLog::action_ok( 'stub:edit' , [ 'domain' => $real , 'enabled' => $stub_enabled ] );
+            header( 'Location: ?p=stub:edit&domain=' . urlencode($domain) . '&saved=1' );
+            exit;
+        }
+
+        $stub = $cfg->getKeys( [ 'domains_stub' , $real ] , [] );
+        
+        View::render( 'stub_edit' , [
+            'domain' => $domain , 'real' => $real , 'stub' => $stub , 'saved' => ! empty($_GET['saved'])
+        ] );
+        break;
+    case 'settings' :
 
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 

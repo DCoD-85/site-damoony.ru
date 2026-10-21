@@ -31,26 +31,10 @@
         </select>
     </label>
 
-    <hr style="margin: 20px 0; border-top: 1px dashed #ccc;">
-    <h3>Заглушка (Технические работы)</h3>
-    
-    <label class="checkbox">
-        <input type="checkbox" name="stub_enabled" value="1" <?= !empty($stub["enabled"]) ? "checked" : "" ?>>
-        Включить заглушку для всего домена
-    </label>
-
-    <label>Заголовок заглушки
-        <input type="text" name="stub_title" value="<?= htmlspecialchars($stub["title"] ?? "Технические работы") ?>">
-    </label>
-
-    <label>Текст заглушки
-        <textarea name="stub_text"><?= htmlspecialchars($stub["text"] ?? "Мы скоро вернемся!") ?></textarea>
-    </label>
-
-    <label>Время окончания (timestamp)
-        <input type="number" name="stub_until" value="<?= (int)($stub["until"] ?? 0) ?>" placeholder="0 — бессрочно">
-    </label>
-
-    <button type="submit">Сохранить</button>
+    <button type="submit" class="btn-edit">Сохранить</button>
     <a href="?p=dashboard" class="btn-cancel">Отмена</a>
+    
+    <div style="margin-top:30px; padding-top:20px; border-top:1px dashed #ccc;">
+        <a href="?p=stub:edit&domain=<?= urlencode($domain) ?>" class="btn-sub" style="font-size:14px;">⚙️ Настроить заглушку домена</a>
+    </div>
 </form>
