@@ -31,7 +31,8 @@ if ( ! is_array( $cfg ) ) $cfg = [ ];
 // 1. Определяем хост и IP
 $raw_host = $_SERVER[ 'HTTP_HOST' ] ?? '';
 $host     = strtolower( preg_replace( '/:\d+$/', '', $raw_host ) );
-$is_local_ip = in_array( $host , [ '127.0.0.1' , 'localhost' , '::1' ] ) || ! filter_var( $host , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+$is_ip = filter_var( $host , FILTER_VALIDATE_IP ) !== false;
+$is_local_ip = in_array( $host , [ '127.0.0.1' , 'localhost' , '::1' ] ) || ( $is_ip && ! filter_var( $host , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) );
 
 // 2. Если это локальный IP и НЕ админка — перекидываем на нормальный домен
 if ( $is_local_ip && $path !== 'admin' && !str_starts_with( $path , 'admin/' ) ) {
@@ -72,7 +73,8 @@ if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 # host — валидация по config/site.config:domains_real (C2+C4+H2)
 $raw_host = $_SERVER[ 'HTTP_HOST' ] ?? '';
 $host     = strtolower( preg_replace( '/:\d+$/', '', $raw_host ) );
-$is_local_ip = in_array( $host , [ '127.0.0.1' , 'localhost' , '::1' ] ) || ! filter_var( $host , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+$is_ip = filter_var( $host , FILTER_VALIDATE_IP ) !== false;
+$is_local_ip = in_array( $host , [ '127.0.0.1' , 'localhost' , '::1' ] ) || ( $is_ip && ! filter_var( $host , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) );
 
 if ( empty( $cfg[ 'domains_real' ] ) || ! is_array( $cfg[ 'domains_real' ] ) ) {
 	http_response_code( 500 );
