@@ -1,5 +1,9 @@
-<h1>Редактирование: <code><?= htmlspecialchars($name) ?></code></h1>
-<?php if ( !empty($_GET['saved']) ) : ?><div class="ok-msg">✓ Сохранено</div><?php endif ?>
+<?php 
+$parent_link = '?p=blocks:list&domain=' . urlencode($domain);
+$parent_title = 'Блоки';
+$current_title = $name;
+require __DIR__ . '/_context_nav.php'; 
+?><?php endif ?>
 <form method="post" class="form" style="max-width:100%;">
 	<?= Csrf::field() ?>
 	<label>PHP (<code><?= $name ?>.php</code>)

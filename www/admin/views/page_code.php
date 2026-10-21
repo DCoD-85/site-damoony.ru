@@ -11,12 +11,13 @@ $url_path .= ($path === '') ? $lang_default . '/index' : str_replace('lang', $la
 $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
 ?>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <h1 style="margin:0;">Редактор кода: <code><?= htmlspecialchars( $cls_short ) ?></code></h1>
-    <div class="td-actions">
-        <a href="?p=page:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $path ) ?>" class="btn-edit">Настройки</a>
-        <a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="btn-cancel">← К страницам</a>
-    </div>
+<?php 
+$parent_link = '?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias);
+$parent_title = 'Страницы';
+$current_title = 'Редактор: ' . $cls_short;
+$actions = '<a href="?p=page:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Настройки</a>';
+require __DIR__ . '/_context_nav.php'; 
+?>
 </div>
 
 <?php if ( !empty($_GET['saved']) ) : ?>

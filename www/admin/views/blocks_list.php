@@ -1,18 +1,7 @@
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-	<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code></h1>
-	<div class="td-actions">
-		<a href="?p=schemes:list&domain=<?= urlencode($domain) ?>" class="btn-edit">Схемы</a>
-		<a href="?p=block:new&domain=<?= urlencode($domain) ?>" class="btn-edit">+ Блок</a>
-		<a href="?p=dashboard" class="btn-cancel">← Назад</a>
-	</div>
+<?php $active_tab = 'blocks'; $actions = '<a href="?p=block:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Создать блок</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
 </div>
 
-<div class="nav-tabs">
-	<a href="?p=blocks:list&domain=<?= urlencode($domain) ?>" class="active">Глобальные</a>
-	<?php foreach ( $alliases as $a ) : ?>
-		<a href="?p=allias:fillers&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($a) ?>">Filler: <?= htmlspecialchars($a) ?></a>
-	<?php endforeach ?>
-</div>
+
 
 <h3>Блоки данных (alliasglobal)</h3>
 <?php if ( empty( $blocks ) ) : ?>

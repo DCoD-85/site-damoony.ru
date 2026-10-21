@@ -163,6 +163,7 @@ switch ( $p ) {
 				'ns'       => $cfg->getKeys( [ 'domains_namespace' , $real ] ) ?? '—' ,
 				'avail'    => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ,
 				'fs'       => is_dir( Paths::domain( $real ) ) ,
+				'stub'     => ! empty( $cfg->getKeys( [ 'domains_stub' , $real , 'enabled' ] ) ) ,
 				'alliases' => $alliases ,
 				'aliases'  => $aliases[ $real ] ?? [ ] ,
 			];
@@ -311,7 +312,7 @@ switch ( $p ) {
 				'domain'  => $domain ,
 				'saved'   => false ,
 				'errors'  => $errors ,
-				'current' => [ 'title' => $title , 'skin' => $skin ] ,
+				'current' => [ 'title' => $title , 'skin' => $skin , 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ] ,
 				'skins'   => Scan::skinsFor( $domain ) ,
 			] );
 			break;
@@ -325,7 +326,7 @@ switch ( $p ) {
 			'domain'  => $domain ,
 			'saved'   => ! empty( $_GET[ 'saved' ] ) ,
 			'errors'  => [ ] ,
-			'current' => [ 'title' => $title , 'skin' => $skin ] ,
+			'current' => [ 'title' => $title , 'skin' => $skin , 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ] ,
 			'skins'   => Scan::skinsFor( $domain ) ,
 		] );
 		break;

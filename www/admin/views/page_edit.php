@@ -1,16 +1,10 @@
-<h1>Страница: <code><?= htmlspecialchars( $path === '' ? '(корень lang)' : $path ) ?></code></h1>
-
-<p class="hint">
-	Домен: <code><?= htmlspecialchars( $domain ) ?></code>
-	&nbsp;·&nbsp; аллиас: <code><?= htmlspecialchars( $allias ) ?></code>
-	&nbsp;·&nbsp; класс: <code><?= htmlspecialchars( $cls_short ) ?></code>
-	<br>
-	<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>">← К дереву</a> &nbsp;·&nbsp; <a href="?p=page:code&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $path ) ?>" style="font-weight:bold; color:#069;">Редактировать код</a>
-	<?php if ( $path !== '' ) : ?>
-		&nbsp;·&nbsp;
-		<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&parent=<?= urlencode( $path ) ?>">+ Подстраница</a>
-	<?php endif ?>
-</p>
+<?php 
+$parent_link = '?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias);
+$parent_title = 'Страницы';
+$current_title = $path === '' ? '(корень)' : $path;
+$actions = '<a href="?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Код</a>';
+require __DIR__ . '/_context_nav.php'; 
+?>
 
 <?php if ( ! empty( $saved ) ) : ?>
 	<div class="ok-msg">✓ Сохранено</div>

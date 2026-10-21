@@ -1,4 +1,9 @@
-<h1>Домен: <code><?= htmlspecialchars( $domain ) ?></code></h1>
+<?php
+// Проверяем активный таб
+$tab = $_GET['tab'] ?? 'main';
+?>
+
+<?php $active_tab = 'main'; require __DIR__ . '/_domain_tabs.php'; ?>
 
 <?php if ( ! empty( $saved ) ) : ?>
     <div class="ok-msg">✓ Сохранено</div>
@@ -12,7 +17,7 @@
     </div>
 <?php endif ?>
 
-<form method="post" action="?p=domain:edit&domain=<?= urlencode( $domain ) ?>" class="form">
+<form method="post" action="?p=domain:edit&domain=<?= urlencode( $domain ) ?>&tab=main" class="form">
     <?= Csrf::field() ?>
 
     <label>Заголовок (title)
@@ -31,10 +36,10 @@
         </select>
     </label>
 
-    <button type="submit" class="btn-edit">Сохранить</button>
-    <a href="?p=dashboard" class="btn-cancel">Отмена</a>
-    
-    <div style="margin-top:30px; padding-top:20px; border-top:1px dashed #ccc;">
-        <a href="?p=stub:edit&domain=<?= urlencode($domain) ?>" class="btn-sub" style="font-size:14px;">⚙️ Настроить заглушку домена</a>
-    </div>
+    <label class="checkbox" style="margin-top:15px;">
+        <input type="checkbox" name="domain_available" value="1" <?= $current[ 'avail' ] ? 'checked' : '' ?>>
+        <b>Включить сайт</b> (если снять галочку — сайт покажет заглушку)
+    </label>
+
+    <button type="submit" class="btn-edit" style="margin-top:15px;">Сохранить</button>
 </form>

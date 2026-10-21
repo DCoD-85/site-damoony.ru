@@ -78,34 +78,12 @@ function render_wireframe ( $nodes ) {
 }
 ?>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <h1 style="margin:0;">Схема: <code><?= htmlspecialchars( $scheme ) ?></code></h1>
-    <a href="?p=schemes:list&domain=<?= urlencode($domain) ?>" class="btn-cancel">← К списку схем</a>
-</div>
-
-<?php if ( !empty($_GET['saved']) ) : ?><div class="ok-msg">✓ Сохранено</div><?php endif ?>
-
-<form method="post" id="scheme-form" style="display:flex; gap:20px; align-items:flex-start;">
-    <?= Csrf::field() ?>
-    <input type="hidden" name="scheme_json" id="scheme_json">
-    
-    <div style="flex:1; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06);">
-        <h3 style="margin-top:0;">Дерево блоков</h3>
-        <p class="hint" style="font-size:12px; color:#666; margin-bottom:15px;">
-            Перетаскивайте за <b>≡</b>. Верхняя/нижняя часть блока — вставка рядом. Центр — вложение внутрь.
-        </p>
-        
-        <?php render_node( $scheme_data, $domain, true ); ?>
-        
-        <button type="submit" style="margin-top:20px;">Сохранить схему</button>
-    </div>
-
-    <div style="flex:2; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06);">
-        <h3 style="margin-top:0;">Визуализация</h3>
-		<div style="display:flex; flex:1; min-height:200px; box-sizing:border-box;">
-			<?php render_wireframe( [ $scheme_data ] ); ?>
-		</div>
-    </div>
+<?php 
+$parent_link = '?p=schemes:list&domain=' . urlencode($domain);
+$parent_title = 'Схемы';
+$current_title = $scheme;
+require __DIR__ . '/_context_nav.php'; 
+?>
 </form>
 
 <style>

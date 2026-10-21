@@ -14,15 +14,15 @@
 				<th>Статус</th>
 				<th>Файлы</th>
 				<th>Аллиасы</th>
-				<th>Управление</th>
+				<th>Действия</th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php foreach ( $domains as $d ) : ?>
 				<?php $d_enc = urlencode( $d[ 'domain' ] ); ?>
-				<tr>
+				<tr style="cursor:pointer;" onclick="window.location='?p=domain:edit&domain=<?= $d_enc ?>';">
 					<td>
-						<a href="?p=domain:edit&domain=<?= $d_enc ?>" class="domain-link">
+						<a href="?p=domain:edit&domain=<?= $d_enc ?>" class="domain-link" style="font-size:16px;">
 							<b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b>
 						</a>
 						<?php if ( ! empty( $d[ 'aliases' ] ) ) : ?>
@@ -31,35 +31,18 @@
 					</td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
 					<td>
-						<form method="post" action="?p=domain:toggle" class="inline">
-							<?= Csrf::field( ) ?>
-							<input type="hidden" name="domain" value="<?= htmlspecialchars( $d[ 'domain' ] , ENT_QUOTES ) ?>">
-							<input type="hidden" name="value"  value="<?= $d[ 'avail' ] ? '0' : '1' ?>">
-							<button type="submit"
-								class="btn-toggle <?= $d[ 'avail' ] ? 'btn-toggle-on' : 'btn-toggle-off' ?>"
-								title="<?= $d[ 'avail' ] ? 'Выключить' : 'Включить' ?>">
-								<?= $d[ 'avail' ] ? '● вкл' : '○ выкл' ?>
-							</button>
-						</form>
+						<?= $d[ 'avail' ] ? '<span style="color:#1a7a3b; font-weight:bold;">● вкл</span>' : '<span style="color:#a11; font-weight:bold;">○ выкл</span>' ?>
 					</td>
 					<td><?= $d[ 'fs' ] ? '✓' : '✗' ?></td>
 					<td>
 						<div class="allias-list">
 							<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
-								<a href="?p=allias:fillers&domain=<?= $d_enc ?>&allias=<?= urlencode( $a ) ?>"
-									class="allias-link" title="Управление филлерами"><?= htmlspecialchars( $a ) ?></a>
+								<span class="allias-link" style="cursor:default;"><?= htmlspecialchars( $a ) ?></span>
 							<?php endforeach ?>
-							<a href="?p=allias:new&domain=<?= $d_enc ?>" class="allias-add" title="Новый аллиас">+ новый</a>
 						</div>
 					</td>
 					<td>
-						<div class="action-links">
-							<a href="?p=allias:list&domain=<?= $d_enc ?>" class="btn-sub">Все аллиасы</a>
-							<a href="?p=blocks:list&domain=<?= $d_enc ?>" class="btn-sub">Блоки</a>
-							<a href="?p=schemes:list&domain=<?= $d_enc ?>" class="btn-sub">Схемы</a>
-							<a href="?p=stub:edit&domain=<?= $d_enc ?>" class="btn-edit">Заглушка</a>
-							<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger">Удалить</a>
-						</div>
+						<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger" onclick="event.stopPropagation(); return confirm('Удалить домен <?= $d_enc ?>?');">Удалить</a>
 					</td>
 				</tr>
 			<?php endforeach ?>

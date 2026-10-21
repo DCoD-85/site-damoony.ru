@@ -1,8 +1,10 @@
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-	<div style="display:flex; gap:15px; align-items:center;">
-		<h1 style="margin:0;">Блоки: <code><?= htmlspecialchars( $domain ) ?></code> / <code><?= htmlspecialchars( $allias ) ?></code></h1>
-		<a href="?p=scheme:edit&domain=<?= urlencode($domain) ?>&scheme=<?= urlencode($allias) ?>" class="btn-edit" style="font-size:12px;">Схема аллиаса</a>
-	</div>
+<?php 
+$active_tab = 'allias';
+$parent_link = '?p=allias:list&domain=' . urlencode($domain);
+$parent_title = 'Аллиасы';
+$current_title = 'Филлеры: ' . $allias;
+require __DIR__ . '/_domain_tabs.php'; 
+?>
 	<a href="?p=dashboard" class="btn-cancel">← Назад</a>
 </div>
 

@@ -1,7 +1,4 @@
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-	<h1 style="margin:0;">Схемы: <code><?= htmlspecialchars( $domain ) ?></code></h1>
-	<a href="?p=dashboard" class="btn-cancel">← Назад</a>
-</div>
+<?php $active_tab = 'schemes'; require __DIR__ . '/_domain_tabs.php'; ?>
 
 <table class="table">
 	<thead>

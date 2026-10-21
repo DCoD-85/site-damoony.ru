@@ -1,10 +1,4 @@
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    <h1 style="margin:0;">Домен: <code><?= htmlspecialchars( $domain , ENT_QUOTES ) ?></code></h1>
-    <div class="td-actions">
-        <a href="?p=allias:new&domain=<?= urlencode( $domain ) ?>" class="btn-edit">+ Добавить аллиас</a>
-        <a href="?p=domain:edit&domain=<?= urlencode( $domain ) ?>" class="btn-edit">Настройки домена</a>
-        <a href="?p=dashboard" class="btn-cancel">← К доменам</a>
-    </div>
+<?php $active_tab = 'allias'; $actions = '<a href="?p=allias:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Добавить аллиас</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
 </div>
 
 <?php if ( empty( $rows ) ) : ?>

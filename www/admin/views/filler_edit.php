@@ -1,5 +1,9 @@
-<h1>Редактирование филлера: <code><?= htmlspecialchars($allias) ?>/<?= htmlspecialchars($block) ?></code></h1>
-<?php if ( !empty($_GET['saved']) ) : ?><div class="ok-msg">✓ Сохранено</div><?php endif ?>
+<?php 
+$parent_link = '?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . urlencode($allias);
+$parent_title = 'Филлеры';
+$current_title = $block . ' (' . $allias . ')';
+require __DIR__ . '/_context_nav.php'; 
+?><?php endif ?>
 <form method="post" class="form" style="max-width:100%;">
 	<?= Csrf::field() ?>
 	<label>PHP (<code><?= $block ?>_<?= $allias ?>.php</code>)

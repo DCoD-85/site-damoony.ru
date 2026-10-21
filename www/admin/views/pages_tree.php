@@ -68,12 +68,13 @@ if ( ! function_exists( 'render_page_node' ) ) {
 }
 ?>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-	<h1 style="margin:0;">Страницы: <code><?= htmlspecialchars( $domain ) ?></code> / <code><?= htmlspecialchars( $allias ) ?></code></h1>
-	<div class="td-actions">
-		<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="btn-edit">+ Новая страница</a>
-		<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">← К аллиасам</a>
-	</div>
+<?php 
+$parent_link = '?p=allias:list&domain=' . urlencode($domain);
+$parent_title = 'Аллиасы';
+$current_title = 'Страницы (' . $allias . ')';
+$actions = '<a href="?p=page:new&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '" class="btn-edit">+ Новая страница</a>';
+require __DIR__ . '/_context_nav.php'; 
+?>
 </div>
 
 <?php if ( ! $has_dir ) : ?>
