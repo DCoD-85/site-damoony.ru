@@ -123,6 +123,56 @@ class algoritm_ {
 	# ===============================================================
 	#   HELPERS
 	# ===============================================================
+	# ===============================================================
+	#   JSON RENDERER (Data -> Logic / Tags & visuoel)
+	# ===============================================================
+	public function render_json_node ( array $node ) : mixed {
+		// 1. Если это готовый компонент visuoel (например: {"el": "button"})
+		if ( ! empty( $node[ 'el' ] ) ) {
+			$el_type = strtolower( $node[ 'el' ] );
+			$class = '\\visuoel_' . $el_type;
+			if ( ! class_exists( $class ) ) {
+				$class = '\\visuoel';
+			}
+
+			try {
+				$el = new $class();
+				if ( ! empty( $node[ 'data' ] ) && method_exists( $el, 'data' ) ) {
+					$el->data()->set( ...(array)$node[ 'data' ] );
+				}
+				return $el;
+			} catch ( Throwable $e ) {
+				return null;
+			}
+		}
+
+		// 2. Обычный HTML-тег
+		$tag     = $node[ 'tag' ]     ?? 'div';
+		$class   = $node[ 'class' ]   ?? '';
+		$id      = $node[ 'id' ]      ?? '';
+		$content = $node[ 'content' ] ?? '';
+		$href    = $node[ 'href' ]    ?? '';
+		
+		$vt = new \visuotag( );
+		$el = $vt->tag( $tag , class : $class , id : $id , href : $href );
+		
+		if ( $content !== '' ) {
+			$el->content( $content );
+		}
+		
+		if ( !empty( $node[ 'children' ] ) && is_array( $node[ 'children' ] ) ) {
+			foreach ( $node[ 'children' ] as $child ) {
+				$res = $this->render_json_node( $child );
+				if ( $res instanceof \visuotag ) {
+					$el->append( $res );
+				} elseif ( $res instanceof \visuoel ) {
+					$el->el( $res );
+				}
+			}
+		}
+		
+		return $vt;
+	}
 	public function is_ajax ()    : bool { return (bool) $this->main->render->getdata( 'render_ajax' ); }
 	public function is_guest ()   : bool { return $this->main->is_guest( ); }
 	public function is_post ()    : bool { return ! empty( $_POST ); }
