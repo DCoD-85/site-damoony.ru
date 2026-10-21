@@ -1,0 +1,30 @@
+{
+  "tag": "div",
+  "class": "landing-container",
+  "children": [
+    {
+      "tag": "h1",
+      "class": "",
+      "content": "Заголовок 1",
+      "children": []
+    },
+    {
+      "tag": "p",
+      "class": "",
+      "content": "Абзац текста 2",
+      "children": []
+    },
+    {
+      "tag": "div",
+      "class": "",
+      "content": "",
+      "children": []
+    },
+    {
+      "tag": "a",
+      "class": "",
+      "content": "Ссылка 3",
+      "children": []
+    }
+  ]
+}

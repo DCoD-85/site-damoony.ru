@@ -580,7 +580,43 @@ switch ( $p ) {
 		] );
 		break;
 
-	            case 'page:code' :
+	            case 'page:visual' :
+        $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+        $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+        $path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
+
+        $base      = Paths::algoritm( $domain , $allias );
+        $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) );
+        $sub_dir   = $path === '' ? $base : $base . '/' . $path;
+        $json_file = $sub_dir . '/' . $cls_short . '.json';
+
+        if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+            $json_code = (string) ( $_POST[ 'json_code' ] ?? '' );
+            try {
+                if ( $json_code !== '' ) Fs::writeAtomic( $json_file , $json_code );
+                AuditLog::action_ok( 'page:visual' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path ] );
+            } catch ( Throwable $e ) {}
+            header( 'Location: ?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '&saved=1' );
+            exit;
+        }
+
+        $json_data = is_file( $json_file ) ? file_get_contents( $json_file ) : '{"tag":"div","class":"landing-container","children":[]}';
+        
+        // URL для предпросмотра
+        $lang_cfg = is_file(PROJECT_ROOT . '/config/lang.config') ? json_decode(file_get_contents(PROJECT_ROOT . '/config/lang.config'), true) : [];
+        $lang_default = $lang_cfg['default'] ?? 'ru-ru';
+        $host = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'www.damoony2.ru');
+        $url_path = ($allias === 'www' || $allias === '') ? '' : $allias . '/';
+        $url_path .= ($path === '') ? $lang_default . '/index' : str_replace('lang', $lang_default, $path);
+        $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
+
+        View::render( 'page_visual' , [
+            'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short ,
+            'json_data' => $json_data , 'preview_url' => $preview_url
+        ] );
+        break;
+
+    case 'page:code' :
         $domain = (string) ( $_GET[ 'domain' ] ?? '' );
         $allias = (string) ( $_GET[ 'allias' ] ?? '' );
         $path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );

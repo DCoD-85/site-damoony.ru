@@ -29,7 +29,8 @@ if ( ! function_exists( 'render_page_node' ) ) {
 					</div>
 
 					<div class="tree-sub">
-						<a href="?p=page:code&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $node[ 'path' ] ) ?>" class="btn-sub">Редактировать код</a> &nbsp;|&nbsp; 
+						<a href="?p=page:visual&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $node[ 'path' ] ) ?>" class="btn-sub" style="color:#1a7a3b; font-weight:bold;">Визуально</a> &nbsp;|&nbsp; 
+							<a href="?p=page:code&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $node[ 'path' ] ) ?>" class="btn-sub">Редактировать код</a> &nbsp;|&nbsp; 
 							<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&parent=<?= urlencode( $node[ 'path' ] ) ?>"
 							class="btn-sub">+ Подстраница</a>
 					</div>
