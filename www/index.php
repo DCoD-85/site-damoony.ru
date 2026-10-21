@@ -35,8 +35,8 @@ $is_local_ip = in_array( $host , [ '127.0.0.1' , 'localhost' , '::1' ] ) || ! fi
 
 // 2. Если это локальный IP и НЕ админка — перекидываем на нормальный домен
 if ( $is_local_ip && $path !== 'admin' && !str_starts_with( $path , 'admin/' ) ) {
-header( 'Location: https://damoony.ru/' . $path );
-exit;
+	http_response_code( 403 );
+	exit( 'Access via IP is forbidden. Please use the domain name.' );
 }
 if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 
