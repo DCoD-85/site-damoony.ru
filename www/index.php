@@ -114,7 +114,7 @@ try {
 }
 
 # --- SSO-ready: cookie domain для поддоменов из domains_real (8/N) ---
-$real_domain  = $cfg[ 'domains_real' ][ $host ] ?? null;
+$real_domain  = $cfg[ 'domains_real' ][ $host ] ?? ( $is_local_ip ? $host : null );
 $cookie_domain = '';
 if ( $real_domain !== null && $real_domain !== $host ) {
     $cookie_domain = '.' . $real_domain;
