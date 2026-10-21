@@ -241,6 +241,8 @@ class main_settings {
 	public array $domains_namespace = [ ];
 	public array $domains_titles = [ ];
 	public array $domains_skins = [ ];
+	public array $domains_stub = [ ];
+	public array $alliases_stub = [ ];
 	public array $fillers = [ ];
 
 	# render engine
