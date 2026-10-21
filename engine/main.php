@@ -107,6 +107,36 @@ class main implements VisuoHost {
 
 		# --- домен или аллиас выключен/не найден → 404 ---
 		if ( empty( $static_domain ) || empty( $static_allias ) ) {
+			$real = $this->main_settings->domain_real_name ?? '';
+			$logic = $this->main_settings->logic ?? 'alpha.0.0';
+
+			$stub_domain = $this->main_settings->domains_stub[ $real ] ?? null;
+			$is_stub_domain = $stub_domain && ( $stub_domain['enabled'] ?? false ) && ( ( $stub_domain['until'] ?? 0 ) == 0 || time() < $stub_domain['until'] );
+
+			$allias_key = $this->main_settings->allias_real_name ?? '';
+			$stub_allias = $this->main_settings->alliases_stub[ $real ][ $allias_key ] ?? null;
+			$is_stub_allias = $stub_allias && ( $stub_allias['enabled'] ?? false ) && ( ( $stub_allias['until'] ?? 0 ) == 0 || time() < $stub_allias['until'] );
+
+			$active_stub = null;
+			if ( $is_stub_domain ) $active_stub = $stub_domain;
+			elseif ( $is_stub_allias ) $active_stub = $stub_allias;
+
+			if ( $active_stub ) {
+				$ns = $this->main_settings->domains_namespace[ $real ] ?? '';
+				$class = '\\' . $ns . '\\www\\algoritm_stub';
+				$file = dirname( __DIR__ ) . '/app/' . $logic . '/domain/' . $real . '/allias/www/algoritm/algoritm_stub.php';
+
+				if ( file_exists( $file ) ) {
+					require_once $file;
+					if ( class_exists( $class ) ) {
+						$instance = new $class( $this );
+						$instance->render_stub( $active_stub );
+						$this->release();
+						exit;
+					}
+				}
+			}
+
 			http_response_code( 404 );
 			die( 'Not Found' );
 		}
