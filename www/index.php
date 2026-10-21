@@ -11,6 +11,13 @@ $GLOBALS[ 'start_hr' ] = $start_hr;
 # --- РОУТИНГ /admin/ — до session_start, до header ---
 $path = trim( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? '/' , PHP_URL_PATH ) ?? '/' , '/' );
 
+# Отрезаем языковой префикс (ru-ru, en-en и т.д.), чтобы админка открывалась по любому пути
+$path_parts = explode( '/' , $path );
+if ( isset( $path_parts[ 0 ] ) && preg_match( '/^[a-z]{2}-[a-z]{2}$/' , $path_parts[ 0 ] ) ) {
+	array_shift( $path_parts );
+	$path = implode( '/' , $path_parts );
+}
+
 # --- конфиг: один раз (admin IP + host whitelist) ---
 $cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'site.config';
 $cfg = is_file( $cfg_path ) ? @json_decode( @file_get_contents( $cfg_path ) , true ) : null;
