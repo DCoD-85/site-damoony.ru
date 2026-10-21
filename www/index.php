@@ -26,6 +26,18 @@ $admin_cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '
 $admin_cfg = is_file( $admin_cfg_path ) ? @json_decode( @file_get_contents( $admin_cfg_path ) , true ) : [];
 if ( ! is_array( $cfg ) ) $cfg = [ ];
 
+
+
+// 1. Определяем хост и IP
+$raw_host = $_SERVER[ 'HTTP_HOST' ] ?? '';
+$host     = strtolower( preg_replace( '/:\d+$/', '', $raw_host ) );
+$is_local_ip = in_array( $host , [ '127.0.0.1' , 'localhost' , '::1' ] ) || ! filter_var( $host , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+
+// 2. Если это локальный IP и НЕ админка — перекидываем на нормальный домен
+if ( $is_local_ip && $path !== 'admin' && !str_starts_with( $path , 'admin/' ) ) {
+header( 'Location: https://damoony.ru/' . $path );
+exit;
+}
 if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 
 	$ip      = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
