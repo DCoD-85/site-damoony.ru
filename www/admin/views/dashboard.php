@@ -11,8 +11,8 @@
 			<tr>
 				<th>Домен</th>
 				<th>Namespace</th>
-				<th>Статус</th>
-				<th>Файлы</th>
+				<th style="text-align:center;">Статус</th>
+				<th style="text-align:center;">Файлы</th>
 				<th>Аллиасы</th>
 				<th>Действия</th>
 			</tr>
@@ -30,10 +30,18 @@
 						<?php endif ?>
 					</td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
-					<td>
-						<?= $d[ 'avail' ] ? '<span style="color:#1a7a3b; font-weight:bold;">● вкл</span>' : '<span style="color:#a11; font-weight:bold;">○ выкл</span>' ?>
+					<td style="text-align:center;" onclick="event.stopPropagation();">
+						<form method="post" action="?p=domain:toggle" style="margin:0; display:inline-block;">
+							<?= Csrf::field() ?>
+							<input type="hidden" name="domain" value="<?= htmlspecialchars( $d[ 'domain' ] , ENT_QUOTES ) ?>">
+							<input type="hidden" name="value"  value="<?= $d[ 'avail' ] ? '0' : '1' ?>">
+							<label class="switch" title="<?= $d[ 'avail' ] ? 'Выключить сайт' : 'Включить сайт' ?>">
+								<input type="checkbox" onchange="this.form.submit()" <?= $d[ 'avail' ] ? 'checked' : '' ?>>
+								<span class="slider"></span>
+							</label>
+						</form>
 					</td>
-					<td><?= $d[ 'fs' ] ? '✓' : '✗' ?></td>
+					<td style="text-align:center;"><?= $d[ 'fs' ] ? '✓' : '✗' ?></td>
 					<td>
 						<div class="allias-list">
 							<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
