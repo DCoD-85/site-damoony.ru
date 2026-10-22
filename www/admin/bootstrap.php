@@ -412,15 +412,31 @@ switch ( $p ) {
 		break;
 
 	case 'filler:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' ); $block = (string) ( $_GET[ 'block' ] ?? '' );
-		$f_dir = Paths::block( $domain , $block ); $php_f = $f_dir . '/' . $block . '_' . $allias . '.php'; $data_f = $f_dir . '/' . $block . '_' . $allias . '.data.php';
-		if ( ! is_file( $php_f ) ) { header( 'Location: ?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); exit; }
-		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			Fs::writeAtomic( $php_f , $_POST[ 'php' ] ); Fs::writeAtomic( $data_f , $_POST[ 'data' ] );
-			header( 'Location: ?p=filler:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&block=' . urlencode($block) . '&saved=1' ); exit;
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
+		$allias = (string) ( $_GET[ 'allias' ] ?? '' ); 
+		$block  = (string) ( $_GET[ 'block' ] ?? '' );
+		
+		$f_dir  = Paths::block( $domain , $block ); 
+		$php_f  = $f_dir . '/' . $block . '_' . $allias . '.php'; 
+		$data_f = $f_dir . '/' . $block . '_' . $allias . '.data.php';
+		
+		if ( ! is_file( $php_f ) ) { 
+			header( 'Location: ?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); 
+			exit; 
 		}
+		
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			Fs::writeAtomic( $php_f , $_POST[ 'php' ] ); 
+			Fs::writeAtomic( $data_f , $_POST[ 'data' ] );
+			header( 'Location: ?p=filler:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&block=' . urlencode($block) . '&saved=1' ); 
+			exit;
+		}
+		
+		$php_content = file_get_contents( $php_f );
+		$data_content = is_file( $data_f ) ? file_get_contents( $data_f ) : "<?PHP\nreturn [\n\t\n];\n";
+
 		View::render( 'filler_edit' , [
-			'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => file_get_contents( $php_f ) , 'file_data' => file_get_contents( $data_f ) ,
+			'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => $php_content , 'file_data' => $data_content ,
 			'meta' => [ 'title' => 'Редактор филлера' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Филлеры', 'url' => '?p=allias:fillers&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $block, 'url' => ''] ] ]
 		] );
 		break;
@@ -454,15 +470,29 @@ switch ( $p ) {
 		break;
 
 	case 'block:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $name = (string) ( $_GET[ 'name' ] ?? '' );
-		$php_file = Paths::block( $domain , $name ) . '/' . $name . '.php'; $data_file = Paths::block( $domain , $name ) . '/' . $name . '.data.php';
-		if ( ! is_file( $php_file ) ) { header( 'Location: ?p=blocks:list&domain=' . urlencode($domain) ); exit; }
-		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			Fs::writeAtomic( $php_file , $_POST[ 'php' ] ); Fs::writeAtomic( $data_file , $_POST[ 'data' ] );
-			header( 'Location: ?p=block:edit&domain=' . urlencode($domain) . '&name=' . urlencode($name) . '&saved=1' ); exit;
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
+		$name   = (string) ( $_GET[ 'name' ] ?? '' );
+		
+		$php_file  = Paths::block( $domain , $name ) . '/' . $name . '.php'; 
+		$data_file = Paths::block( $domain , $name ) . '/' . $name . '.data.php';
+		
+		if ( ! is_file( $php_file ) ) { 
+			header( 'Location: ?p=blocks:list&domain=' . urlencode($domain) ); 
+			exit; 
 		}
+		
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			Fs::writeAtomic( $php_file , $_POST[ 'php' ] ); 
+			Fs::writeAtomic( $data_file , $_POST[ 'data' ] );
+			header( 'Location: ?p=block:edit&domain=' . urlencode($domain) . '&name=' . urlencode($name) . '&saved=1' ); 
+			exit;
+		}
+		
+		$php_content = file_get_contents( $php_file );
+		$data_content = is_file( $data_file ) ? file_get_contents( $data_file ) : "<?PHP\nreturn [\n\t\n];\n";
+
 		View::render( 'block_edit' , [
-			'domain' => $domain , 'name' => $name , 'php' => file_get_contents( $php_file ) , 'file_data' => file_get_contents( $data_file ) ,
+			'domain' => $domain , 'name' => $name , 'php' => $php_content , 'file_data' => $data_content ,
 			'meta' => [ 'title' => 'Редактор блока: '.$name , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Блоки', 'url' => '?p=blocks:list&domain='.urlencode($domain)], ['label' => $name, 'url' => ''] ] ]
 		] );
 		break;
@@ -633,17 +663,36 @@ switch ( $p ) {
 		break;
 
 	case 'allias:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' );
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
+		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
 		if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
-		$cfg = new Config( Paths::config() ); $real = Paths::real( $domain ); $is_avail = ! empty( $cfg->getKeys( [ 'alliases_available' , $real , $allias ] ) );
+		
+		$cfg  = new Config( Paths::config() ); 
+		$real = Paths::real( $domain ); 
+		
+		$is_avail = ! empty( $cfg->getKeys( [ 'alliases_available' , $real , $allias ] ) );
+		
+		// Загружаем библиотеку заглушек
+		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' );
+		$stubs = $stubs_cfg->get( 'stubs' ) ?? [];
+		$current_stub = $cfg->getKeys( [ 'alliases_stub' , $real , $allias , 'current' ] , 'maintenance' );
+
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$avail = ! empty( $_POST[ 'available' ] );
-			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $avail ) { $cfg->setKeys( [ 'alliases_available' , $real , $allias ] , $avail ); } );
-			AuditLog::action_ok( 'allias:edit' , [ 'domain' => $real , 'allias' => $allias , 'avail' => $avail ] );
+			$stub_current = trim( (string) ( $_POST[ 'stub_current' ] ?? 'maintenance' ) );
+			
+			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $avail , $stub_current ) { 
+				$cfg->setKeys( [ 'alliases_available' , $real , $allias ] , $avail );
+				$cfg->setKeys( [ 'alliases_stub' , $real , $allias , 'current' ] , $stub_current );
+			} );
+			
+			AuditLog::action_ok( 'allias:edit' , [ 'domain' => $real , 'allias' => $allias , 'avail' => $avail , 'stub' => $stub_current ] );
 			header( 'Location: ?p=allias:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&saved=1' ); exit;
 		}
+
 		View::render( 'allias_edit' , [
 			'domain' => $domain , 'allias' => $allias , 'avail' => $is_avail , 'saved' => ! empty($_GET['saved']) ,
+			'stubs' => $stubs , 'current_stub' => $current_stub ,
 			'meta' => [ 'title' => 'Настройки аллиаса' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'main'] ]
 		] );
 		break;
@@ -733,7 +782,19 @@ switch ( $p ) {
 			'meta' => [ 'title' => 'Библиотека заглушек' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Заглушки', 'url' => ''] ] ]
 		] );
 		break;
-
+	
+		case 'stubs:edit' :
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			$stubs_data = $_POST[ 'stubs' ] ?? [];
+			try {
+				Config::mutate( PROJECT_ROOT . '/config/site.stubs.config' , function ( Config $cfg ) use ( $stubs_data ) {
+					$cfg->setKeys( [ 'stubs' ] , $stubs_data );
+				} );
+				header( 'Location: ?p=stubs:list&saved=1' ); exit;
+			} catch ( Throwable $e ) {}
+		}
+		break;
+	
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 		$allowed = [ 'logic' , 'logic_type' , 'connect_type' , 'ui_ajax_forms' ];

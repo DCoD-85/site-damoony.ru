@@ -3,7 +3,7 @@ if ( ! function_exists( 'render_page_node' ) ) {
 	function render_page_node ( array $node , string $domain , string $allias ) : void {
 		$meta = $node[ 'meta' ] ?? [ 'available' => [] , 'auth' => false , 'search' => true , 'default' => false ];
 		?>
-		<li class="tree-item">
+		<li class="tree-item" data-search="<?= htmlspecialchars( mb_strtolower( $node[ 'name' ] ) ) ?>">
 			<div class="tree-row">
 				<div class="tree-left">
 					<div class="tree-title">
@@ -39,10 +39,38 @@ if ( ! function_exists( 'render_page_node' ) ) {
 }
 ?>
 
+<div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+    <input type="text" id="tree-search" placeholder="Поиск по страницам..." style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); width: 300px; font: inherit; background: var(--surface);">
+    <span class="hint" style="margin:0;">Введите название для фильтрации</span>
+</div>
+
 <?PHP if ( ! $has_dir ) : ?>
 	<div class="error-msg">Каталог не найден: <code>app/<?= htmlspecialchars( $logic ) ?>/domain/<?= htmlspecialchars( $domain ) ?>/allias/<?= htmlspecialchars( $allias ) ?>/algoritm/</code></div>
 <?PHP elseif ( empty( $tree ) ) : ?>
 	<p>Страниц нет.</p>
 <?PHP else : ?>
-	<ul class="tree"><?PHP foreach ( $tree as $node ) render_page_node( $node , $domain , $allias ); ?></ul>
+	<ul class="tree" id="pages-tree"><?PHP foreach ( $tree as $node ) render_page_node( $node , $domain , $allias ); ?></ul>
 <?PHP endif ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tree-search');
+    const treeItems = document.querySelectorAll('#pages-tree .tree-item');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const val = e.target.value.toLowerCase().trim();
+            
+            treeItems.forEach(item => {
+                const text = item.getAttribute('data-search') || '';
+                // Если поле пустое или текст совпадает
+                if (val === '' || text.includes(val)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>

@@ -4,13 +4,25 @@
 
 <form method="post" action="?p=allias:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="form" style="max-width: 600px;">
     <?= Csrf::field() ?>
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+    
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
         <label class="switch" style="margin:0;">
             <input type="checkbox" name="available" value="1" <?= $avail ? 'checked' : '' ?>>
             <span class="slider"></span>
         </label>
         <span>Аллиас включен (доступен для посещения)</span>
     </div>
+
+    <label>Заглушка при выключении аллиаса
+        <select name="stub_current">
+            <?PHP foreach ( $stubs as $sid => $s ) : ?>
+                <option value="<?= htmlspecialchars($sid) ?>" <?= $sid === $current_stub ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($s['title']) ?>
+                </option>
+            <?PHP endforeach ?>
+        </select>
+    </label>
+
     <button type="submit" class="btn-primary" style="margin-top:15px;">Сохранить</button>
 </form>
 

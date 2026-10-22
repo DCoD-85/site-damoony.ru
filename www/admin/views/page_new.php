@@ -1,31 +1,30 @@
-<h1>Создать страницу</h1>
-
+<?PHP ?>
 <p class="hint">
 	Домен: <code><?= htmlspecialchars( $domain , ENT_QUOTES ) ?></code>
 </p>
 
-<?php if ( ! empty( $error ) ) : ?>
+<?PHP if ( ! empty( $error ) ) : ?>
 	<div class="error-msg">✘ <?= htmlspecialchars( $error ) ?></div>
-<?php endif ?>
+<?PHP endif ?>
 
-<?php if ( ! empty( $parent ) ) : ?>
+<?PHP if ( ! empty( $parent ) ) : ?>
 	<p class="hint">
 		Родитель: <code><?= htmlspecialchars( $parent ) ?></code>
 		&nbsp;·&nbsp; файл: <code><?= htmlspecialchars( str_replace( '/' , '_' , $parent ) ) ?>_<span>имя</span></code>
 	</p>
-<?php endif ?>
+<?PHP endif ?>
 
 <form method="post" action="?p=page:new&domain=<?= urlencode( $domain ) ?>" class="form">
 	<?= Csrf::field( ) ?>
 
 	<label>Аллиас
 		<select name="allias" required>
-			<?php foreach ( $alliases as $a ) : ?>
+			<?PHP foreach ( $alliases as $a ) : ?>
 				<option value="<?= htmlspecialchars( $a , ENT_QUOTES ) ?>"
 					<?= $a === $allias ? 'selected' : '' ?>>
 					<?= htmlspecialchars( $a ) ?>
 				</option>
-			<?php endforeach ?>
+			<?PHP endforeach ?>
 		</select>
 	</label>
 
@@ -38,11 +37,8 @@
 		<input type="text" name="parent" value="<?= htmlspecialchars( $parent ?? '' , ENT_QUOTES ) ?>" placeholder="news/archive">
 	</label>
 
-	<button type="submit">Создать</button>
-	<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">Отмена</a>
-
-	<?php if ( ! empty( $parent ) ) : ?>
-		<input type="hidden" name="parent" value="<?= htmlspecialchars( $parent , ENT_QUOTES ) ?>">
-	<?php endif ?>
-
+	<div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
+		<button type="submit" class="btn-primary">Создать</button>
+		<a href="?p=allias:list&domain=<?= urlencode( $domain ) ?>" class="btn-cancel">Отмена</a>
+	</div>
 </form>

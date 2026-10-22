@@ -1,35 +1,27 @@
-<?php 
-$parent_link = '?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias);
-$parent_title = 'Страницы';
-$current_title = $path === '' ? '(корень)' : $path;
-$actions = '<a href="?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Код</a>';
-require __DIR__ . '/_context_nav.php'; 
-?>
-
-<?php if ( ! empty( $saved ) ) : ?>
+<?PHP if ( ! empty( $saved ) ) : ?>
 	<div class="ok-msg">✓ Сохранено</div>
-<?php endif ?>
+<?PHP endif ?>
 
-<?php if ( ! empty( $errors ) ) : ?>
+<?PHP if ( ! empty( $errors ) ) : ?>
 	<div class="error-msg">
-		<?php foreach ( $errors as $e ) : ?>
+		<?PHP foreach ( $errors as $e ) : ?>
 			<div>✘ <?= htmlspecialchars( $e ) ?></div>
-		<?php endforeach ?>
+		<?PHP endforeach ?>
 	</div>
-<?php endif ?>
+<?PHP endif ?>
 
-<?php if ( ! is_file( $json_file ) ) : ?>
+<?PHP if ( ! is_file( $json_file ) ) : ?>
 	<div class="error-msg">
 		Файл переменных не найден: <code><?= htmlspecialchars( $json_file ) ?></code><br>
 		Будут применены дефолты из класса.
 	</div>
-<?php endif ?>
+<?PHP endif ?>
 
 <form method="post" action="?p=page:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $path ) ?>" class="form">
 	<?= Csrf::field( ) ?>
 
 	<label>Правила URL (<code>available</code>) — по одному на строку
-		<textarea name="available" rows="8" style="width:100%;font-family:ui-monospace,Consolas,monospace;"><?= "\n" . htmlspecialchars( implode( "\n" , $current[ 'available' ] ) , ENT_QUOTES ) ?></textarea>
+		<textarea name="available" rows="8" class="code-editor" spellcheck="false"><?= "\n" . htmlspecialchars( implode( "\n" , $current[ 'available' ] ) , ENT_QUOTES ) ?></textarea>
 	</label>
 
 	<label class="checkbox">
@@ -47,6 +39,8 @@ require __DIR__ . '/_context_nav.php';
 		<code>default</code> — вызывать default() для пустого URL
 	</label>
 
-	<button type="submit">Сохранить</button>
-	<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="btn-cancel">Отмена</a>
+	<div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
+		<button type="submit" class="btn-primary">Сохранить</button>
+		<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="btn-cancel">Отмена</a>
+	</div>
 </form>

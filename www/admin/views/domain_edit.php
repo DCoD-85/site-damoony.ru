@@ -18,10 +18,10 @@
             value="<?= htmlspecialchars( $current[ 'title' ] , ENT_QUOTES ) ?>">
     </label>
 
-    <hr style="margin: 20px 0; border-top: 1px dashed #ccc;">
-    <h3>Статус сайта</h3>
+    <hr style="margin: 20px 0; border-top: 1px dashed var(--border);">
+    <h3 style="margin-top:0;">Статус сайта</h3>
 
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
         <label class="switch" style="margin:0;">
             <input type="checkbox" name="domain_available" value="1" <?= $current[ 'avail' ] ? 'checked' : '' ?>>
             <span class="slider"></span>
@@ -29,7 +29,7 @@
         <span>Сайт включен (если выключить — покажется заглушка)</span>
     </div>
 
-    <label>Выберите заглушку
+    <label>Заглушка при выключении домена
         <select name="stub_current">
             <?PHP foreach ( $stubs as $sid => $s ) : ?>
                 <option value="<?= htmlspecialchars($sid) ?>" <?= $sid === $current[ 'stub' ] ? 'selected' : '' ?>>
@@ -41,7 +41,7 @@
 
     <label>Время авто-включения
         <input type="datetime-local" name="stub_until_date" value="<?= !empty($current['until']) ? date('Y-m-d\TH:i', $current['until']) : '' ?>">
-        <small style="color:#888;">Если указать время, сайт автоматически включится в этот момент.</small>
+        <small style="color:var(--text-dim); display:block; margin-top:4px;">Если указать время, сайт автоматически включится в этот момент.</small>
     </label>
 
     <button type="submit" class="btn-primary" style="margin-top:15px;">Сохранить</button>

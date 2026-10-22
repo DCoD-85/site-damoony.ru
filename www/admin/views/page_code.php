@@ -1,4 +1,4 @@
-<?php
+<?PHP
 // Читаем конфиг языков
 $lang_cfg_path = PROJECT_ROOT . '/config/lang.config';
 $lang_cfg = is_file($lang_cfg_path) ? json_decode(file_get_contents($lang_cfg_path), true) : [];
@@ -11,18 +11,9 @@ $url_path .= ($path === '') ? $lang_default . '/index' : str_replace('lang', $la
 $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
 ?>
 
-<?php 
-$parent_link = '?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias);
-$parent_title = 'Страницы';
-$current_title = 'Редактор: ' . $cls_short;
-$actions = '<a href="?p=page:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Настройки</a>';
-require __DIR__ . '/_context_nav.php'; 
-?>
-</div>
-
-<?php if ( !empty($_GET['saved']) ) : ?>
+<?PHP if ( !empty($_GET['saved']) ) : ?>
     <div class="ok-msg">✓ Сохранено</div>
-<?php endif ?>
+<?PHP endif ?>
 
 <div class="nav-tabs" style="margin-bottom:20px;">
     <a href="?p=page:code&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&path=<?= urlencode($path) ?>&tab=logic" class="<?= $tab === 'logic' ? 'active' : '' ?>">Логика (PHP)</a>
@@ -32,33 +23,33 @@ require __DIR__ . '/_context_nav.php';
 <div style="display:flex; gap:15px; height:75vh;">
     <!-- ЛЕВАЯ КОЛОНКА (Редактор) -->
     <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-        <?php if ( $tab === 'data' ) : ?>
+        <?PHP if ( $tab === 'data' ) : ?>
             <form method="post" style="display:flex; flex-direction:column; height:100%;">
                 <?= Csrf::field() ?>
                 <input type="hidden" name="save_json" value="1">
                 <textarea name="json_code" class="code-editor" style="flex:1;" spellcheck="false"><?= htmlspecialchars( $json_code ) ?></textarea>
-                <button type="submit" class="btn-edit" style="margin-top:10px; padding:10px;">Сохранить данные</button>
+                <button type="submit" class="btn-primary" style="margin-top:10px; padding:10px;">Сохранить данные</button>
             </form>
-        <?php else : ?>
+        <?PHP else : ?>
             <div style="display:flex; flex-direction:column; height:100%;">
                 <div class="method-list" style="display:flex; flex-direction:row; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
-                    <?php foreach ( $methods as $name => $m ) : ?>
+                    <?PHP foreach ( $methods as $name => $m ) : ?>
                         <a href="?p=page:code&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&path=<?= urlencode($path) ?>&tab=logic&method=<?= urlencode($name) ?>" 
-                           class="method-link <?= $method_name === $name ? 'active' : '' ?>" style="padding:4px 10px; font-size:12px;">
+                           class="method-link <?= $method_name === $name ? 'active' : '' ?>">
                             <?= htmlspecialchars( $name ) ?>()
                         </a>
-                    <?php endforeach ?>
+                    <?PHP endforeach ?>
                 </div>
 
-                <?php if ( $method_name && isset( $methods[ $method_name ] ) ) : ?>
+                <?PHP if ( $method_name && isset( $methods[ $method_name ] ) ) : ?>
                     <!-- Генератор сложных компонентов -->
-                    <div style="background:#f8f9fa; border:1px solid #ddd; border-radius:6px; padding:12px; margin-bottom:10px;">
+                    <div style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:12px; margin-bottom:10px;">
                         <div style="display:flex; gap:10px; margin-bottom:10px;">
-                            <select id="comp-type" style="padding:5px; border-radius:4px; border:1px solid #ccc;" onchange="renderBuilder()">
+                            <select id="comp-type" class="form-input" style="padding:5px; border-radius:4px; border:1px solid var(--border);" onchange="renderBuilder()">
                                 <option value="table">Таблица (visuoel_table)</option>
                                 <option value="form">Форма (visuoel_form)</option>
                             </select>
-                            <select id="comp-block" style="padding:5px; border-radius:4px; border:1px solid #ccc;">
+                            <select id="comp-block" class="form-input" style="padding:5px; border-radius:4px; border:1px solid var(--border);">
                                 <option value="center">center</option>
                                 <option value="top">top</option>
                                 <option value="left">left</option>
@@ -77,29 +68,30 @@ require __DIR__ . '/_context_nav.php';
                         <?= Csrf::field() ?>
                         <input type="hidden" name="save_method" value="1">
                         <textarea name="method_code" id="method_code_editor" class="code-editor" style="flex:1;" spellcheck="false"><?= htmlspecialchars( $method_code ) ?></textarea>
-                        <button type="submit" class="btn-edit" style="margin-top:10px; padding:10px;">Сохранить функцию</button>
+                        <button type="submit" class="btn-primary" style="margin-top:10px; padding:10px;">Сохранить функцию</button>
                     </form>
-                <?php else : ?>
+                <?PHP else : ?>
                     <div class="error-msg" style="flex:1; display:flex; align-items:center; justify-content:center;">Выберите функцию.</div>
-                <?php endif ?>
+                <?PHP endif ?>
             </div>
-        <?php endif ?>
+        <?PHP endif ?>
     </div>
 
     <!-- ПРАВАЯ КОЛОНКА (Live Preview) -->
-    <div style="flex:1; display:flex; flex-direction:column; background:#fff; border-radius:6px; overflow:hidden; border:1px solid #ccc;">
-        <div style="background:#f0f2f6; padding:8px 12px; font-size:12px; border-bottom:1px solid #ccc; display:flex; gap:10px; align-items:center;">
-            <button type="button" onclick="document.getElementById('preview-frame').src = document.getElementById('preview-url').value + '?t=' + Date.now();" style="cursor:pointer; padding:4px 10px;">Обновить</button>
-            <input type="text" id="preview-url" value="<?= htmlspecialchars( $preview_url ) ?>" style="flex:1; padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-family:monospace;">
+    <div style="flex:1; display:flex; flex-direction:column; background:var(--surface); border-radius:var(--radius); overflow:hidden; border:1px solid var(--border);">
+        <div style="background:var(--bg); padding:8px 12px; font-size:12px; border-bottom:1px solid var(--border); display:flex; gap:10px; align-items:center;">
+            <button type="button" class="btn-cancel" onclick="document.getElementById('preview-frame').src = document.getElementById('preview-url').value + '?t=' + Date.now();" style="cursor:pointer; padding:4px 10px;">Обновить</button>
+            <input type="text" id="preview-url" value="<?= htmlspecialchars( $preview_url ) ?>" style="flex:1; padding:4px 8px; border:1px solid var(--border); border-radius:4px; font-family:monospace;">
         </div>
         <iframe id="preview-frame" src="<?= htmlspecialchars( $preview_url ) ?>?t=<?= time() ?>" style="flex:1; width:100%; border:none;"></iframe>
     </div>
 </div>
 
 <style>
-.code-editor { width: 100%; background: #1e1e1e; color: #d4d4d4; font-family: monospace; font-size: 14px; padding: 15px; border-radius: 6px; border: 1px solid #333; resize: none; }
-.method-link { background: #fff; border: 1px solid #e0e4eb; border-radius: 4px; color: #333; padding: 4px 10px; font-size: 12px; text-decoration: none; font-family: monospace; }
-.method-link.active { background: #2a63d6; color: #fff; border-color: #2a63d6; }
+.code-editor { width: 100%; background: #1e1e1e; color: #d4d4d4; font-family: ui-monospace, Consolas, monospace; font-size: 13px; padding: 15px; border-radius: 6px; border: 1px solid #333; resize: none; }
+.method-link { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 4px 10px; font-size: 12px; text-decoration: none; font-family: ui-monospace, Consolas, monospace; transition: 0.2s; }
+.method-link:hover { border-color: var(--primary); }
+.method-link.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .grid-input { width: 100%; border: 1px solid #ccc; padding: 5px; border-radius: 3px; box-sizing: border-box; }
 </style>
 
@@ -174,7 +166,6 @@ function insertComponentCode() {
         code += `$form->data()->set( '${formName}' );\n\t\t`;
     }
     
-    // Сборка контейнера visuotag и вставка в блок
     let elVar = (type === 'table') ? '$table' : '$form';
     code += `$vt = new \\visuotag();\n\t\t`;
     code += `$vt->el( ${elVar} );\n\t\t`;
@@ -183,13 +174,11 @@ function insertComponentCode() {
     code += `$center->wrapper_set( 'div' );\n\t\t`;
     code += `$center->section_add( 'auto_${Date.now()}' , $vt );\n\t`;
 
-    // Поиск места вставки (перед return или перед закрывающей скобкой)
     let textarea = document.getElementById('method_code_editor');
     let val = textarea.value;
     let pos = val.lastIndexOf('return');
     
     if (pos === -1) {
-        // Если return нет, вставляем перед последней закрывающей скобкой
         pos = val.lastIndexOf('}');
     }
     
@@ -200,5 +189,6 @@ function insertComponentCode() {
     }
 }
 
+renderComponentCode = renderBuilder; // legacy fallback
 renderBuilder();
 </script>

@@ -105,38 +105,35 @@ class main implements VisuoHost {
 		$static_domain = $main->main_settings->domain_accepted( false );
 		$static_allias = $main->main_settings->allias_accepted( );
 
-		# --- домен или аллиас выключен/не найден → 404 ---
+		# --- домен или аллиас выключен/не найден → заглушка или 404 ---
 		if ( empty( $static_domain ) || empty( $static_allias ) ) {
 			$real = $this->main_settings->domain_real_name ?? '';
-			$logic = $this->main_settings->logic ?? 'alpha.0.0';
-
-			$stub_domain = $this->main_settings->domains_stub[ $real ] ?? null;
-			$is_stub_domain = $stub_domain && ( $stub_domain['enabled'] ?? false ) && ( ( $stub_domain['until'] ?? 0 ) == 0 || time() < $stub_domain['until'] );
-
 			$allias_key = $this->main_settings->allias_real_name ?? '';
-			$stub_allias = $this->main_settings->alliases_stub[ $real ][ $allias_key ] ?? null;
-			$is_stub_allias = $stub_allias && ( $stub_allias['enabled'] ?? false ) && ( ( $stub_allias['until'] ?? 0 ) == 0 || time() < $stub_allias['until'] );
+			
+			$stub_id = null;
 
-			$active_stub = null;
-			if ( $is_stub_domain ) $active_stub = $stub_domain;
-			elseif ( $is_stub_allias ) $active_stub = $stub_allias;
-
-			if ( $active_stub ) {
-				$ns = $this->main_settings->domains_namespace[ $real ] ?? '';
-				$class = '\\' . $ns . '\\www\\algoritm_stub';
-				$file = dirname( __DIR__ ) . '/app/' . $logic . '/domain/' . $real . '/allias/www/algoritm/algoritm_stub.php';
-
-				if ( file_exists( $file ) ) {
-					require_once $file;
-					if ( class_exists( $class ) ) {
-						$instance = new $class( $this );
-						$instance->render_stub( $active_stub );
-						$this->release();
-						exit;
-					}
-				}
+			// Определяем, какая заглушка активна (приоритет: домен > аллиас)
+			if ( empty( $this->main_settings->domains_available[ $real ] ) ) {
+				$stub_id = $this->main_settings->domains_stub[ $real ][ 'current' ] ?? 'maintenance';
+			} elseif ( empty( $this->main_settings->alliases_available[ $real ][ $allias_key ] ) ) {
+				$stub_id = $this->main_settings->alliases_stub[ $real ][ $allias_key ][ 'current' ] ?? 'maintenance';
 			}
 
+			// Если есть активная заглушка и она существует в конфиге
+			if ( $stub_id && isset( $this->main_settings->stubs[ $stub_id ] ) ) {
+				$stub_data = $this->main_settings->stubs[ $stub_id ];
+				$html  = $stub_data['html'] ?? $stub_data['text'] ?? $stub_data['content'] ?? '';
+				$title = $stub_data['title'] ?? 'Технические работы';
+				
+				echo '<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' . htmlspecialchars($title) . '</title>';
+				echo '<style>body{font-family:system-ui,-apple-system,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f8fafc;color:#1e293b;text-align:center;}.stub{padding:40px;background:#fff;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);max-width:600px;width:100%;}</style>';
+				echo '</head><body><div class="stub">';
+				echo $html;
+				echo '</div></body></html>';
+				exit;
+			}
+
+			// Если заглушки нет - стандартный 404
 			http_response_code( 404 );
 			die( 'Not Found' );
 		}
@@ -357,13 +354,23 @@ class main_settings {
 	}
 	
 	public function domain_accepted ( bool $full = true ) {
-		# домен вообще не в списке доступных → null
-		if ( empty( $this->domains_available[ $this->domain_real_name ] ) ) {
+		$real = $this->domain_real_name;
+		
+		$avail = ! empty( $this->domains_available[ $real ] );
+		$until = $this->domains_stub[ $real ][ 'until' ] ?? 0;
+
+		// Если сайт выключен, но время авто-включения уже пришло — считаем его включенным
+		if ( ! $avail && $until > 0 && time() >= $until ) {
+			$avail = true;
+		}
+
+		if ( ! $avail ) {
 			return null;
 		}
-		$return = $this->domain_real_name;
+
+		$return = $real;
 		if ( $full == false ) {
-			$ns = $this->domains_namespace[ $this->domain_real_name ] ?? null;
+			$ns = $this->domains_namespace[ $real ] ?? null;
 			if ( $ns !== null && $ns !== '' ) return $ns;
 			$return = mb_ereg_replace( '\.ru' , '' , $return );
 		}
@@ -371,7 +378,18 @@ class main_settings {
 	}
 	
 	public function allias_accepted ( ) {
-		return $this->alliases_available[ $this->domain_real_name ][ $this->allias_real_name ] ? $this->allias_real_name : null;
+		$real = $this->domain_real_name;
+		$allias = $this->allias_real_name;
+
+		$avail = ! empty( $this->alliases_available[ $real ][ $allias ] );
+		$until = $this->alliases_stub[ $real ][ $allias ][ 'until' ] ?? 0;
+
+		// Если аллиас выключен, но время авто-включения уже пришло — считаем его включенным
+		if ( ! $avail && $until > 0 && time() >= $until ) {
+			$avail = true;
+		}
+
+		return $avail ? $allias : null;
 	}
 	public function engine ( ) : string {
 		$allias = $this->allias_real_name;

@@ -1,6 +1,6 @@
-<?php if ( empty( $domains ) ) : ?>
+<?PHP if ( empty( $domains ) ) : ?>
 	<p>Доменов нет.</p>
-<?php else : ?>
+<?PHP else : ?>
 	<table class="table">
 		<thead>
 			<tr>
@@ -13,16 +13,16 @@
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ( $domains as $d ) : ?>
-				<?php $d_enc = urlencode( $d[ 'domain' ] ); ?>
+			<?PHP foreach ( $domains as $d ) : ?>
+				<?PHP $d_enc = urlencode( $d[ 'domain' ] ); ?>
 				<tr style="cursor:pointer;" onclick="window.location='?p=domain:edit&domain=<?= $d_enc ?>';">
 					<td>
 						<a href="?p=domain:edit&domain=<?= $d_enc ?>" class="domain-link" style="font-size:16px;">
 							<b><?= htmlspecialchars( $d[ 'domain' ] ) ?></b>
 						</a>
-						<?php if ( ! empty( $d[ 'aliases' ] ) ) : ?>
+						<?PHP if ( ! empty( $d[ 'aliases' ] ) ) : ?>
 							<div class="hint" style="font-size:11px; color:#888; margin-top:4px;">aliases: <?= htmlspecialchars( implode( ', ' , $d[ 'aliases' ] ) ) ?></div>
-						<?php endif ?>
+						<?PHP endif ?>
 					</td>
 					<td><code><?= htmlspecialchars( $d[ 'ns' ] ) ?></code></td>
 					<td style="text-align:center;" onclick="event.stopPropagation();">
@@ -39,25 +39,40 @@
 					<td style="text-align:center;"><?= $d[ 'fs' ] ? '✓' : '✗' ?></td>
 					<td>
 						<div class="allias-list">
-							<?php foreach ( $d[ 'alliases' ] as $a ) : ?>
-								<?php 
-								// Поддержка старого и нового формата
+							<?PHP 
+							$aliases_to_show = array_slice( $d[ 'alliases' ] , 0 , 3 );
+							$hidden_count = count( $d[ 'alliases' ] ) - count( $aliases_to_show );
+							?>
+							<?PHP foreach ( $aliases_to_show as $a ) : ?>
+								<?PHP 
 								$a_name = is_array( $a ) ? $a[ 'name' ] : $a;
 								$a_avail = is_array( $a ) ? $a[ 'avail' ] : true;
 								?>
 								<a href="?p=allias:edit&domain=<?= $d_enc ?>&allias=<?= urlencode( $a_name ) ?>" 
 								   class="allias-link" onclick="event.stopPropagation();" title="Настройки аллиаса"
-								   style="<?= $a_avail ? 'background:#e3f7e8; border-color:#c6e6d0; color:#1a7a3b;' : 'opacity:0.6;' ?>">
+								   style="<?= $a_avail ? 'background:#ecfdf5; border-color:#a7f3d0; color:#065f46;' : 'opacity:0.6;' ?>">
 									<?= htmlspecialchars( $a_name ) ?>
 								</a>
-							<?php endforeach ?>
+							<?PHP endforeach ?>
+							
+							<?PHP if ( $hidden_count > 0 ) : ?>
+								<?PHP 
+								$hidden_names = [];
+								foreach ( array_slice( $d['alliases'] , 3 ) as $h ) {
+									$hidden_names[] = is_array( $h ) ? $h[ 'name' ] : $h;
+								}
+								?>
+								<span class="allias-link" style="opacity:0.7; cursor:help; background:var(--surface); border-color:var(--border); color:var(--text-dim);" title="<?= htmlspecialchars( implode( ', ' , $hidden_names ) ) ?>">+<?= $hidden_count ?></span>
+							<?PHP endif ?>
+							
+							<a href="?p=allias:new&domain=<?= $d_enc ?>" class="allias-link" onclick="event.stopPropagation();" style="background:var(--surface); border-style:dashed; color:var(--text-dim); font-weight:bold;" title="Добавить аллиас">+</a>
 						</div>
 					</td>
 					<td>
 						<a href="?p=domain:remove&domain=<?= $d_enc ?>" class="btn-danger" onclick="event.stopPropagation(); return confirm('Удалить домен <?= $d_enc ?>?');">Удалить</a>
 					</td>
 				</tr>
-			<?php endforeach ?>
+			<?PHP endforeach ?>
 		</tbody>
 	</table>
-<?php endif ?>
+<?PHP endif ?>
