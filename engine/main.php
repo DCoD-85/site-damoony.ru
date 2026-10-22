@@ -81,7 +81,9 @@ class main implements VisuoHost {
 		$this->language->load( )->init( );
 		
 		# Базовые классы (domain, algoritmdata_, algoritm_)
-		( include_once $path = dirname( __DIR__ ) . DS . 'engines' . DS . 'chain' . DS . 'include.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		require_once __DIR__ . DS . 'algoritmdata_.php';
+		require_once __DIR__ . DS . 'domain.php';
+		require_once __DIR__ . DS . 'algoritm_.php';
 		
 		# Новый движок tree
 		require_once __DIR__ . DS . 'tree.php';

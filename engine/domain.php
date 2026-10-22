@@ -28,10 +28,10 @@ class domain {
 		( $domain_accepted ) or error( true , true , __FILE__ , __LINE__ );
 		
 		$logic_ver = $this->main->main_settings->get( 'logic' );
-		( include_once $path = dirname(dirname(__DIR__)) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'allias.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = dirname(dirname(__DIR__)) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'alliasglobal.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = dirname(dirname(__DIR__)) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'alliasscheme.php' ) or error_file( $path , __FILE__ , __LINE__ );
-		( include_once $path = dirname(dirname(__DIR__)) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'dataprovider.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = dirname(__DIR__) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'allias.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = dirname(__DIR__) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'alliasglobal.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = dirname(__DIR__) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'alliasscheme.php' ) or error_file( $path , __FILE__ , __LINE__ );
+		( include_once $path = dirname(__DIR__) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'dataprovider.php' ) or error_file( $path , __FILE__ , __LINE__ );
 	}
 }
 
