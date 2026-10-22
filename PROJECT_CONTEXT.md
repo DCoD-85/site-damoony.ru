@@ -4,8 +4,9 @@
 
 ## 1. О проекте
 SimplCMS — высокопроизводительная гибридная CMS для управления мультидоменной сетью сайтов. 
-Ключевая архитектура: Data (JSON) -> Router (Транслятор) -> Logic (PHP + visuo).
-Вместо тяжелой базы данных для структуры используются атомарные JSON/PHP файлы. Движок поддерживает два режима маршрутизации: chain (цепочка файлов) и router (явные маршруты).
+Ключевая архитектура: Data (JSON) -> Tree Router (Файловый роутер) -> Logic (PHP + visuo).
+Вместо тяжелой базы данных для структуры используются атомарные JSON/PHP файлы. 
+Движок использует **единый файловый роутер (tree)**. Логика страниц строится по физическому дереву URL: `/algoritm/p1/p2.php`.
 
 ## 2. Окружение и Стек
 - Локальный ПК: Windows (OSPanel), GitBash.
@@ -25,14 +26,21 @@ SimplCMS — высокопроизводительная гибридная CMS
 7. Рендеринг: HTML генерируется только через visuotag и visuoel. Никаких голых echo в логике.
 
 ## 4. Дерево структуры проекта (Ключевые узлы)
-- /app/alpha.0.0/domain/ - Данные доменов (JSON, PHP-классы страниц)
-- /config/ - site.config (настройки), admin.config (пароли)
-- /corescripts/ - Ядро управления
-  - /commands/ - Логика команд (используется и CLI, и Админкой)
+- /app/alpha.0.0/domain/ - Данные доменов (PHP-классы страниц, .rules.json)
+- /config/ - Конфиги
+  - engine.config (настройки движка: logic, ui_ajax_forms)
+  - site.config (структура: домены, аллиасы, филлеры)
+  - site.stubs.config (библиотека заглушек)
+  - admin.config (пароли)
+- /corescripts/ - Ядро управления (CLI и Админка)
+  - /commands/ - Логика команд
   - /_lib/ - Классы Fs, Json, Paths, Config, Scan
   - cli.php - CLI точка входа
-- /engine/ - Базовый движок (main, autoload, библиотеки)
-- /engines/ - Трансляторы (chain/ и router/)
+- /engine/ - Ядро движка
+  - main.php (оркестратор)
+  - tree.php (★ файловый роутер)
+  - algoritm_.php (базовый класс страниц)
+  - domain.php, algoritmdata_.php (базовые классы)
 - /visuo/ - UI-движок (visuotag, visuoel, components)
 - /www/admin/ - Изолированная админка (bootstrap, views)
 - /_dev/ - Инструменты разработчика (phpstan, phpunit)
@@ -40,10 +48,13 @@ SimplCMS — высокопроизводительная гибридная CMS
 - /_doc/ - Документация проекта
 
 ## 5. Статус и что сделано (История)
-- Paths: Полностью унифицированы (все смотрят в app/).
-- Router: Интегрирован. Обрабатывает auth и error автоматически. Поддерживает return false (переход на 404).
-- Visuo Builder: В админке (page:code) есть генератор сниппетов (таблицы, формы), который пишет чистый код (Data -> visuo) и вставляет перед return.
+- Paths: Унифицированы, разделены engine() и config().
+- Tree Router: Единый движок (tree.php). Работает по физическому дереву. Проверяет `available` и `auth` из `.rules.json`. Заменил собой старые chain и router.
+- Формат правил: Только `.rules.json` (2 ключа: `available`, `auth`). `search` и `default` удалены.
+- Ошибки: Вынесены в `allias/{alias}/errors/{code}.php` (локальные) и `domain/errors/{code}.php` (глобальные).
+- Visuo Builder: В админке (page:code) есть генератор сниппетов (таблицы, формы).
 - Schemes: Управляются визуально через Drag & Drop (вкладка Схемы).
+- Админка: Полностью переведена на `.rules.json` (редактор страниц пишет в новый формат).
 
 ## 6. Roadmap (Что дальше)
 Смотри файл _futures/roadmap.md.
