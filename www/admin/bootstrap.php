@@ -301,7 +301,7 @@ switch ( $p ) {
 
 	case 'page:code' :
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' ); $path = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' ); $method_name = (string) ( $_GET[ 'method' ] ?? '' );
-		$base = Paths::algoritm( $domain , $allias ); $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) ); $sub_dir = $path === '' ? $base : $base . '/' . $path; $php_file = $sub_dir . '/' . $cls_short . '.php'; $json_file = $sub_dir . '/' . $cls_short . '.data.json';
+		$base = Paths::algoritm( $domain , $allias ); $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) ); $sub_dir = $path === '' ? $base : $base . '/' . $path; $php_file = $sub_dir . '/' . $cls_short . '.php'; $json_file = $sub_dir . '/' . $cls_short . '.rules.json';
 		if ( ! is_file( $php_file ) ) { header( 'Location: ?p=pages:tree&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); exit; }
 		$parent_methods = [ 'algoritm' => "public function algoritm ( ) {\n\t\n}", 'guest' => "public function guest ( ) {\n\treturn false;\n}", 'logged' => "public function logged ( ) {\n\treturn false;\n}", 'ajax_guest' => "public function ajax_guest ( ) {\n\treturn false;\n}", 'ajax_logged' => "public function ajax_logged ( ) {\n\treturn false;\n}", 'default' => "public function default ( ) {\n\treturn parent::default();\n}" ];
 		$extract_methods = function( $code ) {
@@ -341,42 +341,48 @@ switch ( $p ) {
 		if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
 		$cfg = new Config( Paths::config() ); $real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 		if ( $real === null ) { header( 'Location: ?p=dashboard' ); exit; }
-		$base = Paths::algoritm( $domain , $allias ); $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) ); $sub_dir = $path === '' ? $base : $base . '/' . $path; $php_file = $sub_dir . '/' . $cls_short . '.php'; $json_file = $sub_dir . '/' . $cls_short . '.data.json';
+		$base = Paths::algoritm( $domain , $allias ); $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) ); $sub_dir = $path === '' ? $base : $base . '/' . $path; $php_file = $sub_dir . '/' . $cls_short . '.php'; $rules_file = $sub_dir . '/' . $cls_short . '.rules.json';
 		if ( ! is_file( $php_file ) ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => "Страница не найдена: {$path}" , 'back_url' => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) , 'back_label' => 'К страницам' ] ); break; }
+		
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			$available_raw = (string) ( $_POST[ 'available' ] ?? '' ); $auth = ! empty( $_POST[ 'auth' ] ); $search = ! empty( $_POST[ 'search' ] ); $default = ! empty( $_POST[ 'default' ] );
+			$available_raw = (string) ( $_POST[ 'available' ] ?? '' ); 
+			$auth          = ! empty( $_POST[ 'auth' ] );
+			
 			$lines = preg_split( '/\r\n|\n|\r/' , $available_raw ); $available = [ ]; $seen = [ ];
 			foreach ( $lines as $line ) { $line = trim( $line ); if ( isset( $seen[ $line ] ) ) continue; $seen[ $line ] = true; $available[ ] = $line; }
 			while ( ! empty( $available ) && end( $available ) === '' ) { array_pop( $available ); }
 			if ( empty( $available ) ) { $available = [ '' ]; }
-			if ( $search ) {
-				$bad = [ ]; foreach ( $available as $line ) {
-					if ( $line === '' ) continue;
-					if ( strlen( $line ) > 64 ) { $bad[ ] = $line . ' — длина > 64'; continue; }
-					if ( preg_match( '/^[\.\*\+\?]+$/' , $line ) ) { $bad[ ] = $line . ' — catch-all regex'; continue; }
-					if ( preg_match( '/[#\s\/]/' , $line ) ) { $bad[ ] = $line . ' — запрещённый символ'; continue; }
-				}
-				if ( ! empty( $bad ) ) {
-					View::render( 'page_edit' , [
-						'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'json_file' => $json_file , 'saved' => false , 'errors' => array_merge( [ 'Недопустимые правила available:' ] , $bad ) , 'current' => [ 'available' => $available , 'auth' => $auth , 'search' => $search , 'default' => $default ] ,
-						'meta' => [ 'title' => 'Настройки страницы' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $path===''?'(корень)':$path, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ]
-					] );
-					break;
-				}
+			
+			$data = [ 
+				'available' => $available , 
+				'auth'      => $auth 
+			];
+			
+			try { 
+				Json::writeAtomic( $rules_file , $data ); 
+				AuditLog::action_ok( 'page:edit' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path ] ); 
+			} catch ( Throwable $e ) { 
+				View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Ошибка записи: ' . $e->getMessage( ) , 'back_url' => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) , 'back_label' => 'Назад' ] ); break; 
 			}
-			$data = [ 'default' => [ 'available' => $available , 'auth' => $auth , 'search' => $search , 'default' => $default ] ];
-			try { Json::writeAtomic( $json_file , $data ); AuditLog::action_ok( 'page:edit' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path ] ); }
-			catch ( Throwable $e ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Ошибка записи: ' . $e->getMessage( ) , 'back_url' => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) , 'back_label' => 'Назад' ] ); break; }
 			header( 'Location: ?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) . '&saved=1' ); exit;
 		}
-		$current = [ 'available' => [ ] , 'auth' => false , 'search' => true , 'default' => false ];
-		$json = Json::read( $json_file );
-		if ( is_array( $json ) && isset( $json[ 'default' ] ) && is_array( $json[ 'default' ] ) ) {
-			$d = $json[ 'default' ]; $current[ 'available' ] = isset( $d[ 'available' ] ) && is_array( $d[ 'available' ] ) ? $d[ 'available' ] : [ ]; $current[ 'auth' ] = ! empty( $d[ 'auth' ] ); $current[ 'search' ] = ! isset( $d[ 'search' ] ) || ! empty( $d[ 'search' ] ); $current[ 'default' ] = ! empty( $d[ 'default' ] );
+		
+		$current = [ 'available' => [ ] , 'auth' => false ];
+		$json = Json::read( $rules_file );
+		if ( is_array( $json ) ) {
+			$current[ 'available' ] = isset( $json[ 'available' ] ) && is_array( $json[ 'available' ] ) ? $json[ 'available' ] : [ ];
+			$current[ 'auth' ]      = ! empty( $json[ 'auth' ] );
 		}
+		
 		View::render( 'page_edit' , [
-			'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'json_file' => $json_file , 'current' => $current , 'saved' => ! empty( $_GET[ 'saved' ] ) ,
-			'meta' => [ 'title' => 'Настройки страницы: '.($path===''?'(корень)':$path) , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Страницы', 'url' => '?p=pages:tree&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $path===''?'(корень)':$path, 'url' => ''] ] , 'actions' => '<a href="?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Визуально</a> <a href="?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Код</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ]
+			'domain'    => $domain ,
+			'allias'    => $allias ,
+			'path'      => $path ,
+			'cls_short' => $cls_short ,
+			'json_file' => $rules_file ,
+			'current'   => $current ,
+			'saved'     => ! empty( $_GET[ 'saved' ] ) ,
+			'meta'      => [ 'title' => 'Настройки страницы: '.($path===''?'(корень)':$path) , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Страницы', 'url' => '?p=pages:tree&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $path===''?'(корень)':$path, 'url' => ''] ] , 'actions' => '<a href="?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Визуально</a> <a href="?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Код</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ]
 		] );
 		break;
 
@@ -797,7 +803,7 @@ switch ( $p ) {
 	
 	case 'settings' :
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
-		$allowed = [ 'logic' , 'logic_type' , 'connect_type' , 'ui_ajax_forms' ];
+		$allowed = [ 'logic' , 'connect_type' , 'ui_ajax_forms' ];
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/SettingsSet.php'; $params = [ ]; foreach ( $allowed as $k ) { if ( array_key_exists( $k , $_POST ) ) { $params[ $k ] = $_POST[ $k ]; } }
 			$result = SettingsSet::run( $params ); AuditLog::action_ok( 'settings:set' , [ 'params' => $params , 'ok' => $result->ok ] );
@@ -813,7 +819,6 @@ switch ( $p ) {
 			'meta' => [ 'title' => 'Настройки' ] , 'title' => 'Настройки' , 'saved' => ! empty( $_GET[ 'saved' ] ) ,
 			'current' => [ 
 				'logic'        => (string) ( $engine_cfg->get( 'logic' ) ?? '' ) , 
-				'logic_type'   => (string) ( $engine_cfg->get( 'logic_type' ) ?? 'router' ) , 
 				'ui_ajax_forms'=> ! empty( $engine_cfg->get( 'ui_ajax_forms' ) ) , 
 				'connect_type' => (string) ( $engine_cfg->get( 'connect_type' ) ?? 'https://' ) 
 			] ,

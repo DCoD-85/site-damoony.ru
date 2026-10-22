@@ -47,9 +47,6 @@ class Scan {
 
         foreach ( scandir( $base ) as $name ) {
             if ( $name === '.' || $name === '..' ) continue;
-            if ( $name === 'algoritm_auth.php' )       continue;
-            if ( $name === 'algoritm_error.php' )      continue;
-            if ( $name === 'algoritm_pageshablon.php' ) continue;
 
             $dir = $base . '/' . $name;
             if ( ! is_dir( $dir ) ) continue;
@@ -70,9 +67,6 @@ class Scan {
         $children = [ ];
         foreach ( scandir( $dir ) as $sub ) {
             if ( $sub === '.' || $sub === '..' ) continue;
-            if ( $sub === 'algoritm_auth.php' )       continue;
-            if ( $sub === 'algoritm_error.php' )      continue;
-            if ( $sub === 'algoritm_pageshablon.php' ) continue;
 
             $sub_dir = $dir . '/' . $sub;
             if ( ! is_dir( $sub_dir ) ) continue;
@@ -87,31 +81,30 @@ class Scan {
             'class'     => $cls ,
             'has_file'  => $has ,
             'meta'      => $has ? self::parseMeta( $file ) : [
-                'available' => [ ] , 'auth' => false , 'search' => true , 'default' => false ,
+                'available' => [ ] , 'auth' => false , 'search' => false , 'default' => false ,
             ] ,
             'children'  => $children ,
         ];
     }
 
-    # парсит метаданные страницы из .data.json
+    # парсит метаданные страницы из .rules.json
     private static function parseMeta ( string $file ) : array {
         $default = [
             'available' => [ ] ,
             'auth'      => false ,
-            'search'    => true ,
+            'search'    => false ,
             'default'   => false ,
         ];
 
-        $json = preg_replace( '/\.php$/' , '.data.json' , $file );
+        $json = preg_replace( '/\.php$/' , '.rules.json' , $file );
         $data = Json::read( $json );
-        if ( ! is_array( $data ) || ! isset( $data[ 'default' ] ) ) return $default;
+        if ( ! is_array( $data ) ) return $default;
 
-        $d = $data[ 'default' ];
         return [
-            'available' => is_array( $d[ 'available' ] ?? null ) ? $d[ 'available' ] : [ ] ,
-            'auth'      => ! empty( $d[ 'auth' ] ) ,
-            'search'    => ! isset( $d[ 'search' ] ) || ! empty( $d[ 'search' ] ) ,
-            'default'   => ! empty( $d[ 'default' ] ) ,
+            'available' => is_array( $data[ 'available' ] ?? null ) ? $data[ 'available' ] : [ ] ,
+            'auth'      => ! empty( $data[ 'auth' ] ) ,
+            'search'    => false ,
+            'default'   => false ,
         ];
     }
 
@@ -130,9 +123,6 @@ class Scan {
         sort( $out );
         return $out;
     }
-
-
-
 
     private static function blocksFromSchemes ( string $domain ) : array {
         $schemes_dir = Paths::domain( $domain ) . '/alliasscheme';
@@ -154,13 +144,6 @@ class Scan {
         }
         return array_unique($out);
     }
-
-
-    
-
-
-    
-
 
     # --- визуальные контейнеры схем ---
     public static function layoutsFor ( string $domain ) : array {
@@ -190,7 +173,6 @@ class Scan {
         $scheme_blocks = self::blocksFromSchemes( $domain );
         $all_blocks = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
         $all_blocks = array_diff( $all_blocks , [ 'middle' ] );
-        $all_blocks    = array_diff( $all_blocks , [ 'middle' ] ); // Убираем визуальный контейнер
         sort( $all_blocks );
 
         $out = [ ];
@@ -218,7 +200,6 @@ class Scan {
         $scheme_blocks = self::blocksFromSchemes( $domain );
         $all_blocks = array_unique( array_merge( $real_blocks , $scheme_blocks , Blocks::LIST ) );
         $all_blocks = array_diff( $all_blocks , [ 'middle' ] );
-        $all_blocks    = array_diff( $all_blocks , [ 'middle' ] ); // Убираем визуальный контейнер
         sort( $all_blocks );
 
         $out = [ ];

@@ -12,8 +12,8 @@
 
 <?PHP if ( ! is_file( $json_file ) ) : ?>
 	<div class="error-msg">
-		Файл переменных не найден: <code><?= htmlspecialchars( $json_file ) ?></code><br>
-		Будут применены дефолты из класса.
+		Файл правил не найден: <code><?= htmlspecialchars( $json_file ) ?></code><br>
+		Будут применены дефолты (пустой список).
 	</div>
 <?PHP endif ?>
 
@@ -29,17 +29,7 @@
 		<code>auth</code> — только для авторизованных
 	</label>
 
-	<label class="checkbox">
-		<input type="checkbox" name="search" value="1" <?= $current[ 'search' ] ? 'checked' : '' ?>>
-		<code>search</code> — разбирать URL через regex
-	</label>
-
-	<label class="checkbox">
-		<input type="checkbox" name="default" value="1" <?= $current[ 'default' ] ? 'checked' : '' ?>>
-		<code>default</code> — вызывать default() для пустого URL
-	</label>
-
-	<div style="display:flex; gap:10px; align-items:center; margin-top:15px;">
+	<div style="display:flex; gap:10px; align-items:center; margin-top:20px;">
 		<button type="submit" class="btn-primary">Сохранить</button>
 		<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="btn-cancel">Отмена</a>
 	</div>
