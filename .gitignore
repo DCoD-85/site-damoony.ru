@@ -50,3 +50,9 @@ _tmp/
 _dev/bin/.phpunit.result.cache
 .phpunit.cache/
 config/admin.config
+
+# Config artifacts from Config::mutate()
+config/*.bak
+config/*.lock
+# Backups
+_backup_config_*

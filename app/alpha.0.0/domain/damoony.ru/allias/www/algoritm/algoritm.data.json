@@ -1,12 +1,10 @@
 {
 	"default": {
 		"available": [
-			"index",
-			"dd",
-			"qwert"
+			"[a-z]{2}-[a-z]{2}|lang"
 		],
 		"auth": false,
 		"search": true,
-		"default": false
+		"default": true
 	}
 }

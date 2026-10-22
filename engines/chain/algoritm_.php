@@ -4,7 +4,6 @@ class algoritm_ {
 	# --- core references ---
 	public main $main;
 
-	# public \damoony\www\algoritm|\damoony\login\algoritm|\damoony\login\algoritm $algoritm;
 	public null|\algoritm_ $algoritm = null;
 	public array $args = [ ];
 	public null|algoritmdata_ $algoritmdata = null;
@@ -29,9 +28,6 @@ class algoritm_ {
 	public bool  $search    = true;
 	public bool  $default   = false;
 
-	# ===============================================================
-	#   CONSTRUCTOR - unified for all children
-	# ===============================================================
 	public function __construct ( main $main , array $args = [ ] ) {
 		$this->main = $main;
 		$this->args = $args;
@@ -77,7 +73,7 @@ class algoritm_ {
 		}
 	}
 
-		protected function load_vars ( ) : void {
+	protected function load_vars ( ) : void {
 		$rc   = new \ReflectionClass( $this );
 		$file = dirname( $rc->getFileName( ) ) . DIRECTORY_SEPARATOR
 		      . $rc->getShortName( ) . '.vars.php';
@@ -87,9 +83,6 @@ class algoritm_ {
 		}
 	}
 
-	# ===============================================================
-	#   RELEASE FRAMEWORK
-	# ===============================================================
 	final public function release () {
 		$this->algoritmdata->set( $this->available , $this->auth , $this->search , $this->default );
 		$this->release_( $this );
@@ -109,7 +102,6 @@ class algoritm_ {
 		$data = @json_decode( $raw , true );
 		if ( ! is_array( $data ) ) return;
 
-		# пока только default
 		$vars = $data[ 'default' ] ?? [ ];
 
 		foreach ( $vars as $k => $v ) {
@@ -120,14 +112,7 @@ class algoritm_ {
 		}
 	}
 
-	# ===============================================================
-	#   HELPERS
-	# ===============================================================
-	# ===============================================================
-	#   JSON RENDERER (Data -> Logic / Tags & visuoel)
-	# ===============================================================
 	public function render_json_node ( array $node ) : mixed {
-		// 1. Если это готовый компонент visuoel (например: {"el": "button"})
 		if ( ! empty( $node[ 'el' ] ) ) {
 			$el_type = strtolower( $node[ 'el' ] );
 			$class = '\\visuoel_' . $el_type;
@@ -146,7 +131,6 @@ class algoritm_ {
 			}
 		}
 
-		// 2. Обычный HTML-тег
 		$tag     = $node[ 'tag' ]     ?? 'div';
 		$class   = $node[ 'class' ]   ?? '';
 		$id      = $node[ 'id' ]      ?? '';
@@ -154,7 +138,7 @@ class algoritm_ {
 		$href    = $node[ 'href' ]    ?? '';
 		
 		$vt = new \visuotag( );
-		$el = $vt->tag( $tag , class : $class , id : $id , href : $href );
+		$el = $vt->tag( $tag , class : $class , id : $id );
 		
 		if ( $content !== '' ) {
 			$el->content( $content );
@@ -184,10 +168,9 @@ class algoritm_ {
 		return ( $url_base[ $pos ] ?? '' ) === '';
 	}
 
-	# ===============================================================
-	#   ROUTING FRAMEWORK - default -> ajax -> role
-	# ===============================================================
-	public function default () {
+	public function default ( ) {
+		print (int)$this->is_ajax() . '<br />';
+		print __FILE__ . '<br />';
 		if ( $this->is_ajax() ) return $this->ajax();
 		return $this->role();
 	}
@@ -200,31 +183,19 @@ class algoritm_ {
 		return $this->logged();
 	}
 
-	# ===============================================================
-	#   STUBS - override in children
-	# ===============================================================
 	public function algoritm ()    { }
 	public function guest ()       { return false; }
 	public function logged ()      { return false; }
 	public function ajax_guest ()  { return false; }
 	public function ajax_logged () { return false; }
 
-	# ===============================================================
-	#   ERROR ALIAS
-	# ===============================================================
 	public function error () {
 		return $this->error_( $this );
 	}
 
-	# ===============================================================
-	#   ROUTING HOOK - empty, override in child for debug
-	# ===============================================================
 	public function on_route ( string $class , string $path ) {
 	}
 
-	# ===============================================================
-	#   SERVICE METHODS
-	# ===============================================================
 	public function clear ( ) {
 		$url = $this->main->library->url( );
 	}
@@ -235,9 +206,6 @@ class algoritm_ {
 	public function debug ( ) {
 	}
 
-	# ===============================================================
-	#   ROUTING - DO NOT TOUCH
-	# ===============================================================
 	public function include_ext ( object $object , array $available , bool $search = false , bool $default = false ){
 		$main = $this->main;
 
@@ -303,7 +271,6 @@ class algoritm_ {
 					$this->error_( $this->algoritm_classes[ $url_base_pos ] );
 				}
 			} else {
-				
 				http_response_code( 403 );
 				if ( $url_base_pos > 0 && isset( $this->algoritm_classes[ $url_base_pos - 1 ] ) ) {
 					$this->algoritm_classes[ $url_base_pos - 1 ]->release( );
@@ -324,19 +291,18 @@ class algoritm_ {
 
 				$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
 				$this->algoritm_classes[ $url_base_pos ]->algoritm( );
-				$this->algoritm_classes[ $url_base_pos ]->release( );
+				// НЕ ВЫЗЫВАЕМ release() — иначе зацикливание на ошибке
+				$this->algoritm_classes[ $url_base_pos ]->default( );
 			}
 		}
 	}
 
 	public function release_ ( object $object ) {
-		// Отключаем старую магию URL для нового роутера
 		if ( $this->main->main_settings->get( 'logic_type' ) === 'router' ) {
 			return; 
 		}
 
 		$available = $object->algoritmdata->available;
-        // ... дальше твой старый код ...
 		$auth = $object->algoritmdata->auth;
 		$search = $object->algoritmdata->search;
 		$default = $object->algoritmdata->default;
@@ -403,7 +369,7 @@ class algoritm_ {
 		$url_base_pos = 0;
 		$this->algoritm_classes[ $url_base_pos ] = new $class( $main , $args );
 		$this->algoritm_classes[ $url_base_pos ]->algoritm( );
-		$this->algoritm_classes[ $url_base_pos ]->release( );
+		$this->algoritm_classes[ $url_base_pos ]->default( ); // <--- ИСПРАВЛЕНО: вместо release()
 		return true;
 	}
 }

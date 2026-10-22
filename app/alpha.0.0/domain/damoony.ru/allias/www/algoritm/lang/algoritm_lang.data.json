@@ -14,7 +14,7 @@
 			"test"
 		],
 		"auth": false,
-		"search": false,
-		"default": false
+		"search": true,
+		"default": true
 	}
 }

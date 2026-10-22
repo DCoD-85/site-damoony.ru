@@ -16,20 +16,19 @@ class algoritm
 		$this->main = $main;
 		$this->args = $args;
 		$this->algoritmdata = new \algoritmdata_( );
+		$this->load_data( );
 	}
 
 	public function start ( ) {
 		$main = $this->main;
-
 		$scheme = $main->alliasscheme;
 		$scheme->load( 'www' );
+		
 		$this->logic( );
 		$this->release( );
 		$scheme->reload( );
 	}
 
 	public function default ( ) {
-		print 'OK';
-
 	}
 }

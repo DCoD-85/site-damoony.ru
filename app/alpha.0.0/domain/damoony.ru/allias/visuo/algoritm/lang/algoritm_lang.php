@@ -5,9 +5,11 @@ namespace damoony_ru\visuo;
 class algoritm_lang
 	extends \algoritm_ {
 
-	
 
-	public function default ( ) {
+	public function guest  ( ) { return $this->render( ); }
+	public function logged ( ) { return $this->render( ); }
+
+	public function render ( ) {
 		$main = $this->main;
 		$library = $main->library;
 		$link = $library->link( );
@@ -21,13 +23,7 @@ class algoritm_lang
 		http_response_code( 307 );
 		header( 'Location: ' . $href );
 		exit;
-	}
 
-	public function guest  ( ) { return $this->render( ); }
-	public function logged ( ) { return $this->render( ); }
-
-	public function render ( ) {
-		
 		$this->default( );
 	}
 }
