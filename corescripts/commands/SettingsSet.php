@@ -51,7 +51,7 @@ class SettingsSet {
 
         # Запись в config (под lock)
         try {
-            Config::mutate( PROJECT_ROOT . '/config/cms.config' , function ( Config $cfg ) use ( $pairs ) {
+            Config::mutate( Paths::config() , function ( Config $cfg ) use ( $pairs ) {
                 foreach ( $pairs as $key => $value ) {
                     $cfg->setKeys( [ $key ] , (string) $value );
                 }

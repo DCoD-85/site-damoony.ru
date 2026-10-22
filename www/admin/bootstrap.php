@@ -135,7 +135,7 @@ if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' && ! Csrf::check( ) ) {
 switch ( $p ) {
 
 	case 'dashboard' :
-		$cfg     = new Config( PROJECT_ROOT . '/config/site.config' );
+		$cfg     = new Config( Paths::config() );
 		$domains = (array) $cfg->get( 'domains_real' );
 
 		# Собрать real-домены и их алиасы
@@ -1261,7 +1261,7 @@ case 'page:edit' :
 			break;
 		}
 
-		$cfg  = new Config( PROJECT_ROOT . '/config/site.config' );
+		$cfg  = new Config( Paths::config() );
 		$real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 
 		if ( $real === null ) {
@@ -1513,13 +1513,15 @@ case 'page:edit' :
 		}
 
 		# GET
-		$cfg = new Config( PROJECT_ROOT . '/config/site.config' );
+		$cfg = new Config( Paths::config() );
 
 		View::render( 'settings' , [
 			'title'        => 'Настройки' ,
 			'saved'        => ! empty( $_GET[ 'saved' ] ) ,
 			'current'      => [
 				'logic'        => (string) ( $cfg->get( 'logic' )        ?? '' ) ,
+				'logic_type'   => (string) ( $cfg->get( 'logic_type' )   ?? 'router' ) ,
+				'ui_ajax_forms'=> ! empty( $cfg->get( 'ui_ajax_forms' ) ) ,
 				'connect_type' => (string) ( $cfg->get( 'connect_type' ) ?? 'https://' ) ,
 			] ,
 			'skins'        => Scan::skinsFor( array_key_first((array)$cfg->get('domains_real', [])) ?? 'damoony.ru' ) ,

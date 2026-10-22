@@ -3,7 +3,8 @@ $parent_link = '?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . u
 $parent_title = 'Филлеры';
 $current_title = $block . ' (' . $allias . ')';
 require __DIR__ . '/_context_nav.php'; 
-?><?php endif ?>
+?>
+
 <form method="post" class="form" style="max-width:100%;">
 	<?= Csrf::field() ?>
 	<label>PHP (<code><?= $block ?>_<?= $allias ?>.php</code>)

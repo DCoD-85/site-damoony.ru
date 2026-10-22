@@ -1,5 +1,4 @@
 <?php
-// Рекурсивная отрисовка узла
 function render_node ( $n, $domain, $is_root = false ) {
     $class   = $n['class']   ?? 'node';
     $layout  = $n['layout']  ?? 'vertical';
@@ -15,8 +14,7 @@ function render_node ( $n, $domain, $is_root = false ) {
     $root_class = $is_root ? ' tree-root' : '';
     $badge      = $is_root ? ' <span class="root-badge">(Контейнер)</span>' : '';
     
-    // Проверка наличия файлов блока
-    $is_layout = ($n['type'] ?? 'block') === 'layout' || in_array($class, ['dt', 'dt_middle']);
+    $is_layout = ($n['type'] ?? 'block') === 'layout';
     $block_exists = true;
     if ( $is_layout ) {
         $badge = ' <span style="color:#888; font-size:11px;">(Визуальный)</span>';
@@ -28,7 +26,7 @@ function render_node ( $n, $domain, $is_root = false ) {
         }
     }
 
-    echo "<li class='tree-node{$root_class} ' . (!$block_exists ? 'block-missing' : '') . '' data-class='{$class}'>";
+    echo "<li class='tree-node{$root_class} " . (!$block_exists ? 'block-missing' : '') . "' data-class='{$class}'>";
     echo "  <div class='node-header' draggable='{$draggable}'>";
     echo "    {$handle}";
     echo "    <label><input type='checkbox' class='node-enabled' {$checked} " . ($is_root ? 'disabled' : '') . "> <b>{$name}</b>{$badge}</label>";
@@ -51,7 +49,6 @@ function render_node ( $n, $domain, $is_root = false ) {
     echo "</li>";
 }
 
-// Рекурсивная отрисовка Wireframe
 function render_wireframe ( $nodes ) {
     foreach ( $nodes as $n ) {
         $class   = $n['class']   ?? '';
@@ -78,44 +75,44 @@ function render_wireframe ( $nodes ) {
 }
 ?>
 
-<?php 
-$parent_link = '?p=schemes:list&domain=' . urlencode($domain);
-$parent_title = 'Схемы';
-$current_title = $scheme;
-require __DIR__ . '/_context_nav.php'; 
-?>
+<div class="tabs-wrapper">
+    <?php $active_tab = 'schemes'; $actions = ''; require __DIR__ . '/_domain_tabs.php'; ?>
+    <?php $allias = $scheme; $active_tab = 'scheme'; $actions = ''; require __DIR__ . '/_allias_tabs.php'; ?>
+</div>
+
+<?php if ( !empty($_GET['saved']) ) : ?>
+    <div class="ok-msg">✓ Сохранено</div>
+<?php endif ?>
+
+<form method="post" id="scheme-form" style="display:flex; gap:20px; align-items:flex-start;">
+    <?= Csrf::field() ?>
+    <input type="hidden" name="scheme_json" id="scheme_json">
+    
+    <div style="flex:1; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); border-radius:6px;">
+        <h3 style="margin-top:0;">Дерево блоков</h3>
+        <p class="hint" style="font-size:12px; color:#666; margin-bottom:15px;">
+            Перетаскивайте за <b>≡</b>. Верхняя/нижняя часть блока — вставка рядом. Центр — вложение внутрь.
+        </p>
+        
+        <?php render_node( $scheme_data, $domain, true ); ?>
+        
+        <button type="submit" class="btn-edit" style="margin-top:20px; padding:10px 20px; font-size:15px;">Сохранить схему</button>
+    </div>
+
+    <div style="flex:1; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); border-radius:6px;">
+        <h3 style="margin-top:0;">Визуализация</h3>
+        <div style="display:flex; flex-direction:column; flex:1; min-height:200px; box-sizing:border-box;">
+            <?php render_wireframe( [ $scheme_data ] ); ?>
+        </div>
+    </div>
 </form>
 
 <style>
-/* Стили для корневого контейнера */
-.tree-root {
-    background: #eef2f6;
-    border: 2px solid #c9cdd6;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 0;
-}
-.tree-root > .scheme-tree {
-    padding-left: 10px;
-    border-left: none;
-    margin-top: 10px;
-}
-.tree-root > .node-header {
-    background: #fff;
-    border-bottom: 3px solid #2a63d6;
-    cursor: default;
-}
-.root-badge {
-    font-size: 11px;
-    color: #555;
-    font-weight: normal;
-    margin-left: 5px;
-    background: #dde3ec;
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-/* Стили для обычных узлов */
+/* Стили для дерева схемы */
+.tree-root { background: #eef2f6; border: 2px solid #c9cdd6; border-radius: 8px; padding: 15px; margin-top: 0; }
+.tree-root > .scheme-tree { padding-left: 10px; border-left: none; margin-top: 10px; }
+.tree-root > .node-header { background: #fff; border-bottom: 3px solid #2a63d6; cursor: default; }
+.root-badge { font-size: 11px; color: #555; font-weight: normal; margin-left: 5px; background: #dde3ec; padding: 2px 6px; border-radius: 4px; }
 .scheme-tree { list-style: none; padding-left: 20px; margin: 0; border-left: 2px dashed #c9cdd6; min-height: 10px; }
 .tree-node { margin: 6px 0; position: relative; }
 .node-header { display: flex; align-items: center; gap: 8px; background: #fff; padding: 8px 12px; border: 1px solid #e0e4eb; border-radius: 4px; cursor: grab; }
@@ -124,8 +121,6 @@ require __DIR__ . '/_context_nav.php';
 .node-code { font-size: 11px; color: #888; margin-left: auto; }
 .dragging { opacity: 0.5; }
 .block-missing > .node-header { background: #fdf2f2; border-color: #f5c6c6; color: #a11; }
-
-/* Зоны сброса */
 .drop-above { border-top: 3px solid #2a63d6 !important; }
 .drop-below { border-bottom: 3px solid #2a63d6 !important; }
 .drop-inside > .node-header { background: #e3f0ff !important; border-color: #2a63d6 !important; }
@@ -134,95 +129,59 @@ require __DIR__ . '/_context_nav.php';
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     let dragged = null;
-
-    // 1. Настройка перетаскивания (только за иконку ≡)
     document.querySelectorAll('.node-header[draggable="true"]').forEach(header => {
         const handle = header.querySelector('.drag-handle');
-        
-        // Разрешаем drag только при клике на ручку
         if (handle) {
             handle.addEventListener('mousedown', () => { header.setAttribute('draggable', 'true'); });
             header.addEventListener('mouseup', () => { if(!dragged) header.setAttribute('draggable', 'false'); });
             header.addEventListener('mouseleave', () => { if(!dragged) header.setAttribute('draggable', 'false'); });
         }
-
         header.addEventListener('dragstart', function(e) {
             dragged = this.closest('.tree-node');
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', 'drag');
         });
-
         header.addEventListener('dragend', function() {
             this.classList.remove('dragging');
             dragged = null;
-            document.querySelectorAll('.tree-node').forEach(el => {
-                el.classList.remove('drop-above', 'drop-below', 'drop-inside');
-            });
+            document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('drop-above', 'drop-below', 'drop-inside'));
         });
     });
-
-    // 2. Обработка зон сброса (вешаем прямо на header, чтобы высота была правильной)
     document.querySelectorAll('.node-header').forEach(header => {
         header.addEventListener('dragover', function(e) {
             e.preventDefault();
             const li = this.closest('.tree-node');
             if (li === dragged || li.contains(dragged)) return;
-            
-            // Считаем координаты именно ЗАГОЛОВКА, а не всего <li>
             const rect = this.getBoundingClientRect();
             const offset = e.clientY - rect.top;
-            
-            document.querySelectorAll('.tree-node').forEach(el => {
-                el.classList.remove('drop-above', 'drop-below', 'drop-inside');
-            });
-
-            // 30% сверху, 30% снизу, 40% по центру
-            if (offset < rect.height * 0.3) {
-                li.classList.add('drop-above');
-            } else if (offset > rect.height * 0.7) {
-                li.classList.add('drop-below');
-            } else {
-                li.classList.add('drop-inside');
-            }
+            document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('drop-above', 'drop-below', 'drop-inside'));
+            if (offset < rect.height * 0.3) li.classList.add('drop-above');
+            else if (offset > rect.height * 0.7) li.classList.add('drop-below');
+            else li.classList.add('drop-inside');
         });
-
         header.addEventListener('dragleave', function(e) {
             const li = this.closest('.tree-node');
-            if (!li.contains(e.relatedTarget)) {
-                li.classList.remove('drop-above', 'drop-below', 'drop-inside');
-            }
+            if (!li.contains(e.relatedTarget)) li.classList.remove('drop-above', 'drop-below', 'drop-inside');
         });
-
         header.addEventListener('drop', function(e) {
             e.preventDefault();
             const li = this.closest('.tree-node');
             li.classList.remove('drop-above', 'drop-below', 'drop-inside');
-            
             if (li === dragged || li.contains(dragged)) return;
-
             const rect = this.getBoundingClientRect();
             const offset = e.clientY - rect.top;
-
-            if (offset < rect.height * 0.3) {
-                li.parentNode.insertBefore(dragged, li); // Вставить выше
-            } else if (offset > rect.height * 0.7) {
-                li.parentNode.insertBefore(dragged, li.nextSibling); // Вставить ниже
-            } else {
-                let ul = li.querySelector(':scope > .scheme-tree'); // Вложить внутрь
-                if (!ul) {
-                    ul = document.createElement('ul');
-                    ul.className = 'scheme-tree';
-                    li.appendChild(ul);
-                }
+            if (offset < rect.height * 0.3) li.parentNode.insertBefore(dragged, li);
+            else if (offset > rect.height * 0.7) li.parentNode.insertBefore(dragged, li.nextSibling);
+            else {
+                let ul = li.querySelector(':scope > .scheme-tree');
+                if (!ul) { ul = document.createElement('ul'); ul.className = 'scheme-tree'; li.appendChild(ul); }
                 ul.appendChild(dragged);
             }
             dragged = null;
         });
     });
-
-    // 3. Сборка JSON перед отправкой
-    document.getElementById('scheme-form').addEventListener('submit', function(e) {
+    document.getElementById('scheme-form').addEventListener('submit', function() {
         function buildChildren(ul) {
             let arr = [];
             if (!ul) return arr;
@@ -231,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let enabled = li.querySelector('.node-enabled').checked;
                 let layout = li.querySelector('.node-layout').value;
                 let node = { tag: 'div', class: classStr, layout: layout, enabled: enabled };
-                
                 let childUl = li.querySelector(':scope > .scheme-tree');
                 let children = buildChildren(childUl);
                 if (children.length > 0) node.children = children;
@@ -239,26 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return arr;
         }
-
         function fixReturn(nodes) {
             nodes.forEach(n => {
-                if (n.children) {
-                    n.return = true;
-                    fixReturn(n.children);
-                } else {
-                    n.return = false;
-                }
+                if (n.children) { n.return = true; fixReturn(n.children); } else { n.return = false; }
             });
         }
-
         let rootNode = document.querySelector('.tree-root');
-        let finalData = {
-            tag: 'div',
-            class: rootNode.dataset.class,
-            layout: rootNode.querySelector('.node-layout').value,
-            children: buildChildren(rootNode.querySelector(':scope > .scheme-tree'))
-        };
-        
+        let finalData = { tag: 'div', class: rootNode.dataset.class, layout: rootNode.querySelector('.node-layout').value, children: buildChildren(rootNode.querySelector(':scope > .scheme-tree')) };
         fixReturn(finalData.children);
         document.getElementById('scheme_json').value = JSON.stringify(finalData);
     });

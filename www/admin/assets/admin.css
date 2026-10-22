@@ -7,6 +7,7 @@ body.admin-body {
 	color: #222;
 }
 
+/* ===== Шапка ===== */
 .admin-header {
 	display: flex;
 	align-items: center;
@@ -19,6 +20,7 @@ body.admin-body {
 .admin-nav { display: flex; gap: 16px; }
 .admin-nav a { color: #b9c4d6; text-decoration: none; }
 .admin-nav a:hover { color: #fff; }
+.admin-nav a.active { color: #fff; font-weight: bold; border-bottom: 2px solid #8ab4ff; }
 .admin-user { margin-left: auto; color: #b9c4d6; }
 .admin-user a { color: #8ab4ff; margin-left: 10px; }
 
@@ -28,10 +30,12 @@ body.admin-body {
 	padding: 0 24px;
 }
 
+/* ===== Заголовки ===== */
 h1 { font-size: 22px; margin-bottom: 20px; }
 h2 { font-size: 16px; margin: 20px 0 10px; }
 h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 
+/* ===== Таблицы ===== */
 .table {
 	width: 100%;
 	border-collapse: collapse;
@@ -45,19 +49,17 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 }
 .table th { background: #f0f2f6; font-weight: 600; }
 
+/* ===== Формы ===== */
 .form {
 	background: #fff;
 	padding: 20px;
 	max-width: 480px;
 	box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
-.form label {
-	display: block;
-	margin-bottom: 14px;
-	font-weight: 500;
-}
+.form label { display: block; margin-bottom: 14px; font-weight: 500; }
 .form input[type=text],
 .form input[type=password],
+.form input[type=datetime-local],
 .form select {
 	display: block;
 	width: 100%;
@@ -78,35 +80,37 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 	font: inherit;
 }
 .form button:hover { background: #1f4fae; }
-.btn-cancel {
+.form textarea {
+	display: block;
+	width: 100%;
+	margin-top: 4px;
+	padding: 8px 10px;
+	border: 1px solid #c9cdd6;
+	border-radius: 4px;
+	font: 13px/1.5 ui-monospace, Consolas, monospace;
+}
+
+/* ===== Кнопки ===== */
+.btn-edit, .btn-danger, .btn-sub, .btn-cancel {
 	display: inline-block;
-	margin-left: 12px;
-	color: #555;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 500;
+	font-family: inherit;
 	text-decoration: none;
+	border-radius: 4px;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition: all 0.2s;
+	text-align: center;
+	margin: 0;
 }
-.btn-edit {
-	color: #2a63d6;
-	text-decoration: none;
-	font-size: 13px;
-}
-.btn-edit:hover { text-decoration: underline; }
-.btn-danger {
-	color: #a11;
-	text-decoration: none;
-	font-size: 13px;
-	margin-left: 8px;
-}
-.btn-danger:hover { text-decoration: underline; }
-.btn-toggle {
-	text-decoration: none;
-	font-size: 13px;
-	margin-right: 8px;
-	font-weight: 600;
-}
-.btn-toggle-on  { color: #1a7a3b; }
-.btn-toggle-on:hover  { text-decoration: underline; }
-.btn-toggle-off { color: #999; }
-.btn-toggle-off:hover { color: #555; text-decoration: underline; }
+.btn-edit { color: #2a63d6; background: #ebf0fa; border-color: #c6d6f5; }
+.btn-edit:hover { background: #d8e4fa; color: #1f4fae; }
+.btn-danger { color: #a11; background: #fdf2f2; border-color: #f5c6c6; }
+.btn-danger:hover { background: #fce4e4; color: #800; }
+.btn-sub, .btn-cancel { color: #555; background: #f5f6f8; border-color: #dde1e6; }
+.btn-sub:hover, .btn-cancel:hover { background: #e8eaed; color: #222; }
 .btn-danger-solid {
 	padding: 9px 18px;
 	background: #c33;
@@ -118,248 +122,80 @@ h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
 }
 .btn-danger-solid:hover { background: #a11; }
 
-/* --- дерево страниц --- */
-.tree { list-style: none; padding: 0; margin: 0; }
-.tree-children { list-style: none; padding-left: 24px; margin: 0; }
-.tree-item { margin: 4px 0; }
-
-.tree-row {
+/* ===== Вкладки (табы): домен + аллиас ===== */
+.tabs-wrapper {
+	margin-top: 20px;
+	margin-bottom: 25px;
+}
+.tabs-row {
 	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 6px 10px;
-	background: #fff;
-	border-left: 3px solid #dde3ec;
-	border-radius: 3px;
+	justify-content: space-between;
+	align-items: flex-end;
 }
-.tree-item:hover > .tree-row { border-left-color: #2a63d6; }
-
-.tree-name {
-	font-weight: 600;
-	font-family: ui-monospace, Consolas, monospace;
+.tabs-row.top {
+	border-bottom: 2px solid #e0e4eb;
+	margin-bottom: 0;
+}
+.tabs-row.bottom {
+	margin-top: 0;
+	margin-bottom: 20px;
 }
 
-.tree-badge { font-size: 11px; padding: 2px 6px; border-radius: 3px; }
-.tree-badge-page   { background: #e6f7ec; color: #1a7a3b; }
-.tree-badge-orphan { background: #fff3cd; color: #856404; }
-
-.tree-avail { display: flex; gap: 4px; flex-wrap: wrap; }
-.tree-avail code {
-	font-size: 11px;
-	background: #eef1f5;
-	padding: 1px 5px;
-	border-radius: 3px;
-	color: #555;
+.nav-tabs-domain,
+.nav-tabs-allias {
+	display: flex;
+	gap: 4px;
 }
 
-.tree-actions { margin-left: auto; }
-.tree-name {
-	font-weight: 600;
-	font-family: ui-monospace, Consolas, monospace;
-	color: #2a63d6;
+/* Отрицательный отступ, чтобы активный таб перекрыл серую линию родителя */
+.nav-tabs-domain { margin-bottom: -2px; }
+.nav-tabs-allias { margin-top: -2px; }
+
+/* Общие стили ссылок-табов */
+.nav-tabs-domain a,
+.nav-tabs-allias a {
+	position: relative;
+	padding: 8px 16px;
+	background: #f4f6f9;
+	border: 1px solid #e0e4eb;
+	color: #666;
 	text-decoration: none;
+	font-size: 14px;
+	transition: 0.2s;
 }
-.tree-name:hover { text-decoration: underline; }
-.tree-cls { font-size: 11px; color: #999; margin-left: 6px; }
-
-.login-box {
-	max-width: 360px;
-	margin: 80px auto;
-	background: #fff;
-	padding: 28px;
-	box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-.login-box h1 { margin-top: 0; }
-.login-box label { display: block; margin-bottom: 12px; }
-.login-box input {
-	display: block; width: 100%; margin-top: 4px;
-	padding: 8px 10px; border: 1px solid #c9cdd6; border-radius: 4px; font: inherit;
-}
-.login-box button {
-	width: 100%; padding: 10px; background: #2a63d6; color: #fff;
-	border: 0; border-radius: 4px; cursor: pointer; font: inherit;
-}
-
-.error-msg {
-	background: #ffe3e3; color: #a11; padding: 8px 12px;
-	border-radius: 4px; margin-bottom: 12px;
-}
-
-.ok-msg {
-	background: #e3f7e8; color: #1a7a3b; padding: 8px 12px;
-	border-radius: 4px; margin-bottom: 12px;
-}
-
-.result { background: #fff; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
-.result.ok  h2 { color: #1a7a3b; }
-.result.err h2 { color: #a11; }
-.result ul { padding-left: 20px; }
-.steps li.ok  { color: #1a7a3b; }
-.steps li.err { color: #a11; }
-.files li { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #555; }
-.warnings li { color: #a86b00; }
-.errors li   { color: #a11; }
-
-.form textarea {
-	display: block;
-	width: 100%;
-	margin-top: 4px;
-	padding: 8px 10px;
-	border: 1px solid #c9cdd6;
-	border-radius: 4px;
-	font: inherit;
-	font-family: ui-monospace, Consolas, monospace;
-	font-size: 13px;
-}
-
-/* --- inline-формы и button-ссылки --- */
-.inline { display: inline; }
-button.btn-toggle {
-	background: none;
-	border: 0;
-	padding: 0;
-	cursor: pointer;
-	font: inherit;
-}
-button.btn-toggle:hover { text-decoration: underline; }
-
-/* --- флаги страницы (auth/search/default) --- */
-.tree-flags { display: flex; gap: 4px; align-items: center; }
-.tree-flags form { display: contents; }
-
-button.flag {
-	font-size: 11px;
-	padding: 2px 8px;
-	border: 1px solid #ccc;
-	border-radius: 3px;
-	cursor: pointer;
-	background: #f0f0f2;
-	color: #aaa;
-	font-family: ui-monospace, Consolas, monospace;
-}
-button.flag-on  { background: #2a63d6; color: #fff; border-color: #2a63d6; }
-button.flag-off { background: #f0f0f2; color: #aaa; border-color: #e0e0e4; }
-button.flag:hover { border-color: #2a63d6; }
-button.flag-off:hover { color: #666; border-color: #bbb; }
-
-
-/* двухколоночная раскладка: слева название+подстраница, справа флаги */
-.tree-row { align-items: flex-start; }
-
-.tree-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
-.tree-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.tree-sub { font-size: 12px; }
-.btn-sub {
-	color: #888;
-	text-decoration: none;
-	font-size: 12px;
-}
-.btn-sub:hover { color: #2a63d6; text-decoration: underline; }
-
-.tree-flags { margin-left: auto; }
-
-.form .checkbox code {
-	background: #eef1f5;
-	padding: 1px 5px;
-	border-radius: 3px;
-	font-size: 12px;
-}
-
-/* dashboard: домен и аллиасы как ссылки */
-.domain-link {
-	color: #1a1a1a;
-	text-decoration: none;
-}
-.domain-link:hover {
-	color: #069;
-	text-decoration: underline;
-}
-
-.allias-link {
-	display: inline-block;
-	padding: 2px 8px;
-	margin: 0 4px 4px 0;
-	background: #f0f0f0;
-	border-radius: 4px;
+.nav-tabs-domain a:hover,
+.nav-tabs-allias a:hover {
+	background: #e4e7ec;
 	color: #333;
-	text-decoration: none;
-	font-size: 13px;
-}
-.allias-link:hover {
-	background: #e0e8f0;
-	color: #069;
 }
 
-.allias-add {
-	display: inline-block;
-	padding: 2px 8px;
-	color: #069;
-	text-decoration: none;
-	font-size: 13px;
-	border: 1px dashed #069;
-	border-radius: 4px;
+/* Верхние табы (Домен) */
+.nav-tabs-domain a {
+	border-bottom: none;
+	border-radius: 8px 8px 0 0;
 }
-.allias-add:hover {
-	background: #069;
-	color: #fff;
-	border-style: solid;
-}
-/* dashboard new layout */
-.table td { vertical-align: top; }
-.allias-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.action-links { display: flex; flex-direction: column; gap: 6px; }
-.action-links .btn-sub { font-size: 12px; color: #2a63d6; text-decoration: none; }
-.action-links .btn-sub:hover { text-decoration: underline; }
-.allias-link {
-	display: inline-block; padding: 2px 8px; background: #f0f2f6;
-	border: 1px solid #e0e4eb; border-radius: 4px; color: #2a63d6;
-	text-decoration: none; font-size: 13px; font-weight: 500;
-}
-.allias-link:hover { background: #e0e8f0; }
-
-/* --- Кнопки-ссылки (универсальные) --- */
-.btn-edit, .btn-danger, .btn-sub, .btn-cancel {
-	display: inline-block;
-	padding: 5px 12px;
-	font-size: 12px;
-	font-weight: 500;
-	text-decoration: none;
-	border-radius: 4px;
-	cursor: pointer;
-	border: 1px solid transparent;
-	transition: all 0.2s;
-	text-align: center;
-	margin: 0;
-	font-family: inherit;
-}
-
-.btn-edit {
+.nav-tabs-domain a.active {
+	background: #fff;
 	color: #2a63d6;
-	background: #ebf0fa;
-	border-color: #c6d6f5;
+	font-weight: bold;
+	border-bottom: 2px solid #fff;
+	z-index: 2; /* поверх серой линии */
 }
-.btn-edit:hover { background: #d8e4fa; color: #1f4fae; }
 
-.btn-danger {
-	color: #a11;
-	background: #fdf2f2;
-	border-color: #f5c6c6;
+/* Нижние табы (Аллиас) */
+.nav-tabs-allias a {
+	border-top: none;
+	border-radius: 0 0 8px 8px;
 }
-.btn-danger:hover { background: #fce4e4; color: #800; }
-
-.btn-sub, .btn-cancel {
-	color: #555;
-	background: #f5f6f8;
-	border-color: #dde1e6;
+.nav-tabs-allias a.active {
+	background: #fff;
+	color: #2a63d6;
+	font-weight: bold;
+	border-top: 2px solid #fff;
+	z-index: 2; /* поверх серой линии */
 }
-.btn-sub:hover, .btn-cancel:hover { background: #e8eaed; color: #222; }
 
-/* Спец-стили для таблиц */
-.action-links { display: flex; flex-wrap: wrap; gap: 6px; }
-.action-links a { flex: 1 1 auto; margin: 0; }
-.tree-actions, .td-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-
-/* --- Табы (вкладки) --- */
+/* Внутренние табы (страница филлеров) */
 .nav-tabs {
 	display: flex;
 	gap: 4px;
@@ -377,203 +213,167 @@ button.flag-off:hover { color: #666; border-color: #bbb; }
 	font-size: 14px;
 }
 .nav-tabs a:hover { color: #2a63d6; }
-.nav-tabs a.active {
-	color: #2a63d6;
-	border-bottom-color: #2a63d6;
-}
+.nav-tabs a.active { color: #2a63d6; border-bottom-color: #2a63d6; }
 
-/* --- Дерево страниц --- */
+/* ===== Переключатель (toggle) ===== */
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 40px;
+	height: 22px;
+	margin: 0;
+	vertical-align: middle;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background-color: #ccc;
+	transition: .3s;
+	border-radius: 22px;
+}
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 16px;
+	width: 16px;
+	left: 3px;
+	bottom: 3px;
+	background-color: #fff;
+	transition: .3s;
+	border-radius: 50%;
+}
+input:checked + .slider { background-color: #1a7a3b; }
+input:focus + .slider { box-shadow: 0 0 1px #1a7a3b; }
+input:checked + .slider:before { transform: translateX(18px); }
+
+/* ===== Дерево страниц ===== */
 .tree { list-style: none; padding: 0; margin: 0; }
-.tree-children { list-style: none; padding-left: 24px; margin: 0; border-left: 2px dashed #e0e4eb; }
+.tree-children {
+	list-style: none;
+	padding-left: 24px;
+	margin: 0;
+	border-left: 2px dashed #e0e4eb;
+}
 .tree-item { margin: 6px 0; }
 .tree-row {
-	display: flex; align-items: flex-start; gap: 15px;
-	padding: 10px 14px; background: #fff;
-	border-left: 3px solid #dde3ec; border-radius: 4px;
+	display: flex;
+	align-items: flex-start;
+	gap: 15px;
+	padding: 10px 14px;
+	background: #fff;
+	border-left: 3px solid #dde3ec;
+	border-radius: 4px;
 	box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .tree-item:hover > .tree-row { border-left-color: #2a63d6; }
 .tree-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .tree-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.tree-name { font-weight: 600; font-family: ui-monospace, Consolas, monospace; color: #2a63d6; text-decoration: none; font-size: 15px; }
+.tree-name {
+	font-weight: 600;
+	font-family: ui-monospace, Consolas, monospace;
+	color: #2a63d6;
+	text-decoration: none;
+	font-size: 15px;
+}
 .tree-name:hover { text-decoration: underline; }
 .tree-cls { font-size: 11px; color: #999; }
-.tree-avail code { font-size: 11px; background: #eef1f5; padding: 2px 6px; border-radius: 3px; color: #555; margin-right: 4px; }
+.tree-avail code {
+	font-size: 11px;
+	background: #eef1f5;
+	padding: 2px 6px;
+	border-radius: 3px;
+	color: #555;
+	margin-right: 4px;
+}
 .tree-badge { font-size: 11px; padding: 2px 8px; border-radius: 3px; font-weight: bold; }
 .tree-badge-page { background: #e6f7ec; color: #1a7a3b; }
 .tree-badge-orphan { background: #fff3cd; color: #856404; }
 .tree-sub { margin-top: 4px; }
+
 .tree-flags { display: flex; gap: 6px; align-items: center; }
+/* form-обёртка не должна влиять на flex-раскладку кнопок-флагов */
 .tree-flags form { display: contents; }
 
-/* --- Красивый переключатель (Toggle Switch) --- */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 22px;
-  margin: 0;
-  vertical-align: middle;
+button.flag {
+	font-size: 11px;
+	padding: 2px 8px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	cursor: pointer;
+	background: #f0f0f2;
+	color: #aaa;
+	font-family: ui-monospace, Consolas, monospace;
 }
-.switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
+button.flag-on { background: #2a63d6; color: #fff; border-color: #2a63d6; }
+button.flag-off { background: #f0f0f2; color: #aaa; border-color: #e0e0e4; }
+button.flag:hover { border-color: #2a63d6; }
+button.flag-off:hover { color: #666; border-color: #bbb; }
+
+/* ===== Логин ===== */
+.login-box {
+	max-width: 360px;
+	margin: 80px auto;
+	background: #fff;
+	padding: 28px;
+	box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .3s;
-  border-radius: 22px;
+.login-box h1 { margin-top: 0; }
+.login-box label { display: block; margin-bottom: 12px; }
+.login-box input {
+	display: block;
+	width: 100%;
+	margin-top: 4px;
+	padding: 8px 10px;
+	border: 1px solid #c9cdd6;
+	border-radius: 4px;
+	font: inherit;
 }
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-}
-input:checked + .slider {
-  background-color: #1a7a3b;
-}
-input:focus + .slider {
-  box-shadow: 0 0 1px #1a7a3b;
-}
-input:checked + .slider:before {
-  transform: translateX(18px);
+.login-box button {
+	width: 100%;
+	padding: 10px;
+	background: #2a63d6;
+	color: #fff;
+	border: 0;
+	border-radius: 4px;
+	cursor: pointer;
+	font: inherit;
 }
 
-/* --- Вторичные табы (для аллиасов) --- */
-.nav-tabs-secondary {
-    background: #f0f2f6;
-    padding: 4px 4px 0;
-    border-radius: 6px;
-    border-bottom: 1px solid #d0d4db;
-}
-.nav-tabs-secondary a {
-    color: #666;
-    padding: 8px 16px;
-    border-bottom: 2px solid transparent;
-    border-radius: 4px 4px 0 0;
-}
-.nav-tabs-secondary a:hover {
-    background: #e4e7ec;
-    color: #333;
-}
-.nav-tabs-secondary a.active {
-    color: #2a63d6;
-    border-bottom-color: #2a63d6;
-    background: #fff;
-    font-weight: bold;
-}
+/* ===== Сообщения ===== */
+.error-msg { background: #ffe3e3; color: #a11; padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; }
+.ok-msg    { background: #e3f7e8; color: #1a7a3b; padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; }
 
-/* --- Новые вкладки (Табы) --- */
-.nav-tabs-domain {
-    display: flex; gap: 4px;
-    border-bottom: 2px solid #e0e4eb; /* Разделительная черта */
-}
-.nav-tabs-domain a {
-    padding: 8px 16px; background: #f4f6f9; border: 1px solid #e0e4eb; border-bottom: none;
-    border-radius: 8px 8px 0 0; color: #666; text-decoration: none; font-size: 14px;
-    margin-bottom: -2px; /* Чтобы активный перекрыл черту */
-}
-.nav-tabs-domain a:hover { background: #e4e7ec; color: #333; }
-.nav-tabs-domain a.active {
-    background: #fff; color: #2a63d6; font-weight: bold;
-    border-bottom: 2px solid #fff;
-}
+/* ===== Результаты операций ===== */
+.result { background: #fff; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.result.ok  h2 { color: #1a7a3b; }
+.result.err h2 { color: #a11; }
+.result ul { padding-left: 20px; }
+.steps li.ok  { color: #1a7a3b; }
+.steps li.err { color: #a11; }
+.files li { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #555; }
+.warnings li { color: #a86b00; }
+.errors li   { color: #a11; }
 
-.nav-tabs-allias {
-    display: flex; gap: 4px;
-    border-bottom: 2px solid #e0e4eb; /* Вторая черта */
-    margin-bottom: 20px;
-}
-.nav-tabs-allias a {
-    padding: 8px 16px; background: #f4f6f9; border: 1px solid #e0e4eb; border-top: none;
-    border-radius: 0 0 8px 8px; color: #666; text-decoration: none; font-size: 14px;
-    margin-top: -2px; /* Прилипаем к черте сверху */
-}
-.nav-tabs-allias a:hover { background: #e4e7ec; color: #333; }
-.nav-tabs-allias a.active {
-    background: #fff; color: #2a63d6; font-weight: bold;
-    border-top: 2px solid #fff;
-}
+/* ===== Утилиты ===== */
+.inline { display: inline; }
+.td-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.action-links { display: flex; flex-wrap: wrap; gap: 6px; }
 
-/* --- Система вкладок (Табы) --- */
-.tabs-wrapper {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 25px;
-    margin-top: 20px;
+/* ===== Dashboard ===== */
+.domain-link { color: #1a1a1a; text-decoration: none; }
+.domain-link:hover { color: #069; text-decoration: underline; }
+.allias-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.allias-link {
+	display: inline-block;
+	padding: 2px 8px;
+	background: #f0f2f6;
+	border: 1px solid #e0e4eb;
+	border-radius: 4px;
+	color: #2a63d6;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
 }
-
-.tabs-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin: 0;
-    padding: 0;
-}
-
-/* Верхний ряд (Домен) */
-.tabs-row.top {
-    border-bottom: 2px solid #e0e4eb;
-}
-.nav-tabs-domain {
-    display: flex;
-    gap: 4px;
-    margin-bottom: -2px; /* Прилипаем к линии */
-}
-.nav-tabs-domain a {
-    padding: 8px 16px;
-    background: #f4f6f9;
-    border: 1px solid #e0e4eb;
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
-    color: #666;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.2s;
-}
-.nav-tabs-domain a:hover { background: #e4e7ec; color: #333; }
-.nav-tabs-domain a.active {
-    background: #fff;
-    color: #2a63d6;
-    font-weight: bold;
-    border-bottom: 2px solid #fff; /* Перекрываем линию */
-}
-
-/* Нижний ряд (Аллиас) */
-.tabs-row.bottom {
-    margin-top: 0;
-    margin-bottom: 20px;
-}
-.nav-tabs-allias {
-    display: flex;
-    gap: 4px;
-    margin-top: -2px; /* Прилипаем к линии сверху */
-}
-.nav-tabs-allias a {
-    padding: 8px 16px;
-    background: #f4f6f9;
-    border: 1px solid #e0e4eb;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    color: #666;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.2s;
-}
-.nav-tabs-allias a:hover { background: #e4e7ec; color: #333; }
-.nav-tabs-allias a.active {
-    background: #fff;
-    color: #2a63d6;
-    font-weight: bold;
-    border-top: 2px solid #fff;
-}
+.allias-link:hover { background: #e0e8f0; }
