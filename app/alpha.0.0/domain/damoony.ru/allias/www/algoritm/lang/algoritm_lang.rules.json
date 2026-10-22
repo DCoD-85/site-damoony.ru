@@ -1,0 +1,4 @@
+{
+	"available": ["", "index", "test", "form", "login", "logout", "profile"],
+	"auth": false
+}

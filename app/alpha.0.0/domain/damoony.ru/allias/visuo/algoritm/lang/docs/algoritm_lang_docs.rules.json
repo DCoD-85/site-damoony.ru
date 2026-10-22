@@ -1,0 +1,7 @@
+{
+    "available": [
+        "",
+        "([a-z0-9-]+)|page"
+    ],
+    "auth": false
+}

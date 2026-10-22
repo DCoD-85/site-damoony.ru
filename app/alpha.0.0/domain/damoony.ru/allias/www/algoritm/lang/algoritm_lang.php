@@ -4,7 +4,6 @@ namespace damoony_ru\www;
 
 class algoritm_lang extends \algoritm_ {
 
-	public function default ( ) { print '222'; return true; }
 	// Вызываем редирект для гостей и авторизованных
 	public function guest  ( ) { return $this->render( ); }
 	public function logged ( ) { return $this->render( ); }
@@ -17,6 +16,7 @@ class algoritm_lang extends \algoritm_ {
 		$url_domain = $url->static_domain;
 		$url_base = $url->static_base;
 		$url_vars = $url->static_vars;
+		
 		$href = $link->href( $url_domain , [ $url_base[ 0 ] , 'index' ] , $url_vars );
 		
 		http_response_code( 307 );

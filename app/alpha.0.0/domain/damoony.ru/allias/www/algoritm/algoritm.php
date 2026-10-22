@@ -7,28 +7,20 @@ class algoritm
 
 	public string $basepath  = __DIR__ . DS;
 	public string $baseclass = 'algoritm';
-	public string $errorpath = __DIR__ . DS;
-	public string $errorclass = 'algoritm_error';
-	public string $authpath  = __DIR__ . DS;
-	public string $authclass = 'algoritm_auth';
 
 	public function __construct ( \main $main , array $args = [ ] ) {
 		$this->main = $main;
 		$this->args = $args;
 		$this->algoritmdata = new \algoritmdata_( );
-		$this->load_data( );
 	}
 
-	public function start ( ) {
-		$main = $this->main;
-		$scheme = $main->alliasscheme;
-		$scheme->load( 'www' );
-		
-		$this->logic( );
-		$this->release( );
-		$scheme->reload( );
-	}
-
+	// URL / → редирект на /{lang}/
 	public function default ( ) {
+		$lang = $this->main->main_settings->get( 'language' ) ?? 'ru-ru';
+		$url  = $this->main->library->url( );
+		$domain = $url->static_domain[ 0 ] ?? '';
+
+		header( 'Location: https://' . $domain . '/' . $lang . '/', true, 307 );
+		exit;
 	}
 }
