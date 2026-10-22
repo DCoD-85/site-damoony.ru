@@ -1,6 +1,4 @@
 {
-    "available": [
-        "([a-z0-9-]+)|page"
-    ],
-    "auth": false
+	"available": ["", "[a-z]{2}-[a-z]{2}|lang"],
+	"auth": false
 }
