@@ -783,7 +783,7 @@ switch ( $p ) {
 		] );
 		break;
 	
-		case 'stubs:edit' :
+	case 'stubs:edit' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$stubs_data = $_POST[ 'stubs' ] ?? [];
 			try {
@@ -804,11 +804,20 @@ switch ( $p ) {
 			if ( $result->ok ) { header( 'Location: ?p=settings&saved=1' ); exit; }
 			View::render( 'result' , [ 'result' => $result , 'title' => 'Настройки — ошибка' , 'back_url' => '?p=settings' , 'back_label' => 'К настройкам' ] ); break;
 		}
-		$cfg = new Config( Paths::config() );
+		
+		// Читаем настройки движка из engine.config, а структуру доменов из site.config
+		$engine_cfg = new Config( Paths::engine() );
+		$site_cfg   = new Config( Paths::config() );
+
 		View::render( 'settings' , [
 			'meta' => [ 'title' => 'Настройки' ] , 'title' => 'Настройки' , 'saved' => ! empty( $_GET[ 'saved' ] ) ,
-			'current' => [ 'logic' => (string) ( $cfg->get( 'logic' ) ?? '' ) , 'logic_type' => (string) ( $cfg->get( 'logic_type' ) ?? 'router' ) , 'ui_ajax_forms'=> ! empty( $cfg->get( 'ui_ajax_forms' ) ) , 'connect_type' => (string) ( $cfg->get( 'connect_type' ) ?? 'https://' ) ] ,
-			'skins' => Scan::skinsFor( array_key_first((array)$cfg->get('domains_real', [])) ?? 'damoony.ru' ) , 'logics' => Scan::logics( ) , 'connectTypes' => Scan::connectTypes( )
+			'current' => [ 
+				'logic'        => (string) ( $engine_cfg->get( 'logic' ) ?? '' ) , 
+				'logic_type'   => (string) ( $engine_cfg->get( 'logic_type' ) ?? 'router' ) , 
+				'ui_ajax_forms'=> ! empty( $engine_cfg->get( 'ui_ajax_forms' ) ) , 
+				'connect_type' => (string) ( $engine_cfg->get( 'connect_type' ) ?? 'https://' ) 
+			] ,
+			'skins' => Scan::skinsFor( array_key_first((array)$site_cfg->get('domains_real', [])) ?? 'damoony.ru' ) , 'logics' => Scan::logics( ) , 'connectTypes' => Scan::connectTypes( )
 		] );
 		break;
 

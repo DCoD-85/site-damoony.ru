@@ -2,45 +2,47 @@
 
 # ============================================================
 #   Paths — единая точка доступа к путям проекта.
-#   Заменяет хардкоды 'alpha.0.0' и ручные конкатенации.
-#
-#   ВАЖНО: namespace и папки — по real-домену.
-#   site.config:
-#       "domains_real": {
-#           "damoony2.ru":  "damoony.ru",   ← key=внешний, value=real
-#           "damoony.online":"damoony.ru",
-#           "damoony.ru":   "damoony.ru"
-#       },
-#       "domains_namespace": {
-#           "damoony.ru":   "damoony_ru"    ← key=real
-#       }
-#
-#   Paths::real('damoony2.ru')  → 'damoony.ru'
-#   Paths::ns('damoony2.ru')    → 'damoony_ru'
-#   Paths::domain('damoony2.ru') → '.../domain/damoony.ru'
+#   site.config   — структура (domains_*, alliases_*, fillers)
+#   engine.config — настройки движка (logic, logic_type и т.д.)
 # ============================================================
 
 class Paths {
 
-    private static ?array $cfg = null;
+    private static ?array $site_cfg   = null;
+    private static ?array $engine_cfg = null;
 
-    # --- конфиг: загружаем один раз за процесс ---
+    # --- site.config: только структура (domains_real, domains_namespace) ---
     private static function cfg ( ) : array {
-        if ( self::$cfg !== null ) return self::$cfg;
+        if ( self::$site_cfg !== null ) return self::$site_cfg;
 
-        $path = self::project() . '/config/cms.config';
-        if ( ! is_file( $path ) ) $path = self::project() . '/config/site.config';
-        if ( ! is_file( $path ) ) return self::$cfg = [ ];
+        $path = self::project() . '/config/site.config';
+        if ( ! is_file( $path ) ) return self::$site_cfg = [ ];
 
         $raw = @file_get_contents( $path );
-        if ( $raw === false ) return self::$cfg = [ ];
+        if ( $raw === false ) return self::$site_cfg = [ ];
 
         $data = @json_decode( $raw , true );
-        return self::$cfg = is_array( $data ) ? $data : [ ];
+        return self::$site_cfg = is_array( $data ) ? $data : [ ];
+    }
+
+    # --- engine.config: настройки движка (fallback на cms.config) ---
+    private static function engineCfg ( ) : array {
+        if ( self::$engine_cfg !== null ) return self::$engine_cfg;
+
+        $path = self::project() . '/config/engine.config';
+        if ( ! is_file( $path ) ) $path = self::project() . '/config/cms.config'; // переходный период
+        if ( ! is_file( $path ) ) return self::$engine_cfg = [ ];
+
+        $raw = @file_get_contents( $path );
+        if ( $raw === false ) return self::$engine_cfg = [ ];
+
+        $data = @json_decode( $raw , true );
+        return self::$engine_cfg = is_array( $data ) ? $data : [ ];
     }
 
     public static function reset ( ) : void {
-        self::$cfg = null;
+        self::$site_cfg   = null;
+        self::$engine_cfg = null;
     }
 
     # --- корень ---
@@ -48,19 +50,22 @@ class Paths {
         return PROJECT_ROOT;
     }
 
-    # --- конфиг ---
+    # --- пути к конфигам ---
     public static function config () : string {
         return self::project() . '/config/site.config';
     }
 
-    # --- logic (имя из site.config, fallback alpha.0.0) ---
+    public static function engine () : string {
+        return self::project() . '/config/engine.config';
+    }
+
+    # --- logic (из engine.config, fallback alpha.0.0) ---
     public static function logic () : string {
-        $logic = self::cfg()[ 'logic' ] ?? null;
+        $logic = self::engineCfg()[ 'logic' ] ?? null;
         return is_string( $logic ) && $logic !== '' ? $logic : 'alpha.0.0';
     }
 
     # --- real domain: damoony2.ru → damoony.ru ---
-    #     если домена нет в конфиге (новый) — возвращаем как есть
     public static function real ( string $domain ) : string {
         $real = self::cfg()[ 'domains_real' ][ $domain ] ?? null;
         return is_string( $real ) && $real !== '' ? $real : $domain;

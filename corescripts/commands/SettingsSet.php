@@ -49,19 +49,19 @@ class SettingsSet {
             $ctx?->step( 'Валидация' , true , "{$key} = {$value}" );
         }
 
-        # Запись в config (под lock)
+        # Запись в engine.config (под lock)
         try {
-            Config::mutate( Paths::config() , function ( Config $cfg ) use ( $pairs ) {
+            Config::mutate( Paths::engine() , function ( Config $cfg ) use ( $pairs ) {
                 foreach ( $pairs as $key => $value ) {
                     $cfg->setKeys( [ $key ] , (string) $value );
                 }
             } );
 
             foreach ( $pairs as $key => $value ) {
-                $r->step( "site.config: {$key}" , true , (string) $value );
-                $ctx?->step( "site.config: {$key}" , true , (string) $value );
+                $r->step( "engine.config: {$key}" , true , (string) $value );
+                $ctx?->step( "engine.config: {$key}" , true , (string) $value );
             }
-            $r->step( 'site.config сохранён' , true , '' );
+            $r->step( 'engine.config сохранён' , true , '' );
         } catch ( Throwable $e ) {
             $r->error( 'Не сохранить: ' . $e->getMessage( ) );
         }

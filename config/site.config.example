@@ -1,4 +1,5 @@
 {
+	"title": "Damoony",
 	"domains_real": {
 		"damoony.ru": "damoony.ru",
 		"damoony.online": "damoony.ru",
@@ -113,12 +114,5 @@
 			}
 		}
 	},
-	"skin": "default",
-	"title": "Damoony",
-	"admin": {
-		"login": "admin",
-		"password_hash": "CHANGE_ME",
-		"ips": []
-	},
-	"logic_type": "alogic"
+	"skin": "default"
 }
