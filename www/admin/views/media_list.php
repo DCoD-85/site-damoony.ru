@@ -1,16 +1,11 @@
-<?php
-$active_tab = 'media';
-$actions = '';
-require __DIR__ . '/_domain_tabs.php';
-?>
-
+<?PHP ?>
 <div class="hint" style="margin-bottom:15px; color:#666;">
     Папка медиа: <code>www/media/<?= htmlspecialchars( Paths::real( $domain ) ) ?>/</code> (Загрузка файлов появится в следующем обновлении).
 </div>
 
-<?php if ( empty( $files ) ) : ?>
+<?PHP if ( empty( $files ) ) : ?>
     <p>Файлов нет.</p>
-<?php else : ?>
+<?PHP else : ?>
     <table class="table">
         <thead>
             <tr>
@@ -20,13 +15,13 @@ require __DIR__ . '/_domain_tabs.php';
             </tr>
         </thead>
         <tbody>
-            <?php foreach ( $files as $f ) : ?>
+            <?PHP foreach ( $files as $f ) : ?>
                 <tr>
                     <td><code><?= htmlspecialchars( $f['name'] ) ?></code></td>
                     <td><?= round( $f['size'] / 1024 , 1 ) ?> KB</td>
                     <td><?= date( 'd.m.Y H:i' , $f['time'] ) ?></td>
                 </tr>
-            <?php endforeach ?>
+            <?PHP endforeach ?>
         </tbody>
     </table>
-<?php endif ?>
+<?PHP endif ?>

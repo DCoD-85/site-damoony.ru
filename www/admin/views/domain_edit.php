@@ -1,20 +1,14 @@
-<?php
-$active_tab = 'main';
-$actions = '';
-require __DIR__ . '/_domain_tabs.php';
-?>
-
-<?php if ( ! empty( $saved ) ) : ?>
+<?PHP if ( ! empty( $saved ) ) : ?>
     <div class="ok-msg">✓ Сохранено</div>
-<?php endif ?>
+<?PHP endif ?>
 
-<?php if ( ! empty( $errors ) ) : ?>
+<?PHP if ( ! empty( $errors ) ) : ?>
     <div class="error-msg">
-        <?php foreach ( $errors as $e ) : ?>
+        <?PHP foreach ( $errors as $e ) : ?>
             <div>✘ <?= htmlspecialchars( $e ) ?></div>
-        <?php endforeach ?>
+        <?PHP endforeach ?>
     </div>
-<?php endif ?>
+<?PHP endif ?>
 
 <form method="post" action="?p=domain:edit&domain=<?= urlencode( $domain ) ?>" class="form" style="max-width: 600px;">
     <?= Csrf::field() ?>
@@ -37,11 +31,11 @@ require __DIR__ . '/_domain_tabs.php';
 
     <label>Выберите заглушку
         <select name="stub_current">
-            <?php foreach ( $stubs as $sid => $s ) : ?>
+            <?PHP foreach ( $stubs as $sid => $s ) : ?>
                 <option value="<?= htmlspecialchars($sid) ?>" <?= $sid === $current[ 'stub' ] ? 'selected' : '' ?>>
                     <?= htmlspecialchars($s['title']) ?>
                 </option>
-            <?php endforeach ?>
+            <?PHP endforeach ?>
         </select>
     </label>
 
@@ -50,11 +44,11 @@ require __DIR__ . '/_domain_tabs.php';
         <small style="color:#888;">Если указать время, сайт автоматически включится в этот момент.</small>
     </label>
 
-    <button type="submit" class="btn-edit" style="margin-top:15px;">Сохранить</button>
+    <button type="submit" class="btn-primary" style="margin-top:15px;">Сохранить</button>
 </form>
 
-<div style="margin-top: 40px; padding: 20px; background: #fdf2f2; border: 1px solid #f5c6c6; border-radius: 6px; max-width: 600px;">
-    <h3 style="color:#a11; margin-top:0;">Опасная зона</h3>
-    <p style="font-size:13px; color:#666;">Удаление домена приведет к удалению всех аллиасов, блоков и настроек.</p>
+<div style="margin-top: 40px; padding: 20px; background: var(--danger-bg); border: 1px solid #fecaca; border-radius: var(--radius); max-width: 600px;">
+    <h3 style="color:var(--danger-h); margin-top:0;">Опасная зона</h3>
+    <p style="font-size:13px; color:var(--text-dim);">Удаление домена приведет к удалению всех аллиасов, блоков и настроек.</p>
     <a href="?p=domain:remove&domain=<?= urlencode($domain) ?>" class="btn-danger-solid" onclick="return confirm('Удалить домен?');">Удалить домен</a>
 </div>

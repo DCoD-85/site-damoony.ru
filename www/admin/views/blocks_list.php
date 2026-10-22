@@ -1,12 +1,8 @@
-<?php $active_tab = 'blocks'; $actions = '<a href="?p=block:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Создать блок</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
-</div>
-
-
-
+<?PHP ?>
 <h3>Блоки данных (alliasglobal)</h3>
-<?php if ( empty( $blocks ) ) : ?>
+<?PHP if ( empty( $blocks ) ) : ?>
 	<p>Блоки не найдены.</p>
-<?php else : ?>
+<?PHP else : ?>
 	<table class="table" style="margin-bottom:30px;">
 		<thead>
 			<tr>
@@ -17,34 +13,34 @@
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ( $blocks as $b ) : ?>
+			<?PHP foreach ( $blocks as $b ) : ?>
 				<tr>
 					<td><b><?= htmlspecialchars( $b['name'] ) ?></b></td>
 					<td><?= $b['has_php'] ? '✓' : '✗' ?></td>
 					<td><?= $b['has_data'] ? '✓' : '✗' ?></td>
 					<td>
 						<div class="td-actions">
-							<?php if ( $b['has_php'] ) : ?>
+							<?PHP if ( $b['has_php'] ) : ?>
 								<a href="?p=block:edit&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-edit">Ред.</a>
 								<a href="?p=block:remove&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-danger" onclick="return confirm('Удалить блок?')">Удалить</a>
-							<?php else : ?>
-								<a href="?p=block:new&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-edit" style="background:#e3f7e8; border-color:#c6e6d0; color:#1a7a3b;">Восстановить</a>
-							<?php endif ?>
+							<?PHP else : ?>
+								<a href="?p=block:new&domain=<?= urlencode( $domain ) ?>&name=<?= urlencode( $b['name'] ) ?>" class="btn-primary">Восстановить</a>
+							<?PHP endif ?>
 						</div>
 					</td>
 				</tr>
-			<?php endforeach ?>
+			<?PHP endforeach ?>
 		</tbody>
 	</table>
-<?php endif ?>
+<?PHP endif ?>
 
 <h3>Визуальные контейнеры (Layout)</h3>
-<p class="hint" style="font-size:12px; color:#666; margin-top:-10px; margin-bottom:10px;">
+<p class="hint">
 	Эти элементы используются только в схемах для сетки (обертки). У них нет файлов блоков и данных.
 </p>
-<?php if ( empty( $layouts ) ) : ?>
+<?PHP if ( empty( $layouts ) ) : ?>
 	<p>Визуальные контейнеры не найдены.</p>
-<?php else : ?>
+<?PHP else : ?>
 	<table class="table">
 		<thead>
 			<tr>
@@ -53,12 +49,12 @@
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ( $layouts as $l ) : ?>
+			<?PHP foreach ( $layouts as $l ) : ?>
 				<tr>
 					<td><b><?= htmlspecialchars( $l ) ?></b></td>
-					<td><span style="background:#eef1f5; padding:2px 6px; border-radius:3px; font-size:11px;">layout</span></td>
+					<td><span class="badge">layout</span></td>
 				</tr>
-			<?php endforeach ?>
+			<?PHP endforeach ?>
 		</tbody>
 	</table>
-<?php endif ?>
+<?PHP endif ?>

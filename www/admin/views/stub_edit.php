@@ -1,12 +1,6 @@
-<?php
-$active_tab = 'stub';
-$actions = '';
-require __DIR__ . '/_domain_tabs.php';
-?>
-
-<?php if ( ! empty( $saved ) ) : ?>
+<?PHP if ( ! empty( $saved ) ) : ?>
     <div class="ok-msg">✓ Сохранено</div>
-<?php endif ?>
+<?PHP endif ?>
 
 <form method="post" action="?p=stub:edit&domain=<?= urlencode( $domain ) ?>" class="form" style="max-width:600px;">
     <?= Csrf::field() ?>
@@ -19,5 +13,5 @@ require __DIR__ . '/_domain_tabs.php';
         <textarea name="stub_text" rows="4" required><?= htmlspecialchars($stub["text"] ?? "Мы обновляем наш сайт, чтобы сделать его лучше. Скоро вернемся!") ?></textarea>
     </label>
 
-    <button type="submit" class="btn-edit" style="margin-top:10px;">Сохранить</button>
+    <button type="submit" class="btn-primary" style="margin-top:10px;">Сохранить</button>
 </form>

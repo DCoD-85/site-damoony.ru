@@ -11,6 +11,16 @@ class View {
 		}
 		extract( $data , EXTR_SKIP );
 
+		# мета-данные по умолчанию (шапка/крошки/кнопки)
+		if ( ! isset( $meta ) || ! is_array( $meta ) ) {
+			$meta = [
+				'title'       => null ,
+				'breadcrumbs' => [] ,
+				'actions'     => '' ,
+				'tabs'        => [] ,
+			];
+		}
+
 		$layout = ADMIN_ROOT . '/views/_layout.php';
 		include $layout;
 	}

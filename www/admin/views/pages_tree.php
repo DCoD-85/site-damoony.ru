@@ -1,4 +1,4 @@
-<?php
+<?PHP
 if ( ! function_exists( 'render_page_node' ) ) {
 	function render_page_node ( array $node , string $domain , string $allias ) : void {
 		$meta = $node[ 'meta' ] ?? [ 'available' => [] , 'auth' => false , 'search' => true , 'default' => false ];
@@ -10,13 +10,13 @@ if ( ! function_exists( 'render_page_node' ) ) {
 						<a class="tree-name" href="?p=page:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $node[ 'path' ] ) ?>">
 							<?= htmlspecialchars( $node[ 'name' ] ) ?>
 						</a>
-						<?php if ( $node[ 'has_file' ] ) : ?><span class="tree-badge tree-badge-page">страница</span><?php else : ?><span class="tree-badge tree-badge-orphan">без файла</span><?php endif ?>
+						<?PHP if ( $node[ 'has_file' ] ) : ?><span class="tree-badge tree-badge-page">страница</span><?PHP else : ?><span class="tree-badge tree-badge-orphan">без файла</span><?PHP endif ?>
 						<code class="tree-cls"><?= htmlspecialchars( $node[ 'class' ] ) ?></code>
-						<?php if ( ! empty( $meta[ 'available' ] ) ) : ?>
+						<?PHP if ( ! empty( $meta[ 'available' ] ) ) : ?>
 							<span class="tree-avail">
-								<?php foreach ( $meta[ 'available' ] as $a ) : ?><code><?= htmlspecialchars( $a === '' ? '/' : $a ) ?></code><?php endforeach ?>
+								<?PHP foreach ( $meta[ 'available' ] as $a ) : ?><code><?= htmlspecialchars( $a === '' ? '/' : $a ) ?></code><?PHP endforeach ?>
 							</span>
-						<?php endif ?>
+						<?PHP endif ?>
 					</div>
 					<div class="tree-sub">
 						<a href="?p=page:visual&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&path=<?= urlencode( $node[ "path" ] ) ?>" class="btn-sub" style="color:#1a7a3b; font-weight:bold;">Визуально</a> &nbsp;|&nbsp;
@@ -24,29 +24,25 @@ if ( ! function_exists( 'render_page_node' ) ) {
 						<a href="?p=page:new&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>&parent=<?= urlencode( $node[ "path" ] ) ?>" class="btn-sub">+ Подстраница</a>
 					</div>
 				</div>
-				<?php if ( $node[ 'has_file' ] ) : ?>
+				<?PHP if ( $node[ 'has_file' ] ) : ?>
 					<span class="tree-flags">
-						<?php foreach ( [ 'auth' => 'auth' , 'search' => 'search' , 'default' => 'default' ] as $key => $label ) : ?>
+						<?PHP foreach ( [ 'auth' => 'auth' , 'search' => 'search' , 'default' => 'default' ] as $key => $label ) : ?>
 							<form method="post" action="?p=page:toggle"><?= Csrf::field( ) ?><input type="hidden" name="domain" value="<?= htmlspecialchars( $domain , ENT_QUOTES ) ?>"><input type="hidden" name="allias" value="<?= htmlspecialchars( $allias , ENT_QUOTES ) ?>"><input type="hidden" name="path" value="<?= htmlspecialchars( $node[ 'path' ] , ENT_QUOTES ) ?>"><input type="hidden" name="key" value="<?= $key ?>"><input type="hidden" name="value" value="<?= ! empty( $meta[ $key ] ) ? '0' : '1' ?>"><button type="submit" class="flag <?= ! empty( $meta[ $key ] ) ? 'flag-on' : 'flag-off' ?>"><?= $label ?></button></form>
-						<?php endforeach ?>
+						<?PHP endforeach ?>
 					</span>
-				<?php endif ?>
+				<?PHP endif ?>
 			</div>
-			<?php if ( ! empty( $node[ 'children' ] ) ) : ?><ul class="tree-children"><?php foreach ( $node[ 'children' ] as $child ) render_page_node( $child , $domain , $allias ); ?></ul><?php endif ?>
+			<?PHP if ( ! empty( $node[ 'children' ] ) ) : ?><ul class="tree-children"><?PHP foreach ( $node[ 'children' ] as $child ) render_page_node( $child , $domain , $allias ); ?></ul><?PHP endif ?>
 		</li>
-		<?php
+		<?PHP
 	}
 }
 ?>
-<div class="tabs-wrapper">
-    <?php $active_tab = 'allias'; $actions = ''; require __DIR__ . '/_domain_tabs.php'; ?>
-    <?php $active_tab = 'pages'; $actions = '<a href="?p=page:new&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '" class="btn-edit">+ Новая страница</a>'; require __DIR__ . '/_allias_tabs.php'; ?>
-</div>
 
-<?php if ( ! $has_dir ) : ?>
+<?PHP if ( ! $has_dir ) : ?>
 	<div class="error-msg">Каталог не найден: <code>app/<?= htmlspecialchars( $logic ) ?>/domain/<?= htmlspecialchars( $domain ) ?>/allias/<?= htmlspecialchars( $allias ) ?>/algoritm/</code></div>
-<?php elseif ( empty( $tree ) ) : ?>
+<?PHP elseif ( empty( $tree ) ) : ?>
 	<p>Страниц нет.</p>
-<?php else : ?>
-	<ul class="tree"><?php foreach ( $tree as $node ) render_page_node( $node , $domain , $allias ); ?></ul>
-<?php endif ?>
+<?PHP else : ?>
+	<ul class="tree"><?PHP foreach ( $tree as $node ) render_page_node( $node , $domain , $allias ); ?></ul>
+<?PHP endif ?>

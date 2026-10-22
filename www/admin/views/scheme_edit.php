@@ -1,4 +1,4 @@
-<?php
+<?PHP
 function render_node ( $n, $domain, $is_root = false ) {
     $class   = $n['class']   ?? 'node';
     $layout  = $n['layout']  ?? 'vertical';
@@ -75,40 +75,66 @@ function render_wireframe ( $nodes ) {
 }
 ?>
 
-<div class="tabs-wrapper">
-    <?php $active_tab = 'schemes'; $actions = ''; require __DIR__ . '/_domain_tabs.php'; ?>
-    <?php $allias = $scheme; $active_tab = 'scheme'; $actions = ''; require __DIR__ . '/_allias_tabs.php'; ?>
+<?PHP if ( !empty($_GET['saved']) ) : ?>
+    <div class="ok-msg">✓ Сохранено</div>
+<?PHP endif ?>
+
+<div style="display: flex; gap: 20px; align-items: flex-start; margin-top: 20px;">
+    
+    <!-- Сайдбар со списком схем -->
+    <div style="width: 220px; flex-shrink: 0; background: var(--surface); padding: 15px; border-radius: var(--radius); box-shadow: var(--shadow-sm);">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;">Все схемы</h3>
+        <ul class="scheme-list">
+            <?PHP foreach ( $schemes as $s ) : ?>
+                <li>
+                    <a href="?p=scheme:edit&domain=<?= urlencode($domain) ?>&scheme=<?= urlencode($s) ?>" 
+                       class="<?= $s === $scheme ? 'active' : '' ?>">
+                        <?= htmlspecialchars($s) ?>
+                    </a>
+                </li>
+            <?PHP endforeach ?>
+        </ul>
+    </div>
+
+    <!-- Редактор и Превью -->
+    <div style="flex: 1; min-width: 0;">
+        <form method="post" id="scheme-form" style="display:flex; gap:20px; align-items:flex-start;">
+            <?= Csrf::field() ?>
+            <input type="hidden" name="scheme_json" id="scheme_json">
+            
+            <div style="flex:1; background:var(--surface); padding:20px; box-shadow:var(--shadow-sm); border-radius:var(--radius);">
+                <h3 style="margin-top:0;">Дерево блоков</h3>
+                <p class="hint" style="margin-bottom:15px;">
+                    Перетаскивайте за <b>≡</b>. Верхняя/нижняя часть — вставка рядом. Центр — вложение внутрь.
+                </p>
+                
+                <ul class="scheme-tree-root">
+                    <?PHP render_node( $scheme_data, $domain, true ); ?>
+                </ul>
+                
+                <button type="submit" class="btn-primary" style="margin-top:20px; padding:10px 20px; font-size:15px;">Сохранить схему</button>
+            </div>
+
+            <div style="flex:1; background:var(--surface); padding:20px; box-shadow:var(--shadow-sm); border-radius:var(--radius);">
+                <h3 style="margin-top:0;">Визуализация</h3>
+                <div style="display:flex; flex-direction:column; flex:1; min-height:200px; box-sizing:border-box;">
+                    <?PHP render_wireframe( [ $scheme_data ] ); ?>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
-<?php if ( !empty($_GET['saved']) ) : ?>
-    <div class="ok-msg">✓ Сохранено</div>
-<?php endif ?>
-
-<form method="post" id="scheme-form" style="display:flex; gap:20px; align-items:flex-start;">
-    <?= Csrf::field() ?>
-    <input type="hidden" name="scheme_json" id="scheme_json">
-    
-    <div style="flex:1; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); border-radius:6px;">
-        <h3 style="margin-top:0;">Дерево блоков</h3>
-        <p class="hint" style="font-size:12px; color:#666; margin-bottom:15px;">
-            Перетаскивайте за <b>≡</b>. Верхняя/нижняя часть блока — вставка рядом. Центр — вложение внутрь.
-        </p>
-        
-        <?php render_node( $scheme_data, $domain, true ); ?>
-        
-        <button type="submit" class="btn-edit" style="margin-top:20px; padding:10px 20px; font-size:15px;">Сохранить схему</button>
-    </div>
-
-    <div style="flex:1; background:#fff; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); border-radius:6px;">
-        <h3 style="margin-top:0;">Визуализация</h3>
-        <div style="display:flex; flex-direction:column; flex:1; min-height:200px; box-sizing:border-box;">
-            <?php render_wireframe( [ $scheme_data ] ); ?>
-        </div>
-    </div>
-</form>
-
 <style>
+/* Стили для списка схем */
+.scheme-list { list-style: none; padding: 0; margin: 0; }
+.scheme-list li { margin-bottom: 4px; }
+.scheme-list a { display: block; padding: 8px 12px; border-radius: 4px; color: var(--text); text-decoration: none; font-weight: 500; font-size: 14px; transition: background 0.15s; }
+.scheme-list a:hover { background: #f1f5f9; }
+.scheme-list a.active { background: var(--primary-bg); color: var(--primary); font-weight: 600; }
+
 /* Стили для дерева схемы */
+.scheme-tree-root { list-style: none; padding: 0; margin: 0; }
 .tree-root { background: #eef2f6; border: 2px solid #c9cdd6; border-radius: 8px; padding: 15px; margin-top: 0; }
 .tree-root > .scheme-tree { padding-left: 10px; border-left: none; margin-top: 10px; }
 .tree-root > .node-header { background: #fff; border-bottom: 3px solid #2a63d6; cursor: default; }

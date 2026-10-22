@@ -1,10 +1,6 @@
-<div class="tabs-wrapper">
-<?php $active_tab = 'allias'; $actions = '<a href="?p=allias:new&domain=' . urlencode($domain) . '" class="btn-edit">+ Добавить аллиас</a>'; require __DIR__ . '/_domain_tabs.php'; ?>
-</div>
-
-<?php if ( empty( $rows ) ) : ?>
+<?PHP if ( empty( $rows ) ) : ?>
     <p>Аллиасов нет.</p>
-<?php else : ?>
+<?PHP else : ?>
     <table class="table">
         <thead>
             <tr>
@@ -16,8 +12,8 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ( $rows as $r ) : ?>
-                <?php $a_enc = urlencode( $r[ 'name' ] ); ?>
+            <?PHP foreach ( $rows as $r ) : ?>
+                <?PHP $a_enc = urlencode( $r[ 'name' ] ); ?>
                 <tr style="cursor:pointer;" onclick="window.location='?p=allias:edit&domain=<?= urlencode($domain) ?>&allias=<?= $a_enc ?>';">
                     <td>
                         <a href="?p=allias:edit&domain=<?= urlencode( $domain ) ?>&allias=<?= $a_enc ?>" class="domain-link" style="font-size:16px;">
@@ -42,7 +38,7 @@
                         <a href="?p=allias:remove&domain=<?= urlencode( $domain ) ?>&name=<?= $a_enc ?>" class="btn-danger" onclick="event.stopPropagation(); return confirm('Удалить аллиас <?= htmlspecialchars($r['name']) ?>?');">Удалить</a>
                     </td>
                 </tr>
-            <?php endforeach ?>
+            <?PHP endforeach ?>
         </tbody>
     </table>
-<?php endif ?>
+<?PHP endif ?>

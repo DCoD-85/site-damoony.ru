@@ -18,7 +18,19 @@
       "tag": "div",
       "class": "",
       "content": "",
-      "children": []
+      "children": [
+        {
+          "tag": "form",
+          "action": "",
+          "method": "post",
+          "children": [
+            {
+              "tag": "article",
+              "text": "wadwad"
+            }
+          ]
+        }
+      ]
     },
     {
       "tag": "a",
