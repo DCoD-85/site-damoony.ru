@@ -754,14 +754,119 @@ switch ( $p ) {
 		break;
 
 	case 'media:list' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $real = Paths::real( $domain ); $media_dir = PROJECT_ROOT . '/www/media/' . $real; $files = [];
-		if ( is_dir( $media_dir ) ) { $it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $media_dir , FilesystemIterator::SKIP_DOTS ) ); foreach ( $it as $file ) { if ( $file->isFile() ) { $files[ ] = [ 'name' => substr( $file->getPathname() , strlen( $media_dir ) + 1 ) , 'size' => $file->getSize() , 'time' => $file->getMTime() ]; } } }
-		usort($files, fn($a, $b) => strcmp($a['name'], $b['name']));
+		$path = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		
+		// Если пришли из вкладки домена — переходим сразу в его папку
+		if ( $path === '' && $domain !== '' ) {
+			$path = Paths::real( $domain );
+		}
+
+		// Если домен не указан, но мы в папке домена — вычисляем его
+		if ( $domain === '' && $path !== '' ) {
+			$parts = explode( '/', $path );
+			$possible_domain = $parts[0];
+			$cfg = new Config( Paths::config() );
+			if ( $cfg->getKeys( [ 'domains_real', $possible_domain ] ) !== null ) {
+				$domain = $possible_domain;
+			}
+		}
+
+		// Защита от traversal
+		if ( str_contains( $path , '..' ) || str_contains( $path , '\\' ) ) {
+			header( 'Location: ?p=media:list' ); exit;
+		}
+
+		$root = Paths::mediaRoot();
+		$current = $path === '' ? $root : $root . '/' . $path;
+		
+		$real_root = realpath( $root );
+		$real_curr = realpath( $current );
+		if ( $real_curr === false || strpos( $real_curr , $real_root ) !== 0 ) {
+			header( 'Location: ?p=media:list' ); exit;
+		}
+
+		$dirs = []; $files = [];
+		foreach ( scandir( $current ) as $name ) {
+			if ( $name === '.' || $name === '..' ) continue;
+			if ( $name[0] === '.' ) continue;
+			
+			$full = $current . '/' . $name;
+			$rel  = $path === '' ? $name : $path . '/' . $name;
+			
+			if ( is_dir( $full ) ) {
+				$dirs[ ] = [ 'name' => $name , 'path' => $rel ];
+			} else {
+				$files[ ] = [
+					'name' => $name ,
+					'path' => $rel ,
+					'size' => filesize( $full ) ,
+					'time' => filemtime( $full ) ,
+					'url'  => '/media/' . $rel ,
+				];
+			}
+		}
+		usort( $dirs , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
+		usort( $files , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
+
 		View::render( 'media_list' , [
-			'domain' => $domain , 'files' => $files ,
-			'meta' => [ 'title' => 'Медиа' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Медиа', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'media'] ]
+			'domain' => $domain , // Передаем вычисленный домен
+			'path'   => $path ,
+			'dirs'   => $dirs ,
+			'files'  => $files ,
+			'saved'  => ! empty( $_GET[ 'saved' ] ) , 
+			'error'  => $_GET[ 'error' ] ?? null ,
+			'meta'   => [ 'title' => 'Медиа' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Медиа', 'url' => '?p=media:list'] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'media'] ]
 		] );
 		break;
+
+	case 'media:upload' :
+		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { header( 'Location: ?p=media:list' ); exit; }
+		$target_path = trim( (string) ( $_POST[ 'target_path' ] ?? '' ) , '/' );
+		$domain      = (string) ( $_POST[ 'domain' ] ?? '' );
+		
+		if ( str_contains( $target_path , '..' ) ) { header( 'Location: ?p=media:list' ); exit; }
+		
+		$root = Paths::mediaRoot();
+		$dir  = $target_path === '' ? $root : $root . '/' . $target_path;
+		
+		Fs::mkdir( $dir );
+		$real_root = realpath( $root );
+		$real_dir  = realpath( $dir );
+		if ( $real_dir === false || strpos( $real_dir , $real_root ) !== 0 ) {
+			header( 'Location: ?p=media:list' ); exit;
+		}
+
+		require_once CS_CMD . '/MediaUpload.php';
+		$res = MediaUpload::run([ 'dir' => $dir , 'file' => $_FILES['file'] ?? null ]);
+		AuditLog::action_ok( 'media:upload' , [ 'path' => $target_path , 'file' => $_FILES['file']['name'] ?? '' , 'ok' => $res->ok ] );
+		
+		$back = '?p=media:list' . ( $target_path !== '' ? '&path=' . urlencode( $target_path ) : '' ) . ( $domain !== '' ? '&domain=' . urlencode( $domain ) : '' );
+		header( 'Location: ' . $back . ( $res->ok ? '&saved=1' : '&error=' . urlencode( $res->errors[0] ?? 'Ошибка' ) ) );
+		exit;
+
+	case 'media:delete' :
+		$path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		if ( str_contains( $path , '..' ) ) { header( 'Location: ?p=media:list' ); exit; }
+		
+		$root = Paths::mediaRoot();
+		$full = $root . '/' . $path;
+		
+		$real_root = realpath( $root );
+		$real_full = realpath( $full );
+		if ( $real_full === false || strpos( $real_full , $real_root ) !== 0 || is_dir( $real_full ) ) {
+			header( 'Location: ?p=media:list' ); exit;
+		}
+		
+		unlink( $real_full );
+		AuditLog::action_ok( 'media:delete' , [ 'path' => $path ] );
+		
+		$parent = dirname( $path );
+		$parent = $parent === '.' ? '' : $parent;
+		$back = '?p=media:list' . ( $parent !== '' ? '&path=' . urlencode( $parent ) : '' ) . ( $domain !== '' ? '&domain=' . urlencode( $domain ) : '' );
+		header( 'Location: ' . $back );
+		exit;
 
 	case 'stub:edit' :
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );

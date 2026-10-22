@@ -112,6 +112,15 @@ class Paths {
         return self::project() . '/www/media/' . self::real( $domain );
     }
 
+    # --- корень медиа (все домены + shared) ---
+    public static function mediaRoot () : string {
+        return self::project() . '/www/media';
+    }
+
+    public static function mediaShared () : string {
+        return self::mediaRoot() . '/shared';
+    }
+
     public static function skins ( string $domain ) : string {
         return self::media( $domain ) . '/skin';
     }
