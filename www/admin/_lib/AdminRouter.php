@@ -6,6 +6,7 @@ class AdminRouter {
     private static array $map = [
         'dashboard' => 'DashboardController',
         'domain'    => 'DomainController',
+		'allias'    => 'AlliasController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 
@@ -21,6 +22,12 @@ class AdminRouter {
 
         $controllerName = self::$map[$resource];
         $controllerFile = __DIR__ . '/../controllers/' . $controllerName . '.php';
+        
+        // Сначала подключаем базовый класс
+        $baseControllerFile = __DIR__ . '/../controllers/BaseController.php';
+        if (is_file($baseControllerFile)) {
+            require_once $baseControllerFile;
+        }
 
         if (!is_file($controllerFile)) {
             http_response_code(500);
