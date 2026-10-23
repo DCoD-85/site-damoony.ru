@@ -15,6 +15,10 @@ class AdminRouter {
 		'media'    => 'MediaController',
         'settings' => 'SettingsController', 
         'db'       => 'SettingsController',
+		'schemes'  => 'SchemeController',
+        'scheme'   => 'SchemeController',
+        'stubs'    => 'StubController',
+        'stub'     => 'StubController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 
