@@ -89,7 +89,12 @@ $domain_query = $domain !== '' ? '&domain=' . urlencode($domain) : '';
                     <td><?= round( $f['size'] / 1024 , 1 ) ?> KB</td>
                     <td><?= date( 'd.m.Y H:i' , $f['time'] ) ?></td>
                     <td>
-                        <a href="?p=media:delete&path=<?= urlencode( $f['path'] ) ?><?= $domain_query ?>" class="btn-danger" onclick="return confirm('Удалить файл <?= htmlspecialchars($f['name']) ?>?')">Удалить</a>
+                        <form method="post" action="?p=media:delete" style="display:inline;" onsubmit="return confirm('Удалить файл <?= htmlspecialchars($f['name'], ENT_QUOTES) ?>?')">
+                            <?= Csrf::field() ?>
+                            <input type="hidden" name="path" value="<?= htmlspecialchars($f['path'], ENT_QUOTES) ?>">
+                            <input type="hidden" name="domain" value="<?= htmlspecialchars($domain, ENT_QUOTES) ?>">
+                            <button type="submit" class="btn-danger">Удалить</button>
+                        </form>
                     </td>
                 </tr>
             <?PHP endforeach ?>

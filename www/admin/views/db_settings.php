@@ -27,7 +27,8 @@
     </label>
     
     <label>Пароль (Password)
-        <input type="password" name="pass" value="<?= htmlspecialchars($db['password'] ?? '') ?>">
+        <input type="password" name="pass" value="" autocomplete="new-password" placeholder="<?= ! empty( $db['password'] ) ? '•••••••• (оставьте пустым, чтобы не менять)' : 'Пароль не задан' ?>">
+        <small style="color:#888;">Оставьте поле пустым, чтобы сохранить текущий пароль.</small>
     </label>
 
     <div style="display:flex; gap:10px; margin-top:20px;">

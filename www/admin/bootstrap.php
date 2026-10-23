@@ -1,23 +1,29 @@
 <?PHP
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 # ============================================================
-#   www/admin/index.php — точка входа админки
+#   www/admin/bootstrap.php — точка входа админки
 # ============================================================
 
-define( 'ADMIN_ROOT'   , __DIR__ );
-define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
+# --- Определяем APP_ENV (env → engine.config[env] → 'prod') ---
+$app_env_boot = getenv( 'APP_ENV' );
+if ( $app_env_boot === false || $app_env_boot === '' ) {
+	$ec_path_boot = dirname( __DIR__ , 2 ) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'engine.config';
+	$ec_boot      = is_file( $ec_path_boot ) ? @json_decode( @file_get_contents( $ec_path_boot ) , true ) : null;
+	$app_env_boot = is_array( $ec_boot ) ? (string) ( $ec_boot[ 'env' ] ?? 'prod' ) : 'prod';
+}
+
+if ( ! defined( 'GL_DEBUG' ) && $app_env_boot === 'dev' ) {
+	ini_set( 'display_errors' , 1 ); ini_set( 'display_startup_errors' , 1 ); error_reporting( E_ALL );
+}
+
+if ( ! defined( 'ADMIN_ROOT' ) ) define( 'ADMIN_ROOT' , __DIR__ );
+if ( ! defined( 'PROJECT_ROOT' ) ) define( 'PROJECT_ROOT' , dirname( dirname( ADMIN_ROOT ) ) );
 
 $admin_cfg = @json_decode( @file_get_contents( PROJECT_ROOT . '/config/admin.config' ) , true ) ?: [ ];
-$admin_session_name = (string) ( $admin_cfg[ 'session_name' ] ?? 'admin_sid' );
-session_name( $admin_session_name );
+session_name( (string) ( $admin_cfg[ 'session_name' ] ?? 'admin_sid' ) );
 
 session_set_cookie_params( [
-	'lifetime' => 0 , 'path' => '/' , 'domain' => '' ,
-	'secure' => ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) , 'httponly' => true , 'samesite' => 'Lax' ,
+	'lifetime' => 0 , 'path' => '/' , 'domain' => '' , 'secure' => ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) , 'httponly' => true , 'samesite' => 'Lax' ,
 ] );
 session_start( );
 
@@ -25,109 +31,222 @@ header( 'X-Content-Type-Options: nosniff' );
 header( 'X-Frame-Options: DENY' );
 header( 'Referrer-Policy: same-origin' );
 header( 'Permissions-Policy: geolocation=(), microphone=(), camera=()' );
-
-if ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) {
-	header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
-}
-
-header(
-	"Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
-);
+if ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) header( 'Strict-Transport-Security: max-age=31536000; includeSubDomains' );
+header( "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'" );
 
 $cs = PROJECT_ROOT . '/corescripts';
+if ( ! defined( 'CS_ROOT' ) ) define( 'CS_ROOT' , $cs );
+if ( ! defined( 'CS_LIB'  ) ) define( 'CS_LIB'  , $cs . '/_lib' );
+if ( ! defined( 'CS_CMD'  ) ) define( 'CS_CMD'  , $cs . '/commands' );
+if ( ! defined( 'CS_TPL'  ) ) define( 'CS_TPL'  , $cs . '/templates' );
 
-define( 'CS_ROOT' , $cs );
-define( 'CS_LIB'  , $cs . '/_lib' );
-define( 'CS_CMD'  , $cs . '/commands' );
-define( 'CS_TPL'  , $cs . '/templates' );
+require_once CS_LIB . '/Fs.php'; require_once CS_LIB . '/Json.php'; require_once CS_LIB . '/Paths.php';
+require_once CS_LIB . '/Blocks.php'; require_once CS_LIB . '/Config.php'; require_once CS_LIB . '/Template.php';
+require_once CS_LIB . '/Validate.php'; require_once CS_LIB . '/Result.php'; require_once CS_LIB . '/Context.php';
 
-require_once CS_LIB . '/Fs.php';
-require_once CS_LIB . '/Json.php';
-require_once CS_LIB . '/Paths.php';
-require_once CS_LIB . '/Blocks.php';
-require_once CS_LIB . '/Config.php';
-require_once CS_LIB . '/Template.php';
-require_once CS_LIB . '/Validate.php';
-require_once CS_LIB . '/Result.php';
-require_once CS_LIB . '/Context.php';
+require_once ADMIN_ROOT . '/_lib/Auth.php'; require_once ADMIN_ROOT . '/_lib/Security.php';
+require_once ADMIN_ROOT . '/_lib/View.php'; require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
+require_once ADMIN_ROOT . '/_lib/Csrf.php'; require_once ADMIN_ROOT . '/_lib/AuditLog.php';
 
-require_once ADMIN_ROOT . '/_lib/Auth.php';
-require_once ADMIN_ROOT . '/_lib/View.php';
-require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
-require_once ADMIN_ROOT . '/_lib/Csrf.php';
-require_once ADMIN_ROOT . '/_lib/AuditLog.php';
+# --- Автовход по fingerprint-cookie ---
+if ( empty( $_SESSION[ 'admin_ok' ] ) ) {
+	$fp_raw = $_COOKIE[ 'admin_fp' ] ?? '';
+	if ( $fp_raw !== '' ) {
+		$match = Security::find_device( json_decode( $fp_raw , true ) ?: [] );
+		if ( $match !== null ) {
+			session_regenerate_id( true );
+			$_SESSION[ 'admin_ok' ]    = true;
+			$_SESSION[ 'admin_login' ] = $match[ 'login' ];
+			$_SESSION[ 'admin_role' ]  = $match[ 'role' ];
+			Security::touch_device( $match[ 'login' ] , $match[ 'device' ] , (string) ( $_SERVER[ 'REMOTE_ADDR' ] ?? '' ) );
+			Security::log( 'autologin:ok' , [ 'login' => $match[ 'login' ] , 'device' => $match[ 'device' ] ] );
+		}
+	}
+}
 
 $auth = new Auth( );
 $p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
 
-if ( $p === 'login' && $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-	require_once PROJECT_ROOT . '/engine/middleware.php';
-	middleware::rateLimit( 'admin:login' , 10 , 60 , 1800 );
-}
-
+# --- Логин ---
 if ( $p === 'login' ) {
 	if ( $auth->check( ) ) { header( 'Location: ?p=dashboard' ); exit; }
 	$error = null;
 	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+		require_once PROJECT_ROOT . '/engine/middleware.php';
+		middleware::rateLimit( 'admin:login' , 10 , 60 , 1800 );
 		if ( ! Csrf::check( ) ) { http_response_code( 403 ); exit( 'CSRF token invalid' ); }
+		
 		$login = (string) ( $_POST[ 'login' ] ?? '' );
 		$pass  = (string) ( $_POST[ 'password' ] ?? '' );
+		
 		if ( $auth->login( $login , $pass ) ) {
+			$fp_raw = (string) ( $_POST[ 'fingerprint' ] ?? '' );
+			if ( $fp_raw !== '' ) {
+				$fp = json_decode( $fp_raw , true ) ?: [];
+				if ( ! empty( $fp[ 'canvas' ] ) ) {
+					try {
+						Security::add_device( $login , $fp , (string) ( $_SERVER[ 'HTTP_USER_AGENT' ] ?? '' ) , (string) ( $_SERVER[ 'REMOTE_ADDR' ] ?? '' ) );
+						Security::log( 'device:bound' , [ 'login' => $login ] );
+					} catch ( Throwable $e ) {
+						Security::log( 'device:bind_fail' , [ 'login' => $login , 'err' => $e->getMessage() ] );
+					}
+				}
+			}
 			AuditLog::login_ok( );
-			header( 'Location: ?p=dashboard' );
-			exit;
+			header( 'Location: ?p=dashboard' ); exit;
 		}
 		AuditLog::login_fail( );
 		$error = 'Неверный логин или пароль';
 	}
-	View::render( 'login' , [ 'error' => $error ] );
-	exit;
+	View::render( 'login' , [ 'error' => $error ] ); exit;
 }
 
-if ( $p === 'logout' ) {
-	AuditLog::logout( );
-	$auth->logout( );
-	header( 'Location: ?p=login' );
+if ( $p === 'logout' ) { AuditLog::logout( ); $auth->logout( ); header( 'Location: ?p=login' ); exit; }
+
+# --- Приглашение: регистрация или привязка устройства ---
+if ( $p === 'invite' || ( isset( $_GET[ 'token' ] ) && (string) $_GET[ 'token' ] !== '' ) ) {
+	$token = (string) ( $_GET[ 'token' ] ?? '' );
+	$invite = $token !== '' ? Security::validate_invite( $token ) : null;
+	
+	if ( $invite === null ) { http_response_code( 404 ); exit( 'Приглашение недействительно или истекло' ); }
+
+	$is_bind = ( $invite['role'] === 'bind_only' );
+	$error = null;
+
+	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+		if ( ! Csrf::check() ) { http_response_code( 403 ); exit( 'CSRF token invalid' ); }
+		$pass = (string) ( $_POST[ 'password' ] ?? '' );
+		$fp = json_decode( (string) ( $_POST[ 'fingerprint' ] ?? '' ) , true ) ?: [];
+		$ua = (string) ( $_SERVER[ 'HTTP_USER_AGENT' ] ?? '' );
+		$ip = (string) ( $_SERVER[ 'REMOTE_ADDR' ] ?? '' );
+
+		if ( empty( $fp['canvas'] ) ) {
+			$error = 'Не удалось получить отпечаток устройства. Включите JavaScript.';
+		} elseif ( $is_bind ) {
+			if ( Security::bind_device_from_invite( $token , $pass , $fp , $ua , $ip ) ) {
+				$admins = Security::get_data();
+				$_SESSION['admin_ok'] = true;
+				$_SESSION['admin_login'] = $invite['target_user'];
+				$_SESSION['admin_role'] = $admins['users'][$invite['target_user']]['role'] ?? 'admin';
+				Security::log( 'device:bound_invite' , [ 'login' => $invite['target_user'] ] );
+				header('Location: ?p=dashboard'); exit;
+			}
+			$error = 'Неверный пароль';
+		} else {
+			$login = trim((string)($_POST['login'] ?? ''));
+			if ( $login === '' || !preg_match('/^[a-z0-9_]+$/i', $login) ) {
+				$error = 'Некорректный логин (только a-z, 0-9, _)';
+			} elseif ( Security::create_user_from_invite( $token , $login , $pass , $invite['role'] , $fp , $ua , $ip ) ) {
+				$_SESSION['admin_ok'] = true; $_SESSION['admin_login'] = $login; $_SESSION['admin_role'] = $invite['role'];
+				Security::log( 'user:created_invite' , [ 'login' => $login ] );
+				header('Location: ?p=dashboard'); exit;
+			} else {
+				$error = 'Логин уже существует или ошибка сохранения';
+			}
+		}
+	}
+
+	View::render( 'invite_accept' , [ 'token' => $token , 'invite' => $invite , 'is_bind' => $is_bind , 'error' => $error ] );
 	exit;
 }
 
 if ( ! $auth->check( ) ) { header( 'Location: ?p=login' ); exit; }
+if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' && ! Csrf::check( ) ) { http_response_code( 403 ); exit( 'CSRF token invalid' ); }
 
-if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' && ! Csrf::check( ) ) {
-	http_response_code( 403 ); exit( 'CSRF token invalid' );
+# ============================================================
+#   ?p=security — управление безопасностью
+# ============================================================
+if ( $p === 'security' ) {
+	$tab = (string) ( $_GET[ 'tab' ] ?? 'policy' );
+	if ( ! in_array( $tab , [ 'policy' , 'users' , 'logs' ] , true ) ) $tab = 'policy';
+	$saved = ! empty( $_GET[ 'saved' ] );
+	$generated_invite = '';
+
+	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+		$action = (string) ( $_POST[ 'action' ] ?? '' );
+		try {
+			switch ( $action ) {
+				case 'save_policy' :
+					$cur = Security::get_config( );
+					$cur[ 'mode' ] = ( ( $_POST[ 'mode' ] ?? 'whitelist' ) === 'blacklist' ) ? 'blacklist' : 'whitelist';
+					$cur[ 'require_fingerprint' ] = ! empty( $_POST[ 'require_fingerprint' ] );
+					Security::save_config( $cur );
+					AuditLog::action_ok( 'security:policy' , [ 'mode' => $cur[ 'mode' ] ] );
+					header( 'Location: ?p=security&tab=policy&saved=1' ); exit;
+
+				case 'reset_devices' :
+					$login = (string) ( $_POST[ 'login' ] ?? '' );
+					if ( $login !== '' ) {
+						Security::reset_user_devices( $login );
+						AuditLog::action_ok( 'security:reset_devices' , [ 'login' => $login ] );
+					}
+					header( 'Location: ?p=security&tab=users&saved=1' ); exit;
+
+				case 'create_invite' :
+					$invite_type = (string) ( $_POST[ 'invite_type' ] ?? 'new_user' );
+					$target_user = null;
+					
+					if ( $invite_type === 'bind_user' ) {
+						$target_user = (string) ( $_POST[ 'target_user' ] ?? '' );
+						$role = 'bind_only';
+					} else {
+						$role = (string) ( $_POST[ 'role' ] ?? 'admin' );
+						if ( ! in_array( $role , [ 'admin' , 'super' ] , true ) ) $role = 'admin';
+					}
+					
+					$token = Security::create_invite( $role , null , $target_user );
+					$scheme = ( ( $_SERVER[ 'HTTPS' ] ?? '' ) === 'on' ) ? 'https' : 'http';
+					$host   = $_SERVER[ 'HTTP_HOST' ] ?? 'localhost';
+					$generated_invite = $scheme . '://' . $host . '/admin/?token=' . $token;
+					AuditLog::action_ok( 'security:invite_create' , [ 'role' => $role , 'target' => $target_user , 'token' => substr( $token , 0 , 8 ) ] );
+					break;
+
+				case 'revoke_invite' :
+					$token = (string) ( $_POST[ 'token' ] ?? '' );
+					if ( $token !== '' ) {
+						Security::revoke_invite( $token );
+						AuditLog::action_ok( 'security:invite_revoke' , [ 'token' => substr( $token , 0 , 8 ) ] );
+					}
+					header( 'Location: ?p=security&tab=users&saved=1' ); exit;
+			}
+		} catch ( Throwable $e ) { error_log( 'security action error: ' . $e->getMessage( ) ); }
+	}
+
+	$sec_cfg = Security::get_config( );
+	$admins  = Security::get_data( );
+	$logs = [ ];
+	$log_path = PROJECT_ROOT . '/secure/logs/security.log';
+
+	if ( is_file( $log_path ) ) {
+		$lines = @file( $log_path , FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+		if ( is_array( $lines ) ) {
+			foreach ( array_slice( array_reverse( $lines ) , 0 , 200 ) as $line ) {
+				$row = json_decode( $line , true );
+				$logs[] = is_array( $row ) ? $row : [ 'ts' => '' , 'ip' => '' , 'event' => '?' , 'data' => [] ];
+			}
+		}
+	}
+
+	View::render( 'security' , [
+		'tab' => $tab , 'saved' => $saved , 'generated_invite' => $generated_invite , 'sec_cfg' => $sec_cfg , 'admins' => $admins , 'logs' => $logs ,
+		'meta' => [ 'title' => 'Безопасность' , 'breadcrumbs' => [ [ 'label' => 'Настройки' , 'url' => '?p=settings' ] , [ 'label' => 'Безопасность' , 'url' => '' ] ] ]
+	] );
+	exit;
 }
 
+# ============================================================
+#   Остальные страницы — большой switch
+# ============================================================
 switch ( $p ) {
-
 	case 'dashboard' :
-		$cfg = new Config( Paths::config() );
-		$domains = (array) $cfg->get( 'domains_real' );
-		$real_domains = [ ]; $aliases = [ ];
-		foreach ( $domains as $d => $real ) {
-			if ( $d === $real ) $real_domains[ $d ] = true;
-			else $aliases[ $real ][ ] = $d;
-		}
+		$cfg = new Config( Paths::config() ); $domains = (array) $cfg->get( 'domains_real' ); $real_domains = [ ]; $aliases = [ ];
+		foreach ( $domains as $d => $real ) { if ( $d === $real ) $real_domains[ $d ] = true; else $aliases[ $real ][ ] = $d; }
 		$rows = [ ];
 		foreach ( array_keys( $real_domains ) as $real ) {
-			$alliases = [ ];
-			foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) {
-				if ( $a === '' ) continue; $alliases[ ] = $a;
-			}
-			$rows[ ] = [
-				'domain' => $real , 'ns' => $cfg->getKeys( [ 'domains_namespace' , $real ] ) ?? '—' ,
-				'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) ,
-				'fs' => is_dir( Paths::domain( $real ) ) ,
-				'stub' => ! empty( $cfg->getKeys( [ 'domains_stub' , $real , 'enabled' ] ) ) ,
-				'alliases' => $alliases , 'aliases' => $aliases[ $real ] ?? [ ] ,
-			];
+			$alliases = [ ]; foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a !== '' ) $alliases[ ] = $a; }
+			$rows[ ] = [ 'domain' => $real , 'ns' => $cfg->getKeys( [ 'domains_namespace' , $real ] ) ?? '—' , 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ) , 'fs' => is_dir( Paths::domain( $real ) ) , 'stub' => ! empty( $cfg->getKeys( [ 'domains_stub' , $real , 'enabled' ] ) ) , 'alliases' => $alliases , 'aliases' => $aliases[ $real ] ?? [ ] ];
 		}
-		View::render( 'dashboard' , [
-			'domains' => $rows,
-			'meta' => [
-				'title' => 'Домены',
-				'actions' => '<a href="?p=stubs:list" class="btn-edit">Библиотека заглушек</a> <a href="?p=domain:new" class="btn-primary">+ Добавить домен</a>'
-			]
-		] );
+		View::render( 'dashboard' , [ 'domains' => $rows , 'meta' => [ 'title' => 'Домены' , 'actions' => '<a href="?p=stubs:list" class="btn-edit">Библиотека заглушек</a> <a href="?p=domain:new" class="btn-primary">+ Добавить домен</a>' ] ] );
 		break;
 
 	case 'domain:new' :
@@ -142,9 +261,7 @@ switch ( $p ) {
 		break;
 
 	case 'allias:new' :
-		$cfg = new Config( Paths::config() );
-		$domains_raw = (array) $cfg->get( 'domains_real' );
-		$domains = [ ];
+		$cfg = new Config( Paths::config() ); $domains_raw = (array) $cfg->get( 'domains_real' ); $domains = [ ];
 		foreach ( $domains_raw as $d => $real ) { if ( $d === $real ) $domains[ ] = $d; }
 		$prefill_domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
@@ -154,10 +271,7 @@ switch ( $p ) {
 			AuditLog::action_ok( 'allias:new' , [ 'domain' => $post_domain , 'name' => $_POST[ 'name' ] ?? '' , 'ok' => $result->ok ] );
 			View::render( 'result' , [ 'result' => $result , 'title' => 'Создание аллиаса' , 'back_url' => '?p=allias:list&domain=' . urlencode( $post_domain ) , 'back_label' => 'К аллиасам' ] );
 		} else {
-			View::render( 'allias_new' , [
-				'domains' => $domains , 'prefill_domain' => $prefill_domain,
-				'meta' => [ 'title' => 'Создать аллиас' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Создать аллиас', 'url' => ''] ] ]
-			] );
+			View::render( 'allias_new' , [ 'domains' => $domains , 'prefill_domain' => $prefill_domain, 'meta' => [ 'title' => 'Создать аллиас' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Создать аллиас', 'url' => ''] ] ] ] );
 		}
 		break;
 
@@ -166,8 +280,7 @@ switch ( $p ) {
 		if ( Validate::domain( $domain ) !== null ) { header( 'Location: ?p=dashboard' ); exit; }
 		$cfg = new Config( Paths::config() ); $real = Paths::real( $domain );
 		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) { header( 'Location: ?p=dashboard' ); exit; }
-		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' );
-		$stubs = $stubs_cfg->get( 'stubs' ) ?? [];
+		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' ); $stubs = $stubs_cfg->get( 'stubs' ) ?? [];
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$title = trim( (string) ( $_POST[ 'title' ] ?? '' ) ); $errors = [];
 			if ( $title === '' ) { $errors[] = 'Title не может быть пустым'; }
@@ -178,22 +291,16 @@ switch ( $p ) {
 			if ( empty( $errors ) ) {
 				try {
 					Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $title , $domain_available , $stub_current , $stub_until ) {
-						$cfg->setKeys( [ 'domains_titles' , $real ] , $title );
-						$cfg->setKeys( [ 'domains_available' , $real ] , $domain_available );
-						$cfg->setKeys( [ 'domains_stub' , $real , 'current' ] , $stub_current );
-						$cfg->setKeys( [ 'domains_stub' , $real , 'until' ] , $stub_until );
+						$cfg->setKeys( [ 'domains_titles' , $real ] , $title ); $cfg->setKeys( [ 'domains_available' , $real ] , $domain_available );
+						$cfg->setKeys( [ 'domains_stub' , $real , 'current' ] , $stub_current ); $cfg->setKeys( [ 'domains_stub' , $real , 'until' ] , $stub_until );
 					} );
-					AuditLog::action_ok( 'domain:edit' , [ 'domain' => $real , 'title' => $title ] );
-					header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' ); exit;
+					AuditLog::action_ok( 'domain:edit' , [ 'domain' => $real , 'title' => $title ] ); header( 'Location: ?p=domain:edit&domain=' . urlencode( $domain ) . '&saved=1' ); exit;
 				} catch ( Throwable $e ) { $errors[] = 'Ошибка сохранения: ' . $e->getMessage(); }
 			}
-			$current = [ 'title' => $title, 'avail' => $domain_available, 'stub' => $stub_current, 'until' => $stub_until ];
-			View::render( 'domain_edit' , [ 'domain' => $domain , 'current' => $current , 'stubs' => $stubs , 'saved' => false , 'errors' => $errors , 'meta' => [ 'title' => 'Настройки домена' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'main'] ] ] );
-			break;
+			View::render( 'domain_edit' , [ 'domain' => $domain , 'current' => [ 'title' => $title, 'avail' => $domain_available, 'stub' => $stub_current, 'until' => $stub_until ] , 'stubs' => $stubs , 'saved' => false , 'errors' => $errors , 'meta' => [ 'title' => 'Настройки домена' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'main'] ] ] ); break;
 		}
 		$title = (string) ( $cfg->getKeys( [ 'domains_titles' , $real ] ) ?? $cfg->get( 'title' , '' ) );
-		$current = [ 'title' => $title, 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ), 'stub' => $cfg->getKeys( [ 'domains_stub' , $real , 'current' ] , 'maintenance' ), 'until' => $cfg->getKeys( [ 'domains_stub' , $real , 'until' ] , 0 ) ];
-		View::render( 'domain_edit' , [ 'domain' => $domain , 'current' => $current , 'stubs' => $stubs , 'saved' => ! empty( $_GET[ 'saved' ] ) , 'errors' => [] , 'meta' => [ 'title' => 'Настройки домена' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'main'] ] ] );
+		View::render( 'domain_edit' , [ 'domain' => $domain , 'current' => [ 'title' => $title, 'avail' => ! empty( $cfg->getKeys( [ 'domains_available' , $real ] ) ), 'stub' => $cfg->getKeys( [ 'domains_stub' , $real , 'current' ] , 'maintenance' ), 'until' => $cfg->getKeys( [ 'domains_stub' , $real , 'until' ] , 0 ) ] , 'stubs' => $stubs , 'saved' => ! empty( $_GET[ 'saved' ] ) , 'errors' => [] , 'meta' => [ 'title' => 'Настройки домена' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'main'] ] ] );
 		break;
 
 	case 'allias:toggle' :
@@ -203,8 +310,7 @@ switch ( $p ) {
 		require_once CS_CMD . '/AlliasToggle.php';
 		$result = AlliasToggle::run( [ 'domain' => $domain , 'name' => $name , 'value' => $value ] );
 		AuditLog::action_ok( 'allias:toggle' , [ 'domain' => $domain , 'name' => $name , 'value' => $value , 'ok' => $result->ok ] );
-		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) );
-		exit;
+		header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) ); exit;
 
 	case 'domain:toggle' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit( 'Method not allowed' ); }
@@ -213,8 +319,7 @@ switch ( $p ) {
 		require_once CS_CMD . '/DomainToggle.php';
 		$result = DomainToggle::run( [ 'domain' => $domain , 'value' => $value ] );
 		AuditLog::action_ok( 'domain:toggle' , [ 'domain' => $domain , 'value' => $value , 'ok' => $result->ok ] );
-		header( 'Location: ?p=dashboard' );
-		exit;
+		header( 'Location: ?p=dashboard' ); exit;
 
 	case 'domain:remove' :
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -222,7 +327,7 @@ switch ( $p ) {
 		$cfg = new Config( Paths::config() );
 		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) { header( 'Location: ?p=dashboard' ); exit; }
 		$real = Paths::real( $domain ); $alliases = [ ];
-		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a === '' ) continue; $alliases[ ] = $a; }
+		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a !== '' ) $alliases[ ] = $a; }
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$confirm_name = trim( (string) ( $_POST[ 'confirm_name' ] ?? '' ) ); $confirm_checked = ! empty( $_POST[ 'confirm_checked' ] ); $errors = [ ];
 			if ( ! $confirm_checked ) { $errors[ ] = 'Подтвердите, что понимаете необратимость'; }
@@ -231,11 +336,9 @@ switch ( $p ) {
 				require_once CS_CMD . '/DomainRemove.php';
 				$result = DomainRemove::run( [ 'name' => $real , 'force' => true ] );
 				AuditLog::action_ok( 'domain:remove' , [ 'domain' => $real , 'ok' => $result->ok ] );
-				View::render( 'result' , [ 'result' => $result , 'title' => 'Удаление домена: ' . $real , 'back_url' => '?p=dashboard' , 'back_label' => 'К списку домен' ] );
-				break;
+				View::render( 'result' , [ 'result' => $result , 'title' => 'Удаление домена: ' . $real , 'back_url' => '?p=dashboard' , 'back_label' => 'К списку домен' ] ); break;
 			}
-			View::render( 'domain_remove' , [ 'domain' => $domain , 'real' => $real , 'errors' => $errors , 'alliases' => $alliases , 'meta' => [ 'title' => 'Удалить домен' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Удалить домен', 'url' => ''] ] ] ] );
-			break;
+			View::render( 'domain_remove' , [ 'domain' => $domain , 'real' => $real , 'errors' => $errors , 'alliases' => $alliases , 'meta' => [ 'title' => 'Удалить домен' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Удалить домен', 'url' => ''] ] ] ] ); break;
 		}
 		View::render( 'domain_remove' , [ 'domain' => $domain , 'real' => $real , 'errors' => [ ] , 'alliases' => $alliases , 'meta' => [ 'title' => 'Удалить домен' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Удалить домен', 'url' => ''] ] ] ] );
 		break;
@@ -254,11 +357,9 @@ switch ( $p ) {
 				require_once CS_CMD . '/AlliasRemove.php';
 				$result = AlliasRemove::run( [ 'name' => $name , 'domain' => $real , 'force' => true ] );
 				AuditLog::action_ok( 'allias:remove' , [ 'domain' => $real , 'name' => $name , 'ok' => $result->ok ] );
-				View::render( 'result' , [ 'result' => $result , 'title' => "Удаление аллиаса: {$real} / {$name}" , 'back_url' => '?p=allias:list&domain=' . urlencode( $domain ) , 'back_label' => 'К аллиасам' ] );
-				break;
+				View::render( 'result' , [ 'result' => $result , 'title' => "Удаление аллиаса: {$real} / {$name}" , 'back_url' => '?p=allias:list&domain=' . urlencode( $domain ) , 'back_label' => 'К аллиасам' ] ); break;
 			}
-			View::render( 'allias_remove' , [ 'domain' => $domain , 'name' => $name , 'errors' => $errors , 'meta' => [ 'title' => 'Удалить аллиас' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Удалить аллиас', 'url' => ''] ] ] ] );
-			break;
+			View::render( 'allias_remove' , [ 'domain' => $domain , 'name' => $name , 'errors' => $errors , 'meta' => [ 'title' => 'Удалить аллиас' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Удалить аллиас', 'url' => ''] ] ] ] ); break;
 		}
 		View::render( 'allias_remove' , [ 'domain' => $domain , 'name' => $name , 'errors' => [ ] , 'meta' => [ 'title' => 'Удалить аллиас' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Удалить аллиас', 'url' => ''] ] ] ] );
 		break;
@@ -271,15 +372,7 @@ switch ( $p ) {
 		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) { header( 'Location: ?p=dashboard' ); exit; }
 		require_once ADMIN_ROOT . '/_lib/Scan.php';
 		$base = Paths::algoritm( $domain , $allias ); $tree = is_dir( $base ) ? Scan::pageTree( $base ) : [ ];
-		View::render( 'pages_tree' , [
-			'domain' => $domain , 'allias' => $allias , 'logic' => Paths::logic( ) , 'tree' => $tree , 'has_dir' => is_dir( $base ) ,
-			'meta' => [
-				'title' => 'Страницы' ,
-				'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Страницы', 'url' => ''] ] ,
-				'actions' => '<a href="?p=page:new&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '" class="btn-primary">+ Новая страница</a>' ,
-				'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages']
-			]
-		] );
+		View::render( 'pages_tree' , [ 'domain' => $domain , 'allias' => $allias , 'logic' => Paths::logic( ) , 'tree' => $tree , 'has_dir' => is_dir( $base ) , 'meta' => [ 'title' => 'Страницы' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Страницы', 'url' => ''] ] , 'actions' => '<a href="?p=page:new&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '" class="btn-primary">+ Новая страница</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ] ] );
 		break;
 
 	case 'page:visual' :
@@ -292,15 +385,9 @@ switch ( $p ) {
 		}
 		$json_data = is_file( $json_file ) ? file_get_contents( $json_file ) : '{"tag":"div","class":"landing-container","children":[]}';
 		$lang_cfg = is_file(PROJECT_ROOT . '/config/lang.config') ? json_decode(file_get_contents(PROJECT_ROOT . '/config/lang.config'), true) : [];
-		$lang_default = $lang_cfg['default'] ?? 'ru-ru';
-		$host = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'www.damoony2.ru');
-		$url_path = ($allias === 'www' || $allias === '') ? '' : $allias . '/';
-		$url_path .= ($path === '') ? $lang_default . '/index' : str_replace('lang', $lang_default, $path);
-		$preview_url = rtrim($host . '/' . $url_path, '/') . '/';
-		View::render( 'page_visual' , [
-			'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'json_data' => $json_data , 'preview_url' => $preview_url ,
-			'meta' => [ 'title' => 'Визуальный редактор' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Визуально: '.($path===''?'(корень)':$path), 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ]
-		] );
+		$lang_default = $lang_cfg['default'] ?? 'ru-ru'; $host = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'www.damoony2.ru'); $url_path = ($allias === 'www' || $allias === '') ? '' : $allias . '/';
+		$url_path .= ($path === '') ? $lang_default . '/index' : str_replace('lang', $lang_default, $path); $preview_url = rtrim($host . '/' . $url_path, '/') . '/';
+		View::render( 'page_visual' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'json_data' => $json_data , 'preview_url' => $preview_url , 'meta' => [ 'title' => 'Визуальный редактор' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Визуально: '.($path===''?'(корень)':$path), 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ] ] );
 		break;
 
 	case 'page:code' :
@@ -333,10 +420,7 @@ switch ( $p ) {
 			}
 		}
 		$methods = $extract_methods( $php_code ); $current_method_code = $method_name && isset($methods[$method_name]) ? $methods[$method_name]['code'] : ''; $json_code = is_file( $json_file ) ? file_get_contents( $json_file ) : ''; $tab = $_GET['tab'] ?? 'logic';
-		View::render( 'page_code' , [
-			'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'methods' => $methods , 'parent_methods' => $parent_methods , 'method_name' => $method_name , 'method_code' => $current_method_code , 'json_code' => $json_code , 'tab' => $tab ,
-			'meta' => [ 'title' => 'Редактор кода' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Код: '.($path===''?'(корень)':$path), 'url' => ''] ] , 'actions' => '<a href="?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Визуально</a> <a href="?p=page:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Настройки</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ]
-		] );
+		View::render( 'page_code' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'methods' => $methods , 'parent_methods' => $parent_methods , 'method_name' => $method_name , 'method_code' => $current_method_code , 'json_code' => $json_code , 'tab' => $tab , 'meta' => [ 'title' => 'Редактор кода' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Код: '.($path===''?'(корень)':$path), 'url' => ''] ] , 'actions' => '<a href="?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Визуально</a> <a href="?p=page:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Настройки</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ] ] );
 		break;
 
 	case 'page:edit' :
@@ -347,47 +431,17 @@ switch ( $p ) {
 		if ( $real === null ) { header( 'Location: ?p=dashboard' ); exit; }
 		$base = Paths::algoritm( $domain , $allias ); $cls_short = 'algoritm' . ( $path === '' ? '' : '_' . str_replace( '/' , '_' , $path ) ); $sub_dir = $path === '' ? $base : $base . '/' . $path; $php_file = $sub_dir . '/' . $cls_short . '.php'; $rules_file = $sub_dir . '/' . $cls_short . '.rules.json';
 		if ( ! is_file( $php_file ) ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => "Страница не найдена: {$path}" , 'back_url' => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) , 'back_label' => 'К страницам' ] ); break; }
-		
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			$available_raw = (string) ( $_POST[ 'available' ] ?? '' ); 
-			$auth          = ! empty( $_POST[ 'auth' ] );
-			
-			$lines = preg_split( '/\r\n|\n|\r/' , $available_raw ); $available = [ ]; $seen = [ ];
+			$available_raw = (string) ( $_POST[ 'available' ] ?? '' ); $auth = ! empty( $_POST[ 'auth' ] ); $lines = preg_split( '/\r\n|\n|\r/' , $available_raw ); $available = [ ]; $seen = [ ];
 			foreach ( $lines as $line ) { $line = trim( $line ); if ( isset( $seen[ $line ] ) ) continue; $seen[ $line ] = true; $available[ ] = $line; }
 			while ( ! empty( $available ) && end( $available ) === '' ) { array_pop( $available ); }
 			if ( empty( $available ) ) { $available = [ '' ]; }
-			
-			$data = [ 
-				'available' => $available , 
-				'auth'      => $auth 
-			];
-			
-			try { 
-				Json::writeAtomic( $rules_file , $data ); 
-				AuditLog::action_ok( 'page:edit' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path ] ); 
-			} catch ( Throwable $e ) { 
-				View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Ошибка записи: ' . $e->getMessage( ) , 'back_url' => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) , 'back_label' => 'Назад' ] ); break; 
-			}
+			try { Json::writeAtomic( $rules_file , [ 'available' => $available , 'auth' => $auth ] ); AuditLog::action_ok( 'page:edit' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path ] ); } catch ( Throwable $e ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Ошибка записи: ' . $e->getMessage( ) , 'back_url' => '?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) , 'back_label' => 'Назад' ] ); break; }
 			header( 'Location: ?p=page:edit&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) . '&path=' . urlencode( $path ) . '&saved=1' ); exit;
 		}
-		
-		$current = [ 'available' => [ ] , 'auth' => false ];
-		$json = Json::read( $rules_file );
-		if ( is_array( $json ) ) {
-			$current[ 'available' ] = isset( $json[ 'available' ] ) && is_array( $json[ 'available' ] ) ? $json[ 'available' ] : [ ];
-			$current[ 'auth' ]      = ! empty( $json[ 'auth' ] );
-		}
-		
-		View::render( 'page_edit' , [
-			'domain'    => $domain ,
-			'allias'    => $allias ,
-			'path'      => $path ,
-			'cls_short' => $cls_short ,
-			'json_file' => $rules_file ,
-			'current'   => $current ,
-			'saved'     => ! empty( $_GET[ 'saved' ] ) ,
-			'meta'      => [ 'title' => 'Настройки страницы: '.($path===''?'(корень)':$path) , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Страницы', 'url' => '?p=pages:tree&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $path===''?'(корень)':$path, 'url' => ''] ] , 'actions' => '<a href="?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Визуально</a> <a href="?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Код</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ]
-		] );
+		$current = [ 'available' => [ ] , 'auth' => false ]; $json = Json::read( $rules_file );
+		if ( is_array( $json ) ) { $current[ 'available' ] = isset( $json[ 'available' ] ) && is_array( $json[ 'available' ] ) ? $json[ 'available' ] : [ ]; $current[ 'auth' ] = ! empty( $json[ 'auth' ] ); }
+		View::render( 'page_edit' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'cls_short' => $cls_short , 'json_file' => $rules_file , 'current' => $current , 'saved' => ! empty( $_GET[ 'saved' ] ) , 'meta' => [ 'title' => 'Настройки страницы: '.($path===''?'(корень)':$path) , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Страницы', 'url' => '?p=pages:tree&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $path===''?'(корень)':$path, 'url' => ''] ] , 'actions' => '<a href="?p=page:visual&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Визуально</a> <a href="?p=page:code&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&path=' . urlencode($path) . '" class="btn-edit">Код</a>' , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ] ] );
 		break;
 
 	case 'page:new' :
@@ -395,16 +449,14 @@ switch ( $p ) {
 		if ( $domain === '' || Validate::domain( $domain ) !== null ) { header( 'Location: ?p=dashboard' ); exit; }
 		$cfg = new Config( Paths::config() );
 		if ( $cfg->getKeys( [ 'domains_real' , $domain ] ) === null ) { header( 'Location: ?p=dashboard' ); exit; }
-		$real = Paths::real( $domain ); $alliases = [ ];
-		foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a === '' ) continue; $alliases[ ] = $a; }
+		$real = Paths::real( $domain ); $alliases = [ ]; foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a !== '' ) $alliases[ ] = $a; }
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$allias = (string) ( $_POST[ 'allias' ] ?? '' ); $name = trim( (string) ( $_POST[ 'name' ] ?? '' ) ); $parent = trim( (string) ( $_POST[ 'parent' ] ?? '' ) , '/' ); $path_err = Validate::page_path( $parent );
 			if ( $path_err !== null ) { View::render( 'page_new' , [ 'domain' => $domain , 'allias' => $allias , 'parent' => $parent , 'alliases' => $alliases , 'error' => $path_err , 'meta' => [ 'title' => 'Создать страницу' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Страницы', 'url' => '?p=pages:tree&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Создать страницу', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ] ] ); break; }
 			require_once CS_CMD . '/PageNew.php';
 			$result = PageNew::run( [ 'name' => $name , 'parent' => $parent , 'domain' => $domain , 'allias' => $allias ] );
 			AuditLog::action_ok( 'page:new' , [ 'domain' => $domain , 'allias' => $allias , 'name' => $name , 'ok' => $result->ok ] );
-			View::render( 'result' , [ 'result' => $result , 'title' => "Создание страницы: {$domain} / {$allias} / {$name}" , 'back_url' => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) , 'back_label' => 'К страницам' ] );
-			break;
+			View::render( 'result' , [ 'result' => $result , 'title' => "Создание страницы: {$domain} / {$allias} / {$name}" , 'back_url' => '?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) , 'back_label' => 'К страницам' ] ); break;
 		}
 		View::render( 'page_new' , [ 'domain' => $domain , 'allias' => $allias , 'parent' => (string) ( $_GET[ 'parent' ] ?? '' ) , 'alliases' => $alliases , 'meta' => [ 'title' => 'Создать страницу' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Страницы', 'url' => '?p=pages:tree&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Создать страницу', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'pages'] ] ] );
 		break;
@@ -413,64 +465,37 @@ switch ( $p ) {
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' );
 		if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
 		if ( $allias === '' ) { header( 'Location: ?p=allias:list&domain=' . urlencode( $domain ) ); exit; }
-		require_once ADMIN_ROOT . '/_lib/Scan.php';
-		$rows = Scan::fillersFor( $domain , $allias );
-		View::render( 'allias_fillers' , [
-			'domain' => $domain , 'allias' => $allias , 'rows' => $rows ,
-			'meta' => [ 'title' => 'Филлеры' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Филлеры', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'fillers'] ]
-		] );
+		require_once ADMIN_ROOT . '/_lib/Scan.php'; $rows = Scan::fillersFor( $domain , $allias );
+		View::render( 'allias_fillers' , [ 'domain' => $domain , 'allias' => $allias , 'rows' => $rows , 'meta' => [ 'title' => 'Филлеры' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Филлеры', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'fillers'] ] ] );
 		break;
 
 	case 'filler:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
-		$allias = (string) ( $_GET[ 'allias' ] ?? '' ); 
-		$block  = (string) ( $_GET[ 'block' ] ?? '' );
-		
-		$f_dir  = Paths::block( $domain , $block ); 
-		$php_f  = $f_dir . '/' . $block . '_' . $allias . '.php'; 
-		$data_f = $f_dir . '/' . $block . '_' . $allias . '.data.php';
-		
-		if ( ! is_file( $php_f ) ) { 
-			header( 'Location: ?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); 
-			exit; 
-		}
-		
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' ); $block  = (string) ( $_GET[ 'block' ] ?? '' );
+		$f_dir  = Paths::block( $domain , $block ); $php_f  = $f_dir . '/' . $block . '_' . $allias . '.php'; $data_f = $f_dir . '/' . $block . '_' . $allias . '.data.php';
+		if ( ! is_file( $php_f ) ) { header( 'Location: ?p=allias:fillers&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) ); exit; }
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			Fs::writeAtomic( $php_f , $_POST[ 'php' ] ); 
-			Fs::writeAtomic( $data_f , $_POST[ 'data' ] );
-			header( 'Location: ?p=filler:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&block=' . urlencode($block) . '&saved=1' ); 
-			exit;
+			Fs::writeAtomic( $php_f , $_POST[ 'php' ] ); Fs::writeAtomic( $data_f , $_POST[ 'data' ] );
+			header( 'Location: ?p=filler:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&block=' . urlencode($block) . '&saved=1' ); exit;
 		}
-		
-		$php_content = file_get_contents( $php_f );
-		$data_content = is_file( $data_f ) ? file_get_contents( $data_f ) : "<?PHP\nreturn [\n\t\n];\n";
-
-		View::render( 'filler_edit' , [
-			'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => $php_content , 'file_data' => $data_content ,
-			'meta' => [ 'title' => 'Редактор филлера' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Филлеры', 'url' => '?p=allias:fillers&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $block, 'url' => ''] ] ]
-		] );
+		View::render( 'filler_edit' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'php' => file_get_contents( $php_f ) , 'file_data' => is_file( $data_f ) ? file_get_contents( $data_f ) : "<?PHP\nreturn [\n\t\n];\n" , 'meta' => [ 'title' => 'Редактор филлера' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Филлеры', 'url' => '?p=allias:fillers&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => $block, 'url' => ''] ] ] ] );
 		break;
 
 	case 'filler:toggle' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit; }
 		$domain = (string) ( $_POST[ 'domain' ] ?? '' ); $allias = (string) ( $_POST[ 'allias' ] ?? '' ); $block = (string) ( $_POST[ 'block' ] ?? '' ); $value = (string) ( $_POST[ 'value' ] ?? '' );
-		require_once CS_CMD . '/FillerToggle.php';
-		$result = FillerToggle::run( [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'value' => $value ] );
+		require_once CS_CMD . '/FillerToggle.php'; $result = FillerToggle::run( [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'value' => $value ] );
 		AuditLog::action_ok( 'filler:toggle' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'ok' => $result->ok ] );
-		header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-		exit;
+		header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) ); exit;
 
 	case 'filler:remove' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' ); $block = (string) ( $_GET[ 'block' ] ?? '' );
-		require_once CS_CMD . '/FillerRemove.php';
-		$result = FillerRemove::run( [ 'domain' => $domain , 'allias' => $allias , 'block' => $block ] );
+		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit( 'Method not allowed' ); }
+		$domain = (string) ( $_POST[ 'domain' ] ?? '' ); $allias = (string) ( $_POST[ 'allias' ] ?? '' ); $block = (string) ( $_POST[ 'block' ] ?? '' );
+		require_once CS_CMD . '/FillerRemove.php'; $result = FillerRemove::run( [ 'domain' => $domain , 'allias' => $allias , 'block' => $block ] );
 		AuditLog::action_ok( 'filler:remove' , [ 'domain' => $domain , 'allias' => $allias , 'block' => $block , 'ok' => $result->ok ] );
-		header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-		exit;
+		header( 'Location: ?p=allias:fillers&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) ); exit;
 
 	case 'block:new' :
-		require_once CS_CMD . '/BlockNew.php';
-		$domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' );
+		require_once CS_CMD . '/BlockNew.php'; $domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' );
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$result = BlockNew::run( [ 'name' => $_POST[ 'name' ] , 'domain' => $domain ] );
 			View::render( 'result' , [ 'result' => $result , 'title' => 'Новый блок' , 'back_url' => '?p=blocks:list&domain=' . urlencode($domain) , 'back_label' => 'К блокам' ] );
@@ -480,37 +505,19 @@ switch ( $p ) {
 		break;
 
 	case 'block:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
-		$name   = (string) ( $_GET[ 'name' ] ?? '' );
-		
-		$php_file  = Paths::block( $domain , $name ) . '/' . $name . '.php'; 
-		$data_file = Paths::block( $domain , $name ) . '/' . $name . '.data.php';
-		
-		if ( ! is_file( $php_file ) ) { 
-			header( 'Location: ?p=blocks:list&domain=' . urlencode($domain) ); 
-			exit; 
-		}
-		
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $name = (string) ( $_GET[ 'name' ] ?? '' );
+		$php_file = Paths::block( $domain , $name ) . '/' . $name . '.php'; $data_file = Paths::block( $domain , $name ) . '/' . $name . '.data.php';
+		if ( ! is_file( $php_file ) ) { header( 'Location: ?p=blocks:list&domain=' . urlencode($domain) ); exit; }
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			Fs::writeAtomic( $php_file , $_POST[ 'php' ] ); 
-			Fs::writeAtomic( $data_file , $_POST[ 'data' ] );
-			header( 'Location: ?p=block:edit&domain=' . urlencode($domain) . '&name=' . urlencode($name) . '&saved=1' ); 
-			exit;
+			Fs::writeAtomic( $php_file , $_POST[ 'php' ] ); Fs::writeAtomic( $data_file , $_POST[ 'data' ] );
+			header( 'Location: ?p=block:edit&domain=' . urlencode($domain) . '&name=' . urlencode($name) . '&saved=1' ); exit;
 		}
-		
-		$php_content = file_get_contents( $php_file );
-		$data_content = is_file( $data_file ) ? file_get_contents( $data_file ) : "<?PHP\nreturn [\n\t\n];\n";
-
-		View::render( 'block_edit' , [
-			'domain' => $domain , 'name' => $name , 'php' => $php_content , 'file_data' => $data_content ,
-			'meta' => [ 'title' => 'Редактор блока: '.$name , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Блоки', 'url' => '?p=blocks:list&domain='.urlencode($domain)], ['label' => $name, 'url' => ''] ] ]
-		] );
+		View::render( 'block_edit' , [ 'domain' => $domain , 'name' => $name , 'php' => file_get_contents( $php_file ) , 'file_data' => is_file( $data_file ) ? file_get_contents( $data_file ) : "<?PHP\nreturn [\n\t\n];\n" , 'meta' => [ 'title' => 'Редактор блока: '.$name , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Блоки', 'url' => '?p=blocks:list&domain='.urlencode($domain)], ['label' => $name, 'url' => ''] ] ] ] );
 		break;
 
 	case 'block:remove' :
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $name = (string) ( $_GET[ 'name' ] ?? '' );
-		require_once CS_CMD . '/BlockRemove.php';
-		$result = BlockRemove::run( [ 'domain' => $domain , 'name' => $name ] );
+		require_once CS_CMD . '/BlockRemove.php'; $result = BlockRemove::run( [ 'domain' => $domain , 'name' => $name ] );
 		View::render( 'result' , [ 'result' => $result , 'title' => 'Удаление блока' , 'back_url' => '?p=blocks:list&domain=' . urlencode($domain) , 'back_label' => 'К блокам' ] );
 		break;
 
@@ -518,11 +525,8 @@ switch ( $p ) {
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
 		$dir = Paths::domain( $domain ) . '/alliasscheme'; $schemes = [];
-		if ( is_dir( $dir ) ) { foreach ( glob( $dir . '/alliasscheme_*.php' ) as $file ) { if ( str_ends_with( $file , '.data.php' ) ) continue; $schemes[] = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $file ) ); } }
-		View::render( 'schemes_list' , [
-			'domain' => $domain , 'schemes' => $schemes ,
-			'meta' => [ 'title' => 'Схемы' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Схемы', 'url' => ''] ] , 'actions' => '<a href="?p=scheme:new&domain=' . urlencode($domain) . '" class="btn-primary">+ Добавить схему</a>' , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'schemes'] ]
-		] );
+		if ( is_dir( $dir ) ) { foreach ( glob( $dir . '/alliasscheme_*.php' ) as $file ) { if ( !str_ends_with( $file , '.data.php' ) ) $schemes[] = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $file ) ); } }
+		View::render( 'schemes_list' , [ 'domain' => $domain , 'schemes' => $schemes , 'meta' => [ 'title' => 'Схемы' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Схемы', 'url' => ''] ] , 'actions' => '<a href="?p=scheme:new&domain=' . urlencode($domain) . '" class="btn-primary">+ Добавить схему</a>' , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'schemes'] ] ] );
 		break;
 
 	case 'scheme:copy' :
@@ -532,16 +536,15 @@ switch ( $p ) {
 			if ( $target === '' || !preg_match('/^[a-z][a-z0-9_]*$/', $target) ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Некорректное имя схемы' , 'back_url' => '?p=schemes:list&domain=' . urlencode($domain) , 'back_label' => 'Назад' ] ); break; }
 			$dir = Paths::domain( $domain ) . '/alliasscheme'; $src_php = $dir . '/alliasscheme_' . $source . '.php'; $src_data = $dir . '/alliasscheme_' . $source . '.data.php'; $dst_php = $dir . '/alliasscheme_' . $target . '.php'; $dst_data = $dir . '/alliasscheme_' . $target . '.data.php';
 			if ( is_file($src_php) && is_file($src_data) ) {
-				$c_php = file_get_contents($src_php); $c_php = str_replace( 'class alliasscheme_' . $source , 'class alliasscheme_' . $target , $c_php ); $c_php = str_replace( 'alliasscheme_' . $source . '.data.php' , 'alliasscheme_' . $target . '.data.php' , $c_php ); file_put_contents( $dst_php , $c_php );
-				$c_data = file_get_contents($src_data); file_put_contents( $dst_data , $c_data );
-				$main_file = Paths::domain($domain) . '/alliasscheme.php';
+				$c_php = file_get_contents($src_php); $c_php = str_replace( 'class alliasscheme_' . $source , 'class alliasscheme_' . $target , $c_php ); $c_php = str_replace( 'alliasscheme_' . $source . '.data.php' , 'alliasscheme_' . $target . '.data.php' , $c_php ); Fs::writeAtomic( $dst_php , $c_php );
+				Fs::writeAtomic( $dst_data , file_get_contents($src_data) ); $main_file = Paths::domain($domain) . '/alliasscheme.php';
 				if (is_file($main_file)) {
 					$main_c = file_get_contents($main_file); $prop_src = 'alliasscheme_' . $source; $prop_dst = 'alliasscheme_' . $target;
 					if (strpos($main_c, $prop_dst) === false) {
 						$new_prop = 'public null|' . $prop_dst . ' $' . $target . ' = null;'; $old_prop = 'public null|' . $prop_src . ' $' . $source . ' = null;'; $main_c = str_replace($old_prop, $old_prop . "\n\t" . $new_prop, $main_c);
 						$new_init = '$this->' . $target . ' = new ' . $prop_dst . '( $this );'; $old_init = '$this->' . $source . ' = new ' . $prop_src . '( $this );'; $main_c = str_replace($old_init, $old_init . "\n\t\t" . $new_init, $main_c);
 						$new_inc = "( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_dst . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );"; $old_inc = "( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_src . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );"; $main_c = str_replace($old_inc, $old_inc . "\n\t\t\t" . $new_inc, $main_c);
-						file_put_contents($main_file, $main_c);
+						Fs::writeAtomic( $main_file , $main_c );
 					}
 				}
 				header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&copied=1' ); exit;
@@ -558,7 +561,7 @@ switch ( $p ) {
 			if ( $confirm === $scheme ) {
 				$dir = Paths::domain( $domain ) . '/alliasscheme'; @unlink( $dir . '/alliasscheme_' . $scheme . '.php' ); @unlink( $dir . '/alliasscheme_' . $scheme . '.data.php' );
 				$main_file = Paths::domain($domain) . '/alliasscheme.php';
-				if (is_file($main_file)) { $main_c = file_get_contents($main_file); $prop = 'alliasscheme_' . $scheme; $lines = explode("\n", $main_c); $new_lines = []; foreach ($lines as $line) { if (strpos($line, $prop) === false) $new_lines[] = $line; } file_put_contents($main_file, implode("\n", $new_lines)); }
+				if (is_file($main_file)) { $main_c = file_get_contents($main_file); $prop = 'alliasscheme_' . $scheme; $new_lines = []; foreach (explode("\n", $main_c) as $line) { if (strpos($line, $prop) === false) $new_lines[] = $line; } Fs::writeAtomic( $main_file , implode("\n", $new_lines) ); }
 				header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&removed=1' ); exit;
 			}
 		}
@@ -574,16 +577,15 @@ switch ( $p ) {
 			else {
 				$dir = Paths::domain( $domain ) . '/alliasscheme'; $src_php = $dir . '/alliasscheme_' . $source . '.php'; $src_data = $dir . '/alliasscheme_' . $source . '.data.php'; $dst_php = $dir . '/alliasscheme_' . $target . '.php'; $dst_data = $dir . '/alliasscheme_' . $target . '.data.php';
 				if ( is_file($src_php) && is_file($src_data) && !is_file($dst_php) ) {
-					$c_php = file_get_contents($src_php); $c_php = str_replace( 'class alliasscheme_' . $source , 'class alliasscheme_' . $target , $c_php ); $c_php = str_replace( 'alliasscheme_' . $source . '.data.php' , 'alliasscheme_' . $target . '.data.php' , $c_php ); file_put_contents( $dst_php , $c_php );
-					file_put_contents( $dst_data , file_get_contents($src_data) );
-					$main_file = Paths::domain($domain) . '/alliasscheme.php';
+					$c_php = file_get_contents($src_php); $c_php = str_replace( 'class alliasscheme_' . $source , 'class alliasscheme_' . $target , $c_php ); $c_php = str_replace( 'alliasscheme_' . $source . '.data.php' , 'alliasscheme_' . $target . '.data.php' , $c_php ); Fs::writeAtomic( $dst_php , $c_php );
+					Fs::writeAtomic( $dst_data , file_get_contents($src_data) ); $main_file = Paths::domain($domain) . '/alliasscheme.php';
 					if (is_file($main_file)) {
 						$main_c = file_get_contents($main_file); $prop_src = 'alliasscheme_' . $source; $prop_dst = 'alliasscheme_' . $target;
 						if (strpos($main_c, $prop_dst) === false) {
 							$main_c = str_replace('public null|' . $prop_src . ' $' . $source . ' = null;', 'public null|' . $prop_src . ' $' . $source . ' = null;' . "\n\t" . 'public null|' . $prop_dst . ' $' . $target . ' = null;', $main_c);
 							$main_c = str_replace('$this->' . $source . ' = new ' . $prop_src . '( $this );', '$this->' . $source . ' = new ' . $prop_src . '( $this );' . "\n\t\t" . '$this->' . $target . ' = new ' . $prop_dst . '( $this );', $main_c);
 							$main_c = str_replace("( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_src . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );", "( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_dst . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );\n\t\t\t( include_once \$path = __DIR__ . DS . 'alliasscheme' . DS . '" . $prop_src . ".php' ) or error_file( \$path , __FILE__ , __LINE__ );", $main_c);
-							file_put_contents($main_file, $main_c);
+							Fs::writeAtomic( $main_file , $main_c );
 						}
 					}
 					header( 'Location: ?p=schemes:list&domain=' . urlencode($domain) . '&saved=1' ); exit;
@@ -591,120 +593,42 @@ switch ( $p ) {
 			}
 		}
 		$dir = Paths::domain( $domain ) . '/alliasscheme'; $schemes = [];
-		if ( is_dir($dir) ) { foreach ( glob( $dir . '/alliasscheme_*.php' ) as $file ) { if ( str_ends_with( $file , '.data.php' ) ) continue; $schemes[] = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $file ) ); } }
+		if ( is_dir($dir) ) { foreach ( glob( $dir . '/alliasscheme_*.php' ) as $file ) { if ( !str_ends_with( $file , '.data.php' ) ) $schemes[] = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $file ) ); } }
 		View::render( 'scheme_new' , [ 'domain' => $domain , 'schemes' => $schemes , 'errors' => $errors ?? [] , 'meta' => [ 'title' => 'Новая схема' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Схемы', 'url' => '?p=schemes:list&domain='.urlencode($domain)], ['label' => 'Новая схема', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'schemes'] ] ] );
 		break;
 
 	case 'scheme:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
-		$scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
-		
-		$file_php  = Paths::domain( $domain ) . '/alliasscheme/alliasscheme_' . $scheme . '.php'; 
-		$file_data = Paths::domain( $domain ) . '/alliasscheme/alliasscheme_' . $scheme . '.data.php';
-		
-		if ( ! is_file( $file_data ) ) { 
-			View::render( 'result' , [ 
-				'result' => new Result( ) , 
-				'meta' => [ 
-					'title' => 'Файл схемы не найден' , 
-					'breadcrumbs' => [ 
-						['label' => 'Домены', 'url' => '?p=dashboard'], 
-						['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], 
-						['label' => 'Схемы', 'url' => '?p=schemes:list&domain='.urlencode($domain)], 
-						['label' => $scheme ?: 'Неизвестно', 'url' => ''] 
-					] 
-				] ,
-				'back_url' => '?p=schemes:list&domain=' . urlencode($domain) , 
-				'back_label' => 'К списку схем' 
-			] ); 
-			break; 
-		}
-		
-		$data = require $file_data;
-		
-		// Собираем список всех схем домена для сайдбара (только те, у которых есть .data.php)
-		$dir = Paths::domain( $domain ) . '/alliasscheme';
-		$schemes = [];
-		if ( is_dir( $dir ) ) {
-			foreach ( glob( $dir . '/alliasscheme_*.php' ) as $f ) {
-				if ( str_ends_with( $f , '.data.php' ) ) continue;
-				$name = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $f ) );
-				if ( is_file( $dir . '/alliasscheme_' . $name . '.data.php' ) ) {
-					$schemes[] = $name;
-				}
-			}
-		}
-		sort( $schemes );
-
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $scheme = (string) ( $_GET[ 'scheme' ] ?? '' );
+		$file_php = Paths::domain( $domain ) . '/alliasscheme/alliasscheme_' . $scheme . '.php'; $file_data = Paths::domain( $domain ) . '/alliasscheme/alliasscheme_' . $scheme . '.data.php';
+		if ( ! is_file( $file_data ) ) { View::render( 'result' , [ 'result' => new Result( ) , 'meta' => [ 'title' => 'Файл схемы не найден' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Схемы', 'url' => '?p=schemes:list&domain='.urlencode($domain)], ['label' => $scheme ?: 'Неизвестно', 'url' => ''] ] ] , 'back_url' => '?p=schemes:list&domain=' . urlencode($domain) , 'back_label' => 'К списку схем' ] ); break; }
+		$data = require $file_data; $dir = Paths::domain( $domain ) . '/alliasscheme'; $schemes = [];
+		if ( is_dir( $dir ) ) { foreach ( glob( $dir . '/alliasscheme_*.php' ) as $f ) { if ( !str_ends_with( $f , '.data.php' ) ) { $name = str_replace( [ 'alliasscheme_' , '.php' ] , '' , basename( $f ) ); if ( is_file( $dir . '/alliasscheme_' . $name . '.data.php' ) ) $schemes[] = $name; } } } sort( $schemes );
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			$json = $_POST[ 'scheme_json' ] ?? ''; 
-			$new_data = json_decode( $json , true );
-			if ( is_array( $new_data ) ) { 
-				$php_code = '<?PHP' . "\n# ============================================================\n#   alliasscheme_" . $scheme . ".data.php — структура схемы\n# ============================================================\nreturn " . var_export($new_data, true) . ";\n"; 
-				file_put_contents($file_data, $php_code); 
-			}
+			$json = $_POST[ 'scheme_json' ] ?? ''; $new_data = json_decode( $json , true );
+			if ( is_array( $new_data ) ) { $php_code = '<?PHP' . "\n# ============================================================\n#   alliasscheme_" . $scheme . ".data.php — структура схемы\n# ============================================================\nreturn " . var_export($new_data, true) . ";\n"; Fs::writeAtomic( $file_data , $php_code ); }
 			header('Location: ?p=scheme:edit&domain=' . urlencode($domain) . '&scheme=' . urlencode($scheme) . '&saved=1'); exit;
 		}
-		
-		View::render( 'scheme_edit' , [
-			'domain' => $domain , 'scheme' => $scheme , 'schemes' => $schemes , 'scheme_data' => $data ,
-			'meta' => [ 
-				'title' => 'Схема: '.$scheme , 
-				'breadcrumbs' => [ 
-					['label' => 'Домены', 'url' => '?p=dashboard'], 
-					['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], 
-					['label' => 'Схемы', 'url' => '?p=schemes:list&domain='.urlencode($domain)], 
-					['label' => $scheme, 'url' => ''] 
-				] , 
-				'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'schemes'] 
-			]
-		] );
+		View::render( 'scheme_edit' , [ 'domain' => $domain , 'scheme' => $scheme , 'schemes' => $schemes , 'scheme_data' => $data , 'meta' => [ 'title' => 'Схема: '.$scheme , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Схемы', 'url' => '?p=schemes:list&domain='.urlencode($domain)], ['label' => $scheme, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'schemes'] ] ] );
 		break;
 
 	case 'blocks:list' :
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
 		if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
-		require_once ADMIN_ROOT . '/_lib/Scan.php';
-		$blocks = Scan::blocksDetailsFor( $domain ); $layouts = Scan::layoutsFor( $domain ); $cfg = new Config( Paths::config() ); $alliases = array_values(array_unique((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], [])));
-		View::render( 'blocks_list' , [
-			'domain' => $domain , 'blocks' => $blocks , 'layouts' => $layouts , 'alliases' => $alliases ,
-			'meta' => [ 'title' => 'Блоки' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Блоки', 'url' => ''] ] , 'actions' => '<a href="?p=block:new&domain=' . urlencode($domain) . '" class="btn-primary">+ Создать блок</a>' , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'blocks'] ]
-		] );
+		require_once ADMIN_ROOT . '/_lib/Scan.php'; $blocks = Scan::blocksDetailsFor( $domain ); $layouts = Scan::layoutsFor( $domain ); $cfg = new Config( Paths::config() ); $alliases = array_values(array_unique((array)$cfg->getKeys(['alliases_real', Paths::real($domain)], [])));
+		View::render( 'blocks_list' , [ 'domain' => $domain , 'blocks' => $blocks , 'layouts' => $layouts , 'alliases' => $alliases , 'meta' => [ 'title' => 'Блоки' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Блоки', 'url' => ''] ] , 'actions' => '<a href="?p=block:new&domain=' . urlencode($domain) . '" class="btn-primary">+ Создать блок</a>' , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'blocks'] ] ] );
 		break;
 
 	case 'allias:edit' :
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); 
-		$allias = (string) ( $_GET[ 'allias' ] ?? '' );
+		$domain = (string) ( $_GET[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? '' );
 		if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
-		
-		$cfg  = new Config( Paths::config() ); 
-		$real = Paths::real( $domain ); 
-		
-		$is_avail = ! empty( $cfg->getKeys( [ 'alliases_available' , $real , $allias ] ) );
-		
-		// Загружаем библиотеку заглушек
-		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' );
-		$stubs = $stubs_cfg->get( 'stubs' ) ?? [];
-		$current_stub = $cfg->getKeys( [ 'alliases_stub' , $real , $allias , 'current' ] , 'maintenance' );
-
+		$cfg  = new Config( Paths::config() ); $real = Paths::real( $domain ); $is_avail = ! empty( $cfg->getKeys( [ 'alliases_available' , $real , $allias ] ) );
+		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' ); $stubs = $stubs_cfg->get( 'stubs' ) ?? []; $current_stub = $cfg->getKeys( [ 'alliases_stub' , $real , $allias , 'current' ] , 'maintenance' );
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			$avail = ! empty( $_POST[ 'available' ] );
-			$stub_current = trim( (string) ( $_POST[ 'stub_current' ] ?? 'maintenance' ) );
-			
-			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $avail , $stub_current ) { 
-				$cfg->setKeys( [ 'alliases_available' , $real , $allias ] , $avail );
-				$cfg->setKeys( [ 'alliases_stub' , $real , $allias , 'current' ] , $stub_current );
-			} );
-			
-			AuditLog::action_ok( 'allias:edit' , [ 'domain' => $real , 'allias' => $allias , 'avail' => $avail , 'stub' => $stub_current ] );
-			header( 'Location: ?p=allias:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&saved=1' ); exit;
+			$avail = ! empty( $_POST[ 'available' ] ); $stub_current = trim( (string) ( $_POST[ 'stub_current' ] ?? 'maintenance' ) );
+			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $avail , $stub_current ) { $cfg->setKeys( [ 'alliases_available' , $real , $allias ] , $avail ); $cfg->setKeys( [ 'alliases_stub' , $real , $allias , 'current' ] , $stub_current ); } );
+			AuditLog::action_ok( 'allias:edit' , [ 'domain' => $real , 'allias' => $allias , 'avail' => $avail , 'stub' => $stub_current ] ); header( 'Location: ?p=allias:edit&domain=' . urlencode($domain) . '&allias=' . urlencode($allias) . '&saved=1' ); exit;
 		}
-
-		View::render( 'allias_edit' , [
-			'domain' => $domain , 'allias' => $allias , 'avail' => $is_avail , 'saved' => ! empty($_GET['saved']) ,
-			'stubs' => $stubs , 'current_stub' => $current_stub ,
-			'meta' => [ 'title' => 'Настройки аллиаса' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'main'] ]
-		] );
+		View::render( 'allias_edit' , [ 'domain' => $domain , 'allias' => $allias , 'avail' => $is_avail , 'saved' => ! empty($_GET['saved']) , 'stubs' => $stubs , 'current_stub' => $current_stub , 'meta' => [ 'title' => 'Настройки аллиаса' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'allias' => true, 'active_domain' => 'allias', 'active_allias' => 'main'] ] ] );
 		break;
 
 	case 'allias:list' :
@@ -712,36 +636,28 @@ switch ( $p ) {
 		if ( $domain === '' ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => 'Домен не указан' , 'back_url' => '?p=dashboard' , 'back_label' => 'К списку домен' ] ); break; }
 		$cfg = new Config( Paths::config() ); $real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 		if ( $real === null ) { View::render( 'result' , [ 'result' => new Result( ) , 'title' => "Домен не найден: {$domain}" , 'back_url' => '?p=dashboard' , 'back_label' => 'К списку домен' ] ); break; }
-		$real = Paths::real( $domain ); $alliases = (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ); $available = (array) $cfg->getKeys( [ 'alliases_available' , $real ] , [ ] ); $fillers = (array) $cfg->getKeys( [ 'fillers' , $real ] , [ ] );
-		$rows = [ ];
+		$real = Paths::real( $domain ); $alliases = (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ); $available = (array) $cfg->getKeys( [ 'alliases_available' , $real ] , [ ] ); $fillers = (array) $cfg->getKeys( [ 'fillers' , $real ] , [ ] ); $rows = [ ];
 		foreach ( $alliases as $alias => $target ) {
 			if ( $alias === '' ) continue; $fs_path = Paths::allias( $domain , $alias ); $f = (array) ( $fillers[ $alias ] ?? [ ] ); $enabled = 0; foreach ( $f as $v ) if ( $v ) $enabled++;
 			$rows[ ] = [ 'name' => $alias , 'avail' => ! empty( $available[ $alias ] ) , 'fs' => is_dir( $fs_path ) , 'fillers_enabled' => $enabled , 'fillers_total' => count( $f ) ];
 		}
-		View::render( 'allias_list' , [
-			'domain' => $domain , 'rows' => $rows ,
-			'meta' => [ 'title' => 'Аллиасы' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Аллиасы', 'url' => ''] ] , 'actions' => '<a href="?p=allias:new&domain=' . urlencode($domain) . '" class="btn-primary">+ Добавить аллиас</a>' , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'allias'] ]
-		] );
+		View::render( 'allias_list' , [ 'domain' => $domain , 'rows' => $rows , 'meta' => [ 'title' => 'Аллиасы' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Аллиасы', 'url' => ''] ] , 'actions' => '<a href="?p=allias:new&domain=' . urlencode($domain) . '" class="btn-primary">+ Добавить аллиас</a>' , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'allias'] ] ] );
 		break;
 
 	case 'page:toggle' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit( 'Method not allowed' ); }
 		$domain = (string) ( $_POST[ 'domain' ] ?? '' ); $allias = (string) ( $_POST[ 'allias' ] ?? '' ); $path = trim( (string) ( $_POST[ 'path' ] ?? '' ) , '/' ); $key = (string) ( $_POST[ 'key' ] ?? '' ); $value = (string) ( $_POST[ 'value' ] ?? '' );
 		if ( $domain === '' || $allias === '' ) { header( 'Location: ?p=dashboard' ); exit; }
-		require_once CS_CMD . '/PageToggle.php';
-		$result = PageToggle::run( [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'key' => $key , 'value' => $value ] );
+		require_once CS_CMD . '/PageToggle.php'; $result = PageToggle::run( [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'key' => $key , 'value' => $value ] );
 		AuditLog::action_ok( 'page:toggle' , [ 'domain' => $domain , 'allias' => $allias , 'path' => $path , 'key' => $key , 'ok' => $result->ok ] );
-		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) );
-		exit;
+		header( 'Location: ?p=pages:tree&domain=' . urlencode( $domain ) . '&allias=' . urlencode( $allias ) ); exit;
 
 	case 'filler:new' :
-		require_once ADMIN_ROOT . '/_lib/Scan.php';
-		$domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? $_POST[ 'allias' ] ?? '' ); $block = (string) ( $_GET[ 'block' ] ?? '' );
+		require_once ADMIN_ROOT . '/_lib/Scan.php'; $domain = (string) ( $_GET[ 'domain' ] ?? $_POST[ 'domain' ] ?? '' ); $allias = (string) ( $_GET[ 'allias' ] ?? $_POST[ 'allias' ] ?? '' ); $block = (string) ( $_GET[ 'block' ] ?? '' );
 		if ( $domain === '' ) { header( 'Location: ?p=dashboard' ); exit; }
 		$cfg = new Config( Paths::config() ); $real = $cfg->getKeys( [ 'domains_real' , $domain ] );
 		if ( $real === null ) { header( 'Location: ?p=dashboard' ); exit; }
-		$alliases = [ ]; foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a === '' ) continue; $alliases[ ] = $a; }
-		$blocks = Scan::blocksFor( $domain );
+		$alliases = [ ]; foreach ( (array) $cfg->getKeys( [ 'alliases_real' , $real ] , [ ] ) as $a => $t ) { if ( $a !== '' ) $alliases[ ] = $a; } $blocks = Scan::blocksFor( $domain );
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$allias = (string) ( $_POST[ 'allias' ] ?? '' ); $block = (string) ( $_POST[ 'block' ] ?? '' ); $enable = ! empty( $_POST[ 'enable' ] ); $result = new Result( );
 			$block_path = Paths::block( $domain , $block ); $filler_php = $block_path . '/' . $block . '_' . $allias . '.php';
@@ -751,126 +667,54 @@ switch ( $p ) {
 				try { Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $allias , $block ) { $cur = $cfg->getKeys( [ 'fillers' , $real , $allias , $block ] ); if ( $cur !== true ) { $cfg->setKeys( [ 'fillers' , $real , $allias , $block ] , true ); } } ); $result->step( 'Включено в site.config' , true , "fillers[{$real}][{$allias}][{$block}] = true" ); AuditLog::action_ok( 'filler:new' , [ 'domain' => $real , 'allias' => $allias , 'block' => $block ] ); }
 				catch ( Throwable $e ) { $result->warn( 'Не удалось включить в конфиге: ' . $e->getMessage( ) ); }
 			}
-			View::render( 'result' , [ 'result' => $result , 'title' => "Filler: {$domain} / {$allias} / {$block}" , 'back_url' => '?p=allias:list&domain=' . urlencode( $domain ) , 'back_label' => 'К аллиасам' ] );
-			break;
+			View::render( 'result' , [ 'result' => $result , 'title' => "Filler: {$domain} / {$allias} / {$block}" , 'back_url' => '?p=allias:list&domain=' . urlencode( $domain ) , 'back_label' => 'К аллиасам' ] ); break;
 		}
 		View::render( 'filler_new' , [ 'domain' => $domain , 'allias' => $allias , 'alliases' => $alliases , 'blocks' => $blocks , 'meta' => [ 'title' => 'Создать филлер' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => $allias, 'url' => '?p=allias:edit&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Филлеры', 'url' => '?p=allias:fillers&domain='.urlencode($domain).'&allias='.urlencode($allias)], ['label' => 'Новый', 'url' => ''] ] ] ] );
 		break;
 
 	case 'media:list' :
-		$path = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
-		
-		// Если пришли из вкладки домена — переходим сразу в его папку
-		if ( $path === '' && $domain !== '' ) {
-			$path = Paths::real( $domain );
-		}
-
-		// Если домен не указан, но мы в папке домена — вычисляем его
+		$path = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' ); $domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		if ( $path === '' && $domain !== '' ) { $path = Paths::real( $domain ); }
 		if ( $domain === '' && $path !== '' ) {
-			$parts = explode( '/', $path );
-			$possible_domain = $parts[0];
-			$cfg = new Config( Paths::config() );
-			if ( $cfg->getKeys( [ 'domains_real', $possible_domain ] ) !== null ) {
-				$domain = $possible_domain;
-			}
+			$parts = explode( '/', $path ); $possible_domain = $parts[0]; $cfg = new Config( Paths::config() );
+			if ( $cfg->getKeys( [ 'domains_real', $possible_domain ] ) !== null ) { $domain = $possible_domain; }
 		}
-
-		// Защита от traversal
-		if ( str_contains( $path , '..' ) || str_contains( $path , '\\' ) ) {
-			header( 'Location: ?p=media:list' ); exit;
-		}
-
-		$root = Paths::mediaRoot();
-		$current = $path === '' ? $root : $root . '/' . $path;
-		
-		$real_root = realpath( $root );
-		$real_curr = realpath( $current );
-		if ( $real_curr === false || strpos( $real_curr , $real_root ) !== 0 ) {
-			header( 'Location: ?p=media:list' ); exit;
-		}
-
+		if ( str_contains( $path , '..' ) || str_contains( $path , '\\' ) ) { header( 'Location: ?p=media:list' ); exit; }
+		$root = Paths::mediaRoot(); $current = $path === '' ? $root : $root . '/' . $path; $real_root = realpath( $root ); $real_curr = realpath( $current );
+		if ( $real_curr === false || strpos( $real_curr , $real_root ) !== 0 ) { header( 'Location: ?p=media:list' ); exit; }
 		$dirs = []; $files = [];
 		foreach ( scandir( $current ) as $name ) {
-			if ( $name === '.' || $name === '..' ) continue;
-			if ( $name[0] === '.' ) continue;
-			
-			$full = $current . '/' . $name;
-			$rel  = $path === '' ? $name : $path . '/' . $name;
-			
-			if ( is_dir( $full ) ) {
-				$dirs[ ] = [ 'name' => $name , 'path' => $rel ];
-			} else {
-				$files[ ] = [
-					'name' => $name ,
-					'path' => $rel ,
-					'size' => filesize( $full ) ,
-					'time' => filemtime( $full ) ,
-					'url'  => '/media/' . $rel ,
-				];
-			}
+			if ( $name === '.' || $name === '..' || $name[0] === '.' ) continue;
+			$full = $current . '/' . $name; $rel  = $path === '' ? $name : $path . '/' . $name;
+			if ( is_dir( $full ) ) { $dirs[ ] = [ 'name' => $name , 'path' => $rel ]; }
+			else { $files[ ] = [ 'name' => $name , 'path' => $rel , 'size' => filesize( $full ) , 'time' => filemtime( $full ) , 'url' => '/media/' . $rel ]; }
 		}
-		usort( $dirs , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
-		usort( $files , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
-
-		View::render( 'media_list' , [
-			'domain' => $domain , // Передаем вычисленный домен
-			'path'   => $path ,
-			'dirs'   => $dirs ,
-			'files'  => $files ,
-			'saved'  => ! empty( $_GET[ 'saved' ] ) , 
-			'error'  => $_GET[ 'error' ] ?? null ,
-			'meta'   => [ 'title' => 'Медиа' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Медиа', 'url' => '?p=media:list'] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'media'] ]
-		] );
+		usort( $dirs , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) ); usort( $files , fn( $a , $b ) => strcmp( $a[ 'name' ] , $b[ 'name' ] ) );
+		View::render( 'media_list' , [ 'domain' => $domain , 'path' => $path , 'dirs' => $dirs , 'files' => $files , 'saved' => ! empty( $_GET[ 'saved' ] ) , 'error' => $_GET[ 'error' ] ?? null , 'meta' => [ 'title' => 'Медиа' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Медиа', 'url' => '?p=media:list'] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'media'] ] ] );
 		break;
 
 	case 'media:upload' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { header( 'Location: ?p=media:list' ); exit; }
-		$target_path = trim( (string) ( $_POST[ 'target_path' ] ?? '' ) , '/' );
-		$domain      = (string) ( $_POST[ 'domain' ] ?? '' );
-		
+		$target_path = trim( (string) ( $_POST[ 'target_path' ] ?? '' ) , '/' ); $domain = (string) ( $_POST[ 'domain' ] ?? '' );
 		if ( str_contains( $target_path , '..' ) ) { header( 'Location: ?p=media:list' ); exit; }
-		
-		$root = Paths::mediaRoot();
-		$dir  = $target_path === '' ? $root : $root . '/' . $target_path;
-		
-		Fs::mkdir( $dir );
-		$real_root = realpath( $root );
-		$real_dir  = realpath( $dir );
-		if ( $real_dir === false || strpos( $real_dir , $real_root ) !== 0 ) {
-			header( 'Location: ?p=media:list' ); exit;
-		}
-
-		require_once CS_CMD . '/MediaUpload.php';
-		$res = MediaUpload::run([ 'dir' => $dir , 'file' => $_FILES['file'] ?? null ]);
+		$root = Paths::mediaRoot(); $dir  = $target_path === '' ? $root : $root . '/' . $target_path; Fs::mkdir( $dir );
+		$real_root = realpath( $root ); $real_dir  = realpath( $dir );
+		if ( $real_dir === false || strpos( $real_dir , $real_root ) !== 0 ) { header( 'Location: ?p=media:list' ); exit; }
+		require_once CS_CMD . '/MediaUpload.php'; $res = MediaUpload::run([ 'dir' => $dir , 'file' => $_FILES['file'] ?? null ]);
 		AuditLog::action_ok( 'media:upload' , [ 'path' => $target_path , 'file' => $_FILES['file']['name'] ?? '' , 'ok' => $res->ok ] );
-		
 		$back = '?p=media:list' . ( $target_path !== '' ? '&path=' . urlencode( $target_path ) : '' ) . ( $domain !== '' ? '&domain=' . urlencode( $domain ) : '' );
-		header( 'Location: ' . $back . ( $res->ok ? '&saved=1' : '&error=' . urlencode( $res->errors[0] ?? 'Ошибка' ) ) );
-		exit;
+		header( 'Location: ' . $back . ( $res->ok ? '&saved=1' : '&error=' . urlencode( $res->errors[0] ?? 'Ошибка' ) ) ); exit;
 
 	case 'media:delete' :
-		$path   = trim( (string) ( $_GET[ 'path' ] ?? '' ) , '/' );
-		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
+		if ( $_SERVER[ 'REQUEST_METHOD' ] !== 'POST' ) { http_response_code( 405 ); exit( 'Method not allowed' ); }
+		$path = trim( (string) ( $_POST[ 'path' ] ?? '' ) , '/' ); $domain = (string) ( $_POST[ 'domain' ] ?? '' );
 		if ( str_contains( $path , '..' ) ) { header( 'Location: ?p=media:list' ); exit; }
-		
-		$root = Paths::mediaRoot();
-		$full = $root . '/' . $path;
-		
-		$real_root = realpath( $root );
-		$real_full = realpath( $full );
-		if ( $real_full === false || strpos( $real_full , $real_root ) !== 0 || is_dir( $real_full ) ) {
-			header( 'Location: ?p=media:list' ); exit;
-		}
-		
-		unlink( $real_full );
-		AuditLog::action_ok( 'media:delete' , [ 'path' => $path ] );
-		
-		$parent = dirname( $path );
-		$parent = $parent === '.' ? '' : $parent;
+		$root = Paths::mediaRoot(); $full = $root . '/' . $path; $real_root = realpath( $root ); $real_full = realpath( $full );
+		if ( $real_full === false || strpos( $real_full , $real_root ) !== 0 || is_dir( $real_full ) ) { header( 'Location: ?p=media:list' ); exit; }
+		unlink( $real_full ); AuditLog::action_ok( 'media:delete' , [ 'path' => $path ] );
+		$parent = dirname( $path ); $parent = $parent === '.' ? '' : $parent;
 		$back = '?p=media:list' . ( $parent !== '' ? '&path=' . urlencode( $parent ) : '' ) . ( $domain !== '' ? '&domain=' . urlencode( $domain ) : '' );
-		header( 'Location: ' . $back );
-		exit;
+		header( 'Location: ' . $back ); exit;
 
 	case 'stub:edit' :
 		$domain = (string) ( $_GET[ 'domain' ] ?? '' );
@@ -879,85 +723,44 @@ switch ( $p ) {
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$stub_title = trim( (string) ( $_POST[ 'stub_title' ] ?? '' ) ); $stub_text = trim( (string) ( $_POST[ 'stub_text' ] ?? '' ) );
 			Config::mutate( Paths::config() , function ( Config $cfg ) use ( $real , $stub_title , $stub_text ) { $stub = $cfg->getKeys( [ 'domains_stub' , $real ] , [] ); $stub['title'] = $stub_title; $stub['text'] = $stub_text; $cfg->setKeys( [ 'domains_stub' , $real ] , $stub ); } );
-			AuditLog::action_ok( 'stub:edit' , [ 'domain' => $real , 'title' => $stub_title ] );
-			header( 'Location: ?p=stub:edit&domain=' . urlencode($domain) . '&saved=1' ); exit;
+			AuditLog::action_ok( 'stub:edit' , [ 'domain' => $real , 'title' => $stub_title ] ); header( 'Location: ?p=stub:edit&domain=' . urlencode($domain) . '&saved=1' ); exit;
 		}
 		$stub = $cfg->getKeys( [ 'domains_stub' , $real ] , [] );
-		View::render( 'stub_edit' , [
-			'domain' => $domain , 'real' => $real , 'stub' => $stub , 'saved' => ! empty($_GET['saved']) ,
-			'meta' => [ 'title' => 'Заглушка домена' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Заглушка', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'stub'] ]
-		] );
+		View::render( 'stub_edit' , [ 'domain' => $domain , 'real' => $real , 'stub' => $stub , 'saved' => ! empty($_GET['saved']) , 'meta' => [ 'title' => 'Заглушка домена' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => $domain, 'url' => '?p=domain:edit&domain='.urlencode($domain)], ['label' => 'Заглушка', 'url' => ''] ] , 'tabs' => ['show' => true, 'domain' => true, 'active_domain' => 'stub'] ] ] );
 		break;
 
 	case 'stubs:list' :
-		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' );
-		$stubs = $stubs_cfg->get( 'stubs' ) ?? [];
-		View::render( 'stubs_list' , [
-			'stubs' => $stubs,
-			'meta' => [ 'title' => 'Библиотека заглушек' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Заглушки', 'url' => ''] ] ]
-		] );
+		$stubs_cfg = new Config( PROJECT_ROOT . '/config/site.stubs.config' ); $stubs = $stubs_cfg->get( 'stubs' ) ?? [];
+		View::render( 'stubs_list' , [ 'stubs' => $stubs, 'meta' => [ 'title' => 'Библиотека заглушек' , 'breadcrumbs' => [ ['label' => 'Домены', 'url' => '?p=dashboard'], ['label' => 'Заглушки', 'url' => ''] ] ] ] );
 		break;
 	
 	case 'stubs:edit' :
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			$stubs_data = $_POST[ 'stubs' ] ?? [];
-			try {
-				Config::mutate( PROJECT_ROOT . '/config/site.stubs.config' , function ( Config $cfg ) use ( $stubs_data ) {
-					$cfg->setKeys( [ 'stubs' ] , $stubs_data );
-				} );
-				header( 'Location: ?p=stubs:list&saved=1' ); exit;
-			} catch ( Throwable $e ) {}
+			try { Config::mutate( PROJECT_ROOT . '/config/site.stubs.config' , function ( Config $cfg ) use ( $stubs_data ) { $cfg->setKeys( [ 'stubs' ] , $stubs_data ); } ); header( 'Location: ?p=stubs:list&saved=1' ); exit; } catch ( Throwable $e ) {}
 		}
 		break;
 	
 	case 'db:settings' :
-		$config_path = PROJECT_ROOT . '/secure/db.config';
-		$data = is_file($config_path) ? json_decode(file_get_contents($config_path), true) : [];
-		$bases = $data['bases'] ?? [];
-		
-		// Берем первую базу для формы (или дефолтную)
-		$db = $bases[0] ?? ['localname' => 'visuo_damoony'];
-
+		$config_path = PROJECT_ROOT . '/secure/db.config'; $data = is_file($config_path) ? json_decode(file_get_contents($config_path), true) : []; $bases = $data['bases'] ?? []; $db = $bases[0] ?? ['localname' => 'visuo_damoony'];
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
-			require_once CS_CMD . '/DbSave.php';
-			$result = DbSave::run( $_POST );
-			if ( $result->ok ) {
-				header( 'Location: ?p=db:settings&saved=1' ); exit;
-			}
-			View::render( 'result' , [ 'result' => $result , 'title' => 'Ошибка' , 'back_url' => '?p=db:settings' , 'back_label' => 'Назад' ] );
-			break;
+			require_once CS_CMD . '/DbSave.php'; $result = DbSave::run( $_POST );
+			if ( $result->ok ) { header( 'Location: ?p=db:settings&saved=1' ); exit; }
+			View::render( 'result' , [ 'result' => $result , 'title' => 'Ошибка' , 'back_url' => '?p=db:settings' , 'back_label' => 'Назад' ] ); break;
 		}
-
-		View::render( 'db_settings' , [
-			'db'   => $db ,
-			'saved'=> ! empty( $_GET[ 'saved' ] ) ,
-			'meta' => [ 'title' => 'Настройки Базы Данных' , 'breadcrumbs' => [ ['label' => 'Настройки', 'url' => '?p=settings'], ['label' => 'База данных', 'url' => ''] ] ]
-		] );
+		View::render( 'db_settings' , [ 'db' => $db , 'saved'=> ! empty( $_GET[ 'saved' ] ) , 'meta' => [ 'title' => 'Настройки Базы Данных' , 'breadcrumbs' => [ ['label' => 'Настройки', 'url' => '?p=settings'], ['label' => 'База данных', 'url' => ''] ] ] ] );
 		break;
 	
 	case 'settings' :
-		require_once ADMIN_ROOT . '/_lib/Scan.php';
-		$allowed = [ 'logic' , 'connect_type' , 'ui_ajax_forms' ];
+		require_once ADMIN_ROOT . '/_lib/Scan.php'; $allowed = [ 'logic' , 'connect_type' , 'ui_ajax_forms' ];
 		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 			require_once CS_CMD . '/SettingsSet.php'; $params = [ ]; foreach ( $allowed as $k ) { if ( array_key_exists( $k , $_POST ) ) { $params[ $k ] = $_POST[ $k ]; } }
 			$result = SettingsSet::run( $params ); AuditLog::action_ok( 'settings:set' , [ 'params' => $params , 'ok' => $result->ok ] );
 			if ( $result->ok ) { header( 'Location: ?p=settings&saved=1' ); exit; }
 			View::render( 'result' , [ 'result' => $result , 'title' => 'Настройки — ошибка' , 'back_url' => '?p=settings' , 'back_label' => 'К настройкам' ] ); break;
 		}
-		
-		// Читаем настройки движка из engine.config, а структуру доменов из site.config
-		$engine_cfg = new Config( Paths::engine() );
-		$site_cfg   = new Config( Paths::config() );
-
-		View::render( 'settings' , [
-			'meta' => [ 'title' => 'Настройки' ] , 'title' => 'Настройки' , 'saved' => ! empty( $_GET[ 'saved' ] ) ,
-			'current' => [ 
-				'logic'        => (string) ( $engine_cfg->get( 'logic' ) ?? '' ) , 
-				'ui_ajax_forms'=> ! empty( $engine_cfg->get( 'ui_ajax_forms' ) ) , 
-				'connect_type' => (string) ( $engine_cfg->get( 'connect_type' ) ?? 'https://' ) 
-			] ,
-			'skins' => Scan::skinsFor( array_key_first((array)$site_cfg->get('domains_real', [])) ?? 'damoony.ru' ) , 'logics' => Scan::logics( ) , 'connectTypes' => Scan::connectTypes( )
-		] );
+		$engine_cfg = new Config( Paths::engine() ); $site_cfg = new Config( Paths::config() );
+		View::render( 'settings' , [ 'meta' => [ 'title' => 'Настройки' ] , 'title' => 'Настройки' , 'saved' => ! empty( $_GET[ 'saved' ] ) , 'current' => [ 'logic' => (string) ( $engine_cfg->get( 'logic' ) ?? '' ) , 'ui_ajax_forms'=> ! empty( $engine_cfg->get( 'ui_ajax_forms' ) ) , 'connect_type' => (string) ( $engine_cfg->get( 'connect_type' ) ?? 'https://' ) ] , 'skins' => Scan::skinsFor( array_key_first((array)$site_cfg->get('domains_real', [])) ?? 'damoony.ru' ) , 'logics' => Scan::logics( ) , 'connectTypes' => Scan::connectTypes( ) ] );
 		break;
 
 	default :

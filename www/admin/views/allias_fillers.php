@@ -49,7 +49,13 @@ $alliases = array_values(array_unique((array)$cfg->getKeys(['alliases_real', Pat
 							<a href="?p=filler:new&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-primary">+ Создать</a>
 						<?PHP else : ?>
 							<a href="?p=filler:edit&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-edit">Ред.</a>
-							<a href="?p=filler:remove&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>&block=<?= urlencode($r['name']) ?>" class="btn-danger" onclick="return confirm('Удалить филлер?')">Удалить</a>
+							<form method="post" action="?p=filler:remove" style="display:inline;" onsubmit="return confirm('Удалить филлер?')">
+								<?= Csrf::field() ?>
+								<input type="hidden" name="domain" value="<?= htmlspecialchars($domain, ENT_QUOTES) ?>">
+								<input type="hidden" name="allias" value="<?= htmlspecialchars($allias, ENT_QUOTES) ?>">
+								<input type="hidden" name="block" value="<?= htmlspecialchars($r['name'], ENT_QUOTES) ?>">
+								<button type="submit" class="btn-danger">Удалить</button>
+							</form>
 						<?PHP endif ?>
 					</div>
 				</td>
