@@ -12,6 +12,9 @@ class AdminRouter {
         'blocks'    => 'BlockController',
 		'page'      => 'PageController',
         'pages'     => 'PageController',
+		'media'    => 'MediaController',
+        'settings' => 'SettingsController', 
+        'db'       => 'SettingsController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 
