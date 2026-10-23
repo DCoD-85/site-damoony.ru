@@ -48,6 +48,7 @@ require_once CS_LIB . '/Result.php';
 require_once CS_LIB . '/Context.php';
 
 require_once ADMIN_ROOT . '/_lib/Auth.php';
+require_once ADMIN_ROOT . '/_lib/Security.php';
 require_once ADMIN_ROOT . '/_lib/View.php';
 require_once ADMIN_ROOT . '/_lib/WebRenderer.php';
 require_once ADMIN_ROOT . '/_lib/Csrf.php';
@@ -55,6 +56,22 @@ require_once ADMIN_ROOT . '/_lib/AuditLog.php';
 
 $auth = new Auth( );
 $p = (string) ( $_GET[ 'p' ] ?? 'dashboard' );
+
+# --- Автовход по fingerprint-cookie ---
+if ( empty( $_SESSION[ 'admin_ok' ] ) ) {
+	$fp_raw = $_COOKIE[ 'admin_fp' ] ?? '';
+	if ( $fp_raw !== '' ) {
+		$match = Security::find_device( json_decode( $fp_raw , true ) ?: [] );
+		if ( $match !== null ) {
+			session_regenerate_id( true );
+			$_SESSION[ 'admin_ok' ]    = true;
+			$_SESSION[ 'admin_login' ] = $match[ 'login' ];
+			$_SESSION[ 'admin_role' ]  = $match[ 'role' ];
+			Security::touch_device( $match[ 'login' ] , $match[ 'device' ] , (string) ( $_SERVER[ 'REMOTE_ADDR' ] ?? '' ) );
+			Security::log( 'autologin:ok' , [ 'login' => $match[ 'login' ] , 'device' => $match[ 'device' ] ] );
+		}
+	}
+}
 
 if ( $p === 'login' && $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
 	require_once PROJECT_ROOT . '/engine/middleware.php';
@@ -87,6 +104,53 @@ if ( $p === 'logout' ) {
 	exit;
 }
 
+# --- Приглашение: регистрация или привязка устройства ---
+if ( $p === 'invite' || ( isset( $_GET[ 'token' ] ) && (string) $_GET[ 'token' ] !== '' ) ) {
+	$token = (string) ( $_GET[ 'token' ] ?? '' );
+	$invite = $token !== '' ? Security::validate_invite( $token ) : null;
+	
+	if ( $invite === null ) { http_response_code( 404 ); exit( 'Приглашение недействительно или истекло' ); }
+
+	$is_bind = ( $invite['role'] === 'bind_only' );
+	$error = null;
+
+	if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+		if ( ! Csrf::check() ) { http_response_code( 403 ); exit( 'CSRF token invalid' ); }
+		$pass = (string) ( $_POST[ 'password' ] ?? '' );
+		$fp = json_decode( (string) ( $_POST[ 'fingerprint' ] ?? '' ) , true ) ?: [];
+		$ua = (string) ( $_SERVER[ 'HTTP_USER_AGENT' ] ?? '' );
+		$ip = (string) ( $_SERVER[ 'REMOTE_ADDR' ] ?? '' );
+
+		if ( empty( $fp['canvas'] ) ) {
+			$error = 'Не удалось получить отпечаток устройства. Включите JavaScript.';
+		} elseif ( $is_bind ) {
+			if ( Security::bind_device_from_invite( $token , $pass , $fp , $ua , $ip ) ) {
+				$admins = Security::get_data();
+				$_SESSION['admin_ok'] = true;
+				$_SESSION['admin_login'] = $invite['target_user'];
+				$_SESSION['admin_role'] = $admins['users'][$invite['target_user']]['role'] ?? 'admin';
+				Security::log( 'device:bound_invite' , [ 'login' => $invite['target_user'] ] );
+				header('Location: ?p=dashboard'); exit;
+			}
+			$error = 'Неверный пароль';
+		} else {
+			$login = trim((string)($_POST['login'] ?? ''));
+			if ( $login === '' || !preg_match('/^[a-z0-9_]+$/i', $login) ) {
+				$error = 'Некорректный логин (только a-z, 0-9, _)';
+			} elseif ( Security::create_user_from_invite( $token , $login , $pass , $invite['role'] , $fp , $ua , $ip ) ) {
+				$_SESSION['admin_ok'] = true; $_SESSION['admin_login'] = $login; $_SESSION['admin_role'] = $invite['role'];
+				Security::log( 'user:created_invite' , [ 'login' => $login ] );
+				header('Location: ?p=dashboard'); exit;
+			} else {
+				$error = 'Логин уже существует или ошибка сохранения';
+			}
+		}
+	}
+
+	View::render( 'invite_accept' , [ 'token' => $token , 'invite' => $invite , 'is_bind' => $is_bind , 'error' => $error ] );
+	exit;
+}
+
 if ( ! $auth->check( ) ) { header( 'Location: ?p=login' ); exit; }
 
 if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' && ! Csrf::check( ) ) {
@@ -97,4 +161,13 @@ if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' && ! Csrf::check( ) ) {
 #   Роутинг (Контроллеры)
 # ============================================================
 require_once ADMIN_ROOT . '/_lib/AdminRouter.php';
-AdminRouter::dispatch( $p );
+if ( ! AdminRouter::dispatch( $p ) ) {
+    http_response_code( 404 );
+    View::render( 'result', [
+        'result' => new Result(),
+        'title' => '404 — Страница не найдена',
+        'back_url' => '?p=dashboard',
+        'back_label' => 'На главную'
+    ] );
+    exit;
+}

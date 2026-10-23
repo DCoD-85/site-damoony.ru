@@ -28,6 +28,7 @@ $showTabs    = ! empty( $tabs['show'] );
 		<nav class="admin-nav" style="margin-left: 20px;">
 			<a href="?p=dashboard"  class="<?= $p === 'dashboard' ? 'active' : '' ?>">Домены</a>
 			<a href="?p=stubs:list" class="<?= str_starts_with( $p , 'stub' ) ? 'active' : '' ?>">Заглушки</a>
+			<a href="?p=security"   class="<?= str_starts_with( $p , 'security' ) ? 'active' : '' ?>">Безопасность</a> <!-- ДОБАВИЛИ СТРОКУ -->
 			<a href="?p=settings"   class="<?= $p === 'settings'  ? 'active' : '' ?>">Настройки</a>
 		</nav>
 
