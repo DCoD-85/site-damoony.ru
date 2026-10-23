@@ -28,7 +28,7 @@ class SecurityTest extends TestCase {
 
     public static function setUpBeforeClass () : void {
         if ( ! defined( 'PROJECT_ROOT' ) ) {
-            self::markTestSkipped( 'PROJECT_ROOT не определён в bootstrap' );
+            define( 'PROJECT_ROOT' , dirname( __DIR__ , 2 ) );
         }
         require_once PROJECT_ROOT . '/www/admin/_lib/Security.php';
 
