@@ -176,9 +176,14 @@ if ( $p === 'security' ) {
 
 				case 'reset_devices' :
 					$login = (string) ( $_POST[ 'login' ] ?? '' );
+					$self  = (string) ( $_SESSION[ 'admin_login' ] ?? '' );
 					if ( $login !== '' ) {
-						Security::reset_user_devices( $login );
-						AuditLog::action_ok( 'security:reset_devices' , [ 'login' => $login ] );
+						$ok = Security::reset_user_devices( $login , $self );
+						if ( $ok ) {
+							AuditLog::action_ok( 'security:reset_devices' , [ 'login' => $login ] );
+						} else {
+							AuditLog::action_ok( 'security:reset_devices_blocked' , [ 'login' => $login , 'self' => $self ] );
+						}
 					}
 					header( 'Location: ?p=security&tab=users&saved=1' ); exit;
 
