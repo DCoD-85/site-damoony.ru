@@ -19,48 +19,45 @@ class AdminRouter {
         'scheme'   => 'SchemeController',
         'stubs'    => 'StubController',
         'stub'     => 'StubController',
+		'security' => 'SecurityController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 
-    public static function dispatch(string $p): void {
+    public static function dispatch(string $p): bool {
         $parts = explode(':', $p);
         $resource = $parts[0] ?? 'dashboard';
         $action = $parts[1] ?? 'index';
 
-        // Если роут еще не перенесен — отдаем управление старому switch
+        // Если роут еще не перенесен
         if (!isset(self::$map[$resource])) {
-            return;
+            return false;
         }
 
         $controllerName = self::$map[$resource];
         $controllerFile = __DIR__ . '/../controllers/' . $controllerName . '.php';
         
-        // Сначала подключаем базовый класс
         $baseControllerFile = __DIR__ . '/../controllers/BaseController.php';
         if (is_file($baseControllerFile)) {
             require_once $baseControllerFile;
         }
 
         if (!is_file($controllerFile)) {
-            http_response_code(500);
-            exit("Controller file not found: {$controllerName}");
+            return false;
         }
 
         require_once $controllerFile;
 
         if (!class_exists($controllerName)) {
-            http_response_code(500);
-            exit("Controller class not found: {$controllerName}");
+            return false;
         }
 
         $controller = new $controllerName($p, $action);
 
         if (!method_exists($controller, $action)) {
-            http_response_code(404);
-            exit("Action not found: {$action}");
+            return false;
         }
 
         $controller->$action();
-        exit; // Контроллер сам сделает render или redirect, после этого завершаем скрипт
+        return true;
     }
 }
