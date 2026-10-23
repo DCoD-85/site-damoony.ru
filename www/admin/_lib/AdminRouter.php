@@ -7,6 +7,9 @@ class AdminRouter {
         'dashboard' => 'DashboardController',
         'domain'    => 'DomainController',
 		'allias'    => 'AlliasController',
+		'filler'    => 'FillerController',
+        'block'     => 'BlockController',
+        'blocks'    => 'BlockController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 
