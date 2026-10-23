@@ -22,13 +22,6 @@
 		</select>
 	</label>
 
-	<label>Тип маршрутизации (logic_type)
-		<select name="logic_type">
-			<option value="router" <?= $current['logic_type'] === 'router' ? 'selected' : '' ?>>router (новый)</option>
-			<option value="chain" <?= $current['logic_type'] === 'chain' ? 'selected' : '' ?>>chain (классический)</option>
-		</select>
-	</label>
-
 	<label>Тип подключения
 		<select name="connect_type">
 			<?PHP foreach ( $connectTypes as $ct ) : ?>
