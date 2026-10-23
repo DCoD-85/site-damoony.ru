@@ -43,7 +43,7 @@ class Security {
 
     private static function write_atomic ( string $path , string $content ) : void {
         # Если загружен Fs (admin bootstrap) — используем его (единый путь записи).
-        if ( class_exists( 'Fs' , false ) && method_exists( 'Fs' , 'writeAtomic' ) ) {
+		if ( class_exists( 'Fs' , false ) ) {
             \Fs::writeAtomic( $path , $content );
             return;
         }

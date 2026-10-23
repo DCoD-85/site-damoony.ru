@@ -121,25 +121,6 @@ class Auth {
         return is_array( $data ) ? $data : [ ];
     }
 
-    private function save_fails ( array $data ) : void {
-        $path = $this->fails_path( );
-        $dir  = dirname( $path );
-        if ( ! is_dir( $dir ) ) @mkdir( $dir , 0755 , true );
-
-        $json = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-        if ( $json === false ) return;
-
-        $tmp = $path . '.tmp.' . bin2hex( random_bytes( 4 ) );
-        $fp = @fopen( $tmp , 'wb' );
-        if ( $fp === false ) return;
-        flock( $fp , LOCK_EX );
-        fwrite( $fp , $json );
-        fflush( $fp );
-        flock( $fp , LOCK_UN );
-        fclose( $fp );
-        @rename( $tmp , $path );
-    }
-
     private function is_banned ( string $ip ) : bool {
         $data = $this->load_fails( );
         $ban  = $data[ $ip ][ 'banned_until' ] ?? 0;

@@ -48,7 +48,7 @@ class MediaUpload {
                     
                     // Сжимаем большие картинки (макс. ширина 1920px)
                     if ( $width > 1920 ) {
-                        $newHeight = floor( $height * ( 1920 / $width ) );
+                        $newHeight = (int) floor( $height * ( 1920 / $width ) );
                         $resized = imagescale( $image , 1920 , $newHeight );
                         imagedestroy( $image );
                         $image = $resized;
