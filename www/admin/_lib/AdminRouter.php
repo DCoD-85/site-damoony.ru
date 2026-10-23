@@ -10,6 +10,8 @@ class AdminRouter {
 		'filler'    => 'FillerController',
         'block'     => 'BlockController',
         'blocks'    => 'BlockController',
+		'page'      => 'PageController',
+        'pages'     => 'PageController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 
