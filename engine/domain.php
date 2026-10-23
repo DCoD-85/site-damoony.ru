@@ -25,7 +25,7 @@ class domain {
 		
 		$domain_accepted = $this->main->main_settings->domain_accepted( );
 		$this->domaininfo->set( 'name' , $domain_accepted );
-		( $domain_accepted ) or error( true , true , __FILE__ , __LINE__ );
+		( $domain_accepted ) or error( 'Domain not accepted' , 'Домен не прошел валидацию или не найден в конфигурации.' , __FILE__ , __LINE__ );
 		
 		$logic_ver = $this->main->main_settings->get( 'logic' );
 		( include_once $path = dirname(__DIR__) . DS . 'app' . DS . $logic_ver . DS . 'domain' . DS . $domain_accepted . DS . 'allias.php' ) or error_file( $path , __FILE__ , __LINE__ );
