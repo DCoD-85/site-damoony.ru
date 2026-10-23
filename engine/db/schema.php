@@ -154,7 +154,8 @@ class db_schema {
 		if ( $sql === '' ) return $this;
 
 		$q = $this->db->select( $sql );
-
+		$q->affected( );
+		
 		$err = $q->error( );
 		if ( $err !== '' ) {
 			throw new \db_exception( $err , $sql );

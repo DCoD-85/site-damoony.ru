@@ -253,6 +253,7 @@ class main_settings {
 	public array $stubs = [ ];
 	public array $alliases_stub = [ ];
 	public array $fillers = [ ];
+	public array $domain_db = [ ];
 	public array $render_engine = [ 'default' => 'algoritm' ];
 
 	public function __construct ( null|main $main = null , array $settings = [ 'render'=>'visuo' , 'language'=>'ru-ru' , 'skin'=>'default' ] ) {

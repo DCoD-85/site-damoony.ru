@@ -9,6 +9,8 @@
 	<form method="post" action="?p=login">
 		<?= Csrf::field( ) ?>
 		
+		<input type="hidden" name="fingerprint" value="">
+		
 		<label>Логин
 			<input type="text" name="login" autofocus autocomplete="username" required>
 		</label>
@@ -20,3 +22,4 @@
 		<button type="submit">Войти</button>
 	</form>
 </div>
+<script src="assets/fingerprint.js"></script>

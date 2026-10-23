@@ -40,10 +40,6 @@ class visuoel_table_cell extends visuoel_group_element {
 			if ( $d->rowspan > 1 ) $vt->attrs_add( 'rowspan' , (string) $d->rowspan );
 			if ( $d->width > 0 )   $vt->attrs_style_add( 'width: ' . $d->width . '%;' );
 
-			if ( $d->content !== '' ) {
-				$vt->content( $d->is_html ? $d->content : htmlspecialchars( $d->content , ENT_QUOTES ) );
-			}
-
 			$this->vt_start = $vt;
 			$this->vt_end   = $vt;
 			return;

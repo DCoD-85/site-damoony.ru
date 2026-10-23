@@ -1,0 +1,21 @@
+<?PHP
+
+namespace damoony_ru;
+
+class alliasglobal_debug_oxydog {
+
+	use alliasglobal_filler_trait;
+
+	public \main $main;
+	public alliasglobal_debug $debug;
+
+	public function __construct ( alliasglobal_debug $debug ) {
+		$this->main    = $debug->main;
+		$this->debug = $debug;
+	}
+
+	public function data ( ) : void {
+		$file = __DIR__ . DS . 'debug_oxydog.data.php';
+		if ( is_file( $file ) ) include $file;
+	}
+}

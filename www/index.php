@@ -21,12 +21,7 @@ if ( isset( $path_parts[ 0 ] ) && preg_match( '/^[a-z]{2}-[a-z]{2}$/' , $path_pa
 # --- конфиг: один раз (admin IP + host whitelist) ---
 $cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'site.config';
 $cfg = is_file( $cfg_path ) ? @json_decode( @file_get_contents( $cfg_path ) , true ) : null;
-
-$admin_cfg_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'admin.config';
-$admin_cfg = is_file( $admin_cfg_path ) ? @json_decode( @file_get_contents( $admin_cfg_path ) , true ) : [];
 if ( ! is_array( $cfg ) ) $cfg = [ ];
-
-
 
 // 1. Определяем хост и IP
 $raw_host = $_SERVER[ 'HTTP_HOST' ] ?? '';
@@ -39,35 +34,57 @@ if ( $is_local_ip && $path !== 'admin' && !str_starts_with( $path , 'admin/' ) )
 	http_response_code( 403 );
 	exit( 'Access via IP is forbidden. Please use the domain name.' );
 }
+
+// 3. Проверка доступа к админке
 if ( $path === 'admin' || str_starts_with( $path , 'admin/' ) ) {
 
-	$ip      = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
-	$allowed = [ '127.0.0.1' , '::1' ];
+    if ( ! defined( 'PROJECT_ROOT' ) ) {
+        define( 'PROJECT_ROOT' , dirname( __DIR__ ) );
+    }
+    require_once __DIR__ . '/admin/_lib/Security.php';
 
-	if ( ! filter_var( $ip , FILTER_VALIDATE_IP , FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
-		$allowed[] = $ip;
-	}
+    $ip = $_SERVER[ 'REMOTE_ADDR' ] ?? '';
 
-	// Локальный обход для OSPanel (на проде не сработает)
-	if ( strpos( __DIR__ , 'OSPanel' ) !== false ) {
-		$allowed[ ] = $ip;
-	}
+    // 3.1. IP в белом списке (включая OSPanel-обход)
+    $is_whitelisted = Security::is_whitelisted( $ip );
+    
+    // Локальный обход для OSPanel (на проде не сработает)
+    if ( ! $is_whitelisted && strpos( __DIR__ , 'OSPanel' ) !== false ) {
+        $is_whitelisted = true;
+    }
 
-	if ( ! empty( $admin_cfg[ 'ips' ] ) && is_array( $admin_cfg[ 'ips' ] ) ) {
-		$allowed = array_merge( $allowed , $admin_cfg[ 'ips' ] );
-	}
+    if ( $is_whitelisted ) {
+        $admin_bootstrap = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'bootstrap.php';
+        if ( ! is_file( $admin_bootstrap ) ) {
+            http_response_code( 500 );
+            exit( 'Admin bootstrap not found' );
+        }
+        require_once $admin_bootstrap;
+        exit;
+    }
 
-	if ( in_array( $ip , $allowed , true ) ) {
-		$admin_bootstrap = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'bootstrap.php';
-		if ( ! is_file( $admin_bootstrap ) ) {
-			http_response_code( 500 );
-			exit( 'Admin bootstrap not found' );
-		}
-		require_once $admin_bootstrap;
-		exit;
-	}
+    // 3.2. Совпадение отпечатка устройства (Cookie)
+    $fp_json = $_COOKIE[ 'admin_fp' ] ?? '';
+    $fp = json_decode( urldecode( $fp_json ) , true ) ?: [];
+    if ( ! empty( $fp ) && Security::find_device( $fp ) !== null ) {
+        $admin_bootstrap = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'bootstrap.php';
+        require_once $admin_bootstrap;
+        exit;
+    }
 
-	# IP не в списке → fallthrough: main.php → 404 движка
+    // 3.3. Наличие invite_token (для привязки нового устройства или пользователя)
+    $token = $_GET[ 'token' ] ?? '';
+    if ( $token !== '' && Security::validate_invite( $token ) !== null ) {
+        $admin_bootstrap = __DIR__ . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'bootstrap.php';
+        require_once $admin_bootstrap;
+        exit;
+    }
+
+    // 3.4. Ничего не совпало — скрываем админку (404)
+    http_response_code( 404 );
+    header( 'Content-Type: text/html; charset=UTF-8' );
+    echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>';
+    exit;
 }
 
 # host — валидация по config/site.config:domains_real (C2+C4+H2)
@@ -129,7 +146,7 @@ try {
         ->run( );
 } catch ( StopMiddleware $e ) {
     http_response_code( 429 );
-    die( 'Too Many Requests' ); // Теперь это безопасно, мы перехватили управление
+    die( 'Too Many Requests' );
 }
 
 # --- SSO-ready: cookie domain для поддоменов из domains_real (8/N) ---
@@ -150,7 +167,7 @@ session_set_cookie_params( [
 session_start( );
 
 # 2 : Показывать / Не показывать ошибки и предупреждения
-Error_Reporting( E_ALL & ~E_NOTICE & ~E_DEPRECATED );
+# Error_Reporting( E_ALL & ~E_NOTICE & ~E_DEPRECATED );
 
 # 3 : Константы времени
 define( 'SCRIPTSTART_MT' , $start );

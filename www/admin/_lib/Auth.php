@@ -2,9 +2,8 @@
 
 class Auth {
 
-    private string $login = 'admin';
-    private string $hash  = '';
     private string $path;
+    private array  $users = [];
 
     # конфиг brute-force
     private const FAILS_FILE  = '/secure/admin_fails.json';
@@ -14,13 +13,14 @@ class Auth {
     private const DELAY_USEC  = 500_000;
 
     public function __construct ( ) {
-        $this->path = PROJECT_ROOT . '/config/admin.config';
-        if ( is_file( $this->path ) ) {
-            $json = file_get_contents( $this->path );
-            $data = json_decode( $json , true );
-            if ( isset( $data[ 'login' ] ) )         $this->login = (string) $data[ 'login' ];
-            if ( isset( $data[ 'password_hash' ] ) ) $this->hash  = (string) $data[ 'password_hash' ];
-        }
+        $this->path = PROJECT_ROOT . '/secure/admins.config';
+        $this->load_users();
+    }
+
+    private function load_users() : void {
+        if ( ! is_file( $this->path ) ) return;
+        $data = json_decode( file_get_contents( $this->path ) , true );
+        $this->users = $data['users'] ?? [];
     }
 
     public function check ( ) : bool {
@@ -36,15 +36,17 @@ class Auth {
             return false;
         }
 
-        if ( $this->hash === '' ) {
+        $this->load_users();
+
+        if ( ! isset( $this->users[$login] ) ) {
             $this->record_fail( $ip );
             return false;
         }
 
-        $ok = hash_equals( $this->login , $login )
-           && password_verify( $password , $this->hash );
+        $user = $this->users[$login];
+        $hash = $user['password_hash'] ?? '';
 
-        if ( ! $ok ) {
+        if ( $hash === '' || ! password_verify( $password , $hash ) ) {
             $this->record_fail( $ip );
 
             if ( $this->fails_count( $ip ) >= self::DELAY_AFTER ) {
@@ -58,8 +60,11 @@ class Auth {
         if ( session_status( ) === PHP_SESSION_ACTIVE ) {
             session_regenerate_id( true );
         }
+        
         $_SESSION[ 'admin_ok' ]    = true;
-        $_SESSION[ 'admin_login' ] = $this->login;
+        $_SESSION[ 'admin_login' ] = $login;
+        $_SESSION[ 'admin_role' ]  = $user['role'] ?? 'admin';
+        
         return true;
     }
 
@@ -84,6 +89,10 @@ class Auth {
 
     public function login_name ( ) : string {
         return (string) ( $_SESSION[ 'admin_login' ] ?? '' );
+    }
+    
+    public function role ( ) : string {
+        return (string) ( $_SESSION[ 'admin_role' ] ?? 'admin' );
     }
 
     # ============================================================

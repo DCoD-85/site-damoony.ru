@@ -1,5 +1,9 @@
 <?PHP
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 # ============================================================
 #   www/admin/index.php — точка входа админки
 # ============================================================
@@ -904,6 +908,31 @@ switch ( $p ) {
 				header( 'Location: ?p=stubs:list&saved=1' ); exit;
 			} catch ( Throwable $e ) {}
 		}
+		break;
+	
+	case 'db:settings' :
+		$config_path = PROJECT_ROOT . '/secure/db.config';
+		$data = is_file($config_path) ? json_decode(file_get_contents($config_path), true) : [];
+		$bases = $data['bases'] ?? [];
+		
+		// Берем первую базу для формы (или дефолтную)
+		$db = $bases[0] ?? ['localname' => 'visuo_damoony'];
+
+		if ( $_SERVER[ 'REQUEST_METHOD' ] === 'POST' ) {
+			require_once CS_CMD . '/DbSave.php';
+			$result = DbSave::run( $_POST );
+			if ( $result->ok ) {
+				header( 'Location: ?p=db:settings&saved=1' ); exit;
+			}
+			View::render( 'result' , [ 'result' => $result , 'title' => 'Ошибка' , 'back_url' => '?p=db:settings' , 'back_label' => 'Назад' ] );
+			break;
+		}
+
+		View::render( 'db_settings' , [
+			'db'   => $db ,
+			'saved'=> ! empty( $_GET[ 'saved' ] ) ,
+			'meta' => [ 'title' => 'Настройки Базы Данных' , 'breadcrumbs' => [ ['label' => 'Настройки', 'url' => '?p=settings'], ['label' => 'База данных', 'url' => ''] ] ]
+		] );
 		break;
 	
 	case 'settings' :
