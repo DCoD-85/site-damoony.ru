@@ -1,4 +1,4 @@
-<?PHP if ( ! empty( $saved ) && empty($generated_invite) ) : ?>
+<?PHP if ( ! empty( $saved ) && empty( $generated_invite ) ) : ?>
     <div class="ok-msg">✓ Сохранено</div>
 <?PHP endif ?>
 
@@ -9,7 +9,7 @@
 </div>
 
 <?PHP if ( $tab === 'policy' ) : ?>
-    <form method="post" action="?p=security" class="form" style="max-width: 600px;">
+    <form method="post" action="?p=security&tab=policy" class="form" style="max-width: 600px;">
         <?= Csrf::field() ?>
         <input type="hidden" name="action" value="save_policy">
         <h3>Режим доступа</h3>
@@ -54,17 +54,26 @@
                         <?PHP else : ?>
                             <ul style="margin:0; padding-left:15px; font-size:13px;">
                             <?PHP foreach ($user['devices'] as $d) : ?>
-                                <li><?= htmlspecialchars($d['label']) ?> <span style="color:#888;">(<?= htmlspecialchars($d['last_ip']) ?>)</span></li>
+                                <li>
+                                    <b><?= htmlspecialchars($d['label'] ?? 'Unknown') ?></b>
+                                    <span style="color:#888;">
+                                        (<?= htmlspecialchars($d['last_ip'] ?? '—') ?><?PHP if ( ! empty( $d['last_seen'] ) ) : ?>
+                                            · <?= date( 'd.m.Y H:i', (int) $d['last_seen'] ) ?>
+                                        <?PHP endif ?>)
+                                    </span>
+                                </li>
                             <?PHP endforeach ?>
                             </ul>
                         <?PHP endif ?>
                     </td>
                     <td>
-                        <form method="post" action="?p=security" style="display:inline;">
+                        <?PHP $is_self = ( ( $_SESSION['admin_login'] ?? '' ) === $login ); ?>
+                        <form method="post" action="?p=security&tab=users" style="display:inline;">
                             <?= Csrf::field() ?>
                             <input type="hidden" name="action" value="reset_devices">
                             <input type="hidden" name="login" value="<?= htmlspecialchars($login) ?>">
-                            <button type="submit" class="btn-danger" onclick="return confirm('Сбросить все устройства?')">Сбросить</button>
+                            <button type="submit" class="btn-danger"
+                                    <?= $is_self ? 'disabled title="Нельзя сбросить свои устройства: вы потеряете доступ"' : 'onclick="return confirm(\'Сбросить все устройства?\')"' ?>>Сбросить</button>
                         </form>
                     </td>
                 </tr>
@@ -75,26 +84,60 @@
     <h3 style="margin-top:40px;">Приглашения</h3>
     <?PHP if (!empty($generated_invite)) : ?>
         <div class="ok-msg">
-            Ссылка для приглашения: <br>
-            <input type="text" value="<?= htmlspecialchars($generated_invite) ?>" style="width:100%; margin-top:10px;" readonly onclick="this.select()">
+            Ссылка для приглашения:<br>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <input type="text" value="<?= htmlspecialchars($generated_invite) ?>" style="flex:1;" readonly onclick="this.select()">
+                <button type="button" class="btn-edit" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.textContent='✓'; setTimeout(()=>this.textContent='Копировать', 1500);">Копировать</button>
+            </div>
         </div>
     <?PHP endif ?>
-    <form method="post" action="?p=security" class="form" style="margin-bottom:20px;">
+    
+    <form method="post" action="?p=security&tab=users" class="form" style="margin-bottom:20px;">
         <?= Csrf::field() ?>
         <input type="hidden" name="action" value="create_invite">
-        <label>Роль
-            <select name="role">
-                <option value="admin">Администратор</option>
+        
+        <label>Тип приглашения
+            <select name="invite_type" id="invite_type" onchange="toggleInviteType()">
+                <option value="new_user">Новый пользователь (создать аккаунт)</option>
+                <option value="bind_user">Существующий пользователь (привязать устройство)</option>
             </select>
         </label>
+
+        <div id="row-role">
+            <label>Роль нового пользователя
+                <select name="role">
+                    <option value="admin">Администратор</option>
+                    <option value="super">Супер-администратор</option>
+                </select>
+            </label>
+        </div>
+
+        <div id="row-target-user" style="display:none;">
+            <label>Для кого (логин)
+                <select name="target_user">
+                    <?PHP foreach ( $admins['users'] ?? [] as $login => $u ) : ?>
+                        <option value="<?= htmlspecialchars($login) ?>"><?= htmlspecialchars($login) ?> (<?= htmlspecialchars($u['role'] ?? 'admin') ?>)</option>
+                    <?PHP endforeach ?>
+                </select>
+            </label>
+        </div>
+
         <button type="submit" class="btn-primary">Создать приглашение</button>
     </form>
+
+    <script>
+    function toggleInviteType() {
+        var type = document.getElementById('invite_type').value;
+        document.getElementById('row-role').style.display = (type === 'new_user') ? 'block' : 'none';
+        document.getElementById('row-target-user').style.display = (type === 'bind_user') ? 'block' : 'none';
+    }
+    </script>
 
     <table class="table">
         <thead>
             <tr>
                 <th>Токен</th>
-                <th>Роль</th>
+                <th>Роль / Тип</th>
                 <th>Действует до</th>
                 <th>Статус</th>
                 <th>Действия</th>
@@ -107,19 +150,31 @@
                 <?PHP foreach ( $admins['invites'] ?? [] as $token => $inv ) : ?>
                     <tr>
                         <td><code><?= htmlspecialchars(substr($token, 0, 10)) ?>...</code></td>
-                        <td><?= htmlspecialchars($inv['role'] ?? 'admin') ?></td>
-                        <td><?= date('d.m.Y H:i', $inv['expires_at']) ?></td>
+                        <td>
+                            <?PHP if ( ($inv['role'] ?? '') === 'bind_only' ) : ?>
+                                Привязка: <b><?= htmlspecialchars($inv['target_user'] ?? '?') ?></b>
+                            <?PHP else : ?>
+                                <?= htmlspecialchars($inv['role'] ?? 'admin') ?>
+                            <?PHP endif ?>
+                        </td>
+                        <td>
+                            <?PHP if ( ! empty( $inv['expires_at'] ) ) : ?>
+                                <?= date('d.m.Y H:i', (int) $inv['expires_at']) ?>
+                            <?PHP else : ?>
+                                —
+                            <?PHP endif ?>
+                        </td>
                         <td>
                             <?PHP if (!empty($inv['used'])) : ?>
                                 <span style="color:#888;">Использован</span>
-                            <?PHP elseif ($inv['expires_at'] < time()) : ?>
+                            <?PHP elseif ( empty( $inv['expires_at'] ) || $inv['expires_at'] < time() ) : ?>
                                 <span style="color:#c00;">Истёк</span>
                             <?PHP else : ?>
                                 <span style="color:#0a0; font-weight:bold;">Активен</span>
                             <?PHP endif ?>
                         </td>
                         <td>
-                            <form method="post" action="?p=security">
+                            <form method="post" action="?p=security&tab=users">
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="action" value="revoke_invite">
                                 <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
