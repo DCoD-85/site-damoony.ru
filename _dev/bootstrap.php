@@ -9,6 +9,8 @@ if ( ! defined( 'DS' )  ) define( 'DS'  , DIRECTORY_SEPARATOR );
 if ( ! defined( 'DSA' ) ) define( 'DSA' , '/' );
 
 $root      = dirname( __DIR__ );
+if ( ! defined( 'PROJECT_ROOT' ) ) define( 'PROJECT_ROOT' , $root );
+
 $www       = $root . '/www';
 $visuo_src = $root . '/visuo/sources';
 $sources   = $root . '/engine';

@@ -6,6 +6,11 @@ require_once __DIR__ . '/../../engine/tree.php';
 
 class TreeTest extends TestCase {
 
+    private function mockMain() : object {
+        // В _dev/bootstrap.php загружен Stubs.php, где объявлен класс \main
+        return new \main();
+    }
+
     private function callMatch( string $segment, array $available ) : array {
         $m = new ReflectionMethod( Tree::class, 'match' );
         $m->setAccessible( true );
