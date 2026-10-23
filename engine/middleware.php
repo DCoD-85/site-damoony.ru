@@ -43,11 +43,21 @@ class middleware {
     }
 
     # rate limiting по IP (для логина + API)
-     # rate limiting по IP (для логина + API)
     public static function rateLimit ( string $key , int $max = 60 , int $window = 60 , int $ban = 900 ) : void {
-        $ip = $_SERVER[ 'REMOTE_ADDR' ] ?? '0.0.0.0';
-        $file = sys_get_temp_dir( ) . '/simplcms_rl_' . md5( $key . ':' . $ip );
+        $ip  = $_SERVER[ 'REMOTE_ADDR' ] ?? '0.0.0.0';
+        $dir = sys_get_temp_dir( );
+        $file = $dir . '/simplcms_rl_' . md5( $key . ':' . $ip );
         $now  = time( );
+
+        # GC: 1% шанс почистить файлы старше 1 суток
+        if ( random_int( 1 , 100 ) === 1 ) {
+            $files = glob( $dir . '/simplcms_rl_*' );
+            if ( is_array( $files ) ) {
+                foreach ( $files as $old ) {
+                    if ( @filemtime( $old ) < $now - 86400 ) @unlink( $old );
+                }
+            }
+        }
 
         # --- атомарный read-modify-write (M2) ---
         $fp = @fopen( $file , 'c+' );
@@ -61,7 +71,7 @@ class middleware {
         }
 
         $raw  = stream_get_contents( $fp );
-        $data = @json_decode( $raw , true );
+        $data = @json_decode( (string) $raw , true );
         if ( ! is_array( $data ) ) $data = [ ];
         $data += [ 'count' => 0 , 'start' => $now , 'banned_until' => 0 ];
 
@@ -83,9 +93,13 @@ class middleware {
             $data[ 'banned_until' ] = $now + $ban;
         }
 
-        ftruncate( $fp , 0 );
-        rewind( $fp );
-        fwrite( $fp , json_encode( $data ) );
+        $out = json_encode( $data );
+        if ( $out !== false ) {
+            ftruncate( $fp , 0 );
+            rewind( $fp );
+            fwrite( $fp , $out );
+            fflush( $fp );
+        }
 
         flock( $fp , LOCK_UN );
         fclose( $fp );

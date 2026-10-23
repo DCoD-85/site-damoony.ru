@@ -111,9 +111,13 @@ class Auth {
     private function load_fails ( ) : array {
         $path = $this->fails_path( );
         if ( ! is_file( $path ) ) return [ ];
-        $raw = @file_get_contents( $path );
-        if ( $raw === false ) return [ ];
-        $data = @json_decode( $raw , true );
+        $fp = @fopen( $path , 'r' );
+        if ( $fp === false ) return [ ];
+        flock( $fp , LOCK_SH );
+        $raw = stream_get_contents( $fp );
+        flock( $fp , LOCK_UN );
+        fclose( $fp );
+        $data = @json_decode( (string) $raw , true );
         return is_array( $data ) ? $data : [ ];
     }
 
@@ -123,7 +127,17 @@ class Auth {
         if ( ! is_dir( $dir ) ) @mkdir( $dir , 0755 , true );
 
         $json = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
-        @file_put_contents( $path , $json , LOCK_EX );
+        if ( $json === false ) return;
+
+        $tmp = $path . '.tmp.' . bin2hex( random_bytes( 4 ) );
+        $fp = @fopen( $tmp , 'wb' );
+        if ( $fp === false ) return;
+        flock( $fp , LOCK_EX );
+        fwrite( $fp , $json );
+        fflush( $fp );
+        flock( $fp , LOCK_UN );
+        fclose( $fp );
+        @rename( $tmp , $path );
     }
 
     private function is_banned ( string $ip ) : bool {
@@ -138,16 +152,25 @@ class Auth {
     }
 
     private function record_fail ( string $ip ) : void {
-        $data = $this->load_fails( );
-        $cur  = $data[ $ip ] ?? [ 'count' => 0 , 'last_ts' => 0 , 'banned_until' => 0 ];
+        $path = $this->fails_path( );
+        $dir  = dirname( $path );
+        if ( ! is_dir( $dir ) ) @mkdir( $dir , 0755 , true );
 
+        $fp = @fopen( $path , 'c+' );
+        if ( $fp === false ) return;
+
+        flock( $fp , LOCK_EX );
+
+        $raw  = stream_get_contents( $fp );
+        $data = @json_decode( (string) $raw , true );
+        if ( ! is_array( $data ) ) $data = [ ];
+
+        $cur = $data[ $ip ] ?? [ 'count' => 0 , 'last_ts' => 0 , 'banned_until' => 0 ];
         $cur[ 'count' ]   = (int) $cur[ 'count' ] + 1;
         $cur[ 'last_ts' ] = time( );
-
         if ( $cur[ 'count' ] >= self::MAX_FAILS ) {
             $cur[ 'banned_until' ] = time( ) + self::BAN_SECONDS;
         }
-
         $data[ $ip ] = $cur;
 
         $cutoff = time( ) - 7 * 86400;
@@ -158,15 +181,44 @@ class Auth {
             if ( $last < $cutoff && $ban < time( ) ) unset( $data[ $k ] );
         }
 
-        $this->save_fails( $data );
+        $out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+        if ( $out !== false ) {
+            ftruncate( $fp , 0 );
+            rewind( $fp );
+            fwrite( $fp , $out );
+            fflush( $fp );
+        }
+
+        flock( $fp , LOCK_UN );
+        fclose( $fp );
 
         error_log( 'admin_login_fail ip=' . $ip . ' login=' . ( $_POST[ 'login' ] ?? '?' ) );
     }
 
     private function reset_fails ( string $ip ) : void {
-        $data = $this->load_fails( );
-        unset( $data[ $ip ] );
-        $this->save_fails( $data );
+        $path = $this->fails_path( );
+        if ( ! is_file( $path ) ) return;
+
+        $fp = @fopen( $path , 'c+' );
+        if ( $fp === false ) return;
+
+        flock( $fp , LOCK_EX );
+
+        $raw  = stream_get_contents( $fp );
+        $data = @json_decode( (string) $raw , true );
+        if ( is_array( $data ) && isset( $data[ $ip ] ) ) {
+            unset( $data[ $ip ] );
+            $out = json_encode( $data , JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+            if ( $out !== false ) {
+                ftruncate( $fp , 0 );
+                rewind( $fp );
+                fwrite( $fp , $out );
+                fflush( $fp );
+            }
+        }
+
+        flock( $fp , LOCK_UN );
+        fclose( $fp );
     }
 
     private function delay ( int $usec ) : void {
