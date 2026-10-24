@@ -8,8 +8,11 @@
          failOnRisky="false"
          failOnDeprecation="false">
     <testsuites>
-        <testsuite name="visuo">
+        <testsuite name="legacy">
             <directory>phpunit</directory>
+        </testsuite>
+        <testsuite name="new">
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

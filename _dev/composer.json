@@ -24,7 +24,10 @@
     "autoload-dev": {
         "classmap": [
             "phpunit/"
-        ]
+        ],
+        "psr-4": {
+            "Damoony\\Tests\\": "tests/"
+        }
     },
     "config": {
         "sort-packages": true,

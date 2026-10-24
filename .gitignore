@@ -1,58 +1,42 @@
-﻿# Слепки — локальные, в репозиторий не идут
-_backup_*/
+# ================= СЕКРЕТЫ =================
+# config: доступы к БД и админке
+config/site.config
+config/site.config.bak
+config/site.config.lock
+config/admin.config
+config/*.bak
+config/*.lock
+config_backup_*/
 
-# Системное
-Thumbs.db
-.DS_Store
-*.log
-*.bak
-
-# IDE
-.vscode/
-.idea/
-
-# Секреты — глобально, по расширению
-*.secure
-
-# secure/ — папку держим в git, но только заглушку
+# secure: всё, кроме явных заглушек
 secure/*
 !secure/.gitkeep
+!secure/index.php
+!secure/db.secure.example
+!secure/blacklist/blacklist.txt
+!secure/blacklist/index.php
+!secure/blacklist/whitelist.txt
+*.secure
+!*.secure.example
 
-# Auto-generated language file
-language/save.txt.inc
-audit-*.txt
-config-usage.txt
-const-usage.txt
-data-tree.txt
-media-files.txt
-media-tree.txt
-backupdomain/
-
-# Media доменов — генерируется через domain:new
-www/media/*/
-!www/media/shared/
-!www/media/damoony.ru/
-
-# Language доменов: авто-дефолты не коммитим
-language/domains/*/save.txt.inc
-*.Разбор проекта*.md
-secure/admin_fails.json
-_dev/*.txt
-_dev/.phpunit.cache/
-
-# Секреты и локальные конфиги
-config/site.config
-config/site.config.lock
-_backup/
-_tmp/
+# ================= МУСОР / СЛУЖЕБНОЕ =================
+.vscode/
+.idea/
+*.log
+*.bak
+Thumbs.db
+.DS_Store
 _backup/
 _tmp/
 _dev/bin/.phpunit.result.cache
+_dev/.phpunit.cache/
+_dev/vendor/
+_dev/composer.lock
 .phpunit.cache/
-config/admin.config
 
-# Config artifacts from Config::mutate()
-config/*.bak
-config/*.lock
-# Backups
-_backup_config_*
+# ================= СГЕНЕРИРОВАННОЕ =================
+language/save.txt.inc
+language/domains/*/save.txt.inc
+www/media/*/
+!www/media/shared/
+!www/media/damoony.ru/

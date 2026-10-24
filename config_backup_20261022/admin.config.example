@@ -1,6 +1,0 @@
-{
-	"login":         "admin",
-	"password_hash": "$2y$12$REPLACE_ME",
-	"ips":           [],
-	"session_name":  "admin_sid"
-}

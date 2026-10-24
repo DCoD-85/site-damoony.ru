@@ -1,10 +1,9 @@
 /vendor/
 /composer.lock
-/composer.phar
-/phpstan.phar
-/phpunit.phar
-/composer-setup.php
+/bin/*.phar
+/bin/.phpunit.result.cache
 /.phpunit.cache/
 /phpstan_level5.txt
 /phpstan_novisuoel.txt
 /phpstan_visuoel.txt
+/composer-setup.php
