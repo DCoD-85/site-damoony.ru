@@ -20,6 +20,8 @@ class AdminRouter {
         'stubs'    => 'StubController',
         'stub'     => 'StubController',
 		'security' => 'SecurityController',
+		'resources' => 'ResourceController',
+        'resource'  => 'ResourceController',
         // Сюда будем добавлять остальные по мере переноса
     ];
 

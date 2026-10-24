@@ -1,117 +1,100 @@
-# 💻 База данных: Работа с Dataprovider
+# 💻 База данных: Resource-Driven Архитектура
 
-В SimplCMS структура сайта (URL, страницы, правила) хранится в JSON-файлах. Однако для динамического контента (статьи, пользователи, товары, настройки) используется база данных **MariaDB**.
+В SimplCMS структура сайта (URL, страницы, правила) хранится в JSON-файлах. Однако для динамического контента (статьи, товары, пользователи) используется база данных **MariaDB**.
 
-Чтобы код был чистым и безопасным, прямые SQL-запросы (`$pdo->query(...)`) в логике страниц **запрещены**. Вся работа с БД инкапсулирована в классе `dataprovider`.
+Чтобы не писать для каждой таблицы отдельные контроллеры, формы и классы (как это делалось ранее через `dataprovider`), мы используем **Resource-Driven подход**. Вся работа с БД инкапсулирована в легковесном классе `DataGateway`, а структура таблиц описывается декларативно.
 
-## 1. Архитектура Dataprovider
+## 1. Как это работает (Принцип)
 
-Каждый домен имеет свой фасад для работы с БД: 
-`app/.../domain/damoony.ru/dataprovider.php`
+Разработчик (или ИИ-агент) создает один декларативный файл `*.resource.php`, в котором описывает таблицу и её поля. 
+Админка автоматически читает этот файл и генерирует:
+1. Кнопку синхронизации структуры таблицы в БД (CREATE TABLE или ALTER TABLE).
+2. Таблицу просмотра записей (Data Grid).
+3. Форму добавления и редактирования записей (с нужными типами полей).
 
-Внутри он наследует базовый класс (`dataprovider_base.php`), который содержит методы подключения и выполнения запросов. 
+## 2. Создание новой сущности (Quick Start)
 
-При загрузке страницы, `main.php` создает объект `$this->main->dataprovider`, через который вы получаете доступ ко всем таблицам этого домена.
+Допустим, мы хотим добавить «Каталог товаров».
 
-## 2. Базовые методы
+### Шаг 1. Создайте файл ресурса
 
-Базовый класс `dataprovider_base` (обычно) предоставляет следующие методы для безопасной работы с PDO:
+Создайте файл в папке аллиаса (например, `app/alpha.0.0/domain/damoony.ru/allias/www/resources/products.resource.php`):
 
-*   `query( string $sql, array $params = [] )` — выполняет SELECT-запрос и возвращает массив строк. Использует подготовленные выражения (защита от SQL-инъекций).
-*   `row( string $sql, array $params = [] )` — возвращает одну строку.
-*   `val( string $sql, array $params = [] )` — возвращает одно значение (например, COUNT).
-*   `insert( string $table, array $data )` — вставляет запись.
-*   `update( string $table, array $data, string $where, array $params )` — обновляет записи.
+    return [
+        'table'   => 'products', // Имя таблицы в БД
+        'title'   => 'Товары',   // Название для админки
+        'fields'  => [
+            'id' => [
+                'type' => 'id', // Автоинкремент, Primary Key
+            ],
+            'title' => [
+                'type'  => 'string',
+                'label' => 'Название товара',
+            ],
+            'description' => [
+                'type'  => 'text',
+                'label' => 'Описание',
+            ],
+            'price' => [
+                'type'  => 'integer',
+                'label' => 'Цена (в копейках)',
+            ],
+            'is_active' => [
+                'type'    => 'boolean',
+                'label'   => 'Активен',
+                'default' => 1,
+            ],
+            'created_at' => [
+                'type'  => 'datetime',
+                'label' => 'Дата добавления',
+            ],
+        ],
+    ];
 
-*(Если в вашей реализации методы называются иначе, ориентируйтесь на текущий код `dataprovider_base.php`)*.
+### Шаг 2. Примените структуру в БД
 
-## 3. Пример: Вывод списка статей
+1. Зайдите в админку -> **Данные (БД)**.
+2. Нажмите кнопку **«⚡ Синхронизировать БД»**.
+3. `ResourceManager` прочитает файл и автоматически создаст таблицу `products` в MariaDB (или добавит недостающие колонки, если таблица уже существует).
 
-В классе страницы (`algoritm_lang_blog.php`) вы обращаетесь к провайдеру:
+### Шаг 3. Управляйте данными
 
-```php
-public function default() {
-    // Получаем последние 5 статей
-    $posts = $this->main->dataprovider->news->get_latest( 5 );
-    
-    // Создаем таблицу через Visuo
-    $table = (new \visuoel())->table()->table();
-    $table->html_mode(true);
-    
-    $head = $table->head()->row();
-    $head->cell()->set('Дата');
-    $head->cell()->set('Заголовок');
-    
-    $body = $table->body();
-    foreach ( $posts as $post ) {
-        $row = $body->row();
-        $row->cell()->set( $post['date'] );
-        $row->cell()->set( $post['title'] );
-    }
-    
-    $vt = new \visuotag();
-    $vt->el( $table );
-    $this->main->alliasglobal->center->section_add('blog_list', $vt);
-    
-    return true;
-}
-```
+В той же вкладке появится раздел «Товары». Зайдите в него, нажмите «+ Добавить запись», заполните поля и сохраните. Никакой SQL-код писать не нужно.
 
-## 4. Создание собственных методов (Модель)
+## 3. Типы полей
 
-Логику конкретных таблиц лучше выносить в отдельные классы внутри папки `dataprovider/` аллиаса.
+В ключе `fields` поддерживаются следующие типы:
 
-**Пример:** `app/.../allias/visuo/dataprovider/dataprovider_news.php`
+*   `id` — `INT AUTO_INCREMENT PRIMARY KEY`. Используется только для первичного ключа.
+*   `string` — `VARCHAR(255)`. В админке рендерится как текстовое поле (`input`).
+*   `text` — `TEXT`. В админке рендерится как многострочное поле (`textarea`).
+*   `integer` — `INT`. Числовое поле.
+*   `boolean` — `TINYINT(1)`. В админке рендерится как чекбокс (галочка).
+*   `datetime` — `DATETIME`. Дата и время (обычно заполняется автоматически при создании).
+*   `relation` — Связь с другой таблицей (Foreign Key).
 
-```php
-<?PHP
-namespace damoony_ru\www;
+## 4. Связи (Relations)
 
-class dataprovider_news extends \dataprovider_base {
-    
-    public function get_latest( int $limit = 10 ) : array {
-        $sql = "SELECT * FROM news ORDER BY created_at DESC LIMIT :limit";
-        // Важно: используем биндинг для параметров
-        return $this->query( $sql , [ 'limit' => $limit ] );
-    }
+Тип `relation` позволяет создавать выпадающие списки для связи таблиц. Например, чтобы привязать товар к категории.
 
-    public function create( string $title, string $text ) : int {
-        return $this->insert( 'news' , [
-            'title'      => $title,
-            'text'       => $text,
-            'created_at' => date('Y-m-d H:i:s')
-        ] );
-    }
-}
-```
+В `products.resource.php` добавьте поле:
 
-Затем в главном `dataprovider.php` домена вы регистрируете это свойство:
+    'category_id' => [
+        'type'    => 'relation',
+        'label'   => 'Категория',
+        'table'   => 'categories', // Имя связанной таблицы
+        'display' => 'title',      // Поле, которое показывать в выпадающем списке
+    ],
 
-```php
-class dataprovider extends \dataprovider_base {
-    public dataprovider_news $news;
-    
-    public function __construct( \main $main ) {
-        parent::__construct( $main );
-        $this->news = new dataprovider_news( $main );
-    }
-}
-```
+После синхронизации в форме товара появится выпадающий список с названиями категорий. В таблице также будет отображаться название категории, а не её ID.
 
-## 5. Миграции
+## 5. Архитектура под капотом
 
-Для создания структуры таблиц (SQL-схемы) в SimplCMS используются миграции. 
-Они хранятся в виде SQL-файлов в папке `allias/visuo/migrations/`.
+*   **`corescripts/_lib/ResourceManager.php`** — читает `*.resource.php`, сравнивает с текущей схемой БД и генерирует SQL (`CREATE TABLE` / `ALTER TABLE`).
+*   **`corescripts/_lib/DataGateway.php`** — легкая обертка над `PDO`. Отвечает за безопасное выполнение запросов (`query`, `insert`, `update`, `delete`, `find`).
+*   **`www/admin/controllers/ResourceController.php`** — универсальный контроллер, который генерирует UI и обрабатывает сохранение данных.
+*   **`www/admin/views/resource_table.php`** и **`resource_form.php`** — универсальные шаблоны, собираемые на лету на основе типов полей из `*.resource.php`.
 
-Пример файла `001_create_news.sql`:
-```sql
-CREATE TABLE IF NOT EXISTS `news` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) NOT NULL,
-  `text` text NOT NULL,
-  `created_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```
+## 6. Миграции и CI/CD
 
-Для применения миграций используется CLI-команда или специальный скрипт-аппликатор, который выполняет эти SQL-файлы по очереди.
+Благодаря декларативному подходу, миграции происходят автоматически. При деплое на прод достаточно будет выполнить CLI-команду `php corescripts/cli.php db:migrate`, которая прогонит все файлы `*.resource.php` и обновит структуру БД на сервере без потери данных.

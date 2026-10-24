@@ -46,6 +46,9 @@ require_once CS_LIB . '/Template.php';
 require_once CS_LIB . '/Validate.php';
 require_once CS_LIB . '/Result.php';
 require_once CS_LIB . '/Context.php';
+require_once CS_LIB . '/DataGateway.php';
+require_once CS_LIB . '/ResourceManager.php';
+
 
 require_once ADMIN_ROOT . '/_lib/Auth.php';
 require_once ADMIN_ROOT . '/_lib/Security.php';

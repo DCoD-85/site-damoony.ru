@@ -12,7 +12,7 @@ SimplCMS — высокопроизводительная гибридная CMS
 - Локальный ПК: Windows (OSPanel), GitBash.
 - Сервер: Debian 13 (production).
 - PHP: 8.4.25 (строгая типизация, неймспейсы, современные фичи).
-- БД: MariaDB (только для контента, не для структуры).
+- БД: MariaDB (для динамического контента).
 - Корень проекта: E:\OSPanel543\domains\damoony2.ru\
 - Прямой доступ к PHP 8.4.25: E:\OSPanel543\modules\php\PHP_8.4
 
@@ -23,39 +23,39 @@ SimplCMS — высокопроизводительная гибридная CMS
 4. Синтаксис: В PHP использовать только <?PHP (верхний регистр).
 5. Безопасность: Никаких eval(). Использовать Fs::writeAtomic(), Json::writeAtomic(), Config::mutate().
 6. Пути: Запрещены хардкоды путей. Использовать только класс Paths::.
-7. Рендеринг: HTML генерируется только через visuotag и visuoel. Никаких голых echo в логике.
+7. Рендеринг: HTML на фронтенде генерируется только через visuotag и visuoel. В админке допускается чистый HTML во вьюхах.
+8. БД: Прямые SQL-запросы запрещены. Использовать только DataGateway::.
 
 ## 4. Дерево структуры проекта (Ключевые узлы)
 - /app/alpha.0.0/domain/ - Данные доменов (PHP-классы страниц, .rules.json)
+  - /allias/{alias}/resources/ - ★ Файлы *.resource.php (описание таблиц для CRUD)
 - /config/ - Конфиги
   - engine.config (настройки движка: logic, ui_ajax_forms)
   - site.config (структура: домены, аллиасы, филлеры)
   - site.stubs.config (библиотека заглушек)
-  - admin.config (пароли)
-- /corescripts/ - Ядро управления (CLI и Админка)
-  - /commands/ - Логика команд
-  - /_lib/ - Классы Fs, Json, Paths, Config, Scan
+  - admin.security.config (настройки безопасности: whitelist, fingerprint)
+- /corescripts/ - Ядро управления
+  - /commands/ - Логика CLI-команд
+  - /_lib/ - Классы Fs, Json, Paths, Config, Scan, DataGateway, ResourceManager
   - cli.php - CLI точка входа
 - /engine/ - Ядро движка
   - main.php (оркестратор)
   - tree.php (★ файловый роутер)
   - algoritm_.php (базовый класс страниц)
-  - domain.php, algoritmdata_.php (базовые классы)
 - /visuo/ - UI-движок (visuotag, visuoel, components)
-- /www/admin/ - Изолированная админка (bootstrap, views)
+- /www/admin/ - Изолированная админка
+  - /controllers/ - ★ MVC-контроллеры (Domain, Page, Resource и т.д.)
+  - /views/ - HTML-шаблоны
+  - /_lib/AdminRouter.php - Роутер админки
 - /_dev/ - Инструменты разработчика (phpstan, phpunit)
-- /_audit/ - Аудиты проекта
 - /_doc/ - Документация проекта
 
 ## 5. Статус и что сделано (История)
-- Paths: Унифицированы, разделены engine() и config().
-- Tree Router: Единый движок (tree.php). Работает по физическому дереву. Проверяет `available` и `auth` из `.rules.json`. Заменил собой старые chain и router.
-- Формат правил: Только `.rules.json` (2 ключа: `available`, `auth`). `search` и `default` удалены.
-- Ошибки: Вынесены в `allias/{alias}/errors/{code}.php` (локальные) и `domain/errors/{code}.php` (глобальные).
-- Visuo Builder: В админке (page:code) есть генератор сниппетов (таблицы, формы).
-- Schemes: Управляются визуально через Drag & Drop (вкладка Схемы).
-- Админка: Полностью переведена на `.rules.json` (редактор страниц пишет в новый формат).
+- **Безопасность**: Внедрены fingerprint-авторизация, инвайты, режимы whitelist/blacklist, защита от сброса своих устройств.
+- **MVC Админка**: Удален старый switch в bootstrap.php. Роутинг переведен на AdminRouter и контроллеры (BaseController).
+- **Resource-Driven CRUD**: Создан механизм для авто-генерации CRUD в админке. Файлы *.resource.php описывают структуру таблиц. ResourceManager сам создает/обновляет таблицы в БД (CREATE/ALTER). DataGateway выполняет запросы.
+- **Связи (Relations)**: В CRUD добавлена поддержка Foreign Keys (выпадающие списки).
+- **Тесты**: 469 зеленых тестов (PHPUnit) + PHPStan (level 5) чистый.
 
 ## 6. Roadmap (Что дальше)
-Смотри файл _futures/roadmap.md.
-Приоритеты: 1) Медиа-менеджер (загрузка файлов), 2) CRUD для БД (статьи), 3) UI-Kit для visuo.
+Приоритеты: 1) Создание сайта документации `visuo.damoony.ru` через новый CRUD, 2) CLI-команда `db:migrate`, 3) UI-Kit для visuo.

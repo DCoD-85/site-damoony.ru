@@ -7,5 +7,6 @@ $active = $meta['tabs']['active_allias'] ?? 'main';
 		<a href="?p=pages:tree&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>"     class="<?= $active === 'pages'   ? 'active' : '' ?>">Страницы</a>
 		<a href="?p=allias:fillers&domain=<?= urlencode( $domain ) ?>&allias=<?= urlencode( $allias ) ?>" class="<?= $active === 'fillers' ? 'active' : '' ?>">Филлеры</a>
 		<a href="?p=scheme:edit&domain=<?= urlencode( $domain ) ?>&scheme=<?= urlencode( $allias ) ?>"    class="<?= $active === 'scheme'  ? 'active' : '' ?>">Схема</a>
+		<a href="?p=resources&domain=<?= urlencode($domain) ?>&allias=<?= urlencode($allias) ?>" class="<?= ($active_allias ?? '') === 'db' ? 'active' : '' ?>">Данные (БД)</a>
 	</div>
 </div>
